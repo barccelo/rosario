@@ -169,50 +169,72 @@ function boundedChainOffset(y){
   const lower=(h-116)-point(55).y-base,upper=h/2-point(0).y-base;
   return Math.max(lower,Math.min(upper,y));
 }
-function coastChain(initialVelocity){
+// Impulso cinético: al soltar el dedo se proyecta un recorrido largo.
+// La duración y la distancia dependen de la velocidad, no sólo del arrastre.
+function coastChain(initialVelocity, swipeDistance=0, gestureDuration=0){
   stopChainInertia();
   const track=chain.querySelector('.chain-track');
-  if(Math.abs(initialVelocity)<0.22 || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    if(track)track.style.transition='';
-    return;
-  }
+  const finish=()=>{if(track)track.style.transition='';};
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){finish();return;}
+  const speed=Math.abs(initialVelocity);
+  const rapidSwipe=Math.abs(swipeDistance)>=35 &&
+    gestureDuration>0 && gestureDuration<650 && speed>=0.22;
+  if(speed<0.25 && !rapidSwipe){finish();return;}
+  const direction=Math.sign(initialVelocity || swipeDistance);
+  if(!direction){finish();return;}
+  // 55px aproximadamente por cuenta. Un gesto corto y rápido tiene un
+  // mínimo de 10 cuentas extra; un gesto fuerte puede recorrer casi todo.
+  let distance=Math.max(speed*1300,Math.abs(swipeDistance)*2.4);
+  if(rapidSwipe)distance=Math.max(distance,55*10);
+  distance=Math.min(distance,55*52);
+  const origin=window.rosarioManualOffset;
+  const destination=boundedChainOffset(origin+direction*distance);
+  const range=Math.abs(destination-origin);
+  if(range<1){finish();return;}
+  const duration=Math.min(1900,Math.max(750,650+range*.42));
   if(track)track.style.transition='none';
-  let speed=Math.max(-8,Math.min(8,initialVelocity));
-  chainInertiaLast=performance.now();
-  function frame(now){
-    const delta=Math.min(40,now-chainInertiaLast);
-    chainInertiaLast=now;
-    const before=window.rosarioManualOffset;
-    window.rosarioManualOffset=boundedChainOffset(before+speed*delta);
+  let startedAt=null;
+  const animate=now=>{
+    if(startedAt===null)startedAt=now;
+    const progress=Math.min(1,(now-startedAt)/duration);
+    // Frenado progresivo y suave como el desplazamiento cinético del móvil.
+    const eased=1-Math.pow(1-progress,3);
+    window.rosarioManualOffset=boundedChainOffset(
+      origin+(destination-origin)*eased
+    );
     window.rosarioApplyChainPan();
-    speed*=Math.exp(-delta/1100);
-    if(Math.abs(speed)<0.06 || window.rosarioManualOffset===before){
-      chainInertia=null;
-      if(track)track.style.transition='';
-    }else chainInertia=requestAnimationFrame(frame);
-  }
-  chainInertia=requestAnimationFrame(frame);
+    if(progress<1)chainInertia=requestAnimationFrame(animate);
+    else{chainInertia=null;finish();}
+  };
+  chainInertia=requestAnimationFrame(animate);
 }
 // Gesto táctil continuo del rosario (separado de la navegación del texto).
 // Velocidades en píxeles/ms, últimas muestras ~150ms. No cambia state.index.
 let chainTouch=null;
 const chainTrack=chain.querySelector('.chain-track');
-function releaseChainTouch(event,cancelled=false){
+function releaseChainTouch(event){
   if(!chainTouch)return;
-  const gestureData=chainTouch;
+  const swipe=chainTouch;
   chainTouch=null;
-  if(gestureData.dragged){
-    suppressClickUntil=performance.now()+1000;
-    const last=gestureData.samples[gestureData.samples.length-1];
-    const past=[...gestureData.samples].reverse().find(sample=>
-      last.time-sample.time>=90) || gestureData.samples[0];
-    const elapsed=Math.max(1,last.time-past.time);
-    const fresh=event.timeStamp-last.time<160;
-    const fingerVelocity=fresh?(last.y-past.y)/elapsed:0;
-    const velocity=fingerVelocity*2.8;
-    if(cancelled && event.type==='touchcancel')coastChain(velocity);
-    else coastChain(velocity);
-    if(Math.abs(velocity)<0.22 && chainTrack)chainTrack.style.transition='';
+  if(!swipe.dragged){if(chainTrack)chainTrack.style.transition='';return;}
+  suppressClickUntil=performance.now()+1000;
+  const ending=event.changedTouches?.[0];
+  const endY=ending?.clientY ?? swipe.samples[swipe.samples.length-1].y;
+  const endTime=event.timeStamp;
+  const duration=Math.max(1,endTime-swipe.startTime);
+  const displacement=endY-swipe.startY;
+  // Usa también touchend: en Android algunos gestos rápidos sólo producen
+  // uno o dos touchmove. La versión anterior calculaba velocidad cero.
+  const lookback=[...swipe.samples].reverse().find(sample=>
+    endTime-sample.time>=55 && endTime-sample.time<=250
+  ) || swipe.samples[0];
+  const recentSpeed=(endY-lookback.y)/Math.max(1,endTime-lookback.time);
+  const averageSpeed=displacement/duration;
+  const velocity=Math.sign(displacement)*Math.max(
+    Math.abs(averageSpeed),Math.abs(recentSpeed)*.85
+  );
+  if(Math.abs(displacement)>=30){
+    coastChain(velocity,displacement,duration);
   }else if(chainTrack)chainTrack.style.transition='';
 }
 chain.addEventListener('touchstart',event=>{
@@ -222,7 +244,7 @@ chain.addEventListener('touchstart',event=>{
   stopChainInertia();
   if(chainTrack)chainTrack.style.transition='none';
   chainTouch={
-    startY:t.clientY,startX:t.clientX,
+    startY:t.clientY,startX:t.clientX,startTime:event.timeStamp,
     startOffset:window.rosarioManualOffset,
     dragged:false,samples:[{time:event.timeStamp,y:t.clientY}]
   };
@@ -242,8 +264,8 @@ chain.addEventListener('touchmove',event=>{
   while(chainTouch.samples.length>2 && now-chainTouch.samples[0].time>170)
     chainTouch.samples.shift();
 },{passive:false});
-chain.addEventListener('touchend',event=>releaseChainTouch(event),{passive:true});
-chain.addEventListener('touchcancel',event=>releaseChainTouch(event,true),{passive:true});
+chain.addEventListener('touchend',releaseChainTouch,{passive:true});
+chain.addEventListener('touchcancel',releaseChainTouch,{passive:true});
 // También funciona la rueda de un ratón o trackpad en la zona de cuentas.
 let wheelVelocity=0,wheelLast=0,wheelSettle=null;
 chain.addEventListener('wheel',event=>{
