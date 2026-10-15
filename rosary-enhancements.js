@@ -207,6 +207,8 @@
     state.intentionCycle = [null,null,null,null,null];
     persist();
   }
+  window.rosarioIntentionFor = intentionFor;
+  window.rosarioResetIntentionCycle = resetIntentionCycle;
 
   function buildRosarySteps(legacy = false) {
   // Estación, comunión espiritual y oraciones introductorias.
@@ -407,6 +409,7 @@
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
+    state.intentionCycle = [null,null,null,null,null];
   } else {
     state.day = saved.day;
     state.group = groups[saved.group] ? saved.group : (dayGroups[state.day] || dayGroups[new Date().getDay()]);
@@ -681,6 +684,7 @@
               state.day = i;
               state.group = dayGroups[i];
               state.dayDate = dateKey();
+              resetIntentionCycle();
               goTo(steps.findIndex(item => item.kind === 'mystery'));
             }, state.day === i);
           });
@@ -913,6 +917,7 @@
         state.day = new Date().getDay();
         state.group = dayGroups[state.day];
         state.dayDate = dateKey();
+        resetIntentionCycle();
         render();
       }
     });
