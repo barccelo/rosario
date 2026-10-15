@@ -156,7 +156,7 @@ $('readFull').onclick=()=>{
 // Mover la camándula a mano sin alterar el paso de oración.
 window.rosarioManualOffset=window.rosarioManualOffset||0;
 let chainInertia=null,chainInertiaLast=0;
-function stopChainInertia(){if(chainInertia!==null){cancelAnimationFrame(chainInertia);chainInertia=null;}}
+function stopChainInertia(){if(chainInertia!==null){cancelAnimationFrame(chainInertia);chainInertia=null;const track=chain.querySelector('.chain-track');if(track)track.style.transition='';}}
 window.rosarioChainOrigin={x:0,y:0};
 window.rosarioApplyChainPan=function(){
   const track=chain.querySelector('.chain-track');
@@ -171,8 +171,11 @@ function boundedChainOffset(y){
 }
 function coastChain(initialVelocity){
   stopChainInertia();
-  if(Math.abs(initialVelocity)<0.22 || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const track=chain.querySelector('.chain-track');
+  if(Math.abs(initialVelocity)<0.22 || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    if(track)track.style.transition='';
+    return;
+  }
   if(track)track.style.transition='none';
   let speed=Math.max(-8,Math.min(8,initialVelocity));
   chainInertiaLast=performance.now();
