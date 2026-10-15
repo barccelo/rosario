@@ -37,6 +37,11 @@
         container.append(document.createTextNode(text.slice(last).replace(/^[ \t]+/, '')));
     }
 
+    window.rosaryFormatAmens = (container, value) => {
+      container.replaceChildren();
+      addPlain(container, value);
+    };
+
     function addVoicePart(text, role) {
       const span = document.createElement('span');
       span.className = 'prayer-part voice-' + role;
