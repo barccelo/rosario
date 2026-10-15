@@ -7,18 +7,20 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-4';
+    css.href='rosary-physical.css?v=20261015-5';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
-    const HEIGHT=2670,TOP=320,GAP=62,MEDAL_Y=2104,CROSS_Y=2533;
+    const HEIGHT=2670,TOP=320,MEDAL_Y=2104,CROSS_Y=2533;
     const FRONT_END=27;
+    // La cuenta grande del nacimiento del aro es la misma del regreso.
+    // El colgante contiene sólo CUATRO cuentas adicionales: tres pequeñas
+    // y una grande cerca de la única cruz.
     const intro=[
-      {key:'large-top',y:2172,r:23},
-      {key:'small-1',y:2230,r:17},
-      {key:'small-2',y:2288,r:17},
-      {key:'small-3',y:2346,r:17},
-      {key:'large-bottom',y:2410,r:23}
+      {key:'small-top',y:2190,r:17},
+      {key:'small-middle',y:2251,r:17},
+      {key:'small-bottom',y:2312,r:17},
+      {key:'large-bottom',y:2390,r:23}
     ];
     const missionary=[
       ['#23845E','#23845E','#FFFFFF'],
@@ -68,70 +70,80 @@
     function draw(){
       const width=Math.max(320,document.documentElement.clientWidth);
       const center=Math.max(84,Math.min(123,width*.225));
-      const frontX=center-20,backX=center+22;
+      const leftX=center-23,rightX=center+23;
       crossX=center;
-      // Es UNA sola serie de 55 cuentas: 28 suben y las 27 restantes
-      // regresan por detrás, desplazadas sólo 42px horizontalmente.
+      // 55 cuentas únicas. La primera es una sola cuenta grande,
+      // compartida por el comienzo y el cierre de la quinta decena.
+      // Las 27 siguientes ascienden; las otras 27 regresan por la derecha.
+      const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
       positions=Array.from({length:55},(_,i)=>{
-        const outbound=i<=FRONT_END;
-        const n=outbound?FRONT_END-i:i-FRONT_END-1;
+        if(i===0)return{x:center,y:MEDAL_Y,strand:'junction'};
+        if(i<=FRONT_END)
+          return{x:leftX+2*Math.sin(i*.24),y:MEDAL_Y-i*rise,strand:'out'};
         return{
-          x:(outbound?frontX:backX)+3*Math.sin(i*.27),
-          y:TOP+n*GAP,
-          strand:outbound?'out':'back'
+          x:rightX+2*Math.sin(i*.24),
+          y:TOP+48+(i-FRONT_END-1)*rise,
+          strand:'back'
         };
       });
-      introPoints=intro.map((bead,i)=>({
-        x:center+3*Math.sin(i*.5),y:bead.y,r:bead.r
+      introPoints=intro.map((item,i)=>({
+        x:center+2*Math.sin(i*.5),y:item.y,r:item.r
       }));
       svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
-      const fore=positions.slice(0,FRONT_END+1);
-      const rear=positions.slice(FRONT_END+1);
       const at=p=>format(p.x)+' '+format(p.y);
-      const route=(group,first)=>{
-        let d='M '+at(first);
-        group.forEach(p=>d+=' L '+at(p));
-        return d;
-      };
-      // La trayectoria sube, da una curva estrecha y baja AL MISMO medallón.
-      // La rama gris no es otra ilustración: sus cuentas completan las 55.
-      let loop=route(fore,{x:center,y:MEDAL_Y});
-      const crownX=(fore[fore.length-1].x+rear[0].x)/2;
-      loop+=' Q '+format(crownX)+' '+format(TOP-45)+' '+at(rear[0]);
-      rear.slice(1).forEach(p=>loop+=' L '+at(p));
-      loop+=' L '+format(center)+' '+format(MEDAL_Y);
-      const body=[];
-      body.push('<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
-        '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient></defs>');
-      body.push('<path class="physical-whole-loop" d="'+loop+'"/>');
-      function branch(items,id,start){
-        let html='<g class="physical-strand" data-strand="'+id+'">';
-        const path=id==='back'
-          ?route(items.slice(1),items[0])+' L '+format(center)+' '+format(MEDAL_Y)
-          :route(items,start);
-        html+='<path class="physical-link" d="'+path+'"/>';
-        items.forEach(p=>{
-          const i=positions.indexOf(p);
-          const big=i%11===0;
-          const n=i%11;
-          const label=(big?'Padrenuestro':'Avemaría '+n)+
-            ', misterio '+(Math.floor(i/11)+1);
-          html+=beadMarkup(p.x,p.y,big?23:17,'data-bead="'+i+'"',label,big?'':String(n));
-        });
-        return html+'</g>';
+      // Tangentes Catmull–Rom pasadas a curvas cúbicas Bézier para que
+      // los encuentros superior e inferior sean suaves, sin vértices.
+      function curvedSegment(previous,from,to,next){
+        const c1={x:from.x+(to.x-previous.x)/6,y:from.y+(to.y-previous.y)/6};
+        const c2={x:to.x-(next.x-from.x)/6,y:to.y-(next.y-from.y)/6};
+        return'M '+at(from)+' C '+at(c1)+' '+at(c2)+' '+at(to);
       }
-      body.push(branch(fore,'out',{x:center,y:MEDAL_Y}));
-      body.push(branch(rear,'back',rear[0]));
-      let tail='<g class="physical-pendant">';
-      const tailPoints=[{x:center,y:MEDAL_Y},...introPoints,{x:center,y:CROSS_Y-54}];
-      tail+='<path class="physical-link" d="'+route(tailPoints.slice(1),tailPoints[0])+'"/>';
-      tail+='<circle class="physical-medallion" cx="'+format(center)+'" cy="'+MEDAL_Y+'" r="15"/>';
-      introPoints.forEach((p,i)=>{
-        tail+=beadMarkup(p.x,p.y,p.r,'data-intro="'+i+'"',
-          'Cuenta introductoria '+(i+1),'');
+      const body=[
+        '<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
+        '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient></defs>'
+      ];
+      // La trayectoria es UN solo óvalo curvo y angosto. Sus segmentos
+      // pueden colorearse de manera acumulativa, sin intercambiar ramas.
+      let lines='<g class="physical-loop-links">';
+      positions.forEach((from,i)=>{
+        const previous=positions[(i+54)%55];
+        const to=positions[(i+1)%55];
+        const next=positions[(i+2)%55];
+        lines+='<path class="physical-link physical-loop-link" data-link="'+i+
+          '" d="'+curvedSegment(previous,from,to,next)+'"/>';
       });
-      tail+=crossMarkup(center,CROSS_Y);
-      body.push(tail+'</g>');
+      lines+='</g>';
+      body.push(lines);
+      // Las cuentas del aro se dibujan una sola vez. La cuenta cero es
+      // compartida entre el colgante y las dos ramas del óvalo.
+      let beads='<g class="physical-loop-beads">';
+      positions.forEach((p,i)=>{
+        const big=i%11===0;
+        const n=i%11;
+        const label=(big?'Padrenuestro':'Avemaría '+n)+
+          ', misterio '+(Math.floor(i/11)+1);
+        beads+=beadMarkup(p.x,p.y,big?23:17,
+          'data-bead="'+i+'"',label,big?'':String(n));
+      });
+      beads+='</g>';
+      body.push(beads);
+      // El colgante arranca exactamente en la cuenta compartida, sin
+      // medallón ni cuenta grande adicional.
+      let pendant='<g class="physical-pendant">';
+      const tail=[positions[0],...introPoints,{x:center,y:CROSS_Y-54}];
+      tail.slice(0,-1).forEach((from,i)=>{
+        const previous=tail[Math.max(0,i-1)];
+        const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
+        pendant+='<path class="physical-link physical-intro-link" d="'+
+          curvedSegment(previous,from,to,next)+'"/>';
+      });
+      introPoints.forEach((p,i)=>{
+        pendant+=beadMarkup(p.x,p.y,p.r,'data-intro="'+i+'"',
+          i<3?'Cuenta pequeña introductoria '+(i+1):
+            'Cuenta grande junto a la cruz','');
+      });
+      pendant+=crossMarkup(center,CROSS_Y);
+      body.push(pendant+'</g>');
       svg.innerHTML=body.join('');
       svg.querySelectorAll('[data-bead]').forEach(el=>{
         const index=Number(el.dataset.bead);
@@ -145,24 +157,60 @@
     draw();
 
     function positionFor(step){
-      if(!step || step.m>=5)return{type:'cross',y:CROSS_Y};
-      if(Number.isInteger(step.bead)){
-        const i=Math.max(0,Math.min(54,step.bead));
-        return{type:'loop',bead:i,y:positions[i].y,strand:positions[i].strand};
+      const firstMystery=steps.findIndex(item=>item.kind==='mystery');
+      const firstFinal=steps.findIndex(item=>item.m===5);
+      if(!step)return{type:'cross',phase:'finished',y:CROSS_Y,completed:55};
+      // Los pasos anteriores al primer misterio recorren el mismo
+      // colgante: cruz -> cuenta grande inferior -> tres pequeñas ->
+      // cuenta compartida del aro. Nunca se insertan oraciones nuevas.
+      if(firstMystery>=0 && state.index<firstMystery){
+        const progress=state.index/Math.max(1,firstMystery);
+        const slots=[
+          {type:'cross',phase:'opening',y:CROSS_Y},
+          {type:'intro',intro:3,y:introPoints[3].y},
+          {type:'intro',intro:2,y:introPoints[2].y},
+          {type:'intro',intro:1,y:introPoints[1].y},
+          {type:'intro',intro:0,y:introPoints[0].y},
+          {type:'loop',bead:0,y:positions[0].y,strand:'junction'}
+        ];
+        const index=Math.min(slots.length-1,Math.floor(progress*slots.length));
+        return{...slots[index],completed:0};
       }
+      // El Gloria del quinto misterio cierra el aro en la MISMA cuenta
+      // grande con la que empezó. Las jaculatorias de esa decena
+      // permanecen en esa cuenta antes de iniciar el colgante de regreso.
+      if(step.m===4 && !Number.isInteger(step.bead) &&
+         step.kind!=='mystery')
+        return{type:'loop',bead:0,y:positions[0].y,
+          strand:'junction',completed:55};
       if(step.m>=0 && step.m<5){
-        const n=step.kind==='mystery'?step.m*11:
-          Math.min(54,(step.m+1)*11-1);
-        return{type:'loop',bead:n,y:positions[n].y,strand:positions[n].strand};
+        const bead=Number.isInteger(step.bead) ? step.bead :
+          step.kind==='mystery' ? step.m*11 :
+            Math.min(54,(step.m+1)*11-1);
+        return{type:'loop',bead,y:positions[bead].y,
+          strand:positions[bead].strand,completed:bead+1};
       }
-      const crossStep=steps.findIndex(p=>p.title==='Señal de la cruz');
-      const first=steps.findIndex(p=>p.kind==='mystery');
-      if(crossStep<0 || state.index<=crossStep)
-        return{type:'cross',y:CROSS_Y};
-      const progress=Math.min(1,Math.max(0,
-        (state.index-crossStep)/Math.max(1,first-crossStep)));
-      const index=Math.min(4,Math.floor((1-progress)*5));
-      return{type:'intro',intro:index,y:introPoints[index].y};
+      // Después del último Gloria el recorrido desciende, sin crear
+      // otro rosario: tres pequeñas (dedicaciones), la grande inferior y
+      // la única cruz al concluir todas las oraciones restantes.
+      if(step.m>=5){
+        if(Number.isInteger(step.dedication) && step.dedication>=0 &&
+           step.dedication<3){
+          const introIndex=step.dedication;
+          return{type:'intro',phase:'closing',intro:introIndex,
+            y:introPoints[introIndex].y,completed:55};
+        }
+        // Salve, letanías, oración e intenciones finales comparten el
+        // último tramo físico hasta llegar a la cruz en la bendición.
+        const end=steps.length;
+        const beginning=Math.max(0,firstFinal);
+        const remaining=Math.max(1,end-beginning);
+        const t=(state.index-beginning)/remaining;
+        if(t>.94)return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
+        return{type:'intro',phase:'closing',intro:3,
+          y:introPoints[3].y,completed:55};
+      }
+      return{type:'cross',phase:'opening',y:CROSS_Y,completed:0};
     }
     function paint(){
       const physical=state.rosaryViewLayout==='physical';
@@ -179,40 +227,43 @@
         return;
       }
       const selected=positionFor(steps[state.index]);
-      const selectedSide=selected.type==='loop' ? selected.strand : 'out';
-      const strandOut=svg.querySelector('[data-strand="out"]');
-      const strandBack=svg.querySelector('[data-strand="back"]');
-      [strandOut,strandBack].forEach(el=>{
-        const rear=el.dataset.strand!==selectedSide;
-        el.classList.toggle('is-rear',rear);
-        el.classList.toggle('is-front',!rear);
-        el.setAttribute('aria-hidden',rear?'true':'false');
-        el.querySelectorAll('.physical-bead').forEach(b=>{
-          b.tabIndex=rear?-1:0;
-        });
-      });
-      // Siempre hay un ramo en primer plano y uno en gris detrás. Ambos
-      // pertenecen a la misma serie de cuentas y se unen en el medallón.
-      svg.insertBefore(selectedSide==='out'?strandBack:strandOut,
-        selectedSide==='out'?strandOut:strandBack);
+      const completed=Math.max(0,Math.min(55,selected.completed||0));
+      // El recorrido se acumula: el lado izquierdo NO se vuelve gris
+      // al empezar la bajada por el derecho.
       svg.querySelectorAll('[data-bead]').forEach(el=>{
-        const index=Number(el.dataset.bead);
-        const stepIndex=steps.findIndex(s=>s.bead===index);
-        const active=selected.type==='loop' && selected.bead===index;
+        const i=Number(el.dataset.bead);
+        const already=i<completed;
+        const active=selected.type==='loop' && selected.bead===i;
+        el.classList.toggle('is-complete',already);
+        el.classList.toggle('is-pending',!already);
         el.classList.toggle('active',active);
-        el.classList.toggle('done',stepIndex>=0 && stepIndex<state.index);
         el.setAttribute('aria-current',active?'step':'false');
       });
+      svg.querySelectorAll('[data-link]').forEach(el=>{
+        const i=Number(el.dataset.link);
+        const traversed=i<completed;
+        el.classList.toggle('is-complete',traversed);
+        el.classList.toggle('is-pending',!traversed);
+      });
       svg.querySelectorAll('[data-intro]').forEach(el=>{
-        const active=selected.type==='intro' &&
-          Number(el.dataset.intro)===selected.intro;
+        const i=Number(el.dataset.intro);
+        const active=selected.type==='intro' && selected.intro===i;
+        // Al regresar, las tres pequeñas y la grande inferior se
+        // iluminan progresivamente, nunca se crean cuentas adicionales.
+        const traversed=selected.phase==='closing' ?
+          (selected.type==='cross'||(selected.type==='intro'&&i<=selected.intro))
+          :selected.type==='loop'||(
+            selected.phase==='opening'&&selected.type==='intro'&&i>=selected.intro);
+        el.classList.toggle('is-complete',traversed);
+        el.classList.toggle('is-pending',!traversed);
         el.classList.toggle('active',active);
         el.setAttribute('aria-current',active?'step':'false');
       });
       const cross=svg.querySelector('[data-cross]');
-      cross.classList.toggle('active',selected.type==='cross');
-      cross.setAttribute('aria-current',selected.type==='cross'?'step':'false');
-      if(beforeMode!=='physical' || beforeIndex!==state.index){
+      const crossActive=selected.type==='cross';
+      cross.classList.toggle('active',crossActive);
+      cross.setAttribute('aria-current',crossActive?'step':'false');
+      if(beforeMode!=='physical'||beforeIndex!==state.index){
         const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
         const target=Math.max(0,selected.y-viewport.clientHeight*.64);
         viewport.scrollTop=Math.min(max,target);
@@ -230,12 +281,19 @@
         if(index<0)return;
         state.index=index;
       }else if(el.hasAttribute('data-intro')){
-        const crossStep=steps.findIndex(s=>s.title==='Señal de la cruz');
         const first=steps.findIndex(s=>s.kind==='mystery');
-        if(crossStep<0||first<=crossStep)return;
-        const ratio=(4-Number(el.dataset.intro))/5;
-        state.index=Math.min(first-1,
-          crossStep+Math.round(ratio*(first-crossStep)));
+        if(first<0)return;
+        const item=Number(el.dataset.intro);
+        const mapped=first>0 ?
+          Math.floor(first*(4-item)/6) : 0;
+        // La misma cuenta se usa al inicio o al final, según la fase
+        // que se esté rezando.
+        if(steps[state.index]?.m>=5){
+          const dedication=steps.findIndex(s=>s.m===5&&
+            s.dedication===item);
+          state.index=dedication>=0?dedication:
+            Math.max(0,steps.findIndex(s=>s.m===5&&s.title==='Salve'));
+        }else state.index=Math.max(0,Math.min(first-1,mapped));
       }
       render();
     }
@@ -267,7 +325,7 @@
         {id:'vertical',name:'Vista vertical',
           help:'Conserva el diseño anterior, con sus gestos y funciones.'},
         {id:'physical',name:'Rosario físico · experimental',
-          help:'Una sola cruz y un aro estrecho que sube y regresa por detrás en gris.'}
+          help:'Una cruz; una cuenta grande compartida, tres pequeñas y una grande inferior. El color progresa por ambas ramas.'}
       ].forEach(item=>{
         const label=document.createElement('label');
         label.className='physical-layout-option';
@@ -295,7 +353,7 @@
       });
       const hint=document.createElement('p');
       hint.className='physical-layout-hint';
-      hint.textContent='La cadena asciende desde la única cruz, rodea una curva pequeña y regresa por el mismo medallón. El tramo gris detrás contiene las cuentas reales del otro lado; no es un segundo rosario.';
+      hint.textContent='La cuenta grande que une el colgante con el aro es la primera y la última. El rosario se colorea acumulativamente por la izquierda y luego la derecha. Al finalizar, se baja por las tres pequeñas, la cuenta grande inferior y la única cruz.';
       field.append(legend,list,hint);
       const controls=host.querySelector('.controls-position-setting');
       if(controls)host.insertBefore(field,controls);
