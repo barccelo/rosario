@@ -659,6 +659,7 @@
       }
       button.onclick = action;
       container.append(button);
+      return button;
     }
 
     function openNavigation(tab = 'days') {
@@ -668,10 +669,63 @@
         '<button type="button" data-nav="mysteries" role="tab">Misterios</button>' +
         '<button type="button" data-nav="prayers" role="tab">Oraciones</button>' +
         '<button type="button" data-nav="jaculatorias" role="tab">Jaculatorias</button>' +
+        '<button type="button" data-nav="intentions" role="tab">Intenciones</button>' +
         '<button type="button" data-nav="text" role="tab">Texto</button>' +
         '<button type="button" data-nav="voices" role="tab">Voces</button></div>' +
-        '<div class="nav-list" id="navList"></div>');
+        '<div class="nav-list" id="navList"></div>' +
+        '<section class="nav-detail" id="navDetail" hidden aria-label="Consulta de oración"></section>');
+      const tabs = ['days','mysteries','prayers','jaculatorias','intentions','text','voices'];
+      let currentTab = tab;
+      let savedScroll = 0;
+      function openPreview(title,content) {
+        const list=$('navList'),detail=$('navDetail');
+        savedScroll=list.scrollTop;
+        list.hidden=true;
+        detail.hidden=false;
+        detail.replaceChildren();
+        const back=document.createElement('button');
+        back.type='button';
+        back.className='nav-preview-back';
+        back.textContent='← Volver a la lista';
+        back.onclick=()=>{
+          detail.hidden=true;
+          list.hidden=false;
+          list.scrollTop=savedScroll;
+        };
+        const heading=document.createElement('h3');
+        heading.textContent=title;
+        const body=document.createElement('div');
+        body.className='nav-preview-reading';
+        if(window.rosaryFormatAmens)window.rosaryFormatAmens(body,content);
+        else body.textContent=content;
+        detail.append(back,heading,body);
+        $('modal').scrollTop=0;
+        detail.scrollTop=0;
+      }
+      function addPreviewRow(list,label,subtitle,go,active,previewTitle,previewContent,previewLabel='Leer'){
+        const wrapper=document.createElement('div');
+        wrapper.className='nav-entry';
+        appendOption(wrapper,label,subtitle,go,active);
+        const look=document.createElement('button');
+        look.type='button';
+        look.className='nav-preview-link';
+        look.textContent=previewLabel+' ↗';
+        look.setAttribute('aria-label',previewLabel+': '+previewTitle);
+        look.onclick=()=>openPreview(previewTitle,previewContent);
+        wrapper.append(look);
+        list.append(wrapper);
+      }
+      function prayerPreview(title,step) {
+        if(title==='Letanías')return fullLitany;
+        if(title==='Cordero de Dios')return lambLines.join('\n\n');
+        if(title==='Tres Avemarías')return originalAvemaria;
+        if(title==='Anuncio del misterio')return announcement({m:Math.max(0,Math.min(4,step?.m||0))});
+        return step?.text || prayers[title] || '';
+      }
       function fill(selected) {
+        currentTab=selected;
+        $('navDetail').hidden=true;
+        $('navList').hidden=false;
         $('modal').querySelectorAll('[data-nav]').forEach(btn => {
           btn.setAttribute('aria-selected', String(btn.dataset.nav === selected));
         });
@@ -689,10 +743,12 @@
             }, state.day === i);
           });
         } else if (selected === 'mysteries') {
-          groups[state.group].forEach((name, i) => {
-            appendOption(list, (i + 1) + '. ' + name, state.group + ' · Meditación opcional', () => {
-              goTo(steps.findIndex(item => item.kind === 'mystery' && item.m === i));
-            }, steps[state.index]?.m === i);
+          groups[state.group].forEach((name,i)=>{
+            const full=window.rosaryFullMeditations?.[state.group]?.[i] ||
+              meditations[state.group]?.[i] || '';
+            addPreviewRow(list,(i+1)+'. '+name,state.group,()=>{
+              goTo(steps.findIndex(item=>item.kind==='mystery'&&item.m===i));
+            },steps[state.index]?.m===i,name,full,'Meditación');
           });
         } else if (selected === 'prayers') {
           const titles = [
@@ -724,8 +780,10 @@
               (title !== 'Tres Avemarías' || item.kind === 'dedication') ? i : -1).filter(i => i >= 0);
             if (!positions.length) return;
             const closest = positions.find(i => i >= state.index) ?? positions[0];
-            appendOption(list, title === 'Jaculatoria' ? 'María, Madre de gracia' : title, subtitle, () => goTo(closest),
-              steps[state.index]?.title === title);
+            const display=title==='Jaculatoria'?'María, Madre de gracia':title;
+            addPreviewRow(list,display,subtitle,()=>goTo(closest),
+              steps[state.index]?.title===title,display,
+              prayerPreview(title,steps[closest]));
           });
         } else if (selected === 'jaculatorias') {
           const info = document.createElement('p');
@@ -759,6 +817,142 @@
           notice.className = 'jac-intro';
           notice.textContent = 'Puedes activar cualquiera de las tres jaculatorias, por separado o en combinación. Se rezarán después del Gloria, en el orden de la lista.';
           list.append(notice);
+        } else if (selected === 'intentions') {
+          const caption=document.createElement('p');
+          caption.className='jac-intro';
+          caption.textContent='Las intenciones se guardan únicamente en este dispositivo. Antes de cada misterio aparecerá una de la lista, elegida al azar y conservada durante esa decena.';
+          list.append(caption);
+          const switchRow=document.createElement('label');
+          switchRow.className='jac-choice';
+          const check=document.createElement('input');
+          check.type='checkbox';
+          check.checked=state.randomIntentionsEnabled;
+          const label=document.createElement('span');
+          const bold=document.createElement('strong');
+          bold.textContent='Mostrar intenciones aleatorias';
+          const small=document.createElement('small');
+          small.textContent='Activar o desactivar antes de cada misterio.';
+          label.append(bold,small);
+          switchRow.append(check,label);
+          check.onchange=()=>{
+            state.randomIntentionsEnabled=check.checked;
+            if(check.checked && state.intentionPool.length===0){
+              state.intentionPool=[...initialIntentions];
+            }
+            resetIntentionCycle();
+            render();
+            fill('intentions');
+          };
+          list.append(switchRow);
+          const addRow=document.createElement('div');
+          addRow.className='intention-add';
+          const input=document.createElement('input');
+          input.type='text';
+          input.maxLength=350;
+          input.placeholder='Escribe una nueva intención';
+          input.setAttribute('aria-label','Nueva intención');
+          const add=document.createElement('button');
+          add.type='button';
+          add.textContent='Agregar';
+          add.onclick=()=>{
+            const value=input.value.trim();
+            if(!value || state.intentionPool.includes(value) || state.intentionPool.length>=200)return;
+            state.intentionPool.push(value);
+            persist();
+            fill('intentions');
+          };
+          input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add.click();}};
+          addRow.append(input,add);
+          list.append(addRow);
+          state.intentionPool.forEach((value,i)=>{
+            const row=document.createElement('div');
+            row.className='intention-entry';
+            const span=document.createElement('span');
+            span.textContent=value;
+            const edit=document.createElement('button');
+            edit.type='button';
+            edit.className='intention-small-btn';
+            edit.textContent='Editar';
+            edit.setAttribute('aria-label','Editar intención '+(i+1));
+            edit.onclick=()=>{
+              row.replaceChildren();
+              const field=document.createElement('textarea');
+              field.rows=2;
+              field.maxLength=350;
+              field.value=value;
+              const save=document.createElement('button');
+              save.type='button';
+              save.className='intention-small-btn';
+              save.textContent='Guardar';
+              save.onclick=()=>{
+                const updated=field.value.trim();
+                if(!updated || (updated!==value && state.intentionPool.includes(updated)))return;
+                state.intentionPool[i]=updated;
+                state.intentionCycle=state.intentionCycle.map(t=>t===value?updated:t);
+                persist();
+                fill('intentions');
+              };
+              const cancel=document.createElement('button');
+              cancel.type='button';
+              cancel.className='intention-small-btn';
+              cancel.textContent='Cancelar';
+              cancel.onclick=()=>fill('intentions');
+              row.append(field,save,cancel);
+              field.focus();
+            };
+            const del=document.createElement('button');
+            del.type='button';
+            del.className='intention-small-btn danger';
+            del.textContent='Quitar';
+            del.setAttribute('aria-label','Eliminar intención '+(i+1));
+            del.onclick=()=>{
+              state.intentionPool.splice(i,1);
+              state.intentionCycle=state.intentionCycle.map(t=>t===value?null:t);
+              persist();
+              fill('intentions');
+            };
+            row.append(span,edit,del);
+            list.append(row);
+          });
+          const backup=document.createElement('div');
+          backup.className='intention-backup';
+          const backupLabel=document.createElement('p');
+          backupLabel.className='jac-intro';
+          backupLabel.textContent='Copia de seguridad: exporta la lista o pega aquí una lista JSON para restaurarla.';
+          const exportButton=document.createElement('button');
+          exportButton.type='button';
+          exportButton.textContent='Exportar JSON';
+          exportButton.onclick=()=>{
+            const payload=JSON.stringify({intentions:state.intentionPool},null,2);
+            const blob=new Blob([payload],{type:'application/json'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download='rosario-intenciones.json';
+            a.click();
+            setTimeout(()=>URL.revokeObjectURL(url),1000);
+          };
+          const restore=document.createElement('textarea');
+          restore.placeholder='Pega aquí el contenido de tu copia JSON';
+          restore.rows=3;
+          restore.setAttribute('aria-label','JSON para restaurar intenciones');
+          const restoreButton=document.createElement('button');
+          restoreButton.type='button';
+          restoreButton.textContent='Restaurar lista';
+          const feedback=document.createElement('small');
+          restoreButton.onclick=()=>{
+            try{
+              const parsed=JSON.parse(restore.value);
+              const arr=Array.isArray(parsed)?parsed:parsed.intentions;
+              if(!Array.isArray(arr)||arr.length>200||arr.some(x=>typeof x!=='string'||x.length>350))
+                throw Error('Archivo no válido');
+              state.intentionPool=[...new Set(arr.map(x=>x.trim()).filter(Boolean))];
+              resetIntentionCycle();
+              fill('intentions');
+            }catch{feedback.textContent='No se pudo leer la lista. Comprueba el formato JSON.';}
+          };
+          backup.append(backupLabel,exportButton,restore,restoreButton,feedback);
+          list.append(backup);
         } else if (selected === 'voices') {
           const description=document.createElement('p');
           description.className='jac-intro';
@@ -817,6 +1011,25 @@
       $('modal').querySelectorAll('[data-nav]').forEach(button => {
         button.onclick = () => fill(button.dataset.nav);
       });
+      // Swipe horizontal entre las pestañas del menú, sin interceptar el scroll vertical.
+      let touch=null;
+      const surface=$('modalContent');
+      surface.addEventListener('touchstart',e=>{
+        if(e.touches.length!==1 || e.target.closest('textarea,input,select'))return;
+        touch={x:e.touches[0].clientX,y:e.touches[0].clientY};
+      },{passive:true});
+      surface.addEventListener('touchend',e=>{
+        if(!touch)return;
+        const p=touch;touch=null;
+        const t=e.changedTouches[0];
+        if(!t)return;
+        const dx=t.clientX-p.x,dy=t.clientY-p.y;
+        if(Math.abs(dx)<55||Math.abs(dx)<=Math.abs(dy)*1.3)return;
+        e.preventDefault();
+        const index=tabs.indexOf(currentTab);
+        fill(tabs[Math.max(0,Math.min(tabs.length-1,index+(dx<0?1:-1)))]);
+      },{passive:false});
+      surface.addEventListener('touchcancel',()=>{touch=null;},{passive:true});
       fill(tab);
     }
 
