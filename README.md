@@ -94,3 +94,9 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 ## Desplazamiento cinético del rosario en teléfonos
 
 Se corrigió el cálculo de velocidad al soltar el dedo, que podía quedar en cero cuando Android emitía muy pocos eventos `touchmove`. Ahora se calcula con el punto `touchend` y se combina la velocidad total del gesto con las muestras recientes. Si el gesto es rápido y corto, se proyecta un recorrido adicional de varias cuentas (mínimo aproximado de diez cuentas cuando existe espacio), con frenado progresivo y límites en ambos extremos. Arrastrar lentamente conserva el seguimiento directo del dedo. El movimiento sólo afecta a la cadena del lado izquierdo, no al paso de oración. La preferencia de accesibilidad para reducir movimiento evita la inercia.
+
+## Desplazamiento nativo de la camándula (octubre de 2026)
+
+Se sustituyó el desplazamiento artificial mediante transformaciones SVG y velocidad calculada con JavaScript por un **contenedor con overflow-y: auto, touch-action: pan-y y desplazamiento cinético nativo de Android/Chrome**. La cadena ocupa todo su recorrido dentro del contenedor izquierdo, con espacio superior para centrar el inicio y espacio inferior para mostrar la cruz final. Al soltar un gesto rápido, la inercia y el frenado quedan a cargo del navegador, como en el scroll de una página larga.
+
+El texto y la oración actual no cambian al recorrer las cuentas. Tocar una cuenta sí permite seleccionarla; al avanzar de oración la cuenta correspondiente se centra automáticamente. Esta implementación reemplaza las simulaciones anteriores con animaciones y cálculos de velocidad que no reproducían el scroll esperado.
