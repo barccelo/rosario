@@ -143,7 +143,7 @@
     'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n\n' +
     'Ofrezco, Señor, mi vida, obras y trabajos en satisfacción de todos mis pecados; y, así como lo suplico, confío en vuestra bondad y misericordia infinita que los perdonaréis por los méritos de vuestra preciosísima sangre, pasión y muerte, y me daréis gracia para enmendarme y perseverar en vuestro santo amor y servicio hasta el fin de mi vida. Amén.';
   prayers['Versículos iniciales'] =
-    'V/ Señor, ábreme los labios.\nR/ Y mi boca proclamará tu alabanza.\n\nV/ Dios mío, ven en mi auxilio.\nR/ Señor, date prisa en socorrerme.';
+    '℣. Señor, ábreme los labios.\n℟. Y mi boca proclamará tu alabanza.\n\n℣. Dios mío, ven en mi auxilio.\n℟. Señor, date prisa en socorrerme.';
   prayers['Intenciones finales'] = 'Por las necesidades de la Iglesia y del Estado; por el obispo de esta diócesis y sus intenciones; y por las benditas ánimas del purgatorio.';
   const stationPair = {
     title: 'Estación al Santísimo Sacramento', kind: 'dialogue', m: -1,
@@ -332,9 +332,12 @@
     if (restoredIndex < 0 && prev)
       restoredIndex = steps.findIndex(step => step.title === prev.title && step.m === prev.m && step.n === prev.n);
   } else if (Number(saved.sequenceVersion) === 4) {
-    const legacySteps = buildRosarySteps(true);
+    const legacySteps = buildLegacyVersionFive();
     const original = legacySteps[Math.max(0, Math.min(Number(saved.index) || 0, legacySteps.length))];
     restoredIndex = original ? findStep(original) : steps.length;
+    if (restoredIndex < 0 && original)
+      restoredIndex = steps.findIndex(step => step.title === original.title &&
+        step.m === original.m && step.n === original.n);
     if (restoredIndex < 0 && original && original.m >= 0 && original.m < 5)
       restoredIndex = steps.findIndex(step => step.kind === 'mystery' && step.m === original.m + 1);
   } else if (!previousStep) {
@@ -852,7 +855,10 @@
       });
       const showSelectedPrayer = () => {
         const text = select.value === 'Letanías' ? fullLitany :
-          select.value === 'Cordero de Dios' ? lambLines.join('\n\n') : prayers[select.value];
+          select.value === 'Cordero de Dios' ? lambLines.map((line,i) =>
+            '℣. Cordero de Dios, que quitas los pecados del mundo,\n℟. ' +
+            ['perdónanos, Señor.','escúchanos, Señor.','ten misericordia de nosotros.'][i]).join('\n\n') :
+          prayers[select.value];
         $('reading').replaceChildren();
         if (window.rosaryFormatAmens) window.rosaryFormatAmens($('reading'), text);
         else $('reading').textContent = text;
