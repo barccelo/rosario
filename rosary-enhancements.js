@@ -521,7 +521,7 @@
     const meditationBox = document.createElement('div');
     meditationBox.className = 'meditation-tools';
     meditationBox.hidden = true;
-    meditationBox.innerHTML = '<button type="button" id="meditationToggle" aria-label="Leer meditación completa">Ver meditación <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>';
+    meditationBox.innerHTML = '<button type="button" id="meditationToggle" aria-label="Leer meditación completa">Ver meditación</button>';
     reading.insertBefore(meditationBox, $('immersiveCount'));
 
     function litanyLabel(line) {
