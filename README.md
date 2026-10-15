@@ -132,3 +132,14 @@ La zona izquierda sigue utilizando scroll nativo con inercia independiente del t
 Se ajustó exclusivamente la correspondencia de los pasos con las cuentas de la vista física: doce pasos de la Estación, una cuenta grande para la Comunión espiritual, tres pequeñas para las oraciones introductorias y la cuenta compartida para el anuncio del primer misterio. El Gloria de los versículos iniciales utiliza la misma cuenta que «Señor, ábreme los labios». El orden de esas oraciones se conserva.
 
 Se cambió el orden de la secuencia final para colocar **Salve + «Ruega por nosotros»** después de letanías, oración final e intenciones, justo antes de la bendición final. El progreso guardado con versión de secuencia 6 se migra mediante identificación de la oración, distinguiendo las dos apariciones de «Ruega por nosotros». La versión de secuencia pasa a 7. La vista vertical también usa el orden de oraciones corregido; su desplazamiento y apariencia no cambian.
+
+## Refinamiento táctil y visual de la vista física (octubre de 2026)
+
+- **Capas y oclusión:** los enlaces del aro y del colgante se dibujan antes de todas las cuentas, que incluyen una base opaca. Ninguna cuerda debe verse a través de las cuentas (incluyendo las pendientes grises); en la cuenta grande compartida tampoco pasa por delante la cuerda del colgante.
+- **Geometría:** el giro superior llega hasta cerca del borde alto del scroll (en vez de quedar a media altura), con curva cúbica redondeada. El diámetro máximo de las cuentas no crece. Las dos columnas tienen separación adaptativa a la anchura disponible para que ni las dos cuentas grandes enfrentadas ni sus contornos se toquen.
+- **Colores finales:** los cuatro elementos del colgante, incluidas las tres pequeñas y la grande cercana a la cruz, recuperan el relleno de cuenta rezada al volver por el colgante, respetando los temas actuales.
+- **Accesibilidad táctil:** se elimina el recuadro rectangular de foco que aparecía al tocar la única cruz; continúa existiendo indicación de foco por trazo cuando se navega con teclado.
+- **Desplazamiento físico:** el scroll inercial nativo recorre la rama izquierda al arrastrar de arriba hacia abajo, gira cerca del borde superior y recorre la derecha al arrastrar de abajo hacia arriba. No se altera la oración por desplazar físicamente las cuentas.
+- **Toques por mitades:** en **Ajustes → Navegación por toques** se puede activar/desactivar (desactivado inicialmente) la navegación con pulsaciones cortas sobre las áreas vacías. Mitad superior retrocede y mitad inferior avanza. No intercepta el texto, enlaces, elementos interactivos, gestos de arrastre ni el movimiento de la cadena. Se guarda la preferencia para ambas presentaciones.
+
+La vista vertical anterior sigue disponible sin alteraciones de geometría. La vista física conserva su carácter experimental hasta la verificación real en Android.
