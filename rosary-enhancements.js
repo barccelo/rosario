@@ -241,6 +241,8 @@
     state.group = groups[saved.group] ? saved.group : (dayGroups[state.day] || dayGroups[new Date().getDay()]);
   }
   state.dayDate = dateKey();
+  const alignments = ['justify', 'left', 'center', 'right'];
+  state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
 
   const announcement = step => {
     const ordinals = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto'];
@@ -283,6 +285,19 @@
     const style = document.createElement('style');
     style.textContent = [
       '.litany-wheel[hidden],.meditation-tools[hidden],.meditation-copy[hidden]{display:none!important}',
+      '.nav-quick{position:fixed;z-index:8;right:calc(env(safe-area-inset-right,0px) + 129px);top:calc(env(safe-area-inset-top,0px) + 14px);width:42px;height:42px;border-radius:15px;border:1px solid rgba(119,105,80,.14);background:rgba(255,254,250,.9);color:#56574f;display:grid;place-items:center;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);touch-action:none;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 16px #00000008}',
+      '.nav-quick svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}',
+      '.dark .nav-quick{background:#263029ed;color:#e1decf;border-color:#ffffff24}',
+      ':root:fullscreen .nav-quick{right:calc(env(safe-area-inset-right,0px) + 58px);top:calc(env(safe-area-inset-top,0px) + 10px);background:transparent;border-color:transparent;box-shadow:none}',
+      '.immersive-prayer p,.meditation-copy,#fullPrayerText,.prayer{text-align:var(--rosary-text-align,justify);hyphens:auto}',
+      '.dialogue-line{display:block;margin-bottom:14px}.verse-mark{display:inline-grid;place-items:center;min-width:28px;height:28px;margin-right:8px;padding:0 5px;border:1px solid #a78e663e;border-radius:9px;font:700 11px system-ui;color:#9b7742;vertical-align:middle;white-space:nowrap}',
+      '.dark .verse-mark{color:#d4b579;border-color:#dbbe8740}',
+      '.wheel-main .verse-mark,.wheel-response .verse-mark{margin-right:10px}',
+      '.nav-align-option{align-items:center!important}.nav-align-option[aria-pressed="true"]{background:#b89b6a1e;border-color:#b89b6a}',
+      '.align-example{font:17px/1.7 Georgia,serif;max-width:34ch;color:#6c7166;margin:8px 3px 15px}',
+      '.nav-tabs{grid-template-columns:repeat(4,1fr)!important}',
+      '.nav-list.align-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:none}',
+      '@media(max-width:420px){.nav-quick{right:calc(env(safe-area-inset-right,0px) + 117px)}}',
       '.litany-wheel{width:100%;min-height:270px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;text-align:center}',
       '.litany-wheel .wheel-label{font:10px system-ui;letter-spacing:2px;text-transform:uppercase;color:#998a6b;margin-bottom:4px}',
       '.litany-wheel .wheel-side{font:17px/1.4 Georgia,serif;min-height:52px;max-height:58px;overflow:hidden;border:0;background:none;color:#8a907f;opacity:.38;padding:8px 12px;display:flex;align-items:center;justify-content:center;width:100%;touch-action:none}',
@@ -318,8 +333,8 @@
       '<div class="wheel-label">Letanías lauretanas</div>' +
       '<button type="button" class="wheel-side" id="litanyPrevious" aria-label="Letanía anterior"></button>' +
       '<div class="wheel-current" aria-live="polite">' +
-      '<div class="wheel-main" id="litanyCurrent"></div>' +
-      '<div class="wheel-response" id="litanyResponse"></div>' +
+      '<div class="wheel-main"><span class="verse-mark" aria-label="Versículo">V/</span><span id="litanyCurrent"></span></div>' +
+      '<div class="wheel-response"><span class="verse-mark" aria-label="Respuesta">R/</span><span id="litanyResponse"></span></div>' +
       '<div class="wheel-progress" id="litanyProgress"></div></div>' +
       '<button type="button" class="wheel-side" id="litanyNext" aria-label="Letanía siguiente"></button>';
     reading.insertBefore(wheel, $('immersiveCount'));
@@ -333,6 +348,26 @@
 
     function litanyLabel(line) {
       return line.replace(/, ruega por nosotros\.$/, '');
+    }
+    function formatDialogue(step) {
+      const paragraph = $('immersiveText');
+      paragraph.replaceChildren();
+      [
+        ['V/', step.verse, 'Versículo'],
+        ['R/', step.response, 'Respuesta']
+      ].forEach(([mark, text, label]) => {
+        const line = document.createElement('span');
+        line.className = 'dialogue-line';
+        const badge = document.createElement('span');
+        badge.className = 'verse-mark';
+        badge.textContent = mark;
+        badge.setAttribute('aria-label', label);
+        line.append(badge, document.createTextNode(text));
+        paragraph.append(line);
+      });
+    }
+    function applyAlignment() {
+      document.documentElement.style.setProperty('--rosary-text-align', state.textAlign);
     }
     function goTo(index) {
       state.index = Math.max(0, Math.min(index, steps.length));
@@ -366,16 +401,17 @@
       reading.classList.toggle('is-litany', isLitany);
       wheel.hidden = !isLitany;
       meditationBox.hidden = !isAnnouncement;
+      applyAlignment();
+      if (step && !isLitany && step.verse && step.response) formatDialogue(step);
       if (isLitany) {
         const i = step.litanyIndex;
-        const line = litanyLines[i];
-        const name = litanyLabel(line);
-        $('litanyCurrent').textContent = name === line ? line : name;
-        $('litanyResponse').textContent = name === line ? '' : 'Ruega por nosotros.';
+        const pair = litanyPairs[i];
+        $('litanyCurrent').textContent = pair.verse;
+        $('litanyResponse').textContent = pair.response;
         $('litanyProgress').textContent = (i + 1) + ' / ' + litanyLines.length;
-        $('litanyPrevious').textContent = i > 0 ? litanyLabel(litanyLines[i - 1]) : '';
+        $('litanyPrevious').textContent = i > 0 ? litanyPairs[i - 1].verse : '';
         $('litanyPrevious').disabled = i === 0;
-        $('litanyNext').textContent = i < litanyLines.length - 1 ? litanyLabel(litanyLines[i + 1]) : '';
+        $('litanyNext').textContent = i < litanyLines.length - 1 ? litanyPairs[i + 1].verse : '';
         $('litanyNext').disabled = i === litanyLines.length - 1;
       }
       if (isAnnouncement) {
@@ -421,7 +457,8 @@
         '<div class="nav-tabs" role="tablist" aria-label="Secciones del rosario">' +
         '<button type="button" data-nav="days" role="tab">Días</button>' +
         '<button type="button" data-nav="mysteries" role="tab">Misterios</button>' +
-        '<button type="button" data-nav="prayers" role="tab">Oraciones</button></div>' +
+        '<button type="button" data-nav="prayers" role="tab">Oraciones</button>' +
+        '<button type="button" data-nav="text" role="tab">Texto</button></div>' +
         '<div class="nav-list" id="navList"></div>');
       function fill(selected) {
         $('modal').querySelectorAll('[data-nav]').forEach(btn => {
@@ -429,6 +466,7 @@
         });
         const list = $('navList');
         list.replaceChildren();
+        list.classList.toggle('align-list', selected === 'text');
         if (selected === 'days') {
           dayNames.forEach((day, i) => {
             appendOption(list, day, 'Misterios ' + dayGroups[i].toLowerCase(), () => {
@@ -444,28 +482,61 @@
               goTo(steps.findIndex(item => item.kind === 'mystery' && item.m === i));
             }, steps[state.index]?.m === i);
           });
-        } else {
+        } else if (selected === 'prayers') {
           const titles = [
+            ['Estación al Santísimo Sacramento', 'Antes de comenzar'],
+            ['Comunión espiritual', 'Antes del rosario'],
             ['Señal de la cruz', 'Inicio'],
+            ['Señor mío Jesucristo', 'Acto de contrición'],
+            ['Versículos iniciales', 'Diálogo V/ y R/'],
             ['Anuncio del misterio', 'Antes de cada decena'],
             ['Padrenuestro', 'Cada decena'],
             ['Avemaría', 'Diez veces por misterio'],
             ['Gloria', 'Al terminar la decena'],
             ['Jaculatoria', 'María, Madre de gracia'],
-            ['Alabanzas al Santísimo', 'Después de la jaculatoria'],
+            ['Tres Avemarías', 'Al terminar los cinco misterios'],
             ['Salve', 'Oración final de los cinco misterios'],
             ['Ruega por nosotros', 'Respuesta a la Virgen'],
             ['Letanías', 'Una invocación por deslizamiento'],
             ['Cordero de Dios', 'Tres peticiones'],
             ['Bajo tu amparo', 'Oración a la Virgen'],
-            ['Oración final', 'Conclusión']
+            ['Oración final', 'Conclusión'],
+            ['Intenciones finales', 'Por la Iglesia, el obispo y las almas del purgatorio']
           ];
           titles.forEach(([title, subtitle]) => {
-            const positions = steps.map((item, i) => item.title === title ? i : -1).filter(i => i >= 0);
+            const lookup = title === 'Tres Avemarías' ? 'Avemaría' : title;
+            const positions = steps.map((item, i) => item.title === lookup &&
+              (title !== 'Tres Avemarías' || item.kind === 'dedication') ? i : -1).filter(i => i >= 0);
+            if (!positions.length) return;
             const closest = positions.find(i => i >= state.index) ?? positions[0];
             appendOption(list, title === 'Jaculatoria' ? 'María, Madre de gracia' : title, subtitle, () => goTo(closest),
               steps[state.index]?.title === title);
           });
+        } else if (selected === 'text') {
+          const modes = [
+            ['justify', 'Justificar'], ['left', 'Izquierda'],
+            ['center', 'Centrar'], ['right', 'Derecha']
+          ];
+          modes.forEach(([value, label]) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'nav-item nav-align-option' + (state.textAlign === value ? ' active' : '');
+            button.textContent = label;
+            button.setAttribute('aria-pressed', String(state.textAlign === value));
+            button.onclick = () => {
+              state.textAlign = value;
+              applyAlignment();
+              persist();
+              fill('text');
+            };
+            list.append(button);
+          });
+          const preview = document.createElement('div');
+          preview.className = 'align-example';
+          preview.style.gridColumn = '1 / -1';
+          preview.style.textAlign = state.textAlign;
+          preview.textContent = 'El texto de las oraciones y las meditaciones se mostrará con esta alineación.';
+          list.append(preview);
         }
       }
       $('modal').querySelectorAll('[data-nav]').forEach(button => {
@@ -479,6 +550,16 @@
     navButton.textContent = 'Navegar';
     navButton.setAttribute('aria-label', 'Abrir menú de días, misterios y oraciones');
     navButton.onclick = () => openNavigation('days');
+    // Acceso permanente, sin tener que revelar la barra inferior oculta.
+    const quickNav = document.createElement('button');
+    quickNav.type = 'button';
+    quickNav.className = 'nav-quick';
+    quickNav.id = 'iNavigate';
+    quickNav.title = 'Navegar por el rosario';
+    quickNav.setAttribute('aria-label', 'Abrir menú de navegación');
+    quickNav.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
+    document.body.append(quickNav);
+    quickNav.onclick = () => openNavigation('days');
     $('allMysteries').onclick = () => openNavigation('mysteries');
 
     // El devocionario conserva las letanías completas como texto de consulta.
