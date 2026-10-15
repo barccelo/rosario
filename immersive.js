@@ -5,7 +5,7 @@ const reading=document.createElement('div');reading.className='immersive-prayer'
 const topControls=document.createElement('div');
 topControls.className='top-controls';
 topControls.setAttribute('role','group');
-topControls.setAttribute('aria-label','Apariencia y pantalla');
+topControls.setAttribute('aria-label','Controles principales del rosario');
 topControls.innerHTML='<button id="iTheme" class="top-control" type="button"></button><button id="iSettingsTop" class="top-control" type="button" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2 1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg></button><span class="top-divider" aria-hidden="true"></span><button id="iFullscreen" class="top-control" type="button"></button>';
 document.body.append(topControls);
 const topStyle=document.createElement('style');
@@ -27,7 +27,7 @@ document.head.append(topStyle);
 const controlsDot=document.createElement('button');
 controlsDot.className='controls-dot';
 controlsDot.type='button';
-controlsDot.setAttribute('aria-label','Mostrar controles de pantalla');
+controlsDot.setAttribute('aria-label','Mostrar controles del rosario');
 controlsDot.setAttribute('aria-expanded','false');
 controlsDot.innerHTML='<span aria-hidden="true"></span>';
 controlsDot.hidden=true;
