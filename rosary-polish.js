@@ -234,7 +234,13 @@
     if(readFull)readFull.hidden=true;
 
     // Pulsación prolongada de una intervención dorada: abrir ajustes de voces.
-    let hold=null,origin=null;
+    let hold=null,origin=null,suppressVoiceClickUntil=0;
+    reading.addEventListener('click',event=>{
+      if(performance.now()<suppressVoiceClickUntil){
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },true);
     reading.addEventListener('pointerdown',e=>{
       const gold=e.target.closest('.voice-assembly,.wheel-response');
       if(!gold || !state.voiceColors || e.button!==0)return;
@@ -242,6 +248,7 @@
       clearTimeout(hold);
       hold=setTimeout(()=>{
         hold=null;
+        suppressVoiceClickUntil=performance.now()+900;
         window.rosarioOpenVoiceSettings?.();
       },620);
     });
