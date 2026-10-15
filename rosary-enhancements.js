@@ -1019,23 +1019,27 @@
       });
       // Swipe horizontal entre las pestañas del menú, sin interceptar el scroll vertical.
       let touch=null;
-      const surface=$('modalContent');
-      surface.addEventListener('touchstart',e=>{
-        if(e.touches.length!==1 || e.target.closest('textarea,input,select'))return;
-        touch={x:e.touches[0].clientX,y:e.touches[0].clientY};
-      },{passive:true});
-      surface.addEventListener('touchend',e=>{
-        if(!touch)return;
-        const p=touch;touch=null;
-        const t=e.changedTouches[0];
-        if(!t)return;
-        const dx=t.clientX-p.x,dy=t.clientY-p.y;
-        if(Math.abs(dx)<55||Math.abs(dx)<=Math.abs(dy)*1.3)return;
-        e.preventDefault();
-        const index=tabs.indexOf(currentTab);
-        fill(tabs[Math.max(0,Math.min(tabs.length-1,index+(dx<0?1:-1)))]);
-      },{passive:false});
-      surface.addEventListener('touchcancel',()=>{touch=null;},{passive:true});
+      const attachTabSwipe=surface=>{
+        surface.addEventListener('touchstart',e=>{
+          if(e.touches.length!==1||e.target.closest('textarea,input,select'))return;
+          touch={x:e.touches[0].clientX,y:e.touches[0].clientY};
+        },{passive:true});
+        surface.addEventListener('touchend',e=>{
+          if(!touch)return;
+          const p=touch;touch=null;
+          const t=e.changedTouches[0];
+          if(!t)return;
+          const dx=t.clientX-p.x,dy=t.clientY-p.y;
+          if(Math.abs(dx)<55||Math.abs(dx)<=Math.abs(dy)*1.3)return;
+          e.preventDefault();
+          const index=tabs.indexOf(currentTab);
+          fill(tabs[Math.max(0,Math.min(tabs.length-1,index+(dx<0?1:-1)))]);
+        },{passive:false});
+        surface.addEventListener('touchcancel',()=>{touch=null;},{passive:true});
+      };
+      // Ambos nodos se crean de nuevo al abrir el menú, así no se acumulan listeners.
+      attachTabSwipe($('navList'));
+      attachTabSwipe($('modal').querySelector('.nav-tabs'));
       fill(tab);
     }
 
