@@ -106,7 +106,10 @@
       body.push('<path class="physical-whole-loop" d="'+loop+'"/>');
       function branch(items,id,start){
         let html='<g class="physical-strand" data-strand="'+id+'">';
-        html+='<path class="physical-link" d="'+route(items,start)+'"/>';
+        const path=id==='back'
+          ?route(items.slice(1),items[0])+' L '+format(center)+' '+format(MEDAL_Y)
+          :route(items,start);
+        html+='<path class="physical-link" d="'+path+'"/>';
         items.forEach(p=>{
           const i=positions.indexOf(p);
           const big=i%11===0;
@@ -118,7 +121,7 @@
         return html+'</g>';
       }
       body.push(branch(fore,'out',{x:center,y:MEDAL_Y}));
-      body.push(branch(rear,'back',fore[fore.length-1]));
+      body.push(branch(rear,'back',rear[0]));
       let tail='<g class="physical-pendant">';
       const tailPoints=[{x:center,y:MEDAL_Y},...introPoints,{x:center,y:CROSS_Y-54}];
       tail+='<path class="physical-link" d="'+route(tailPoints.slice(1),tailPoints[0])+'"/>';
