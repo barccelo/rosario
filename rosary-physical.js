@@ -158,7 +158,6 @@
 
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
-      const firstFinal=steps.findIndex(item=>item.m===5);
       if(!step)return{type:'cross',phase:'finished',y:CROSS_Y,completed:55};
       // Los pasos anteriores al primer misterio recorren el mismo
       // colgante: cruz -> cuenta grande inferior -> tres pequeñas ->
@@ -202,11 +201,6 @@
         }
         // Salve, letanías, oración e intenciones finales comparten el
         // último tramo físico hasta llegar a la cruz en la bendición.
-        const end=steps.length;
-        const beginning=Math.max(0,firstFinal);
-        const remaining=Math.max(1,end-beginning);
-        const t=(state.index-beginning)/remaining;
-        if(t>.94)return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
         return{type:'intro',phase:'closing',intro:3,
           y:introPoints[3].y,completed:55};
       }
@@ -274,8 +268,9 @@
       if(el.hasAttribute('data-cross')){
         // La misma cruz es el punto de partida y de llegada.
         const current=steps[state.index];
-        state.index=(!current||current.m>=5)?0:
-          Math.max(0,steps.findIndex(s=>s.title==='Señal de la cruz'));
+        // Es la misma cruz, pero lleva al comienzo si estamos comenzando
+        // o a la bendición final cuando ya pasamos las cinco decenas.
+        state.index=current?.m>=5?steps.length:0;
       }else if(el.hasAttribute('data-bead')){
         const index=steps.findIndex(s=>s.bead===Number(el.dataset.bead));
         if(index<0)return;
