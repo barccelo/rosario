@@ -253,8 +253,11 @@
     state.jaculatorias = validJaculatorias.filter(id => ids.includes(id));
     steps = buildRosarySteps();
     let next = findStep(current);
-    if (next < 0 && current && current.m >= 0 && current.m < 5)
-      next = steps.findIndex(step => step.kind === 'mystery' && step.m === current.m + 1);
+    if (next < 0 && current && current.m >= 0 && current.m < 5) {
+      next = steps.findIndex(step => step.m === current.m && step.title === 'Jaculatoria de Fátima');
+      if (next < 0) next = steps.findIndex(step => step.kind === 'mystery' && step.m === current.m + 1);
+      if (next < 0) next = steps.findIndex(step => step.kind === 'dedication');
+    }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
     state.sequenceVersion = 5;
@@ -444,7 +447,8 @@
       show('<div class="meditation-dialog"><div class="meditation-kicker">Meditación · Misterio ' +
         (step.m + 1) + '</div><h2 id="meditationTitle"></h2><div class="meditation-full" id="meditationFull"></div></div>');
       $('meditationTitle').textContent = groups[state.group][step.m];
-      $('meditationFull').textContent = text;
+      if (window.rosaryFormatAmens) window.rosaryFormatAmens($('meditationFull'), text);
+      else $('meditationFull').textContent = text;
       $('modal').scrollTop = 0;
     };
 
@@ -679,8 +683,11 @@
         select.append(option);
       });
       const showSelectedPrayer = () => {
-        $('reading').textContent = select.value === 'Letanías' ? fullLitany :
+        const text = select.value === 'Letanías' ? fullLitany :
           select.value === 'Cordero de Dios' ? lambLines.join('\n\n') : prayers[select.value];
+        $('reading').replaceChildren();
+        if (window.rosaryFormatAmens) window.rosaryFormatAmens($('reading'), text);
+        else $('reading').textContent = text;
       };
       select.onchange = showSelectedPrayer;
       showSelectedPrayer();
