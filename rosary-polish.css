@@ -1,0 +1,57 @@
+/* Controles superiores integrados, sin solapamientos. */
+.top-controls #iNavigate{width:36px;height:36px;flex:0 0 36px}
+.nav-fullscreen-quick[hidden]{display:none!important}
+.nav-fullscreen-quick{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 57px);width:40px;height:40px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;color:#8c7957;background:transparent;z-index:8;touch-action:none;-webkit-tap-highlight-color:transparent}
+.nav-fullscreen-quick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-width:1.7;pointer-events:none}
+.dark .nav-fullscreen-quick{color:#c7b48d}
+.nav-fullscreen-quick:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
+
+/* Tarjetas con centrado real y sin encogimiento al desplazarse. */
+.nav-list{overscroll-behavior:contain}
+.nav-item{flex:0 0 auto;min-height:78px;height:auto;padding:14px 17px;gap:6px;justify-content:center;line-height:1.3;overflow:visible}
+.nav-item small{font-size:12px;line-height:1.35;flex:0 0 auto;white-space:normal}
+.nav-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.nav-tabs button{min-width:0;padding:10px 4px}
+.jac-intro{font-size:13px;line-height:1.6;color:#8c9085;margin:7px 4px 12px}
+.jac-choice{display:flex!important;align-items:flex-start!important;justify-content:flex-start!important;gap:13px!important;flex:0 0 auto;border:1px solid #9f998344;border-radius:15px;padding:14px!important;margin:0!important}
+.jac-choice input{appearance:auto;accent-color:#9b7846;flex:0 0 auto;width:18px;height:18px;margin:2px 0 0}
+.jac-choice span{flex:1;min-width:0}
+.jac-choice strong{display:block;font:600 14px/1.4 system-ui;margin-bottom:6px}
+.jac-choice small{display:block;font:13px/1.55 Georgia,serif;color:#8c9085;white-space:normal}
+.meditation-tools button{display:inline-flex;align-items:center;gap:7px}
+.meditation-tools svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#modal:has(.meditation-dialog){width:min(92vw,650px);max-height:calc(100dvh - 36px);overflow-y:auto;overscroll-behavior:contain}
+.meditation-kicker{font:600 10px/1.5 system-ui;letter-spacing:2px;text-transform:uppercase;color:#b29666;margin-top:7px}
+.meditation-dialog h2{font:600 clamp(25px,4vw,34px)/1.24 Georgia,serif;margin:13px 24px 20px 0}
+.meditation-full{font:clamp(16px,2vw,20px)/1.8 Georgia,serif;white-space:pre-wrap;text-align:var(--rosary-text-align,justify);color:inherit;hyphens:none;word-break:normal;overflow-wrap:break-word;padding-bottom:14px}
+
+/* Evitar cortes de palabra con guiones, incluso en texto justificado. */
+.immersive-prayer,.immersive-prayer p,.prayer,.meditation-full,#fullPrayerText,.align-example{hyphens:none!important;-webkit-hyphens:none!important;word-break:normal;overflow-wrap:break-word}
+.immersive-prayer p{white-space:pre-line}
+.amen-line{display:block!important;text-align:right!important;width:100%;font-style:normal;white-space:nowrap;margin-top:7px;color:inherit}
+.amen-line:empty{display:none}
+.prayer-part{display:block;margin:0 0 20px;white-space:pre-line}
+.prayer-part:last-child{margin-bottom:0}
+.voice-label{display:block;font:600 10px/1.5 system-ui;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:7px}
+.prayer-part.voice-guide{color:#99743f}
+.prayer-part.voice-assembly{color:#50594e}
+.prayer-part.voice-guide .voice-label{color:#a77c43}
+.prayer-part.voice-assembly .voice-label{color:#869084}
+.dark .prayer-part.voice-guide{color:#ddc28e}
+.dark .prayer-part.voice-assembly{color:#e0e3d9}
+.dark .prayer-part.voice-assembly .voice-label{color:#aab7a7}
+.dark .prayer-part.voice-guide .voice-label{color:#bea273}
+.rosary-mystery-context[hidden]{display:none!important}
+.rosary-mystery-context{position:fixed;top:calc(env(safe-area-inset-top,0px) + clamp(90px,12dvh,180px));left:42%;right:7%;z-index:2;text-align:center;pointer-events:none}
+.rosary-mystery-badge{display:grid;place-items:center;width:39px;height:39px;margin:0 auto 12px;border-radius:50%;border:1px solid #bd9e69;color:#9b7845;font:600 14px Georgia,serif}
+.rosary-mystery-name{font:500 clamp(17px,2.6vw,24px)/1.3 Georgia,serif;color:#566353;margin:0 auto;max-width:600px;text-wrap:balance}
+.dark .rosary-mystery-name{color:#e0dfd3}
+.dark .rosary-mystery-badge{color:#dbbd81;border-color:#be9d65}
+.immersive-prayer.is-mystery-announcement .mystery-announcement-label{display:block;font:600 11px/1.6 system-ui;letter-spacing:1.8px;text-transform:uppercase;color:#a58a59;margin-bottom:18px;text-wrap:pretty}
+.immersive-prayer.is-mystery-announcement .mystery-announcement-name{display:block;font:600 clamp(28px,4.4vw,43px)/1.25 Georgia,serif;letter-spacing:-.35px;color:#343e35;text-wrap:balance}
+.dark .immersive-prayer.is-mystery-announcement .mystery-announcement-name{color:#f1eee3}
+.immersive-prayer.is-mystery-announcement .meditation-tools{margin-top:29px}
+.immersive-prayer.is-mystery-announcement #readFull{display:none!important}
+@media(min-width:900px){.rosary-mystery-context{left:38%;right:17%}}
+@media(max-height:700px){.rosary-mystery-context{top:calc(env(safe-area-inset-top,0px) + 74px)}.rosary-mystery-badge{width:31px;height:31px;margin-bottom:8px}.rosary-mystery-name{font-size:17px}}
+@media(max-width:430px){.rosary-mystery-context{left:40%;right:5%}.rosary-mystery-name{font-size:16px}.rosary-mystery-badge{width:33px;height:33px;font-size:12px}}
