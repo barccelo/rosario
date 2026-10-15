@@ -219,11 +219,13 @@
           prayer.append(label);
         }
         const source=prayerSource(step);
-        if (step.title==='Comunión espiritual' || step.title==='Salve') {
+        if (step.title==='Comunión espiritual' || step.title==='Salve' ||
+            step.title==='Oración final') {
           const heading=document.createElement('span');
           heading.className='reading-prayer-heading';
           heading.textContent=step.title==='Salve' ?
-            'Y ahora te saludamos con una Salve' : 'Comunión espiritual';
+            'Y ahora te saludamos con una Salve' :
+            step.title==='Oración final' ? 'Oración' : 'Comunión espiritual';
           prayer.append(heading);
         }
         const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
@@ -242,7 +244,8 @@
         }else appendWithAmen(prayer,source);
       }else{
         prayer.replaceChildren();
-        appendWithAmen(prayer,'Has terminado el rosario. Que la paz te acompañe.');
+        specialSymbol();
+        appendWithAmen(prayer,'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.');
       }
       document.getElementById('readFull').hidden=true;
       requestAnimationFrame(refreshReadingGesture);
