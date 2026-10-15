@@ -100,3 +100,15 @@ Se corrigió el cálculo de velocidad al soltar el dedo, que podía quedar en ce
 Se sustituyó el desplazamiento artificial mediante transformaciones SVG y velocidad calculada con JavaScript por un **contenedor con overflow-y: auto, touch-action: pan-y y desplazamiento cinético nativo de Android/Chrome**. La cadena ocupa todo su recorrido dentro del contenedor izquierdo, con espacio superior para centrar el inicio y espacio inferior para mostrar la cruz final. Al soltar un gesto rápido, la inercia y el frenado quedan a cargo del navegador, como en el scroll de una página larga.
 
 El texto y la oración actual no cambian al recorrer las cuentas. Tocar una cuenta sí permite seleccionarla; al avanzar de oración la cuenta correspondiente se centra automáticamente. Esta implementación reemplaza las simulaciones anteriores con animaciones y cálculos de velocidad que no reproducían el scroll esperado.
+
+## Temas de colores del Rosario (octubre de 2026)
+
+En **Ajustes → Colores del rosario** hay tres estilos persistentes:
+
+- **Clásico**: conserva exactamente la apariencia dorada original y ambos fondos.
+- **Misionero**: únicamente colorea las cuentas, decena por decena, siguiendo el orden tradicional de la imagen aportada: verde (África), rojo (América), blanco (Europa), azul (Oceanía), amarillo (Asia). Se preservan el fondo actual, la cruz, los conectores y el **resaltado dorado** de la cuenta activa. Las cuentas blancas llevan contorno y números oscuros para conservar el contraste.
+- **Según los misterios**: adapta automáticamente todas las decenas al grupo de misterios del día, o al grupo elegido manualmente. Se aplica una paleta integrada al fondo, las cuentas, los conectores, los títulos y los controles. En **Dolorosos** se puede elegir Morado o Rojo; **Luminosos**, Dorado o Amarillo; **Gozosos**, Celeste o Azul; **Gloriosos**, Blanco perla. Cada variante tiene fondos y contrastes específicos para **claro** y **oscuro**, sin usar blanco sobre blanco para el grupo glorioso.
+
+Una pequeña vista previa en Ajustes permite comprobar los colores antes de volver al rosario. El modo elegido y cada variante se guardan en el mismo `localStorage` de las demás preferencias. El modo inicial sigue siendo **Clásico** para no modificar la apariencia de los usuarios existentes.
+
+La distinción de **Guía** y **Asamblea** continúa siendo independiente de la paleta; las respuestas de la asamblea conservan su dorado configurable. La cadena sigue utilizando el scroll cinético nativo del navegador, sin cambios en el progreso ni en las oraciones.
