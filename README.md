@@ -7,13 +7,17 @@ Camándula interactiva en español, con cuentas grandes, desplazamiento por el r
 Código trasladado desde la versión 3 de https://rosario-sereno.barcco.chatgpt.site.
 Commit de origen en Sites: `b1870ce56605455a7a0d05f5357761fcb774d3db`.
 
-La aplicación es estática y no requiere compilación ni dependencias. Publicar los cuatro archivos de la raíz en un servidor web estático. `index.html` carga `app.js`, `focus.js` e `immersive.js`, en ese orden.
+La aplicación es estática y no requiere compilación ni dependencias. Publicar todos los archivos de la raíz en un servidor web estático. `index.html` carga `app.js`, `rosary-enhancements.js`, `focus.js` e `immersive.js`, en ese orden.
 
 ## Controles
 
 - Tocar o mantener pulsada una cuenta para completarla.
 - Deslizar hacia arriba para avanzar; hacia abajo para retroceder.
-- Tocar la zona superior para mostrar los controles: anterior, avanzar, misterios, ajustes, tema y pantalla completa.
+- Tocar la zona superior para mostrar los controles: anterior, avanzar, navegar, ajustes y prueba de volumen. El tema y la pantalla completa se controlan desde los iconos superiores.
+- En **Navegar** se puede elegir el día, uno de sus cinco misterios o una oración concreta.
+- Cada misterio se anuncia antes de su decena. La meditación se despliega solamente al pulsar **Ver meditación**.
+- En las letanías se muestra una invocación por paso, con la anterior y la siguiente visibles parcialmente. Deslizar hacia arriba o abajo avanza o retrocede una invocación.
+- Los misterios se ajustan al día de la semana al abrir el rosario un nuevo día; una elección manual de día se conserva durante la jornada.
 
 ## Pantalla completa y Android
 
