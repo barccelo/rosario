@@ -180,7 +180,7 @@
     state.group = dayGroups[state.day];
   } else {
     state.day = saved.day;
-    state.group = dayGroups[state.day] || dayGroups[new Date().getDay()];
+    state.group = groups[saved.group] ? saved.group : (dayGroups[state.day] || dayGroups[new Date().getDay()]);
   }
   state.dayDate = dateKey();
 
@@ -276,7 +276,7 @@
       state.index = Math.max(0, Math.min(index, steps.length));
       openMeditationAt = -1;
       render();
-      $('modal').close();
+      if ($('modal').open) $('modal').close();
       const toolbar = document.querySelector('.prayer-toolbar');
       if (toolbar) toolbar.hidden = true;
     }
