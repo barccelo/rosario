@@ -40,12 +40,16 @@ La secuencia sigue el orden del [Santo Rosario en el devocionario de Opus Dei](h
 
 El menú permanente de tres líneas de la esquina superior abre **Días**, **Misterios**, **Oraciones** y **Texto**. En Texto, la lectura puede justificarse, alinearse a la izquierda, centrarse o alinearse a la derecha; esta preferencia se guarda localmente. V/ y R/ se presentan como marcas visuales diferenciadas en las intervenciones de diálogo y en las letanías.
 
-## Ajustes de lectura y jaculatorias
+## Revisión de lectura y secuencia (octubre de 2026)
 
-- En los anuncios de misterio aparece el título destacado, sin separación de palabras por guiones y con concordancia singular («misterio luminoso»).
-- En las decenas, un encabezado superior muestra el número romano (I–V) y el nombre del misterio.
-- El Padrenuestro y el Avemaría distinguen visualmente **Guía** y **Asamblea**. El guía empieza los misterios I, III y V; la asamblea empieza II y IV.
-- Los «Amén» se colocan en un renglón independiente, alineados a la derecha, también cuando la lectura general esté justificada.
-- «Ver meditación» abre un diálogo con el texto completo de la meditación del TXT aportado.
-- En **Navegar → Jaculatorias** se puede activar María, Madre de gracia y/o la jaculatoria de Fátima («Oh Jesús mío»). Cuando está activa María, inmediatamente después se reza **Alabanzas y gracias**. Los cambios se aplican a todas las decenas y quedan guardados localmente.
-- El botón de navegación ahora forma parte del mismo grupo superior que los botones de tema y pantalla; en pantalla completa mantiene un acceso compacto junto al indicador de controles.
+- La **Estación al Santísimo Sacramento** se reza **tres veces en ciclos completos**: invocación y respuesta, Padrenuestro, Avemaría, Gloria. Al terminar cada Gloria se repite el ciclo, con su invocación.
+- «Señor, ábreme los labios» y «Dios mío, ven en mi auxilio» se presentan juntos en un único paso, precedidos por una cruz. La oración de la Señal de la Cruz también muestra el símbolo.
+- Cada misterio se anuncia con título destacado; durante cada Padrenuestro y Avemaría de una decena se ve arriba el número romano (I–V) y el nombre del misterio. Pulsando el número se lee la meditación **completa**.
+- Las tres Avemarías finales tienen antes una invocación a la Virgen purísima y castísima: antes del parto, en el parto y después del parto. La respuesta es «En pensamiento, palabra y obra».
+- Las intenciones finales se muestran destacadas al comienzo del Padrenuestro correspondiente.
+- Los «Amén» aparecen en su propia línea a la derecha; se usa tipografía sin cortes automáticos por guiones.
+- Las oraciones largas tienen desplazamiento vertical dentro de su panel, sin el botón «Leer oración completa». Cuando caben, el gesto vertical cambia de oración. T+ y T− cambian el tamaño y la preferencia se guarda.
+- Las voces **Guía/Asamblea** se alternan entre primera y segunda parte de Padrenuestros y Avemarías en todo el recorrido, también en las tres Avemarías finales, y en jaculatorias. El oro identifica las respuestas de la asamblea. En **Voces** se pueden ocultar sus etiquetas y/o los colores, incluso sin etiquetas visibles. La pulsación prolongada sobre una respuesta dorada abre esos ajustes.
+- La selección de **Jaculatorias** es independiente: «María, Madre de gracia», «Alabanzas y gracias» y «Oh Jesús mío», activables en cualquier combinación; en la migración de usuarios existentes se mantiene Alabanzas si antes seguía a María.
+- Las letanías conservan la rueda, pero tocando cualquiera de las invocaciones visibles se abre un listado con la letanía actual centrada y resaltada; se puede saltar a otra.
+- El botón de alinear texto en ventanas emergentes alterna justificada, izquierda, centrada y derecha. Se usan los signos litúrgicos ℣. y ℟. en los diálogos.
