@@ -39,3 +39,13 @@ Esta primera importación no incluye APK, contenedor Android ni configuración d
 La secuencia sigue el orden del [Santo Rosario en el devocionario de Opus Dei](https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145), con personalizaciones solicitadas para esta aplicación. Comienza con la **Estación al Santísimo Sacramento** («Alabado sea el Santísimo Sacramento del Altar / Sea por siempre bendito y alabado»), tomada del TXT aportado, tres tandas de Padrenuestro, Avemaría y Gloria, comunión espiritual, Señal de la cruz, Señor mío Jesucristo, versículos iniciales y Gloria. Después se anuncian los cinco misterios del día con meditación optativa, se rezan las decenas y, al final, las tres Avemarías, Salve, respuesta, letanías, Cordero de Dios, Bajo tu amparo, oración final e intenciones. Se mantienen Salve y respuesta separadas, por indicación del usuario.
 
 El menú permanente de tres líneas de la esquina superior abre **Días**, **Misterios**, **Oraciones** y **Texto**. En Texto, la lectura puede justificarse, alinearse a la izquierda, centrarse o alinearse a la derecha; esta preferencia se guarda localmente. V/ y R/ se presentan como marcas visuales diferenciadas en las intervenciones de diálogo y en las letanías.
+
+## Ajustes de lectura y jaculatorias
+
+- En los anuncios de misterio aparece el título destacado, sin separación de palabras por guiones y con concordancia singular («misterio luminoso»).
+- En las decenas, un encabezado superior muestra el número romano (I–V) y el nombre del misterio.
+- El Padrenuestro y el Avemaría distinguen visualmente **Guía** y **Asamblea**. El guía empieza los misterios I, III y V; la asamblea empieza II y IV.
+- Los «Amén» se colocan en un renglón independiente, alineados a la derecha, también cuando la lectura general esté justificada.
+- «Ver meditación» abre un diálogo con el texto completo de la meditación del TXT aportado.
+- En **Navegar → Jaculatorias** se puede activar María, Madre de gracia y/o la jaculatoria de Fátima («Oh Jesús mío»). Cuando está activa María, inmediatamente después se reza **Alabanzas y gracias**. Los cambios se aplican a todas las decenas y quedan guardados localmente.
+- El botón de navegación ahora forma parte del mismo grupo superior que los botones de tema y pantalla; en pantalla completa mantiene un acceso compacto junto al indicador de controles.
