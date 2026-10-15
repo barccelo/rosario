@@ -159,21 +159,26 @@
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
       if(!step)return{type:'cross',phase:'finished',y:CROSS_Y,completed:55};
-      // Los pasos anteriores al primer misterio recorren el mismo
-      // colgante: cruz -> cuenta grande inferior -> tres pequeñas ->
-      // cuenta compartida del aro. Nunca se insertan oraciones nuevas.
+      // Mapeo litúrgico exacto: la Estación COMPLETA (tres ciclos con
+      // sus invocaciones, padrenuestros, avemarías y glorias) permanece
+      // en la cruz. El resto llega al aro sin inventar cuentas.
       if(firstMystery>=0 && state.index<firstMystery){
-        const progress=state.index/Math.max(1,firstMystery);
-        const slots=[
-          {type:'cross',phase:'opening',y:CROSS_Y},
-          {type:'intro',intro:3,y:introPoints[3].y},
-          {type:'intro',intro:2,y:introPoints[2].y},
-          {type:'intro',intro:1,y:introPoints[1].y},
-          {type:'intro',intro:0,y:introPoints[0].y},
-          {type:'loop',bead:0,y:positions[0].y,strand:'junction'}
-        ];
-        const index=Math.min(slots.length-1,Math.floor(progress*slots.length));
-        return{...slots[index],completed:0};
+        if(step.title==='Comunión espiritual')
+          return{type:'intro',phase:'opening',intro:3,
+            y:introPoints[3].y,completed:0};
+        if(step.title==='Señal de la cruz')
+          return{type:'intro',phase:'opening',intro:2,
+            y:introPoints[2].y,completed:0};
+        if(step.title==='Señor mío Jesucristo')
+          return{type:'intro',phase:'opening',intro:1,
+            y:introPoints[1].y,completed:0};
+        if(step.title==='Versículos iniciales' ||
+           (step.title==='Gloria' && !step.stationNumber))
+          return{type:'intro',phase:'opening',intro:0,
+            y:introPoints[0].y,completed:0};
+        // Toda la Estación al Santísimo Sacramento, incluyendo los
+        // tres ciclos, se realiza en la única cruz.
+        return{type:'cross',phase:'opening',y:CROSS_Y,completed:0};
       }
       // El Gloria del quinto misterio cierra el aro en la MISMA cuenta
       // grande con la que empezó. Las jaculatorias de esa decena
@@ -189,9 +194,9 @@
         return{type:'loop',bead,y:positions[bead].y,
           strand:positions[bead].strand,completed:bead+1};
       }
-      // Después del último Gloria el recorrido desciende, sin crear
-      // otro rosario: tres pequeñas (dedicaciones), la grande inferior y
-      // la única cruz al concluir todas las oraciones restantes.
+      // De vuelta al colgante, las tres pequeñas reciben las tres
+      // Avemarías de dedicación. El resto de las oraciones finales
+      // permanece en la grande inferior hasta la Salve, en la cruz.
       if(step.m>=5){
         if(Number.isInteger(step.dedication) && step.dedication>=0 &&
            step.dedication<3){
@@ -199,8 +204,10 @@
           return{type:'intro',phase:'closing',intro:introIndex,
             y:introPoints[introIndex].y,completed:55};
         }
-        // Salve, letanías, oración e intenciones finales comparten el
-        // último tramo físico hasta llegar a la cruz en la bendición.
+        if(step.title==='Salve' ||
+          (step.title==='Ruega por nosotros' &&
+           steps[state.index-1]?.title==='Salve'))
+          return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
         return{type:'intro',phase:'closing',intro:3,
           y:introPoints[3].y,completed:55};
       }
@@ -266,29 +273,36 @@
     }
     function goToNode(el){
       if(el.hasAttribute('data-cross')){
-        // La misma cruz es el punto de partida y de llegada.
+        // Misma cruz: Estación al empezar y Salve al finalizar.
         const current=steps[state.index];
-        // Es la misma cruz, pero lleva al comienzo si estamos comenzando
-        // o a la bendición final cuando ya pasamos las cinco decenas.
-        state.index=current?.m>=5?steps.length:0;
+        const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
+        state.index=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
       }else if(el.hasAttribute('data-bead')){
         const index=steps.findIndex(s=>s.bead===Number(el.dataset.bead));
         if(index<0)return;
         state.index=index;
       }else if(el.hasAttribute('data-intro')){
-        const first=steps.findIndex(s=>s.kind==='mystery');
-        if(first<0)return;
         const item=Number(el.dataset.intro);
-        const mapped=first>0 ?
-          Math.floor(first*(4-item)/6) : 0;
-        // La misma cuenta se usa al inicio o al final, según la fase
-        // que se esté rezando.
-        if(steps[state.index]?.m>=5){
-          const dedication=steps.findIndex(s=>s.m===5&&
-            s.dedication===item);
-          state.index=dedication>=0?dedication:
-            Math.max(0,steps.findIndex(s=>s.m===5&&s.title==='Salve'));
-        }else state.index=Math.max(0,Math.min(first-1,mapped));
+        const closing=steps[state.index]?.m>=5;
+        if(closing){
+          if(item<3){
+            const dedication=steps.findIndex(s=>s.m===5 &&
+              s.dedication===item);
+            if(dedication<0)return;
+            state.index=dedication;
+          }else{
+            const afterDedications=steps.findIndex((s,i)=>
+              s.m===5 && !Number.isInteger(s.dedication));
+            if(afterDedications<0)return;
+            state.index=afterDedications;
+          }
+        }else{
+          const title=['Versículos iniciales','Señor mío Jesucristo',
+            'Señal de la cruz','Comunión espiritual'][item];
+          const index=steps.findIndex(s=>s.m===-1 && s.title===title);
+          if(index<0)return;
+          state.index=index;
+        }
       }
       render();
     }
