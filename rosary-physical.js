@@ -30,6 +30,8 @@
       ['#DEB82C','#D3AA22','#453816']
     ];
     state.rosaryViewLayout=state.rosaryViewLayout==='physical'?'physical':'vertical';
+    // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
+    state.screenTapNavigation=state.screenTapNavigation===true;
 
     const viewport=document.createElement('div');
     viewport.className='physical-scroll-viewport';
@@ -333,6 +335,53 @@
         event.preventDefault();goToNode(bead);
       }
     });
+    // Navegación por mitades. No intercepta deslizamientos, pulsaciones
+    // sobre cuentas, lectura, botones, menús ni el scroll cinético.
+    // Se instala sobre el documento, pero sólo actúa dentro del rosario.
+    let tapStart=null,lastChainScroll=0;
+    for(const pane of [viewport,window.rosarioNativeScroll]){
+      pane?.addEventListener('scroll',()=>{
+        lastChainScroll=performance.now();
+      },{passive:true});
+    }
+    function isFreeBackground(target){
+      if(!(target instanceof Element)||!target.closest('.rosary'))return false;
+      if(target.closest('button,a,input,select,textarea,[contenteditable],'+
+        '[role="button"],[role="link"],.physical-bead,.physical-cross,'+
+        '.focus-bead,.rosary-cross,.chain-bead,.top-controls,'+
+        '.controls-dot,.meditation-tools,.rosary-mystery-context,'+
+        '.mystery-announcement-link'))return false;
+      // Excluye la superficie del texto y sus ayudas de lectura.
+      if(target.closest('.immersive-prayer,.reading-prayer-heading,'+
+        '.rosary-mystery-context,.meditation-full'))return false;
+      return true;
+    }
+    document.addEventListener('pointerdown',event=>{
+      tapStart=null;
+      if(!state.screenTapNavigation||$('modal').open ||
+         event.button!==0||!event.isPrimary||
+         !isFreeBackground(event.target))return;
+      tapStart={pointer:event.pointerId,x:event.clientX,y:event.clientY,
+        started:performance.now()};
+    },true);
+    document.addEventListener('pointerup',event=>{
+      const data=tapStart;
+      tapStart=null;
+      if(!data||!state.screenTapNavigation||
+         event.pointerId!==data.pointer||$('modal').open||
+         !isFreeBackground(event.target))return;
+      if(Math.hypot(event.clientX-data.x,event.clientY-data.y)>12||
+         performance.now()-data.started>650||
+         performance.now()-lastChainScroll<250||
+         window.getSelection?.()?.toString())return;
+      // Se divide la ventana real, no el documento desplazable.
+      if(event.clientY<window.innerHeight/2)
+        state.index=Math.max(0,state.index-1),render();
+      else advance();
+    },true);
+    for(const cancel of ['pointercancel','lostpointercapture'])
+      document.addEventListener(cancel,()=>{tapStart=null;},true);
+
     const originalRender=render;
     render=function(){originalRender();paint();};
     const originalSettings=$('settings').onclick;
@@ -378,11 +427,33 @@
       });
       const hint=document.createElement('p');
       hint.className='physical-layout-hint';
-      hint.textContent='La cuenta grande que une el colgante con el aro es la primera y la última. El rosario se colorea acumulativamente por la izquierda y luego la derecha. Al finalizar, se baja por las tres pequeñas, la cuenta grande inferior y la única cruz.';
+      hint.textContent='En el lado izquierdo, desliza el dedo de arriba hacia abajo para subir a la curva superior. En el lado derecho, de abajo hacia arriba para bajar. La cadena utiliza la inercia nativa del navegador.';
       field.append(legend,list,hint);
+      const tapField=document.createElement('fieldset');
+      tapField.className='physical-layout-settings physical-tap-settings';
+      const tapLegend=document.createElement('legend');
+      tapLegend.textContent='Navegación por toques';
+      const tapLabel=document.createElement('label');
+      tapLabel.className='physical-tap-option';
+      const toggle=document.createElement('input');
+      toggle.type='checkbox';toggle.checked=state.screenTapNavigation;
+      toggle.setAttribute('aria-label','Activar navegación por toques en las mitades de la pantalla');
+      const tapTitle=document.createElement('span');
+      tapTitle.textContent='Avanzar o retroceder tocando el fondo';
+      tapLabel.append(tapTitle,toggle);
+      const tapHint=document.createElement('p');
+      tapHint.className='physical-layout-hint';
+      tapHint.textContent='Mitad superior: oración anterior. Mitad inferior: siguiente oración. No se activará sobre el texto, cuentas, controles ni durante un deslizamiento.';
+      tapField.append(tapLegend,tapLabel,tapHint);
+      toggle.onchange=()=>{
+        state.screenTapNavigation=toggle.checked;
+        persist();
+      };
       const controls=host.querySelector('.controls-position-setting');
-      if(controls)host.insertBefore(field,controls);
-      else host.append(field);
+      if(controls){
+        host.insertBefore(field,controls);
+        host.insertBefore(tapField,controls);
+      }else host.append(field,tapField);
     };
     window.addEventListener('resize',()=>{
       if(state.rosaryViewLayout!=='physical')return;
