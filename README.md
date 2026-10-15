@@ -72,3 +72,14 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 - **Gestos diferenciados**: deslizar por el lado izquierdo recorre visualmente la camándula sin alterar la oración. Tocar una cuenta sí salta a esa cuenta. El lado derecho sigue avanzando y retrocediendo las oraciones. Al cambiar de paso se centra la cuenta correspondiente.
 - **Menú por deslizamiento horizontal**: navega entre Días, Misterios, Oraciones, Jaculatorias, Intenciones, Texto y Voces. Las oraciones muestran un enlace «Leer» y los misterios otro de «Meditación»; ambos abren el contenido sin abandonar la ventana del menú ni modificar el progreso.
 - **Notificaciones programadas**: pendientes. Para recibirlas fiablemente con la webapp cerrada hace falta implementar Web Push con service worker y un servicio programador de envíos. Los temporizadores de una pestaña no ofrecen garantías.
+
+## Ajustes de interfaz y cierre (octubre de 2026)
+
+- La pestaña del navegador muestra solamente **Rosario**.
+- El arrastre vertical de las cuentas a la izquierda tiene **inercia**: al soltar después de un movimiento rápido sigue avanzando y se detiene suavemente en los límites, sin cambiar el texto.
+- El avance hacia el Gloria ya no genera el patrón de vibración de varios pulsos: se utiliza un único pulso breve, igual que en los demás pasos.
+- En **Ajustes → Posición de los controles** se puede elegir **Arriba** o **Abajo**. La barra expandida y el punto compacto de pantalla completa siguen la misma posición y se conserva la elección localmente.
+- El nombre y el número romano del misterio tienen contraste reforzado en modo claro.
+- Al terminar el rosario, la cruz se mantiene cerca de la parte inferior de la pantalla para que la cadena no siga subiendo excesivamente.
+- La oración «Te suplicamos, Señor, que derrames tu gracia...» aparece con el encabezado **Oración**.
+- La pantalla final muestra una cruz y «El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.», con el Amén en línea independiente.
