@@ -769,6 +769,20 @@
     navButton.setAttribute('aria-label', 'Abrir menú de días, misterios y oraciones');
     navButton.onclick = () => openNavigation('days');
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
+    // La configuración general también da acceso a las preferencias de voces.
+    const originalSettings = $('settings').onclick;
+    $('settings').onclick = () => {
+      originalSettings();
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'voice-settings-link';
+      btn.textContent = 'Configurar guía y asamblea';
+      btn.onclick = () => {
+        $('modal').close();
+        openNavigation('voices');
+      };
+      $('modalContent').append(btn);
+    };
     // Acceso permanente, sin tener que revelar la barra inferior oculta.
     const quickNav = document.createElement('button');
     quickNav.type = 'button';
