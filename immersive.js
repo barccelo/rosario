@@ -127,8 +127,8 @@ document.addEventListener('fullscreenchange',()=>{
 });
 let previousPrayerIndex=-1;const sectionRender=render;render=function(){if(previousPrayerIndex!==-1&&previousPrayerIndex!==state.index)window.rosarioManualOffset=0;sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
   x:Math.min(w*.22,220)-89,
-  y:h/2-(!s||s.m>4||bead===55?point(55).y+50:point(bead).y)
-};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'Has terminado el rosario.\nQue la paz te acompañe.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
+  y:(!s || s.m>4 || bead===55) ? h-116-point(55).y : h/2-point(bead).y
+};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
@@ -157,6 +157,8 @@ $('readFull').onclick=()=>{
 
 // Mover la camándula a mano sin alterar el paso de oración.
 window.rosarioManualOffset=window.rosarioManualOffset||0;
+let chainInertia=null,chainInertiaLast=0;
+function stopChainInertia(){if(chainInertia!==null){cancelAnimationFrame(chainInertia);chainInertia=null;}}
 window.rosarioChainOrigin={x:0,y:0};
 window.rosarioApplyChainPan=function(){
   const track=chain.querySelector('.chain-track');
@@ -166,8 +168,29 @@ window.rosarioApplyChainPan=function(){
 };
 function boundedChainOffset(y){
   const h=window.innerHeight,base=window.rosarioChainOrigin.y;
-  const lower=h/2-point(54).y-base,upper=h/2-point(0).y-base;
+  const lower=(h-116)-point(55).y-base,upper=h/2-point(0).y-base;
   return Math.max(lower,Math.min(upper,y));
+}
+function coastChain(initialVelocity){
+  stopChainInertia();
+  if(Math.abs(initialVelocity)<0.24 || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const track=chain.querySelector('.chain-track');
+  if(track)track.style.transition='none';
+  let speed=Math.max(-3.8,Math.min(3.8,initialVelocity));
+  chainInertiaLast=performance.now();
+  function frame(now){
+    const delta=Math.min(40,now-chainInertiaLast);
+    chainInertiaLast=now;
+    const before=window.rosarioManualOffset;
+    window.rosarioManualOffset=boundedChainOffset(before+speed*delta);
+    window.rosarioApplyChainPan();
+    speed*=Math.exp(-delta/390);
+    if(Math.abs(speed)<0.045 || window.rosarioManualOffset===before){
+      chainInertia=null;
+      if(track)track.style.transition='';
+    }else chainInertia=requestAnimationFrame(frame);
+  }
+  chainInertia=requestAnimationFrame(frame);
 }
 // One gesture handler for the entire prayer surface, including text and top edge.
 // Dialogs and the visible toolbar retain their own controls and scrolling.
@@ -177,6 +200,7 @@ document.addEventListener('pointerdown',event=>{
   if(!event.isPrimary){cancelGesture();return;}
   if(event.button!==0||$('modal').open||event.target.closest('.prayer-toolbar'))return;
   suppressClickUntil=0;
+  stopChainInertia();
   const bead=event.target.closest('.focus-bead');
   const leftArea=!!event.target.closest('.focus-chain') &&
     event.clientX<=window.innerWidth*.42;
@@ -185,7 +209,8 @@ document.addEventListener('pointerdown',event=>{
   const scrollTop=scrollPane?.scrollTop||0;
   gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,
     readingScroll,scrollTop,scrollPane,
-    leftPan:leftArea,startOffset:window.rosarioManualOffset};
+    leftPan:leftArea,startOffset:window.rosarioManualOffset,
+    lastPointerY:event.clientY,lastPointerTime:event.timeStamp,dragVelocity:0};
   if(bead)holdTimeout=setTimeout(()=>{
     if(!gesture||gesture.moved||$('modal').open)return;
     gesture.held=true;suppressClickUntil=performance.now()+800;
@@ -199,8 +224,15 @@ document.addEventListener('pointermove',event=>{
     if(gesture.leftPan){
       const track=chain.querySelector('.chain-track');
       if(track)track.style.transition='none';
+      const dt=Math.max(1,event.timeStamp-gesture.lastPointerTime);
+      if(dt<100){
+        const v=((event.clientY-gesture.lastPointerY)*1.5)/dt;
+        gesture.dragVelocity=gesture.dragVelocity*.26+v*.74;
+      }
+      gesture.lastPointerY=event.clientY;
+      gesture.lastPointerTime=event.timeStamp;
       window.rosarioManualOffset=boundedChainOffset(
-        gesture.startOffset+(event.clientY-gesture.y)*1.6);
+        gesture.startOffset+(event.clientY-gesture.y)*1.5);
       window.rosarioApplyChainPan();
       suppressClickUntil=performance.now()+850;
     }
@@ -213,8 +245,11 @@ document.addEventListener('pointerup',event=>{
   if(current.held||current.moved)suppressClickUntil=performance.now()+800;
   if(current.leftPan){
     const track=chain.querySelector('.chain-track');
-    if(track)track.style.transition='';
-    // Un arrastre del lado izquierdo nunca cambia la oración ni activa una cuenta.
+    const age=event.timeStamp-current.lastPointerTime;
+    const velocity=age>115?0:current.dragVelocity;
+    if(current.moved)coastChain(velocity);
+    else if(track)track.style.transition='';
+    // El impulso sólo mueve el rosario; nunca cambia el texto.
     return;
   }
   if($('modal').open||current.held)return;
@@ -262,7 +297,7 @@ reading.addEventListener('touchend',event=>{
 for(const name of ['touchcancel'])
   reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
 document.addEventListener('pointercancel',cancelGesture,true);
-window.addEventListener('blur',cancelGesture);
+window.addEventListener('blur',()=>{cancelGesture();stopChainInertia();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGesture()});
 document.addEventListener('click',event=>{
   if(event.detail!==0&&performance.now()<suppressClickUntil){
