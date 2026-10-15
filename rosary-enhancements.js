@@ -171,6 +171,43 @@
     'Oh Jesús mío, perdona nuestras culpas, presérvanos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.';
   const originalAvemaria = prayers.Avemaría;
 
+  // Intenciones guardadas en el mismo almacenamiento local que el progreso.
+  const initialIntentions = [
+    'Por la paz y la reconciliación en el mundo.',
+    'Por las familias y quienes atraviesan dificultades.',
+    'Por las personas enfermas y quienes las cuidan.',
+    'Por quienes viven solos o necesitan compañía.',
+    'Por los niños y los jóvenes.',
+    'Por quienes buscan trabajo y estabilidad.',
+    'Por las vocaciones y la vida de la Iglesia.',
+    'Por los migrantes y las personas desplazadas.',
+    'Por nuestros difuntos y las almas del purgatorio.',
+    'Por quienes han pedido nuestras oraciones.'
+  ];
+  state.intentionPool = Array.isArray(saved.intentionPool)
+    ? [...new Set(saved.intentionPool.filter(t => typeof t === 'string').map(t => t.trim()).filter(Boolean))].slice(0,200)
+    : [...initialIntentions];
+  state.randomIntentionsEnabled = saved.randomIntentionsEnabled === true;
+  state.intentionCycle = Array.isArray(saved.intentionCycle) &&
+    saved.intentionCycle.length === 5 ? saved.intentionCycle : [null,null,null,null,null];
+  function intentionFor(m) {
+    if (!state.randomIntentionsEnabled || !state.intentionPool.length) return '';
+    // La elección se conserva durante la decena: no cambia con cada render.
+    const current = state.intentionCycle[m];
+    if (current && state.intentionPool.includes(current)) return current;
+    const used = state.intentionCycle.filter((t,i) => i !== m && state.intentionPool.includes(t));
+    const available = state.intentionPool.filter(t => !used.includes(t));
+    const pool = available.length ? available : state.intentionPool;
+    const choice = pool[Math.floor(Math.random() * pool.length)];
+    state.intentionCycle[m] = choice;
+    persist();
+    return choice;
+  }
+  function resetIntentionCycle() {
+    state.intentionCycle = [null,null,null,null,null];
+    persist();
+  }
+
   function buildRosarySteps(legacy = false) {
   // Estación, comunión espiritual y oraciones introductorias.
   const nextSteps = [];
