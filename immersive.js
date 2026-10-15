@@ -171,10 +171,10 @@ function boundedChainOffset(y){
 }
 function coastChain(initialVelocity){
   stopChainInertia();
-  if(Math.abs(initialVelocity)<0.24 || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(Math.abs(initialVelocity)<0.22 || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const track=chain.querySelector('.chain-track');
   if(track)track.style.transition='none';
-  let speed=Math.max(-3.8,Math.min(3.8,initialVelocity));
+  let speed=Math.max(-8,Math.min(8,initialVelocity));
   chainInertiaLast=performance.now();
   function frame(now){
     const delta=Math.min(40,now-chainInertiaLast);
@@ -182,16 +182,85 @@ function coastChain(initialVelocity){
     const before=window.rosarioManualOffset;
     window.rosarioManualOffset=boundedChainOffset(before+speed*delta);
     window.rosarioApplyChainPan();
-    speed*=Math.exp(-delta/390);
-    if(Math.abs(speed)<0.045 || window.rosarioManualOffset===before){
+    speed*=Math.exp(-delta/1100);
+    if(Math.abs(speed)<0.06 || window.rosarioManualOffset===before){
       chainInertia=null;
       if(track)track.style.transition='';
     }else chainInertia=requestAnimationFrame(frame);
   }
   chainInertia=requestAnimationFrame(frame);
 }
+// Gesto táctil continuo del rosario (separado de la navegación del texto).
+// Velocidades en píxeles/ms, últimas muestras ~150ms. No cambia state.index.
+let chainTouch=null;
+const chainTrack=chain.querySelector('.chain-track');
+function releaseChainTouch(event,cancelled=false){
+  if(!chainTouch)return;
+  const gestureData=chainTouch;
+  chainTouch=null;
+  if(gestureData.dragged){
+    suppressClickUntil=performance.now()+1000;
+    const last=gestureData.samples[gestureData.samples.length-1];
+    const past=[...gestureData.samples].reverse().find(sample=>
+      last.time-sample.time>=90) || gestureData.samples[0];
+    const elapsed=Math.max(1,last.time-past.time);
+    const fresh=event.timeStamp-last.time<160;
+    const fingerVelocity=fresh?(last.y-past.y)/elapsed:0;
+    const velocity=fingerVelocity*2.8;
+    if(cancelled && event.type==='touchcancel')coastChain(velocity);
+    else coastChain(velocity);
+    if(Math.abs(velocity)<0.22 && chainTrack)chainTrack.style.transition='';
+  }else if(chainTrack)chainTrack.style.transition='';
+}
+chain.addEventListener('touchstart',event=>{
+  if($('modal').open || event.touches.length!==1) {chainTouch=null;return;}
+  const t=event.touches[0];
+  if(t.clientX>window.innerWidth*.42) {chainTouch=null;return;}
+  stopChainInertia();
+  if(chainTrack)chainTrack.style.transition='none';
+  chainTouch={
+    startY:t.clientY,startX:t.clientX,
+    startOffset:window.rosarioManualOffset,
+    dragged:false,samples:[{time:event.timeStamp,y:t.clientY}]
+  };
+},{passive:true});
+chain.addEventListener('touchmove',event=>{
+  if(!chainTouch || event.touches.length!==1)return;
+  const t=event.touches[0];
+  const dy=t.clientY-chainTouch.startY,dx=t.clientX-chainTouch.startX;
+  if(Math.hypot(dy,dx)>7)chainTouch.dragged=true;
+  if(!chainTouch.dragged)return;
+  event.preventDefault();
+  suppressClickUntil=performance.now()+900;
+  window.rosarioManualOffset=boundedChainOffset(chainTouch.startOffset+dy*1.5);
+  window.rosarioApplyChainPan();
+  const now=event.timeStamp;
+  chainTouch.samples.push({time:now,y:t.clientY});
+  while(chainTouch.samples.length>2 && now-chainTouch.samples[0].time>170)
+    chainTouch.samples.shift();
+},{passive:false});
+chain.addEventListener('touchend',event=>releaseChainTouch(event),{passive:true});
+chain.addEventListener('touchcancel',event=>releaseChainTouch(event,true),{passive:true});
+// También funciona la rueda de un ratón o trackpad en la zona de cuentas.
+let wheelVelocity=0,wheelLast=0,wheelSettle=null;
+chain.addEventListener('wheel',event=>{
+  if($('modal').open || event.clientX>window.innerWidth*.42)return;
+  event.preventDefault();
+  stopChainInertia();
+  const now=performance.now();
+  const delta=event.deltaY*(event.deltaMode===1?18:event.deltaMode===2?window.innerHeight:1);
+  const dy=-delta*1.25;
+  const dt=wheelLast?Math.max(9,now-wheelLast):32;
+  wheelLast=now;
+  wheelVelocity=Math.max(-6,Math.min(6,dy/dt));
+  if(chainTrack)chainTrack.style.transition='none';
+  window.rosarioManualOffset=boundedChainOffset(window.rosarioManualOffset+dy);
+  window.rosarioApplyChainPan();
+  clearTimeout(wheelSettle);
+  wheelSettle=setTimeout(()=>{coastChain(wheelVelocity);wheelVelocity=0;wheelLast=0;},85);
+},{passive:false});
 // One gesture handler for the entire prayer surface, including text and top edge.
-// Dialogs and the visible toolbar retain their own controls and scrolling.
+// All buttons retain their own controls and scrolling.
 let gesture=null,holdTimeout=null,suppressClickUntil=0;
 function cancelGesture(){clearTimeout(holdTimeout);gesture=null;}
 document.addEventListener('pointerdown',event=>{
@@ -202,6 +271,9 @@ document.addEventListener('pointerdown',event=>{
   const bead=event.target.closest('.focus-bead');
   const leftArea=!!event.target.closest('.focus-chain') &&
     event.clientX<=window.innerWidth*.42;
+  // En teléfonos el gesto izquierdo se procesa con Touch Events para
+  // conservar su velocidad incluso si el navegador cancela Pointer Events.
+  if(leftArea && event.pointerType==='touch'){cancelGesture();return;}
   const scrollPane=event.target.closest('.immersive-prayer');
   const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
   const scrollTop=scrollPane?.scrollTop||0;
