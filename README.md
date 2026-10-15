@@ -90,3 +90,7 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 - Se eliminó del DOM la barra secundaria que aparecía al tocar la zona superior y su superficie invisible. Los **Ajustes** están en la barra principal; el test de volumen está en Ajustes y en **Navegar → Acciones**, donde también aparecen **Anterior** y **Avanzar**.
 - El impulso de las cuentas utiliza muestras temporales del movimiento táctil, permite alcanzar rápidamente otras decenas y continúa tras levantar el dedo. La fricción reduce gradualmente la velocidad y los extremos limitan el recorrido; la preferencia del sistema de reducir movimiento desactiva la inercia.
 - El desplazamiento de las cuentas no modifica el estado del rezo. Cambiar de oración vuelve a centrar la cuenta activa.
+
+## Desplazamiento cinético del rosario en teléfonos
+
+Se corrigió el cálculo de velocidad al soltar el dedo, que podía quedar en cero cuando Android emitía muy pocos eventos `touchmove`. Ahora se calcula con el punto `touchend` y se combina la velocidad total del gesto con las muestras recientes. Si el gesto es rápido y corto, se proyecta un recorrido adicional de varias cuentas (mínimo aproximado de diez cuentas cuando existe espacio), con frenado progresivo y límites en ambos extremos. Arrastrar lentamente conserva el seguimiento directo del dedo. El movimiento sólo afecta a la cadena del lado izquierdo, no al paso de oración. La preferencia de accesibilidad para reducir movimiento evita la inercia.
