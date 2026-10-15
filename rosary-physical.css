@@ -121,3 +121,23 @@ dialog label.physical-layout-option{
   margin:10px 0 0;font:12px/1.6 system-ui;color:inherit;opacity:.7;
 }
 @media(prefers-reduced-motion:reduce){.physical-ghost{transition:none}}
+
+/* La hoja principal aplica dimensiones a todos los SVG: prioridad explícita
+   para que la cadena mida toda su longitud y tenga scroll cinético real. */
+.rosary .physical-scroll-viewport .physical-path{
+  width:100vw!important;height:var(--physical-path-height,3820px)!important;
+  max-width:none!important;max-height:none!important;
+  overflow:visible!important;
+}
+.rosary .physical-ghost{
+  width:100%!important;height:100%!important;overflow:visible!important;
+}
+.physical-path .physical-cross.active path:not(.cross-detail){
+  stroke:#CBA763;stroke-width:5;
+}
+.physical-path .physical-cross:focus-visible path:not(.cross-detail){
+  stroke:#CBA763;stroke-width:6;
+}
+body[data-rosary-color-mode="mystery"] .physical-path .physical-cross.active path:not(.cross-detail){
+  stroke:var(--rc-accent);
+}
