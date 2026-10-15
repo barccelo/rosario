@@ -53,3 +53,12 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 - La selección de **Jaculatorias** es independiente: «María, Madre de gracia», «Alabanzas y gracias» y «Oh Jesús mío», activables en cualquier combinación; en la migración de usuarios existentes se mantiene Alabanzas si antes seguía a María.
 - Las letanías conservan la rueda, pero tocando cualquiera de las invocaciones visibles se abre un listado con la letanía actual centrada y resaltada; se puede saltar a otra.
 - El botón de alinear texto en ventanas emergentes alterna justificada, izquierda, centrada y derecha. Se usan los signos litúrgicos ℣. y ℟. en los diálogos.
+
+## Ajustes visuales y de gestos — 15 de octubre de 2026
+- El número romano y el título del misterio se presentan juntos y ambos abren la meditación; el botón «Ver meditación» aparece centrado bajo el anuncio.
+- El texto de cada Gloria se divide en respuesta del guía y de la asamblea. En las decenas II y IV la intervención del guía en el Avemaría comienza con «Gloria.», antes de «Santa María».
+- Se muestran los títulos «Comunión espiritual» y «Y ahora te saludamos con una Salve».
+- La oración final usa «para que aquellos que ... han conocido ... sean llevados».
+- El texto que cabe admite deslizar para pasar de oración; el texto más largo se desplaza dentro del panel y desde sus extremos se puede navegar con otro deslizamiento.
+- En pantalla completa, el menú y los controles T−/T+ se ocultan junto con tema/pantalla en el punto superior.
+- La configuración de voces se puede abrir desde una pulsación prolongada sobre la participación dorada, además del menú y los ajustes.
