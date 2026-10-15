@@ -29,21 +29,26 @@ body.dark .physical-path{
   stroke:var(--physical-shadow);stroke-width:3.4;fill:none;
   stroke-linecap:round;stroke-linejoin:round;opacity:.36;
 }
-.physical-path .physical-strand{transition:opacity .24s ease}
-.physical-path .physical-strand.is-front{opacity:1;pointer-events:auto}
-.physical-path .physical-strand.is-rear{opacity:.31;pointer-events:none}
-.physical-path .physical-strand.is-rear .ring{
-  stroke:var(--physical-shadow)!important;fill:var(--physical-shadow)!important;
-}
-.physical-path .physical-strand.is-rear .physical-link{
+/* Sólo se atenúan las cuentas todavía no recorridas. Las cuentas ya
+   rezadas conservan su color aun después de girar por la parte superior. */
+.physical-path .physical-bead.is-pending:not(.active) .ring{
+  fill:var(--physical-shadow)!important;
   stroke:var(--physical-shadow)!important;
+  opacity:.34!important;
 }
-.physical-path .physical-strand.is-rear .number{fill:var(--physical-shadow)!important}
-.physical-path .physical-strand.is-rear .halo{display:none}
-.physical-path .physical-link{
-  fill:none;stroke:var(--physical-line);stroke-width:4;
-  stroke-linejoin:round;stroke-linecap:round;
+.physical-path .physical-bead.is-pending:not(.active) .number{
+  fill:var(--physical-shadow)!important;
+  opacity:.5;
 }
+.physical-path .physical-loop-link.is-pending{
+  stroke:var(--physical-shadow)!important;
+  opacity:.33!important;
+}
+.physical-path .physical-loop-link.is-complete{
+  stroke:var(--physical-line)!important;
+  opacity:1!important;
+}
+.physical-path .physical-bead.is-complete .ring{opacity:1!important}
 .physical-path .physical-bead{
   cursor:pointer;outline:none;touch-action:pan-y;
 }
@@ -82,14 +87,14 @@ body.dark .physical-path{
   stroke:#587D67;stroke-width:6;
 }
 .physical-path .physical-intro-link{stroke:var(--physical-line);stroke-width:4;fill:none}
-body[data-rosary-color-mode="missionary"] .physical-strand.is-front .physical-bead.is-decade .ring{
+body[data-rosary-color-mode="missionary"] .physical-loop-beads .physical-bead.is-complete .ring{
   fill:var(--mission-color)!important;
   stroke:var(--mission-border,var(--mission-color))!important;
 }
-body[data-rosary-color-mode="missionary"] .physical-strand.is-front .physical-bead.is-decade .number{
+body[data-rosary-color-mode="missionary"] .physical-loop-beads .physical-bead.is-complete .number{
   fill:var(--mission-text)!important;
 }
-body[data-rosary-color-mode="missionary"] .physical-strand.is-front .physical-bead.active .ring{
+body[data-rosary-color-mode="missionary"] .physical-loop-beads .physical-bead.active .ring{
   stroke:#C6A466!important;stroke-width:7!important;
 }
 body[data-rosary-color-mode="mystery"] .physical-path{
@@ -97,13 +102,13 @@ body[data-rosary-color-mode="mystery"] .physical-path{
   --physical-line:var(--rc-link);--physical-number:var(--rc-bead-label);
   --physical-metal:var(--rc-active-fill);
 }
-body[data-rosary-color-mode="mystery"] .physical-strand.is-front .physical-bead .ring{
+body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.is-complete .ring{
   fill:var(--rc-bead)!important;stroke:var(--rc-outline)!important;
 }
-body[data-rosary-color-mode="mystery"] .physical-strand.is-front .physical-bead .number{
+body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.is-complete .number{
   fill:var(--rc-bead-label)!important;
 }
-body[data-rosary-color-mode="mystery"] .physical-strand.is-front .physical-bead.active .ring{
+body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.active .ring{
   fill:var(--rc-active-fill)!important;stroke:var(--rc-accent)!important;
   stroke-width:7!important;
 }
@@ -137,3 +142,19 @@ dialog label.physical-layout-option{
   margin:10px 0 0;font:12px/1.6 system-ui;color:inherit;opacity:.7;
 }
 @media(prefers-reduced-motion:reduce){.physical-path .physical-strand{transition:none}}
+
+/* El punto compartido permanece visible incluso antes de empezar la decena. */
+.physical-path .physical-loop-beads .physical-bead.active .ring{
+  fill:var(--physical-metal)!important;
+  stroke:#B18A48!important;
+  stroke-width:6!important;
+  opacity:1!important;
+}
+body[data-rosary-color-mode="missionary"] .physical-loop-beads .physical-bead.active .ring{
+  fill:var(--mission-color)!important;
+  stroke:#C6A466!important;
+}
+body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.active .ring{
+  fill:var(--rc-active-fill)!important;
+  stroke:var(--rc-accent)!important;
+}
