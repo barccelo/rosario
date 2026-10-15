@@ -19,11 +19,17 @@ body.rosario-physical-view .physical-scroll-viewport{
   --physical-fill:#F6F4EF;--physical-line:#BCA06B;
   --physical-outline:#B79355;--physical-number:#776B55;
   --physical-metal:#E3D0AB;--physical-shadow:#9D9F99;
+  --physical-surface:#F6F4EF;--physical-pending:#D3D5D1;
+  --physical-pending-stroke:#A5A9A3;
+  --physical-complete:#EBD7AC;--physical-complete-stroke:#B79355;
 }
 body.dark .physical-path{
-  --physical-fill:#1C241E;--physical-line:#B49A70;
+  --physical-fill:#171E19;--physical-line:#B49A70;
   --physical-outline:#C4A36B;--physical-number:#D4C9B1;
   --physical-metal:#967A53;--physical-shadow:#888F88;
+  --physical-surface:#171E19;--physical-pending:#4D544C;
+  --physical-pending-stroke:#616A60;
+  --physical-complete:#ECCA75;--physical-complete-stroke:#F8DB98;
 }
 .physical-path .physical-whole-loop{
   stroke:var(--physical-shadow);stroke-width:3.4;fill:none;
@@ -32,13 +38,13 @@ body.dark .physical-path{
 /* Sólo se atenúan las cuentas todavía no recorridas. Las cuentas ya
    rezadas conservan su color aun después de girar por la parte superior. */
 .physical-path .physical-bead.is-pending:not(.active) .ring{
-  fill:var(--physical-shadow)!important;
-  stroke:var(--physical-shadow)!important;
-  opacity:.34!important;
+  fill:var(--physical-pending)!important;
+  stroke:var(--physical-pending-stroke)!important;
+  opacity:1!important;
 }
 .physical-path .physical-bead.is-pending:not(.active) .number{
-  fill:var(--physical-shadow)!important;
-  opacity:.5;
+  fill:var(--physical-number)!important;
+  opacity:.52;
 }
 .physical-path .physical-loop-link.is-pending{
   stroke:var(--physical-shadow)!important;
@@ -48,9 +54,28 @@ body.dark .physical-path{
   stroke:var(--physical-line)!important;
   opacity:1!important;
 }
-.physical-path .physical-bead.is-complete .ring{opacity:1!important}
+.physical-path .physical-bead.is-complete .ring{
+  fill:var(--physical-complete)!important;
+  stroke:var(--physical-complete-stroke)!important;
+  opacity:1!important;
+}
+.physical-path .physical-pendant .physical-bead.is-complete .ring{
+  fill:var(--physical-complete)!important;
+  stroke:var(--physical-complete-stroke)!important;
+}
+.physical-path .physical-occluder{
+  fill:var(--physical-surface)!important;
+  pointer-events:none;
+}
 .physical-path .physical-bead{
-  cursor:pointer;outline:none;touch-action:pan-y;
+  cursor:pointer;outline:none!important;touch-action:pan-y;
+  -webkit-tap-highlight-color:transparent;
+}
+.physical-path g[tabindex]:focus,
+.physical-path g[tabindex]:focus-visible,
+.physical-path g[tabindex]:active{
+  outline:none!important;box-shadow:none!important;
+  -webkit-tap-highlight-color:transparent;
 }
 .physical-path .physical-bead .physical-hit{fill:transparent;pointer-events:all}
 .physical-path .physical-bead .ring{
@@ -79,7 +104,10 @@ body.dark .physical-path{
 .physical-path .physical-cross .cross-detail{
   stroke:#F8EACA;stroke-width:2;fill:none;
 }
-.physical-path .physical-cross{cursor:pointer}
+.physical-path .physical-cross{
+  cursor:pointer;outline:none!important;
+  -webkit-tap-highlight-color:transparent;
+}
 .physical-path .physical-cross.active path:not(.cross-detail){
   stroke:#BF954F;stroke-width:5;
 }
@@ -101,6 +129,9 @@ body[data-rosary-color-mode="mystery"] .physical-path{
   --physical-fill:var(--rc-bead);--physical-outline:var(--rc-outline);
   --physical-line:var(--rc-link);--physical-number:var(--rc-bead-label);
   --physical-metal:var(--rc-active-fill);
+  --physical-surface:var(--rc-bg);
+  --physical-complete:var(--rc-bead);
+  --physical-complete-stroke:var(--rc-outline);
 }
 body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.is-complete .ring{
   fill:var(--rc-bead)!important;stroke:var(--rc-outline)!important;
@@ -157,4 +188,16 @@ body[data-rosary-color-mode="missionary"] .physical-loop-beads .physical-bead.ac
 body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.active .ring{
   fill:var(--rc-active-fill)!important;
   stroke:var(--rc-accent)!important;
+}
+
+/* Los cuatro elementos del colgante conservan el color al regresar a la
+   misma cruz, sin volver a verse grises. Se respeta el tema por misterio. */
+body[data-rosary-color-mode="mystery"] .physical-pendant .physical-bead.is-complete .ring{
+  fill:var(--rc-bead)!important;stroke:var(--rc-outline)!important;
+}
+body[data-rosary-color-mode="mystery"] .physical-pendant .physical-bead.active .ring{
+  fill:var(--rc-active-fill)!important;stroke:var(--rc-accent)!important;
+}
+body.rosario-physical-view .physical-scroll-viewport{
+  -webkit-tap-highlight-color:transparent;
 }
