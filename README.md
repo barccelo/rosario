@@ -62,3 +62,13 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 - El texto que cabe admite deslizar para pasar de oración; el texto más largo se desplaza dentro del panel y desde sus extremos se puede navegar con otro deslizamiento.
 - En pantalla completa, el menú y los controles T−/T+ se ocultan junto con tema/pantalla en el punto superior.
 - La configuración de voces se puede abrir desde una pulsación prolongada sobre la participación dorada, además del menú y los ajustes.
+
+## Intenciones, consulta y gestos (octubre de 2026)
+
+- **Ver meditación** queda centrado y sin flecha.
+- El «Gloria.» previo a «Santa María...» en los misterios II y IV sólo se muestra cuando está activada la diferenciación de voces por color.
+- **Intenciones aleatorias**: activas inicialmente, con diez textos de partida. El menú Intenciones permite añadir, modificar, eliminar y desactivar intenciones. La intención se elige una vez por misterio y se mantiene durante la decena.
+- Se guardan junto al progreso en **localStorage** del navegador, sin servicio de cuentas ni sincronización. La sección permite exportar y restaurar la lista en formato JSON para trasladarla o hacer una copia.
+- **Gestos diferenciados**: deslizar por el lado izquierdo recorre visualmente la camándula sin alterar la oración. Tocar una cuenta sí salta a esa cuenta. El lado derecho sigue avanzando y retrocediendo las oraciones. Al cambiar de paso se centra la cuenta correspondiente.
+- **Menú por deslizamiento horizontal**: navega entre Días, Misterios, Oraciones, Jaculatorias, Intenciones, Texto y Voces. Las oraciones muestran un enlace «Leer» y los misterios otro de «Meditación»; ambos abren el contenido sin abandonar la ventana del menú ni modificar el progreso.
+- **Notificaciones programadas**: pendientes. Para recibirlas fiablemente con la webapp cerrada hace falta implementar Web Push con service worker y un servicio programador de envíos. Los temporizadores de una pestaña no ofrecen garantías.
