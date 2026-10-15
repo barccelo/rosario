@@ -1,0 +1,200 @@
+/* Paletas del rosario. El modo clásico deja intactos los estilos existentes.
+   Las voces de guía/asamblea no se modifican aquí: conservan sus preferencias. */
+body[data-rosary-color-mode="missionary"] .focus-chain .focus-bead .ring,
+body[data-rosary-color-mode="missionary"].dark .focus-chain .focus-bead .ring{
+  fill:var(--mission-color)!important;
+  stroke:var(--mission-border,var(--mission-color))!important;
+  stroke-width:4!important;
+}
+body[data-rosary-color-mode="missionary"] .focus-chain .focus-bead .number{
+  fill:var(--mission-text)!important;
+}
+body[data-rosary-color-mode="missionary"] .focus-chain .focus-bead.active .ring,
+body[data-rosary-color-mode="missionary"].dark .focus-chain .focus-bead.active .ring{
+  fill:var(--mission-color)!important;
+  stroke:#C6A466!important;
+  stroke-width:6!important;
+}
+body[data-rosary-color-mode="missionary"] .focus-chain .focus-bead.active .halo{
+  opacity:.75;
+}
+
+body[data-rosary-color-mode="mystery"]{
+  background:var(--rc-bg)!important;
+  color:var(--rc-text)!important;
+}
+body[data-rosary-color-mode="mystery"] .rosary,
+body[data-rosary-color-mode="mystery"].dark .rosary{
+  background:var(--rc-bg)!important;
+  --chain-fill:var(--rc-bg);
+}
+body[data-rosary-color-mode="mystery"] .focus-chain .focus-bead .ring,
+body[data-rosary-color-mode="mystery"].dark .focus-chain .focus-bead .ring{
+  fill:var(--rc-bead)!important;
+  stroke:var(--rc-outline)!important;
+  stroke-width:4!important;
+}
+body[data-rosary-color-mode="mystery"] .focus-chain .focus-bead .number,
+body[data-rosary-color-mode="mystery"].dark .focus-chain .focus-bead .number{
+  fill:var(--rc-bead-label)!important;
+}
+body[data-rosary-color-mode="mystery"] .focus-chain .focus-bead.active .ring,
+body[data-rosary-color-mode="mystery"].dark .focus-chain .focus-bead.active .ring{
+  fill:var(--rc-active-fill)!important;
+  stroke:var(--rc-accent)!important;
+  stroke-width:6!important;
+}
+body[data-rosary-color-mode="mystery"] .focus-chain .focus-bead.active .halo{
+  opacity:.54!important;
+}
+body[data-rosary-color-mode="mystery"] .focus-chain .chain-link{
+  stroke:var(--rc-link)!important;
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer p,
+body[data-rosary-color-mode="mystery"].dark .immersive-prayer p{
+  color:var(--rc-text)!important;
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer .mystery-announcement-name,
+body[data-rosary-color-mode="mystery"].dark .immersive-prayer .mystery-announcement-name,
+body[data-rosary-color-mode="mystery"] .immersive-prayer .rosary-mystery-name,
+body[data-rosary-color-mode="mystery"].dark .immersive-prayer .rosary-mystery-name{
+  color:var(--rc-text)!important;
+  opacity:1!important;
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer .mystery-announcement-label,
+body[data-rosary-color-mode="mystery"] .immersive-prayer .rosary-mystery-badge,
+body[data-rosary-color-mode="mystery"] .reading-prayer-heading,
+body[data-rosary-color-mode="mystery"] .meditation-kicker{
+  color:var(--rc-accent)!important;
+  border-color:var(--rc-accent)!important;
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer .meditation-tools button,
+body[data-rosary-color-mode="mystery"].dark .immersive-prayer .meditation-tools button{
+  color:var(--rc-accent)!important;
+  border-color:var(--rc-link)!important;
+  background:var(--rc-subtle)!important;
+}
+body[data-rosary-color-mode="mystery"] .top-controls,
+body[data-rosary-color-mode="mystery"].dark .top-controls{
+  background:var(--rc-surface)!important;
+  border-color:var(--rc-link)!important;
+}
+body[data-rosary-color-mode="mystery"] .top-control,
+body[data-rosary-color-mode="mystery"].dark .top-control,
+body[data-rosary-color-mode="mystery"] .controls-dot{
+  color:var(--rc-text)!important;
+}
+body[data-rosary-color-mode="mystery"] dialog,
+body[data-rosary-color-mode="mystery"].dark dialog{
+  background:var(--rc-surface)!important;
+  color:var(--rc-text)!important;
+  border-color:var(--rc-link)!important;
+}
+body[data-rosary-color-mode="mystery"] .nav-item.active,
+body[data-rosary-color-mode="mystery"] .nav-tabs button[aria-selected="true"]{
+  border-color:var(--rc-accent)!important;
+}
+body[data-rosary-color-mode="mystery"] .rosary-mystery-context:focus-visible,
+body[data-rosary-color-mode="mystery"] .mystery-announcement-link:focus-visible{
+  outline-color:var(--rc-accent)!important;
+}
+body[data-rosary-color-mode="mystery"] .section-dots .active,
+body[data-rosary-color-mode="mystery"] .progress div{
+  background:var(--rc-accent)!important;
+}
+/* La asamblea conserva el dorado ya definido por los controles de voces. */
+
+.rosary-colors-settings{
+  clear:both;
+  display:block;
+  margin:18px 0 9px;
+  padding:15px 0 3px;
+  border:0;
+  border-top:1px solid #9c90764a;
+  min-width:0;
+}
+.rosary-colors-settings legend{
+  display:block;
+  width:100%;
+  font:600 16px/1.5 Georgia,serif;
+  padding:0 0 10px;
+}
+.rosary-colors-hint{
+  font:12px/1.55 system-ui;
+  color:inherit;
+  opacity:.73;
+  margin:0 0 12px;
+}
+.rosary-colors-mode-list{display:grid;gap:7px}
+dialog label.rosary-colors-mode{
+  display:flex!important;
+  align-items:center;
+  justify-content:flex-start!important;
+  gap:11px!important;
+  margin:0!important;
+  padding:10px 11px!important;
+  border-radius:13px;
+  border:1px solid #aaa18a66;
+  min-height:46px;
+  font:13px/1.4 system-ui;
+}
+.rosary-colors-mode.selected{
+  border-color:var(--choice-border,#b79b6f)!important;
+  background:color-mix(in srgb,var(--choice-border,#b79b6f) 10%,transparent);
+}
+.rosary-colors-mode input{
+  width:17px;height:17px;
+  flex:0 0 auto;margin:0;
+  accent-color:#9E8155;
+}
+.rosary-colors-mode .mode-label{flex:1;font-weight:500}
+.rosary-color-dots{display:flex;gap:4px;align-items:center}
+.rosary-color-dot{display:inline-block;width:16px;height:16px;border-radius:50%;border:1px solid #9ba09755;flex:0 0 auto}
+.rosary-colors-variants{padding-top:12px}
+.rosary-colors-variants[hidden]{display:none!important}
+.rosary-colors-variants h3{
+  margin:5px 0 12px;font:600 14px Georgia,serif;
+}
+dialog label.rosary-color-variant{
+  display:flex!important;gap:10px;justify-content:space-between;align-items:center;
+  margin:7px 0!important;
+  min-height:45px;
+  font:13px/1.4 system-ui;
+}
+.rosary-color-variant span{flex:1}
+.rosary-color-variant select{
+  margin:0!important;
+  width:150px!important;
+  max-width:57%;
+  min-height:40px;
+}
+.rosary-color-preview{
+  margin:16px 0 5px;
+  padding:17px 11px 13px;
+  border-radius:15px;
+  border:1px solid #8b89734b;
+  background:var(--preview-bg,#f6f4ef);
+  color:var(--preview-text,#384038);
+  text-align:center;
+}
+.rosary-color-preview-beads{
+  display:flex;justify-content:center;gap:7px;align-items:center;
+  margin:0 0 9px;
+}
+.rosary-color-preview-bead{
+  width:29px;height:29px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  border:3px solid var(--preview-outline,#b89a68);
+  background:var(--preview-bead,#f2e5ca);
+  font:10px/1 system-ui;
+}
+.rosary-color-preview-bead.is-active{
+  outline:2px solid var(--preview-active,#bc9a60);
+  outline-offset:2px;
+}
+.rosary-color-preview-caption{font:11px/1.5 system-ui;opacity:.79}
+@media(max-width:400px){
+  .rosary-color-variant select{width:135px!important}
+  .rosary-color-preview-beads{gap:6px}
+}
