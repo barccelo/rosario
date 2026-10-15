@@ -636,8 +636,14 @@
         const w = document.documentElement.clientWidth;
         const h = window.innerHeight;
         const track = chain.querySelector('.chain-track');
-        if (track) track.style.transform =
-          'translate(' + (Math.min(w * .22, 220) - 89) + 'px,' + (h / 2 - point(bead).y) + 'px)';
+        if (track) {
+          window.rosarioChainOrigin={
+            x:Math.min(w*.22,220)-89, y:h/2-point(bead).y
+          };
+          if(window.rosarioApplyChainPan) window.rosarioApplyChainPan();
+          else track.style.transform='translate('+window.rosarioChainOrigin.x+
+            'px,'+window.rosarioChainOrigin.y+'px)';
+        }
         chain.querySelectorAll('.focus-bead').forEach(el => {
           const active = Number(el.dataset.bead) === bead;
           el.classList.toggle('active', active);
