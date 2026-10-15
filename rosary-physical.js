@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-9';
+    css.href='rosary-physical.css?v=20261015-10';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -123,7 +123,7 @@
         const previous=positions[(i+54)%55];
         const to=positions[(i+1)%55];
         const next=positions[(i+2)%55];
-        lines+='<path class="physical-link physical-loop-link" data-link="'+i+
+        lines+='<path fill="none" class="physical-link physical-loop-link" data-link="'+i+
           '" d="'+(i===FRONT_END?topTurn(from,to):
             curvedSegment(previous,from,to,next))+'"/>';
       });
@@ -136,7 +136,7 @@
       tail.slice(0,-1).forEach((from,i)=>{
         const previous=tail[Math.max(0,i-1)];
         const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
-        pendantWire+='<path class="physical-link physical-intro-link" d="'+
+        pendantWire+='<path fill="none" class="physical-link physical-intro-link" d="'+
           curvedSegment(previous,from,to,next)+'"/>';
       });
       body.push(pendantWire+'</g>');
