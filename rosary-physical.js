@@ -121,7 +121,15 @@
     function paint(){
       const physical=state.rosaryViewLayout==='physical';
       document.body.classList.toggle('rosario-physical-view',physical);
-      if(!physical){oldMode='vertical';oldIndex=state.index;return;}
+      if(!physical){
+        if(oldMode==='physical'){
+          const step=steps[state.index];
+          const bead=step?.bead!==undefined?step.bead:
+            !step||step.m>=5?54:step.m<0?0:Math.min(54,(step.m+1)*11-1);
+          window.rosarioScrollToBead?.(bead,!step||step.m>=5);
+        }
+        oldMode='vertical';oldIndex=state.index;return;
+      }
       const selected=positionFor(steps[state.index]);
       svg.querySelectorAll('[data-cross]').forEach(el=>{
         const active=selected.kind===el.dataset.cross;
