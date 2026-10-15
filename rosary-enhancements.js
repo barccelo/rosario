@@ -134,6 +134,8 @@
   prayers['Cordero de Dios'] = lambLines.join('\n\n');
   prayers['Estación al Santísimo Sacramento'] =
     'V/ Alabado sea el Santísimo Sacramento del Altar.\nR/ Sea por siempre bendito y alabado.';
+  // La antigua etiqueta era incorrecta: esta fórmula corresponde a la Estación.
+  delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
     'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos.';
   prayers['Señor mío Jesucristo'] =
@@ -567,7 +569,7 @@
       const options = Object.keys(prayers).filter(name => name !== 'Anuncio del misterio');
       show('<h2>Oraciones</h2><select id="prayerSelect"></select>' +
         '<div class="prayer" id="reading"></div>' +
-        '<p><a href="https://press.vatican.va/special/rosary/documents/litanie-lauretane_sp.html" target="_blank" rel="noopener">Letanías de referencia · Santa Sede ↗</a></p>');
+        '<p><a href="https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145" target="_blank" rel="noopener">Estructura del Rosario · Opus Dei ↗</a></p>');
       const select = $('prayerSelect');
       options.forEach(name => {
         const option = document.createElement('option');
