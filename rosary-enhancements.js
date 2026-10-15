@@ -9,34 +9,25 @@
     const d = new Date();
     return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
   };
+  // Denominaciones y distribución semanal del devocionario de Opus Dei.
   const mysteryNames = {
     Gozosos: [
-      'La Encarnación del Hijo de Dios',
-      'La Visitación de Nuestra Señora a santa Isabel',
-      'El Nacimiento del Hijo de Dios',
-      'La Presentación de Jesús en el templo',
-      'El Niño Jesús perdido y hallado en el templo'
-    ],
-    Luminosos: [
-      'El Bautismo de Jesús en el Jordán',
-      'La autorrevelación de Jesús en las bodas de Caná',
-      'El anuncio del Reino de Dios y la llamada a la conversión',
-      'La Transfiguración del Señor',
-      'La institución de la Eucaristía'
+      'La Encarnación', 'La Visitación de Nuestra Señora a su prima Santa Isabel',
+      'El Nacimiento del Hijo de Dios en Belén', 'La Purificación de Nuestra Señora',
+      'El Niño perdido y hallado en el Templo'
     ],
     Dolorosos: [
-      'La oración de Jesús en el huerto',
-      'La flagelación del Señor',
-      'La coronación de espinas',
-      'Jesús con la cruz a cuestas',
-      'La crucifixión y muerte de Jesús'
+      'La oración en el huerto', 'La flagelación del Señor',
+      'La coronación de espinas', 'La Cruz a cuestas', 'Jesús muere en la Cruz'
     ],
     Gloriosos: [
-      'La Resurrección del Señor',
-      'La Ascensión del Señor',
-      'La venida del Espíritu Santo',
-      'La Asunción de la Virgen María',
-      'La Coronación de María como Reina del cielo y de la tierra'
+      'La Resurrección del Señor', 'La Ascensión del Señor',
+      'La venida del Espíritu Santo', 'La Asunción de Nuestra Señora',
+      'La Coronación de María Santísima'
+    ],
+    Luminosos: [
+      'El Bautismo del Señor', 'Las bodas de Caná', 'El anuncio del Reino de Dios',
+      'La Transfiguración del Señor', 'La institución de la Eucaristía'
     ]
   };
   const meditations = {
@@ -124,57 +115,124 @@
     'Reina del Santísimo Rosario', 'Reina de la familia', 'Reina de la paz'
   ];
   const litanyLines = litanyOpening.concat(litanyInvocations.map(name => name + ', ruega por nosotros.'));
+  const litanyPairs = litanyLines.map((line, i) => {
+    if (i < 5) return { verse: line, response: line };
+    if (i < 9) {
+      const separator = ', ten misericordia de nosotros.';
+      return { verse: line.slice(0, -separator.length) + ',', response: 'ten misericordia de nosotros.' };
+    }
+    return { verse: line.replace(/ ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
+  });
   const lambLines = [
     'Cordero de Dios, que quitas el pecado del mundo, perdónanos, Señor.',
     'Cordero de Dios, que quitas el pecado del mundo, escúchanos, Señor.',
     'Cordero de Dios, que quitas el pecado del mundo, ten misericordia de nosotros.'
   ];
-  const fullLitany = litanyLines.join('\n\n') + '\n\n' + lambLines.join('\n\n');
+  const fullLitany = litanyPairs.map(pair => 'V/ ' + pair.verse + '\nR/ ' + pair.response).join('\n\n') +
+    '\n\n' + lambLines.join('\n\n');
   prayers['Letanías'] = fullLitany;
   prayers['Cordero de Dios'] = lambLines.join('\n\n');
+  prayers['Estación al Santísimo Sacramento'] =
+    'V/ Alabado sea el Santísimo Sacramento del Altar.\nR/ Sea por siempre bendito y alabado.';
+  prayers['Comunión espiritual'] =
+    'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos.';
+  prayers['Señor mío Jesucristo'] =
+    'Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío: por ser Vos quien sois y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido.\n\n' +
+    'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n\n' +
+    'Ofrezco, Señor, mi vida, obras y trabajos en satisfacción de todos mis pecados; y, así como lo suplico, confío en vuestra bondad y misericordia infinita que los perdonaréis por los méritos de vuestra preciosísima sangre, pasión y muerte, y me daréis gracia para enmendarme y perseverar en vuestro santo amor y servicio hasta el fin de mi vida. Amén.';
+  prayers['Versículos iniciales'] =
+    'V/ Señor, ábreme los labios.\nR/ Y mi boca proclamará tu alabanza.\n\nV/ Dios mío, ven en mi auxilio.\nR/ Señor, date prisa en socorrerme.';
+  prayers['Intenciones finales'] = 'Por las necesidades de la Iglesia y del Estado; por el obispo de esta diócesis y sus intenciones; y por las benditas ánimas del purgatorio.';
+  const stationPair = {
+    title: 'Estación al Santísimo Sacramento', kind: 'dialogue', m: -1,
+    verse: 'Alabado sea el Santísimo Sacramento del Altar.',
+    response: 'Sea por siempre bendito y alabado.'
+  };
 
   // Conservar el lugar correspondiente a la oración guardada antes de añadir pasos.
   const previousSteps = steps.slice();
   const previousIndex = Math.max(0, Math.min(Number(state.index) || 0, previousSteps.length));
   const previousStep = previousSteps[previousIndex];
-  const nextSteps = [{ title: 'Señal de la cruz', m: -1 }];
+  // Estación, comunión espiritual y oraciones introductorias.
+  const nextSteps = [{ ...stationPair }];
+  for (let i = 0; i < 3; i++) {
+    nextSteps.push({ title: 'Padrenuestro', m: -1, stationNumber: i + 1 });
+    nextSteps.push({ title: 'Avemaría', m: -1, stationNumber: i + 1 });
+    nextSteps.push({ title: 'Gloria', m: -1, stationNumber: i + 1 });
+  }
+  nextSteps.push({ ...stationPair });
+  nextSteps.push({ title: 'Comunión espiritual', m: -1 });
+  nextSteps.push({ title: 'Señal de la cruz', m: -1 });
+  nextSteps.push({ title: 'Señor mío Jesucristo', m: -1 });
+  nextSteps.push({ title: 'Versículos iniciales', kind: 'dialogue', m: -1,
+    verse: 'Señor, ábreme los labios.', response: 'Y mi boca proclamará tu alabanza.' });
+  nextSteps.push({ title: 'Versículos iniciales', kind: 'dialogue', m: -1,
+    verse: 'Dios mío, ven en mi auxilio.', response: 'Señor, date prisa en socorrerme.' });
+  nextSteps.push({ title: 'Gloria', m: -1 });
   for (let m = 0; m < 5; m++) {
     nextSteps.push({ title: 'Anuncio del misterio', kind: 'mystery', m });
     nextSteps.push({ title: 'Padrenuestro', m, bead: m * 11 });
     for (let n = 1; n <= 10; n++) nextSteps.push({ title: 'Avemaría', m, n, bead: m * 11 + n });
     nextSteps.push({ title: 'Gloria', m });
     nextSteps.push({ title: 'Jaculatoria', m });
-    nextSteps.push({ title: 'Alabanzas al Santísimo', m });
   }
+  // Las tres Avemarías finales figuran antes de las letanías en el devocionario.
+  [
+    'Hija de Dios Padre', 'Madre de Dios Hijo', 'Esposa de Dios Espíritu Santo'
+  ].forEach((invocation, i) => nextSteps.push({
+    title: 'Avemaría', m: 5, kind: 'dedication', dedication: i,
+    text: prayers.Avemaría.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
+  }));
+  // Se conservan la Salve y su respuesta como oraciones independientes.
   nextSteps.push({ title: 'Salve', m: 5 });
-  nextSteps.push({ title: 'Ruega por nosotros', m: 5 });
+  nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+    verse: 'Ruega por nosotros, Santa Madre de Dios.',
+    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.' });
   litanyLines.forEach((line, i) => nextSteps.push({
-    title: 'Letanías', kind: 'litany', m: 5, text: line, litanyIndex: i
+    title: 'Letanías', kind: 'litany', m: 5, text: line,
+    verse: litanyPairs[i].verse, response: litanyPairs[i].response, litanyIndex: i
   }));
   lambLines.forEach((line, i) => nextSteps.push({
-    title: 'Cordero de Dios', kind: 'final', m: 5, text: line, part: i
+    title: 'Cordero de Dios', kind: 'final', m: 5, text: line, part: i,
+    verse: 'Cordero de Dios, que quitas los pecados del mundo,',
+    response: ['perdónanos, Señor.', 'escúchanos, Señor.', 'ten misericordia de nosotros.'][i]
   }));
   nextSteps.push({ title: 'Bajo tu amparo', m: 5 });
-  nextSteps.push({ title: 'Ruega por nosotros', m: 5 });
+  nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+    verse: 'Ruega por nosotros, Santa Madre de Dios.',
+    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.' });
   nextSteps.push({ title: 'Oración final', m: 5 });
+  [
+    { name: 'La Iglesia y el Estado', intro: 'Por las necesidades de la Iglesia y del Estado:', rest: false },
+    { name: 'El obispo', intro: 'Por la persona e intenciones del obispo de esta diócesis:', rest: false },
+    { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:', rest: true }
+  ].forEach(intention => {
+    nextSteps.push({ title: 'Intenciones finales', m: 5, kind: 'intention', text: intention.intro });
+    nextSteps.push({ title: 'Padrenuestro', m: 5 });
+    nextSteps.push({ title: 'Avemaría', m: 5 });
+    if (intention.rest) nextSteps.push({ title: 'Descansen en paz', m: 5,
+      text: 'Descansen en paz. Amén.' });
+    else nextSteps.push({ title: 'Gloria', m: 5 });
+  });
   steps = nextSteps;
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 3) {
+  if (Number(saved.sequenceVersion) >= 4) {
     restoredIndex = Number(saved.index);
   } else if (!previousStep) {
     restoredIndex = steps.length;
-  } else if (previousStep.title === 'Letanías') {
-    restoredIndex = steps.findIndex(item => item.kind === 'litany');
+  } else if (previousStep.kind === 'litany') {
+    restoredIndex = steps.findIndex(item => item.kind === 'litany' && item.litanyIndex === (previousStep.litanyIndex || 0));
   } else {
     restoredIndex = steps.findIndex(item =>
       item.title === previousStep.title && item.m === previousStep.m &&
-      item.n === previousStep.n
+      item.n === previousStep.n &&
+      (previousStep.kind !== 'mystery' || item.kind === 'mystery')
     );
   }
   state.index = Number.isFinite(restoredIndex)
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 3;
+  state.sequenceVersion = 4;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -200,7 +258,11 @@
     const step = steps[state.index];
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
-      if (step.kind === 'litany') prayers['Letanías'] = step.text;
+      if (step.kind === 'dialogue') prayers[step.title] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.kind === 'dedication' || step.kind === 'intention') prayers[step.title] = step.text;
+      if (step.title === 'Descansen en paz') prayers[step.title] = step.text;
+      if (step.kind === 'litany') prayers['Letanías'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
       if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = step.text;
     }
     rawRender();
