@@ -357,9 +357,6 @@
   top:auto!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;
 }
-.controls-bottom .prayer-toolbar{
-  bottom:calc(env(safe-area-inset-bottom,0px) + 82px)!important;
-}
 .controls-position-setting{
   display:flex!important;
   flex-direction:column!important;
