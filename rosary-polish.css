@@ -338,3 +338,11 @@
  .intention-entry>span{min-width:100%}
  .mystery-random-intention{margin-bottom:22px;padding:12px}
 }
+
+/* Contraste legible para intenciones en tema claro. */
+.mystery-intention-body{color:#5f675b}
+.mystery-intention-caption{color:#937647}
+.dark .mystery-intention-body{color:#e1d9c1}
+.dark .mystery-intention-caption{color:#cfaf75}
+/* Conservar la altura del panel de consulta al cambiar de sección. */
+.nav-detail[hidden],.nav-list[hidden]{display:none!important}
