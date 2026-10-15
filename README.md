@@ -7,7 +7,7 @@ Camándula interactiva en español, con cuentas grandes, desplazamiento por el r
 Código trasladado desde la versión 3 de https://rosario-sereno.barcco.chatgpt.site.
 Commit de origen en Sites: `b1870ce56605455a7a0d05f5357761fcb774d3db`.
 
-La aplicación es estática y no requiere compilación ni dependencias. Publicar todos los archivos de la raíz en un servidor web estático. `index.html` carga `app.js`, `rosary-enhancements.js`, `focus.js` e `immersive.js`, en ese orden.
+La aplicación es estática y no requiere compilación ni dependencias. Publicar todos los archivos de la raíz en un servidor web estático. `index.html` carga `app.js`, `rosary-enhancements.js`, `meditations-full.js`, `focus.js`, `immersive.js` y `rosary-polish.js`, en ese orden.
 
 ## Controles
 
@@ -15,7 +15,7 @@ La aplicación es estática y no requiere compilación ni dependencias. Publicar
 - Deslizar hacia arriba para avanzar; hacia abajo para retroceder.
 - Tocar la zona superior para mostrar los controles: anterior, avanzar, navegar, ajustes y prueba de volumen. El tema y la pantalla completa se controlan desde los iconos superiores.
 - En **Navegar** se puede elegir el día, uno de sus cinco misterios o una oración concreta.
-- Cada misterio se anuncia antes de su decena. La meditación se despliega solamente al pulsar **Ver meditación**.
+- Cada misterio se anuncia antes de su decena. La meditación completa se abre en una ventana emergente al pulsar **Ver meditación** o el número romano del misterio.
 - En las letanías se muestra una invocación por paso, con la anterior y la siguiente visibles parcialmente. Deslizar hacia arriba o abajo avanza o retrocede una invocación.
 - Los misterios se ajustan al día de la semana al abrir el rosario un nuevo día; una elección manual de día se conserva durante la jornada.
 
@@ -36,9 +36,9 @@ Esta primera importación no incluye APK, contenedor Android ni configuración d
 
 ## Estructura y lectura (octubre de 2026)
 
-La secuencia sigue el orden del [Santo Rosario en el devocionario de Opus Dei](https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145), con personalizaciones solicitadas para esta aplicación. Comienza con la **Estación al Santísimo Sacramento** («Alabado sea el Santísimo Sacramento del Altar / Sea por siempre bendito y alabado»), tomada del TXT aportado, tres tandas de Padrenuestro, Avemaría y Gloria, comunión espiritual, Señal de la cruz, Señor mío Jesucristo, versículos iniciales y Gloria. Después se anuncian los cinco misterios del día con meditación optativa, se rezan las decenas y, al final, las tres Avemarías, Salve, respuesta, letanías, Cordero de Dios, Bajo tu amparo, oración final e intenciones. Se mantienen Salve y respuesta separadas, por indicación del usuario.
+La secuencia sigue el orden del [Santo Rosario en el devocionario de Opus Dei](https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145), con personalizaciones solicitadas para esta aplicación. Comienza con la **Estación al Santísimo Sacramento** («Alabado sea el Santísimo Sacramento del Altar / Sea por siempre bendito y alabado»), tomada del TXT aportado, tres ciclos completos de invocación, Padrenuestro, Avemaría y Gloria, comunión espiritual, Señal de la cruz, Señor mío Jesucristo, versículos iniciales y Gloria. Después se anuncian los cinco misterios del día con meditación optativa, se rezan las decenas y, al final, las tres Avemarías, Salve, respuesta, letanías, Cordero de Dios, Bajo tu amparo, oración final e intenciones. Se mantienen Salve y respuesta separadas, por indicación del usuario.
 
-El menú permanente de tres líneas de la esquina superior abre **Días**, **Misterios**, **Oraciones** y **Texto**. En Texto, la lectura puede justificarse, alinearse a la izquierda, centrarse o alinearse a la derecha; esta preferencia se guarda localmente. V/ y R/ se presentan como marcas visuales diferenciadas en las intervenciones de diálogo y en las letanías.
+El menú permanente de tres líneas de la esquina superior abre **Días**, **Misterios**, **Oraciones**, **Jaculatorias**, **Texto** y **Voces**. En Texto, la lectura puede justificarse, alinearse a la izquierda, centrarse o alinearse a la derecha; esta preferencia se guarda localmente. ℣. y ℟. se presentan como marcas visuales diferenciadas en las intervenciones de diálogo y en las letanías.
 
 ## Revisión de lectura y secuencia (octubre de 2026)
 
