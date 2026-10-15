@@ -351,8 +351,11 @@
         '.focus-bead,.rosary-cross,.chain-bead,.top-controls,'+
         '.controls-dot,.meditation-tools,.rosary-mystery-context,'+
         '.mystery-announcement-link'))return false;
-      // Excluye la superficie del texto y sus ayudas de lectura.
-      if(target.closest('.immersive-prayer,.reading-prayer-heading,'+
+      // La zona vacía alrededor del texto sí admite toques; el texto,
+      // sus renglones y las ayudas de lectura nunca los activan.
+      const reader=target.closest('.immersive-prayer');
+      if(reader && target!==reader)return false;
+      if(target.closest('.reading-prayer-heading,'+
         '.rosary-mystery-context,.meditation-full'))return false;
       return true;
     }
