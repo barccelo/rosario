@@ -187,7 +187,7 @@
   state.intentionPool = Array.isArray(saved.intentionPool)
     ? [...new Set(saved.intentionPool.filter(t => typeof t === 'string').map(t => t.trim()).filter(Boolean))].slice(0,200)
     : [...initialIntentions];
-  state.randomIntentionsEnabled = saved.randomIntentionsEnabled === true;
+  state.randomIntentionsEnabled = saved.randomIntentionsEnabled !== false;
   state.intentionCycle = Array.isArray(saved.intentionCycle) &&
     saved.intentionCycle.length === 5 ? saved.intentionCycle : [null,null,null,null,null];
   function intentionFor(m) {
