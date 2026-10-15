@@ -123,10 +123,13 @@ document.addEventListener('fullscreenchange',()=>{
   $('iFullscreen').setAttribute('aria-pressed',String(active));
   if(!active) navigator.keyboard?.unlock?.();
 });
-let previousPrayerIndex=-1;const sectionRender=render;render=function(){if(previousPrayerIndex!==-1&&previousPrayerIndex!==state.index){stopChainInertia();window.rosarioManualOffset=0;}sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
-  x:Math.min(w*.22,220)-89,
-  y:(!s || s.m>4 || bead===55) ? h-116-point(55).y : h/2-point(bead).y
-};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
+let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);if(s?.kind==='mystery')bead=s.m*11;
+const svgHeight=point(55).y+112;
+const horizontalShift=Math.min(w*.22,220)-89;
+chain.setAttribute('viewBox',(-horizontalShift)+' 0 '+w+' '+svgHeight);
+chain.style.setProperty('--rosary-native-height',svgHeight+'px');
+if(previousPrayerIndex!==state.index)
+  window.rosarioScrollToBead?.(bead,!s||s.m>4||bead===55);$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
@@ -153,137 +156,11 @@ $('readFull').onclick=()=>{
   $('fullPrayerText').textContent=prayers[step.title];
 };
 
-// Mover la camándula a mano sin alterar el paso de oración.
-window.rosarioManualOffset=window.rosarioManualOffset||0;
-let chainInertia=null,chainInertiaLast=0;
-function stopChainInertia(){if(chainInertia!==null){cancelAnimationFrame(chainInertia);chainInertia=null;const track=chain.querySelector('.chain-track');if(track)track.style.transition='';}}
-window.rosarioChainOrigin={x:0,y:0};
-window.rosarioApplyChainPan=function(){
-  const track=chain.querySelector('.chain-track');
-  if(!track)return;
-  const x=window.rosarioChainOrigin.x,y=window.rosarioChainOrigin.y;
-  track.style.transform='translate('+x+'px,'+(y+window.rosarioManualOffset)+'px)';
-};
-function boundedChainOffset(y){
-  const h=window.innerHeight,base=window.rosarioChainOrigin.y;
-  const lower=(h-116)-point(55).y-base,upper=h/2-point(0).y-base;
-  return Math.max(lower,Math.min(upper,y));
-}
-// Impulso cinético: al soltar el dedo se proyecta un recorrido largo.
-// La duración y la distancia dependen de la velocidad, no sólo del arrastre.
-function coastChain(initialVelocity, swipeDistance=0, gestureDuration=0){
-  stopChainInertia();
-  const track=chain.querySelector('.chain-track');
-  const finish=()=>{if(track)track.style.transition='';};
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){finish();return;}
-  const speed=Math.abs(initialVelocity);
-  const rapidSwipe=Math.abs(swipeDistance)>=35 &&
-    gestureDuration>0 && gestureDuration<650 && speed>=0.22;
-  if(speed<0.25 && !rapidSwipe){finish();return;}
-  const direction=Math.sign(initialVelocity || swipeDistance);
-  if(!direction){finish();return;}
-  // 55px aproximadamente por cuenta. Un gesto corto y rápido tiene un
-  // mínimo de 10 cuentas extra; un gesto fuerte puede recorrer casi todo.
-  let distance=Math.max(speed*1300,Math.abs(swipeDistance)*2.4);
-  if(rapidSwipe)distance=Math.max(distance,55*10);
-  distance=Math.min(distance,55*52);
-  const origin=window.rosarioManualOffset;
-  const destination=boundedChainOffset(origin+direction*distance);
-  const range=Math.abs(destination-origin);
-  if(range<1){finish();return;}
-  const duration=Math.min(1900,Math.max(750,650+range*.42));
-  if(track)track.style.transition='none';
-  let startedAt=null;
-  const animate=now=>{
-    if(startedAt===null)startedAt=now;
-    const progress=Math.min(1,(now-startedAt)/duration);
-    // Frenado progresivo y suave como el desplazamiento cinético del móvil.
-    const eased=1-Math.pow(1-progress,3);
-    window.rosarioManualOffset=boundedChainOffset(
-      origin+(destination-origin)*eased
-    );
-    window.rosarioApplyChainPan();
-    if(progress<1)chainInertia=requestAnimationFrame(animate);
-    else{chainInertia=null;finish();}
-  };
-  chainInertia=requestAnimationFrame(animate);
-}
-// Gesto táctil continuo del rosario (separado de la navegación del texto).
-// Velocidades en píxeles/ms, últimas muestras ~150ms. No cambia state.index.
-let chainTouch=null;
-const chainTrack=chain.querySelector('.chain-track');
-function releaseChainTouch(event){
-  if(!chainTouch)return;
-  const swipe=chainTouch;
-  chainTouch=null;
-  if(!swipe.dragged){if(chainTrack)chainTrack.style.transition='';return;}
-  suppressClickUntil=performance.now()+1000;
-  const ending=event.changedTouches?.[0];
-  const endY=ending?.clientY ?? swipe.samples[swipe.samples.length-1].y;
-  const endTime=event.timeStamp;
-  const duration=Math.max(1,endTime-swipe.startTime);
-  const displacement=endY-swipe.startY;
-  // Usa también touchend: en Android algunos gestos rápidos sólo producen
-  // uno o dos touchmove. La versión anterior calculaba velocidad cero.
-  const lookback=[...swipe.samples].reverse().find(sample=>
-    endTime-sample.time>=55 && endTime-sample.time<=250
-  ) || swipe.samples[0];
-  const recentSpeed=(endY-lookback.y)/Math.max(1,endTime-lookback.time);
-  const averageSpeed=displacement/duration;
-  const velocity=Math.sign(displacement)*Math.max(
-    Math.abs(averageSpeed),Math.abs(recentSpeed)*.85
-  );
-  if(Math.abs(displacement)>=30){
-    coastChain(velocity,displacement,duration);
-  }else if(chainTrack)chainTrack.style.transition='';
-}
-chain.addEventListener('touchstart',event=>{
-  if($('modal').open || event.touches.length!==1) {chainTouch=null;return;}
-  const t=event.touches[0];
-  if(t.clientX>window.innerWidth*.42) {chainTouch=null;return;}
-  stopChainInertia();
-  if(chainTrack)chainTrack.style.transition='none';
-  chainTouch={
-    startY:t.clientY,startX:t.clientX,startTime:event.timeStamp,
-    startOffset:window.rosarioManualOffset,
-    dragged:false,samples:[{time:event.timeStamp,y:t.clientY}]
-  };
-},{passive:true});
-chain.addEventListener('touchmove',event=>{
-  if(!chainTouch || event.touches.length!==1)return;
-  const t=event.touches[0];
-  const dy=t.clientY-chainTouch.startY,dx=t.clientX-chainTouch.startX;
-  if(Math.hypot(dy,dx)>7)chainTouch.dragged=true;
-  if(!chainTouch.dragged)return;
-  event.preventDefault();
-  suppressClickUntil=performance.now()+900;
-  window.rosarioManualOffset=boundedChainOffset(chainTouch.startOffset+dy*1.5);
-  window.rosarioApplyChainPan();
-  const now=event.timeStamp;
-  chainTouch.samples.push({time:now,y:t.clientY});
-  while(chainTouch.samples.length>2 && now-chainTouch.samples[0].time>170)
-    chainTouch.samples.shift();
-},{passive:false});
-chain.addEventListener('touchend',releaseChainTouch,{passive:true});
-chain.addEventListener('touchcancel',releaseChainTouch,{passive:true});
-// También funciona la rueda de un ratón o trackpad en la zona de cuentas.
-let wheelVelocity=0,wheelLast=0,wheelSettle=null;
-chain.addEventListener('wheel',event=>{
-  if($('modal').open || event.clientX>window.innerWidth*.42)return;
-  event.preventDefault();
-  stopChainInertia();
-  const now=performance.now();
-  const delta=event.deltaY*(event.deltaMode===1?18:event.deltaMode===2?window.innerHeight:1);
-  const dy=-delta*1.25;
-  const dt=wheelLast?Math.max(9,now-wheelLast):32;
-  wheelLast=now;
-  wheelVelocity=Math.max(-6,Math.min(6,dy/dt));
-  if(chainTrack)chainTrack.style.transition='none';
-  window.rosarioManualOffset=boundedChainOffset(window.rosarioManualOffset+dy);
-  window.rosarioApplyChainPan();
-  clearTimeout(wheelSettle);
-  wheelSettle=setTimeout(()=>{coastChain(wheelVelocity);wheelVelocity=0;wheelLast=0;},85);
-},{passive:false});
+// La cadena se desplaza con el scroll nativo de Android, no con
+// transformaciones manuales ni timers. La barra de lectura es independiente.
+window.rosarioManualOffset=0;
+window.rosarioApplyChainPan=()=>{};
+function stopChainInertia() {}
 // One gesture handler for the entire prayer surface, including text and top edge.
 // All buttons retain their own controls and scrolling.
 let gesture=null,holdTimeout=null,suppressClickUntil=0;
@@ -292,20 +169,14 @@ document.addEventListener('pointerdown',event=>{
   if(!event.isPrimary){cancelGesture();return;}
   if(event.button!==0||$('modal').open)return;
   suppressClickUntil=0;
-  stopChainInertia();
   const bead=event.target.closest('.focus-bead');
-  const leftArea=!!event.target.closest('.focus-chain') &&
-    event.clientX<=window.innerWidth*.42;
-  // En teléfonos el gesto izquierdo se procesa con Touch Events para
-  // conservar su velocidad incluso si el navegador cancela Pointer Events.
-  if(leftArea && event.pointerType==='touch'){cancelGesture();return;}
+  const leftArea=!!event.target.closest('.rosary-scroll-viewport');
   const scrollPane=event.target.closest('.immersive-prayer');
   const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
   const scrollTop=scrollPane?.scrollTop||0;
   gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,
     readingScroll,scrollTop,scrollPane,
-    leftPan:leftArea,startOffset:window.rosarioManualOffset,
-    lastPointerY:event.clientY,lastPointerTime:event.timeStamp,dragVelocity:0};
+    leftPan:leftArea};
   if(bead)holdTimeout=setTimeout(()=>{
     if(!gesture||gesture.moved||$('modal').open)return;
     gesture.held=true;suppressClickUntil=performance.now()+800;
@@ -316,21 +187,6 @@ document.addEventListener('pointermove',event=>{
   if(!gesture||gesture.id!==event.pointerId)return;
   if(Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>12){
     gesture.moved=true;clearTimeout(holdTimeout);
-    if(gesture.leftPan){
-      const track=chain.querySelector('.chain-track');
-      if(track)track.style.transition='none';
-      const dt=Math.max(1,event.timeStamp-gesture.lastPointerTime);
-      if(dt<100){
-        const v=((event.clientY-gesture.lastPointerY)*1.5)/dt;
-        gesture.dragVelocity=gesture.dragVelocity*.26+v*.74;
-      }
-      gesture.lastPointerY=event.clientY;
-      gesture.lastPointerTime=event.timeStamp;
-      window.rosarioManualOffset=boundedChainOffset(
-        gesture.startOffset+(event.clientY-gesture.y)*1.5);
-      window.rosarioApplyChainPan();
-      suppressClickUntil=performance.now()+850;
-    }
   }
 },true);
 document.addEventListener('pointerup',event=>{
@@ -338,15 +194,8 @@ document.addEventListener('pointerup',event=>{
   const current=gesture,dy=event.clientY-current.y,dx=event.clientX-current.x;
   cancelGesture();
   if(current.held||current.moved)suppressClickUntil=performance.now()+800;
-  if(current.leftPan){
-    const track=chain.querySelector('.chain-track');
-    const age=event.timeStamp-current.lastPointerTime;
-    const velocity=age>115?0:current.dragVelocity;
-    if(current.moved)coastChain(velocity);
-    else if(track)track.style.transition='';
-    // El impulso sólo mueve el rosario; nunca cambia el texto.
-    return;
-  }
+  // El desplazamiento táctil de las cuentas pertenece al navegador.
+  if(current.leftPan)return;
   if($('modal').open||current.held)return;
   // Un texto largo primero se desplaza: no saltar de oración mientras se lee.
   // En sus límites se permite el avance/retroceso con otro deslizamiento.
@@ -359,7 +208,6 @@ document.addEventListener('pointerup',event=>{
   }
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
-    window.rosarioManualOffset=0;
     if(dy<0)advance();else{state.index=Math.max(0,state.index-1);render();}
   }
 },true);
@@ -386,14 +234,13 @@ reading.addEventListener('touchend',event=>{
   if(!back&&!next)return;
   suppressClickUntil=performance.now()+850;
   cancelGesture();
-  window.rosarioManualOffset=0;
   if(next)advance();else{state.index=Math.max(0,state.index-1);render();}
 },{passive:true,capture:true});
 for(const name of ['touchcancel'])
   reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
 document.addEventListener('pointercancel',cancelGesture,true);
-window.addEventListener('blur',()=>{cancelGesture();stopChainInertia();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelGesture();stopChainInertia();}});
+window.addEventListener('blur',cancelGesture);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGesture();});
 document.addEventListener('click',event=>{
   if(event.detail!==0&&performance.now()<suppressClickUntil){
     event.preventDefault();event.stopImmediatePropagation();return;
