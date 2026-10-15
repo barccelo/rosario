@@ -73,7 +73,7 @@
     'y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre. ' +
     '¡Oh clementísima, oh piadosa, oh dulce siempre Virgen María!';
   prayers['Ruega por nosotros'] =
-    'Ruega por nosotros, Santa Madre de Dios.\n\nPara que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.';
+    'Ruega por nosotros, Santa Madre de Dios.\n\nPara que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.';
   prayers['Bajo tu amparo'] =
     'Bajo tu amparo nos acogemos, Santa Madre de Dios: no desprecies las súplicas que te dirigimos en nuestras necesidades; ' +
     'antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.';
@@ -128,12 +128,12 @@
     'Cordero de Dios, que quitas el pecado del mundo, escúchanos, Señor.',
     'Cordero de Dios, que quitas el pecado del mundo, ten misericordia de nosotros.'
   ];
-  const fullLitany = litanyPairs.map(pair => 'V/ ' + pair.verse + '\nR/ ' + pair.response).join('\n\n') +
+  const fullLitany = litanyPairs.map(pair => '℣. ' + pair.verse + '\n℟. ' + pair.response).join('\n\n') +
     '\n\n' + lambLines.join('\n\n');
   prayers['Letanías'] = fullLitany;
   prayers['Cordero de Dios'] = lambLines.join('\n\n');
   prayers['Estación al Santísimo Sacramento'] =
-    'V/ Alabado sea el Santísimo Sacramento del Altar.\nR/ Sea por siempre bendito y alabado.';
+    '℣. Alabado sea el Santísimo Sacramento del Altar.\n℟. Sea por siempre bendito y alabado.';
   // La antigua etiqueta era incorrecta: esta fórmula corresponde a la Estación.
   delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
@@ -156,10 +156,12 @@
   const previousIndex = Math.max(0, Math.min(Number(state.index) || 0, previousSteps.length));
   const previousStep = previousSteps[previousIndex];
   // Jaculatorias configurables, conservadas entre aperturas.
-  const validJaculatorias = ['maria', 'fatima', 'alabanzas'];
-  state.jaculatorias = Array.isArray(saved.jaculatorias)
-    ? validJaculatorias.filter(id => saved.jaculatorias.includes(id))
-    : ['maria', 'alabanzas'];
+  const validJaculatorias = ['maria', 'alabanzas', 'fatima'];
+  const previouslySelected = Array.isArray(saved.jaculatorias)
+    ? [...saved.jaculatorias] : ['maria', 'alabanzas'];
+  if (Number(saved.sequenceVersion || 0) < 6 && previouslySelected.includes('maria') &&
+      !previouslySelected.includes('alabanzas')) previouslySelected.push('alabanzas');
+  state.jaculatorias = validJaculatorias.filter(id => previouslySelected.includes(id));
   prayers['Alabanzas y gracias'] =
     'Alabanzas y gracias sean dadas en todo momento al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
     'Y bendita sea por siempre la Santa e Inmaculada Concepción de la Bienaventurada siempre Virgen María, Madre de Dios y Madre nuestra.';
@@ -218,7 +220,7 @@
   nextSteps.push({ title: 'Salve', m: 5 });
   nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
     verse: 'Ruega por nosotros, Santa Madre de Dios.',
-    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.' });
+    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   litanyLines.forEach((line, i) => nextSteps.push({
     title: 'Letanías', kind: 'litany', m: 5, text: line,
     verse: litanyPairs[i].verse, response: litanyPairs[i].response, litanyIndex: i
@@ -231,7 +233,7 @@
   nextSteps.push({ title: 'Bajo tu amparo', m: 5 });
   nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
     verse: 'Ruega por nosotros, Santa Madre de Dios.',
-    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.' });
+    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   nextSteps.push({ title: 'Oración final', m: 5 });
   [
     { name: 'La Iglesia y el Estado', intro: 'Por las necesidades de la Iglesia y del Estado:', rest: false },
@@ -380,14 +382,14 @@
     const step = steps[state.index];
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
-      if (step.kind === 'dialogue') prayers[step.title] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.kind === 'dialogue') prayers[step.title] = '℣. ' + step.verse + '\n℟. ' + step.response;
       if (step.kind === 'dialogue-group') prayers[step.title] = step.dialogues
-        .map(part => 'V/ ' + part.verse + '\nR/ ' + part.response).join('\n\n');
+        .map(part => '℣. ' + part.verse + '\n℟. ' + part.response).join('\n\n');
       if (step.title === 'Avemaría' && step.kind !== 'dedication') prayers.Avemaría = originalAvemaria;
       if (step.kind === 'dedication' || step.kind === 'intention') prayers[step.title] = step.text;
       if (step.title === 'Descansen en paz') prayers[step.title] = step.text;
-      if (step.kind === 'litany') prayers['Letanías'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
-      if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.kind === 'litany') prayers['Letanías'] = '℣. ' + step.verse + '\n℟. ' + step.response;
+      if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = '℣. ' + step.verse + '\n℟. ' + step.response;
     }
     rawRender();
     if (step && step.kind === 'mystery') {
@@ -455,8 +457,8 @@
       '<div class="wheel-label">Letanías lauretanas</div>' +
       '<button type="button" class="wheel-side" id="litanyPrevious" aria-label="Letanía anterior"></button>' +
       '<div class="wheel-current" role="button" tabindex="0" aria-label="Ver todas las letanías" aria-live="polite">' +
-      '<div class="wheel-main"><span class="verse-mark" aria-label="Versículo">V/</span><span id="litanyCurrent"></span></div>' +
-      '<div class="wheel-response"><span class="verse-mark" aria-label="Respuesta">R/</span><span id="litanyResponse"></span></div>' +
+      '<div class="wheel-main"><span class="verse-mark" aria-label="Versículo">℣.</span><span id="litanyCurrent"></span></div>' +
+      '<div class="wheel-response voice-assembly"><span class="verse-mark" aria-label="Respuesta">℟.</span><span id="litanyResponse"></span></div>' +
       '<div class="wheel-progress" id="litanyProgress"></div></div>' +
       '<button type="button" class="wheel-side" id="litanyNext" aria-label="Letanía siguiente"></button>';
     reading.insertBefore(wheel, $('immersiveCount'));
@@ -647,7 +649,7 @@
             ['Avemaría', 'Diez veces por misterio'],
             ['Gloria', 'Al terminar la decena'],
             ['Jaculatoria', 'María, Madre de gracia'],
-            ['Alabanzas y gracias', 'Después de María, Madre de gracia'],
+            ['Alabanzas y gracias', 'Jaculatoria opcional tras el Gloria'],
             ['Jaculatoria de Fátima', 'Oh Jesús mío'],
             ['Tres Avemarías', 'Al terminar los cinco misterios'],
             ['Virgen purísima y castísima', 'Antes de cada Avemaría final'],
