@@ -584,8 +584,7 @@
       state.index = Math.max(0, Math.min(index, steps.length));
       render();
       if ($('modal').open) $('modal').close();
-      const toolbar = document.querySelector('.prayer-toolbar');
-      if (toolbar) toolbar.hidden = true;
+      // El único grupo de controles es la barra principal.
     }
     $('litanyPrevious').onclick = openLitanyList;
     $('litanyNext').onclick = openLitanyList;
@@ -683,10 +682,11 @@
         '<button type="button" data-nav="jaculatorias" role="tab">Jaculatorias</button>' +
         '<button type="button" data-nav="intentions" role="tab">Intenciones</button>' +
         '<button type="button" data-nav="text" role="tab">Texto</button>' +
-        '<button type="button" data-nav="voices" role="tab">Voces</button></div>' +
+        '<button type="button" data-nav="voices" role="tab">Voces</button>' +
+        '<button type="button" data-nav="controls" role="tab">Acciones</button></div>' +
         '<div class="nav-list" id="navList"></div>' +
         '<section class="nav-detail" id="navDetail" hidden aria-label="Consulta de oración"></section>');
-      const tabs = ['days','mysteries','prayers','jaculatorias','intentions','text','voices'];
+      const tabs = ['days','mysteries','prayers','jaculatorias','intentions','text','voices','controls'];
       let currentTab = tab;
       let savedScroll = 0;
       function openPreview(title,content) {
@@ -966,6 +966,32 @@
           };
           backup.append(backupLabel,exportButton,restore,restoreButton,feedback);
           list.append(backup);
+        } else if (selected === 'controls') {
+          const info=document.createElement('p');
+          info.className='jac-intro';
+          info.textContent='Puedes cambiar de oración deslizando sobre el texto. Estas acciones también están disponibles aquí.';
+          list.append(info);
+          const actions=[
+            ['← Oración anterior',()=>{
+              state.index=Math.max(0,state.index-1);render();$('modal').close();
+            }],
+            ['Avanzar oración →',()=>{
+              advance();$('modal').close();
+            }],
+            ['Probar teclas de volumen',()=>{
+              $('modal').close();
+              window.rosarioTestVolume?.();
+            }],
+            ['Abrir ajustes',()=>{$('modal').close();$('settings').click();}]
+          ];
+          actions.forEach(([name,action])=>{
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='nav-item';
+            button.textContent=name;
+            button.onclick=action;
+            list.append(button);
+          });
         } else if (selected === 'voices') {
           const description=document.createElement('p');
           description.className='jac-intro';
@@ -1051,10 +1077,6 @@
     }
 
     // El menú reemplaza el atajo aislado a los misterios: días, misterios y oraciones.
-    const navButton = $('iMysteries');
-    navButton.textContent = 'Navegar';
-    navButton.setAttribute('aria-label', 'Abrir menú de días, misterios y oraciones');
-    navButton.onclick = () => openNavigation('days');
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
     // La configuración general también da acceso a las preferencias de voces.
     const originalSettings = $('settings').onclick;
@@ -1080,6 +1102,15 @@
       };
       controlSetting.append(heading,select);
       $('modalContent').append(controlSetting);
+      const volume=document.createElement('button');
+      volume.type='button';
+      volume.className='voice-settings-link';
+      volume.textContent='Probar teclas de volumen';
+      volume.onclick=()=>{
+        $('modal').close();
+        window.rosarioTestVolume?.();
+      };
+      $('modalContent').append(volume);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'voice-settings-link';
