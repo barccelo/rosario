@@ -244,8 +244,8 @@
     nextSteps.push({ title: 'Padrenuestro', m: 5, intentionNumber: i, intention: intention.intro });
     nextSteps.push({ title: 'Avemaría', m: 5, intentionNumber: i });
     if (intention.rest) nextSteps.push({ title: 'Descansen en paz', m: 5,
-      text: 'Descansen en paz. Amén.' });
-    else nextSteps.push({ title: 'Gloria', m: 5 });
+      intentionNumber: i, text: 'Descansen en paz. Amén.' });
+    else nextSteps.push({ title: 'Gloria', m: 5, intentionNumber: i });
   });
     return nextSteps;
   }
@@ -307,16 +307,18 @@
       old.push({title:'Avemaría',m:5,kind:'dedication',dedication:i}));
     old.push({title:'Salve',m:5},
       {title:'Ruega por nosotros',m:5,kind:'dialogue',verse:'Ruega por nosotros, Santa Madre de Dios.'});
-    litanyLines.forEach((v,i)=>old.push({title:'Letanías',m:5,kind:'litany',litanyIndex:i}));
-    lambLines.forEach((v,i)=>old.push({title:'Cordero de Dios',m:5,kind:'final',part:i}));
+    litanyLines.forEach((v,i)=>old.push({title:'Letanías',m:5,kind:'litany',
+      litanyIndex:i,verse:litanyPairs[i].verse}));
+    lambLines.forEach((v,i)=>old.push({title:'Cordero de Dios',m:5,kind:'final',
+      part:i,verse:'Cordero de Dios, que quitas los pecados del mundo,'}));
     old.push({title:'Bajo tu amparo',m:5},
       {title:'Ruega por nosotros',m:5,kind:'dialogue',verse:'Ruega por nosotros, Santa Madre de Dios.'},
       {title:'Oración final',m:5});
     for(let i=0;i<3;i++){
-      old.push({title:'Intenciones finales',m:5,kind:'intention'});
-      old.push({title:'Padrenuestro',m:5});
-      old.push({title:'Avemaría',m:5});
-      old.push({title:i===2?'Descansen en paz':'Gloria',m:5});
+      old.push({title:'Intenciones finales',m:5,kind:'intention',intentionNumber:i});
+      old.push({title:'Padrenuestro',m:5,intentionNumber:i});
+      old.push({title:'Avemaría',m:5,intentionNumber:i});
+      old.push({title:i===2?'Descansen en paz':'Gloria',m:5,intentionNumber:i});
     }
     return old;
   }
@@ -329,15 +331,24 @@
     const old = buildLegacyVersionFive();
     const prev = old[Math.max(0, Math.min(Number(saved.index) || 0, old.length))];
     restoredIndex = prev ? findStep(prev) : steps.length;
+    if (restoredIndex < 0 && prev?.kind === 'intention')
+      restoredIndex = steps.findIndex(step => step.title === 'Padrenuestro' &&
+        step.m === 5 && step.intentionNumber === prev.intentionNumber);
     if (restoredIndex < 0 && prev)
-      restoredIndex = steps.findIndex(step => step.title === prev.title && step.m === prev.m && step.n === prev.n);
+      restoredIndex = steps.findIndex(step => step.title === prev.title &&
+        step.m === prev.m && step.n === prev.n &&
+        (prev.litanyIndex === undefined || step.litanyIndex === prev.litanyIndex));
   } else if (Number(saved.sequenceVersion) === 4) {
     const legacySteps = buildLegacyVersionFive();
     const original = legacySteps[Math.max(0, Math.min(Number(saved.index) || 0, legacySteps.length))];
     restoredIndex = original ? findStep(original) : steps.length;
+    if (restoredIndex < 0 && original?.kind === 'intention')
+      restoredIndex = steps.findIndex(step => step.title === 'Padrenuestro' &&
+        step.m === 5 && step.intentionNumber === original.intentionNumber);
     if (restoredIndex < 0 && original)
       restoredIndex = steps.findIndex(step => step.title === original.title &&
-        step.m === original.m && step.n === original.n);
+        step.m === original.m && step.n === original.n &&
+        (original.litanyIndex === undefined || step.litanyIndex === original.litanyIndex));
     if (restoredIndex < 0 && original && original.m >= 0 && original.m < 5)
       restoredIndex = steps.findIndex(step => step.kind === 'mystery' && step.m === original.m + 1);
   } else if (!previousStep) {
