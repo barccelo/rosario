@@ -32,3 +32,10 @@ Para evaluar en el teléfono:
 3. Si se prepara una app Android, implementar pantalla inmersiva y teclas de volumen en la capa nativa, reutilizando esta interfaz.
 
 Esta primera importación no incluye APK, contenedor Android ni configuración de GitHub Pages. El progreso usa almacenamiento local: no se transfiere automáticamente entre el dominio de Sites y otro dominio o una app instalada.
+
+
+## Estructura y lectura (octubre de 2026)
+
+La secuencia sigue el orden del [Santo Rosario en el devocionario de Opus Dei](https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145), con personalizaciones solicitadas para esta aplicación. Comienza con la **Estación al Santísimo Sacramento** («Alabado sea el Santísimo Sacramento del Altar / Sea por siempre bendito y alabado»), tomada del TXT aportado, tres tandas de Padrenuestro, Avemaría y Gloria, comunión espiritual, Señal de la cruz, Señor mío Jesucristo, versículos iniciales y Gloria. Después se anuncian los cinco misterios del día con meditación optativa, se rezan las decenas y, al final, las tres Avemarías, Salve, respuesta, letanías, Cordero de Dios, Bajo tu amparo, oración final e intenciones. Se mantienen Salve y respuesta separadas, por indicación del usuario.
+
+El menú permanente de tres líneas de la esquina superior abre **Días**, **Misterios**, **Oraciones** y **Texto**. En Texto, la lectura puede justificarse, alinearse a la izquierda, centrarse o alinearse a la derecha; esta preferencia se guarda localmente. V/ y R/ se presentan como marcas visuales diferenciadas en las intervenciones de diálogo y en las letanías.
