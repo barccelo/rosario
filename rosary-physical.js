@@ -7,11 +7,11 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-6';
+    css.href='rosary-physical.css?v=20261015-8';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
-    const HEIGHT=2670,TOP=320,MEDAL_Y=2104,CROSS_Y=2533;
+    const HEIGHT=2670,TOP=54,MEDAL_Y=2104,CROSS_Y=2533;
     const FRONT_END=27;
     // La cuenta grande del nacimiento del aro es la misma del regreso.
     // El colgante contiene sólo CUATRO cuentas adicionales: tres pequeñas
@@ -50,6 +50,9 @@
         attributes+' aria-label="'+label+'">'+
         '<circle class="physical-hit" cx="'+format(x)+'" cy="'+format(y)+
         '" r="'+Math.max(29,r+8)+'"/>'+
+        // Placa opaca: nunca deja pasar el hilo, aun si la cuenta es gris.
+        '<circle class="physical-occluder" cx="'+format(x)+'" cy="'+format(y)+
+        '" r="'+(r+3)+'"/>'+
         '<circle class="halo" cx="'+format(x)+'" cy="'+format(y)+
         '" r="'+(r+16)+'" fill="url(#physicalHalo)"/>'+
         '<circle class="ring" cx="'+format(x)+'" cy="'+format(y)+'" r="'+r+'"/>'+
@@ -69,8 +72,12 @@
     }
     function draw(){
       const width=Math.max(320,document.documentElement.clientWidth);
-      const center=Math.max(84,Math.min(123,width*.225));
-      const leftX=center-23,rightX=center+23;
+      // La cadena permanece junto al borde izquierdo, sin invadir
+      // el texto; hay espacio entre dos cuentas grandes.
+      const railWidth=width*.42;
+      const separation=Math.min(66,Math.max(56,railWidth-72));
+      const center=Math.max(74,Math.min(88,railWidth-27-separation/2));
+      const leftX=center-separation/2,rightX=center+separation/2;
       crossX=center;
       // 55 cuentas únicas. La primera es una sola cuenta grande,
       // compartida por el comienzo y el cierre de la quinta decena.
@@ -98,6 +105,11 @@
         const c2={x:to.x-(next.x-from.x)/6,y:to.y-(next.y-from.y)/6};
         return'M '+at(from)+' C '+at(c1)+' '+at(c2)+' '+at(to);
       }
+      function topTurn(left,right){
+        // Arco redondeado en la parte superior, no una línea recta.
+        return'M '+at(left)+' C '+format(left.x)+' '+format(left.y-90)+
+          ' '+format(right.x)+' '+format(right.y-90)+' '+at(right);
+      }
       const body=[
         '<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
         '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient></defs>'
@@ -110,12 +122,23 @@
         const to=positions[(i+1)%55];
         const next=positions[(i+2)%55];
         lines+='<path class="physical-link physical-loop-link" data-link="'+i+
-          '" d="'+curvedSegment(previous,from,to,next)+'"/>';
+          '" d="'+(i===FRONT_END?topTurn(from,to):
+            curvedSegment(previous,from,to,next))+'"/>';
       });
       lines+='</g>';
       body.push(lines);
-      // Las cuentas del aro se dibujan una sola vez. La cuenta cero es
-      // compartida entre el colgante y las dos ramas del óvalo.
+      // Todos los hilos van detrás de todas las cuentas. Antes, la
+      // cuerda del colgante atravesaba la cuenta grande compartida.
+      let pendantWire='<g class="physical-pendant-links">';
+      const tail=[positions[0],...introPoints,{x:center,y:CROSS_Y-54}];
+      tail.slice(0,-1).forEach((from,i)=>{
+        const previous=tail[Math.max(0,i-1)];
+        const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
+        pendantWire+='<path class="physical-link physical-intro-link" d="'+
+          curvedSegment(previous,from,to,next)+'"/>';
+      });
+      body.push(pendantWire+'</g>');
+      // Las cuentas del aro se dibujan una sola vez.
       let beads='<g class="physical-loop-beads">';
       positions.forEach((p,i)=>{
         const big=i%11===0;
@@ -130,13 +153,6 @@
       // El colgante arranca exactamente en la cuenta compartida, sin
       // medallón ni cuenta grande adicional.
       let pendant='<g class="physical-pendant">';
-      const tail=[positions[0],...introPoints,{x:center,y:CROSS_Y-54}];
-      tail.slice(0,-1).forEach((from,i)=>{
-        const previous=tail[Math.max(0,i-1)];
-        const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
-        pendant+='<path class="physical-link physical-intro-link" d="'+
-          curvedSegment(previous,from,to,next)+'"/>';
-      });
       introPoints.forEach((p,i)=>{
         pendant+=beadMarkup(p.x,p.y,p.r,'data-intro="'+i+'"',
           i<3?'Cuenta pequeña introductoria '+(i+1):
