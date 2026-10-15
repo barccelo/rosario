@@ -160,3 +160,134 @@
   .immersive-prayer .meditation-tools button{font-size:12px;padding:9px 11px}
 }
 @media(max-height:650px){.immersive-prayer.has-decade-context{top:calc(env(safe-area-inset-top,0px) + 28dvh)!important}.rosary-mystery-context{top:calc(env(safe-area-inset-top,0px) + 10dvh)!important}}
+
+
+/* 2026-10-15: Encabezado y oración forman un solo bloque, sin hueco intermedio. */
+.rosary{touch-action:pan-y!important}
+.immersive-prayer{
+  top:calc(env(safe-area-inset-top,0px) + clamp(82px,9dvh,126px))!important;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 20px)!important;
+  align-items:stretch!important;
+  justify-content:safe center!important;
+  touch-action:pan-y!important;
+  overscroll-behavior-y:contain!important;
+}
+.immersive-prayer.can-swipe{touch-action:none!important}
+.immersive-prayer.has-decade-context,
+.immersive-prayer.is-mystery-announcement{
+  top:calc(env(safe-area-inset-top,0px) + clamp(82px,9dvh,126px))!important;
+}
+.immersive-prayer .rosary-mystery-context,
+.immersive-prayer .rosary-mystery-context:not([hidden]){
+  position:static!important;
+  display:flex!important;
+  flex:0 0 auto!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  inset:auto!important;
+  transform:none!important;
+  gap:10px!important;
+  padding:0 2px!important;
+  margin:0 0 clamp(16px,3dvh,32px)!important;
+  border:0!important;
+  outline-offset:4px;
+  border-radius:14px;
+  background:transparent!important;
+  color:inherit;
+  font:inherit;
+  text-align:center;
+  white-space:normal;
+  cursor:pointer;
+  pointer-events:auto!important;
+}
+.immersive-prayer .rosary-mystery-context[hidden]{display:none!important}
+.immersive-prayer .rosary-mystery-badge{
+  pointer-events:none!important;
+  flex:0 0 auto;
+  width:40px;height:40px;
+  margin:0!important;
+  border:1px solid #b69a6c;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font:600 16px Georgia,serif;
+  color:#bca171;
+}
+.immersive-prayer .rosary-mystery-name{
+  display:block;
+  font:500 var(--rosary-secondary-font,19px)/1.28 Georgia,serif;
+  text-wrap:balance;
+  color:#c6c9be;
+}
+.immersive-prayer .rosary-mystery-context:focus-visible{outline:2px solid #c2a371}
+.immersive-prayer .rosary-mystery-context:active{opacity:.75}
+.immersive-prayer .meditation-tools{
+  align-self:stretch!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  text-align:center!important;
+  margin:clamp(16px,3dvh,28px) auto 2px!important;
+}
+.immersive-prayer .meditation-tools[hidden]{display:none!important}
+.immersive-prayer .meditation-tools button{
+  margin:0 auto!important;
+  text-align:center!important;
+  justify-content:center!important;
+}
+.immersive-prayer.is-mystery-announcement #immersiveText{
+  text-align:center!important;
+}
+.immersive-prayer .mystery-announcement-label{
+  display:block!important;
+  margin-bottom:14px!important;
+  text-align:center;
+}
+.immersive-prayer .mystery-announcement-link{
+  display:block;
+  width:100%;
+  padding:2px 0;
+  margin:0 auto;
+  background:transparent;
+  border:0;
+  text-align:center;
+  font-family:Georgia,serif;
+  cursor:pointer;
+}
+.immersive-prayer .mystery-announcement-link:focus-visible{
+  border-radius:7px;outline:2px solid #bda06b;outline-offset:4px;
+}
+.reading-prayer-heading{
+  display:block;
+  width:100%;
+  margin:0 0 20px;
+  font:600 clamp(18px,2.5vw,24px)/1.4 Georgia,serif;
+  text-align:center;
+  color:#bea271;
+  text-wrap:balance;
+}
+.dark .reading-prayer-heading{color:#d3b883}
+.prayer-part.voice-assembly,
+.dialogue-line.voice-assembly,
+.litany-wheel .wheel-response{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+.immersive-prayer .quiet-count{align-self:stretch}
+@media(max-width:430px){
+  .immersive-prayer,
+  .immersive-prayer.has-decade-context,
+  .immersive-prayer.is-mystery-announcement{
+    top:calc(env(safe-area-inset-top,0px) + clamp(80px,8dvh,115px))!important;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 20px)!important;
+  }
+  .immersive-prayer .rosary-mystery-name{font-size:var(--rosary-secondary-font,18px)}
+  .immersive-prayer .rosary-mystery-context{gap:8px!important}
+}
+/* Sólo se ve el punto compacto: menú y tamaño se esconden con la barra. */
+.top-controls[hidden]{display:none!important}
+.nav-fullscreen-quick,.font-controls-compact{display:none!important}
