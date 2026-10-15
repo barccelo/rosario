@@ -155,6 +155,19 @@
   const previousSteps = steps.slice();
   const previousIndex = Math.max(0, Math.min(Number(state.index) || 0, previousSteps.length));
   const previousStep = previousSteps[previousIndex];
+  // Jaculatorias configurables, conservadas entre aperturas.
+  const validJaculatorias = ['maria', 'fatima'];
+  state.jaculatorias = Array.isArray(saved.jaculatorias)
+    ? validJaculatorias.filter(id => saved.jaculatorias.includes(id))
+    : ['maria'];
+  prayers['Alabanzas y gracias'] =
+    'Alabanzas y gracias sean dadas en todo momento al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
+    'Y bendita sea por siempre la Santa e Inmaculada Concepción de la Bienaventurada siempre Virgen María, Madre de Dios y Madre nuestra.';
+  prayers['Jaculatoria de Fátima'] =
+    'Oh Jesús mío, perdona nuestras culpas, presérvanos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.';
+  const originalAvemaria = prayers.Avemaría;
+
+  function buildRosarySteps(legacy = false) {
   // Estación, comunión espiritual y oraciones introductorias.
   const nextSteps = [{ ...stationPair }];
   for (let i = 0; i < 3; i++) {
@@ -176,14 +189,22 @@
     nextSteps.push({ title: 'Padrenuestro', m, bead: m * 11 });
     for (let n = 1; n <= 10; n++) nextSteps.push({ title: 'Avemaría', m, n, bead: m * 11 + n });
     nextSteps.push({ title: 'Gloria', m });
-    nextSteps.push({ title: 'Jaculatoria', m });
+    const selected = legacy ? ['maria'] : state.jaculatorias;
+    for (const id of selected) {
+      if (id === 'maria') {
+        nextSteps.push({ title: 'Jaculatoria', m, kind: 'jaculatory' });
+        if (!legacy) nextSteps.push({ title: 'Alabanzas y gracias', m, kind: 'praise' });
+      } else if (id === 'fatima') {
+        nextSteps.push({ title: 'Jaculatoria de Fátima', m, kind: 'jaculatory' });
+      }
+    }
   }
   // Las tres Avemarías finales figuran antes de las letanías en el devocionario.
   [
     'Hija de Dios Padre', 'Madre de Dios Hijo', 'Esposa de Dios Espíritu Santo'
   ].forEach((invocation, i) => nextSteps.push({
     title: 'Avemaría', m: 5, kind: 'dedication', dedication: i,
-    text: prayers.Avemaría.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
+    text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
   }));
   // Se conservan la Salve y su respuesta como oraciones independientes.
   nextSteps.push({ title: 'Salve', m: 5 });
@@ -216,11 +237,39 @@
       text: 'Descansen en paz. Amén.' });
     else nextSteps.push({ title: 'Gloria', m: 5 });
   });
-  steps = nextSteps;
+    return nextSteps;
+  }
+  steps = buildRosarySteps();
+
+  // Identifica una oración sin depender de su índice tras cambios de secuencia.
+  const sameStep = (a, b) => a && b && a.title === b.title && a.m === b.m &&
+    a.n === b.n && a.kind === b.kind && a.stationNumber === b.stationNumber &&
+    a.dedication === b.dedication && a.litanyIndex === b.litanyIndex &&
+    a.part === b.part && a.verse === b.verse;
+  const findStep = previous => steps.findIndex(step => sameStep(step, previous));
+  function updateJaculatorias(ids) {
+    const current = steps[state.index];
+    const oldIndex = state.index;
+    state.jaculatorias = validJaculatorias.filter(id => ids.includes(id));
+    steps = buildRosarySteps();
+    let next = findStep(current);
+    if (next < 0 && current && current.m >= 0 && current.m < 5)
+      next = steps.findIndex(step => step.kind === 'mystery' && step.m === current.m + 1);
+    if (next < 0) next = Math.min(oldIndex, steps.length);
+    state.index = next;
+    state.sequenceVersion = 5;
+    render();
+  }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 4) {
+  if (Number(saved.sequenceVersion) >= 5) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 4) {
+    const legacySteps = buildRosarySteps(true);
+    const original = legacySteps[Math.max(0, Math.min(Number(saved.index) || 0, legacySteps.length))];
+    restoredIndex = original ? findStep(original) : steps.length;
+    if (restoredIndex < 0 && original && original.m >= 0 && original.m < 5)
+      restoredIndex = steps.findIndex(step => step.kind === 'mystery' && step.m === original.m + 1);
   } else if (!previousStep) {
     restoredIndex = steps.length;
   } else if (previousStep.kind === 'litany') {
@@ -232,9 +281,9 @@
       (previousStep.kind !== 'mystery' || item.kind === 'mystery')
     );
   }
-  state.index = Number.isFinite(restoredIndex)
+  state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 4;
+  state.sequenceVersion = 5;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -246,9 +295,13 @@
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
 
+  const mysterySingular = {
+    Gozosos: 'gozoso', Dolorosos: 'doloroso',
+    Gloriosos: 'glorioso', Luminosos: 'luminoso'
+  };
   const announcement = step => {
     const ordinals = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto'];
-    return 'En el ' + ordinals[step.m] + ' misterio ' + state.group.toLowerCase() +
+    return 'En el ' + ordinals[step.m] + ' misterio ' + mysterySingular[state.group] +
       ' contemplamos:\n\n' + groups[state.group][step.m] + '.';
   };
   const stepText = step => {
@@ -263,11 +316,11 @@
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
       if (step.kind === 'dialogue') prayers[step.title] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.title === 'Avemaría' && step.kind !== 'dedication') prayers.Avemaría = originalAvemaria;
       if (step.kind === 'dedication' || step.kind === 'intention') prayers[step.title] = step.text;
       if (step.title === 'Descansen en paz') prayers[step.title] = step.text;
       if (step.kind === 'litany') prayers['Letanías'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
       if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = 'V/ ' + step.verse + '\nR/ ' + step.response;
-      if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = step.text;
     }
     rawRender();
     if (step && step.kind === 'mystery') {
@@ -343,10 +396,8 @@
     const meditationBox = document.createElement('div');
     meditationBox.className = 'meditation-tools';
     meditationBox.hidden = true;
-    meditationBox.innerHTML = '<button type="button" id="meditationToggle" aria-expanded="false">Ver meditación ⌄</button>' +
-      '<div class="meditation-copy" id="meditationCopy" hidden></div>';
+    meditationBox.innerHTML = '<button type="button" id="meditationToggle" aria-label="Leer meditación completa">Ver meditación <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>';
     reading.insertBefore(meditationBox, $('immersiveCount'));
-    let openMeditationAt = -1;
 
     function litanyLabel(line) {
       return line.replace(/, ruega por nosotros\.$/, '');
@@ -373,7 +424,6 @@
     }
     function goTo(index) {
       state.index = Math.max(0, Math.min(index, steps.length));
-      openMeditationAt = -1;
       render();
       if ($('modal').open) $('modal').close();
       const toolbar = document.querySelector('.prayer-toolbar');
@@ -387,8 +437,15 @@
       else advance();
     };
     $('meditationToggle').onclick = () => {
-      openMeditationAt = openMeditationAt === state.index ? -1 : state.index;
-      updateEnhancements();
+      const step = steps[state.index];
+      if (!step || step.kind !== 'mystery') return;
+      const complete = window.rosaryFullMeditations?.[state.group]?.[step.m];
+      const text = complete || meditations[state.group]?.[step.m] || '';
+      show('<div class="meditation-dialog"><div class="meditation-kicker">Meditación · Misterio ' +
+        (step.m + 1) + '</div><h2 id="meditationTitle"></h2><div class="meditation-full" id="meditationFull"></div></div>');
+      $('meditationTitle').textContent = groups[state.group][step.m];
+      $('meditationFull').textContent = text;
+      $('modal').scrollTop = 0;
     };
 
     const immersiveRender = render;
@@ -416,13 +473,7 @@
         $('litanyNext').textContent = i < litanyLines.length - 1 ? litanyPairs[i + 1].verse : '';
         $('litanyNext').disabled = i === litanyLines.length - 1;
       }
-      if (isAnnouncement) {
-        const expanded = openMeditationAt === state.index;
-        $('meditationToggle').textContent = expanded ? 'Ocultar meditación ⌃' : 'Ver meditación ⌄';
-        $('meditationToggle').setAttribute('aria-expanded', String(expanded));
-        $('meditationCopy').hidden = !expanded;
-        $('meditationCopy').textContent = expanded ? meditations[state.group][step.m] : '';
-      }
+      if (isAnnouncement) $('meditationToggle').setAttribute('aria-label', 'Leer meditación completa del misterio');
       // Mientras se anuncian los misterios, centrar la cuenta de su decena.
       if (isAnnouncement && typeof chain !== 'undefined') {
         const bead = step.m * 11;
@@ -460,6 +511,7 @@
         '<button type="button" data-nav="days" role="tab">Días</button>' +
         '<button type="button" data-nav="mysteries" role="tab">Misterios</button>' +
         '<button type="button" data-nav="prayers" role="tab">Oraciones</button>' +
+        '<button type="button" data-nav="jaculatorias" role="tab">Jaculatorias</button>' +
         '<button type="button" data-nav="text" role="tab">Texto</button></div>' +
         '<div class="nav-list" id="navList"></div>');
       function fill(selected) {
@@ -496,6 +548,8 @@
             ['Avemaría', 'Diez veces por misterio'],
             ['Gloria', 'Al terminar la decena'],
             ['Jaculatoria', 'María, Madre de gracia'],
+            ['Alabanzas y gracias', 'Después de María, Madre de gracia'],
+            ['Jaculatoria de Fátima', 'Oh Jesús mío'],
             ['Tres Avemarías', 'Al terminar los cinco misterios'],
             ['Salve', 'Oración final de los cinco misterios'],
             ['Ruega por nosotros', 'Respuesta a la Virgen'],
@@ -514,6 +568,37 @@
             appendOption(list, title === 'Jaculatoria' ? 'María, Madre de gracia' : title, subtitle, () => goTo(closest),
               steps[state.index]?.title === title);
           });
+        } else if (selected === 'jaculatorias') {
+          const info = document.createElement('p');
+          info.className = 'jac-intro';
+          info.textContent = 'Elige las jaculatorias que se rezarán después del Gloria de cada misterio. Se utilizarán en el orden indicado.';
+          list.append(info);
+          [
+            ['maria', 'María, Madre de gracia', prayers.Jaculatoria],
+            ['fatima', 'Oh Jesús mío', prayers['Jaculatoria de Fátima']]
+          ].forEach(([id, label, content]) => {
+            const row = document.createElement('label');
+            row.className = 'jac-choice';
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.checked = state.jaculatorias.includes(id);
+            const section = document.createElement('span');
+            const title = document.createElement('strong');
+            title.textContent = label;
+            const preview = document.createElement('small');
+            preview.textContent = content;
+            section.append(title, preview);
+            row.append(check, section);
+            check.onchange = () => {
+              updateJaculatorias(check.checked
+                ? [...state.jaculatorias, id] : state.jaculatorias.filter(value => value !== id));
+            };
+            list.append(row);
+          });
+          const notice = document.createElement('p');
+          notice.className = 'jac-intro';
+          notice.textContent = '«Alabanzas y gracias» se reza siempre después de «María, Madre de gracia» cuando esta esté seleccionada.';
+          list.append(notice);
         } else if (selected === 'text') {
           const modes = [
             ['justify', 'Justificar'], ['left', 'Izquierda'],
@@ -560,8 +645,24 @@
     quickNav.title = 'Navegar por el rosario';
     quickNav.setAttribute('aria-label', 'Abrir menú de navegación');
     quickNav.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
-    document.body.append(quickNav);
+    // Controles agrupados: el icono de menú comparte la misma barra que tema y pantalla.
+    quickNav.classList.add('top-control');
+    quickNav.classList.remove('nav-quick');
+    document.querySelector('.top-controls').prepend(quickNav);
     quickNav.onclick = () => openNavigation('days');
+
+    const fullscreenMenu = quickNav.cloneNode(true);
+    fullscreenMenu.id = 'iNavigateFullscreen';
+    fullscreenMenu.className = 'nav-fullscreen-quick';
+    fullscreenMenu.hidden = true;
+    document.body.append(fullscreenMenu);
+    fullscreenMenu.onclick = () => openNavigation('days');
+    const syncMenu = () => {
+      fullscreenMenu.hidden = !(document.fullscreenElement && document.querySelector('.top-controls').hidden);
+    };
+    new MutationObserver(syncMenu).observe(document.querySelector('.top-controls'), { attributes: true, attributeFilter: ['hidden'] });
+    document.addEventListener('fullscreenchange', syncMenu);
+    syncMenu();
     $('allMysteries').onclick = () => openNavigation('mysteries');
 
     // El devocionario conserva las letanías completas como texto de consulta.
