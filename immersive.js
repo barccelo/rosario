@@ -163,7 +163,9 @@ document.addEventListener('pointerdown',event=>{
   const bead=event.target.closest('.focus-bead');
   const scrollPane=event.target.closest('.immersive-prayer');
   const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
-  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,readingScroll};
+  const scrollTop=scrollPane?.scrollTop||0;
+  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,
+    readingScroll,scrollTop,scrollPane};
   if(bead)holdTimeout=setTimeout(()=>{
     if(!gesture||gesture.moved||$('modal').open)return;
     gesture.held=true;suppressClickUntil=performance.now()+800;
@@ -182,13 +184,47 @@ document.addEventListener('pointerup',event=>{
   cancelGesture();
   if(current.held||current.moved)suppressClickUntil=performance.now()+800;
   if($('modal').open||current.held)return;
-  // Un texto extenso se desplaza con el dedo; no se toma como cambio de cuenta.
-  if(current.readingScroll)return;
+  // Un texto largo primero se desplaza: no saltar de oración mientras se lee.
+  // En sus límites se permite el avance/retroceso con otro deslizamiento.
+  if(current.readingScroll){
+    const pane=current.scrollPane;
+    const atStart=current.scrollTop<=2;
+    const atEnd=current.scrollTop>=pane.scrollHeight-pane.clientHeight-2;
+    const movedScroll=Math.abs(pane.scrollTop-current.scrollTop)>5;
+    if(movedScroll || !(dy>45&&atStart || dy< -45&&atEnd))return;
+  }
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
     if(dy<0)advance();else{state.index=Math.max(0,state.index-1);render();}
   }
 },true);
+// En móvil, el navegador puede cancelar pointerup cuando activa pan-y.
+// touchend permite continuar desde el principio o final de un texto extenso.
+let touchReading=null;
+reading.addEventListener('touchstart',event=>{
+  if(event.touches.length!==1 || $('modal').open){touchReading=null;return;}
+  const t=event.touches[0],overflow=reading.scrollHeight>reading.clientHeight+2;
+  touchReading={y:t.clientY,x:t.clientX,scrollTop:reading.scrollTop,overflow,
+    startedAtTop:reading.scrollTop<=2,
+    startedAtBottom:reading.scrollTop>=reading.scrollHeight-reading.clientHeight-2};
+},{passive:true,capture:true});
+reading.addEventListener('touchend',event=>{
+  if(!touchReading||!touchReading.overflow||$('modal').open)return;
+  const info=touchReading;touchReading=null;
+  const t=event.changedTouches[0];if(!t)return;
+  const dy=t.clientY-info.y,dx=t.clientX-info.x;
+  if(Math.abs(dy)<=60 || Math.abs(dy)<=Math.abs(dx))return;
+  // Sólo un swipe cuyo inicio y fin estaban en el mismo límite es navegación.
+  if(Math.abs(reading.scrollTop-info.scrollTop)>5)return;
+  const back=dy>0&&info.startedAtTop;
+  const next=dy<0&&info.startedAtBottom;
+  if(!back&&!next)return;
+  suppressClickUntil=performance.now()+850;
+  cancelGesture();
+  if(next)advance();else{state.index=Math.max(0,state.index-1);render();}
+},{passive:true,capture:true});
+for(const name of ['touchcancel'])
+  reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
 document.addEventListener('pointercancel',cancelGesture,true);
 window.addEventListener('blur',cancelGesture);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGesture()});
