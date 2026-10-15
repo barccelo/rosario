@@ -31,7 +31,15 @@
         window.rosarioOpenMeditation?.(step.m);
     };
 
-    // Controles visibles en la barra y, sin barra expandida, cerca del menú compacto.
+    // La oración corta usa swipes; la oración larga utiliza el scroll nativo.
+    function refreshReadingGesture(){
+      reading.classList.toggle('can-swipe',
+        reading.scrollHeight <= reading.clientHeight + 3);
+    }
+    sheet.addEventListener('load',()=>requestAnimationFrame(refreshReadingGesture));
+    window.addEventListener('resize',()=>requestAnimationFrame(refreshReadingGesture));
+
+    // Los botones de tamaño comparten la misma barra con el menú.
     function makeSizeButton(sign) {
       const button = document.createElement('button');
       button.type = 'button';
@@ -43,6 +51,7 @@
         state.textScale = Math.max(.75, Math.min(1.65,
           Math.round((state.textScale + sign * .1) * 100) / 100));
         applyPrefs();
+        requestAnimationFrame(refreshReadingGesture);
         persist();
       };
       return button;
@@ -222,6 +231,7 @@
         appendWithAmen(prayer,'Has terminado el rosario. Que la paz te acompañe.');
       }
       document.getElementById('readFull').hidden=true;
+      requestAnimationFrame(refreshReadingGesture);
     }
     function makeCross(){
       const cross=document.createElement('span');
