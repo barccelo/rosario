@@ -156,10 +156,10 @@
   const previousIndex = Math.max(0, Math.min(Number(state.index) || 0, previousSteps.length));
   const previousStep = previousSteps[previousIndex];
   // Jaculatorias configurables, conservadas entre aperturas.
-  const validJaculatorias = ['maria', 'fatima'];
+  const validJaculatorias = ['maria', 'fatima', 'alabanzas'];
   state.jaculatorias = Array.isArray(saved.jaculatorias)
     ? validJaculatorias.filter(id => saved.jaculatorias.includes(id))
-    : ['maria'];
+    : ['maria', 'alabanzas'];
   prayers['Alabanzas y gracias'] =
     'Alabanzas y gracias sean dadas en todo momento al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
     'Y bendita sea por siempre la Santa e Inmaculada Concepción de la Bienaventurada siempre Virgen María, Madre de Dios y Madre nuestra.';
@@ -169,43 +169,51 @@
 
   function buildRosarySteps(legacy = false) {
   // Estación, comunión espiritual y oraciones introductorias.
-  const nextSteps = [{ ...stationPair }];
+  const nextSteps = [];
+  // Estación completa tres veces: invocación, Padrenuestro, Avemaría y Gloria.
   for (let i = 0; i < 3; i++) {
+    nextSteps.push({ ...stationPair, stationNumber: i + 1 });
     nextSteps.push({ title: 'Padrenuestro', m: -1, stationNumber: i + 1 });
     nextSteps.push({ title: 'Avemaría', m: -1, stationNumber: i + 1 });
     nextSteps.push({ title: 'Gloria', m: -1, stationNumber: i + 1 });
   }
-  nextSteps.push({ ...stationPair });
   nextSteps.push({ title: 'Comunión espiritual', m: -1 });
   nextSteps.push({ title: 'Señal de la cruz', m: -1 });
   nextSteps.push({ title: 'Señor mío Jesucristo', m: -1 });
-  nextSteps.push({ title: 'Versículos iniciales', kind: 'dialogue', m: -1,
-    verse: 'Señor, ábreme los labios.', response: 'Y mi boca proclamará tu alabanza.' });
-  nextSteps.push({ title: 'Versículos iniciales', kind: 'dialogue', m: -1,
-    verse: 'Dios mío, ven en mi auxilio.', response: 'Señor, date prisa en socorrerme.' });
+  nextSteps.push({ title: 'Versículos iniciales', kind: 'dialogue-group', m: -1,
+    dialogues: [
+      { verse: 'Señor, ábreme los labios.', response: 'Y mi boca proclamará tu alabanza.' },
+      { verse: 'Dios mío, ven en mi auxilio.', response: 'Señor, date prisa en socorrerme.' }
+    ] });
   nextSteps.push({ title: 'Gloria', m: -1 });
   for (let m = 0; m < 5; m++) {
     nextSteps.push({ title: 'Anuncio del misterio', kind: 'mystery', m });
     nextSteps.push({ title: 'Padrenuestro', m, bead: m * 11 });
     for (let n = 1; n <= 10; n++) nextSteps.push({ title: 'Avemaría', m, n, bead: m * 11 + n });
     nextSteps.push({ title: 'Gloria', m });
-    const selected = legacy ? ['maria'] : state.jaculatorias;
+    const selected = legacy ? ['maria', 'alabanzas'] : state.jaculatorias;
     for (const id of selected) {
-      if (id === 'maria') {
-        nextSteps.push({ title: 'Jaculatoria', m, kind: 'jaculatory' });
-        if (!legacy) nextSteps.push({ title: 'Alabanzas y gracias', m, kind: 'praise' });
-      } else if (id === 'fatima') {
-        nextSteps.push({ title: 'Jaculatoria de Fátima', m, kind: 'jaculatory' });
-      }
+      if (id === 'maria') nextSteps.push({ title: 'Jaculatoria', m, kind: 'jaculatory' });
+      if (id === 'alabanzas') nextSteps.push({ title: 'Alabanzas y gracias', m, kind: 'jaculatory' });
+      if (id === 'fatima') nextSteps.push({ title: 'Jaculatoria de Fátima', m, kind: 'jaculatory' });
     }
   }
   // Las tres Avemarías finales figuran antes de las letanías en el devocionario.
   [
-    'Hija de Dios Padre', 'Madre de Dios Hijo', 'Esposa de Dios Espíritu Santo'
-  ].forEach((invocation, i) => nextSteps.push({
-    title: 'Avemaría', m: 5, kind: 'dedication', dedication: i,
-    text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
-  }));
+    { invocation: 'Hija de Dios Padre', occasion: 'antes del parto' },
+    { invocation: 'Madre de Dios Hijo', occasion: 'en el parto' },
+    { invocation: 'Esposa de Dios Espíritu Santo', occasion: 'después del parto' }
+  ].forEach(({ invocation, occasion }, i) => {
+    nextSteps.push({
+      title: 'Virgen purísima y castísima', kind: 'dialogue', m: 5, dedication: i,
+      verse: 'Virgen purísima y castísima, ' + occasion + ', hacednos mansos, humildes y castos.',
+      response: 'En pensamiento, palabra y obra.'
+    });
+    nextSteps.push({
+      title: 'Avemaría', m: 5, kind: 'dedication', dedication: i,
+      text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
+    });
+  });
   // Se conservan la Salve y su respuesta como oraciones independientes.
   nextSteps.push({ title: 'Salve', m: 5 });
   nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
@@ -229,10 +237,10 @@
     { name: 'La Iglesia y el Estado', intro: 'Por las necesidades de la Iglesia y del Estado:', rest: false },
     { name: 'El obispo', intro: 'Por la persona e intenciones del obispo de esta diócesis:', rest: false },
     { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:', rest: true }
-  ].forEach(intention => {
-    nextSteps.push({ title: 'Intenciones finales', m: 5, kind: 'intention', text: intention.intro });
-    nextSteps.push({ title: 'Padrenuestro', m: 5 });
-    nextSteps.push({ title: 'Avemaría', m: 5 });
+  ].forEach((intention, i) => {
+    // Resaltar la intención junto a la oración siguiente, sin un swipe redundante.
+    nextSteps.push({ title: 'Padrenuestro', m: 5, intentionNumber: i, intention: intention.intro });
+    nextSteps.push({ title: 'Avemaría', m: 5, intentionNumber: i });
     if (intention.rest) nextSteps.push({ title: 'Descansen en paz', m: 5,
       text: 'Descansen en paz. Amén.' });
     else nextSteps.push({ title: 'Gloria', m: 5 });
@@ -245,7 +253,8 @@
   const sameStep = (a, b) => a && b && a.title === b.title && a.m === b.m &&
     a.n === b.n && a.kind === b.kind && a.stationNumber === b.stationNumber &&
     a.dedication === b.dedication && a.litanyIndex === b.litanyIndex &&
-    a.part === b.part && a.verse === b.verse;
+    a.part === b.part && a.verse === b.verse &&
+    a.intentionNumber === b.intentionNumber;
   const findStep = previous => steps.findIndex(step => sameStep(step, previous));
   function updateJaculatorias(ids) {
     const current = steps[state.index];
@@ -260,13 +269,66 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 5;
+    state.sequenceVersion = 6;
     render();
   }
 
+  function buildLegacyVersionFive() {
+    // Reproduce los pasos de la versión anterior para migrar sin variar la oración.
+    const old = [];
+    old.push({ ...stationPair });
+    for (let i = 0; i < 3; i++) {
+      old.push({ title:'Padrenuestro',m:-1,stationNumber:i+1 });
+      old.push({ title:'Avemaría',m:-1,stationNumber:i+1 });
+      old.push({ title:'Gloria',m:-1,stationNumber:i+1 });
+    }
+    old.push({ ...stationPair }, { title:'Comunión espiritual',m:-1 },
+      { title:'Señal de la cruz',m:-1 }, { title:'Señor mío Jesucristo',m:-1 });
+    old.push({ title:'Versículos iniciales',kind:'dialogue',m:-1,
+      verse:'Señor, ábreme los labios.' });
+    old.push({ title:'Versículos iniciales',kind:'dialogue',m:-1,
+      verse:'Dios mío, ven en mi auxilio.' });
+    old.push({ title:'Gloria',m:-1 });
+    for(let m=0;m<5;m++){
+      old.push({ title:'Anuncio del misterio',kind:'mystery',m });
+      old.push({ title:'Padrenuestro',m,bead:m*11 });
+      for(let n=1;n<=10;n++)old.push({ title:'Avemaría',m,n,bead:m*11+n });
+      old.push({title:'Gloria',m});
+      const ids=Array.isArray(saved.jaculatorias)?saved.jaculatorias:['maria'];
+      ids.forEach(id=>{
+        if(id==='maria'){old.push({title:'Jaculatoria',m,kind:'jaculatory'});
+          old.push({title:'Alabanzas y gracias',m,kind:'praise'});}
+        if(id==='fatima')old.push({title:'Jaculatoria de Fátima',m,kind:'jaculatory'});
+      });
+    }
+    ['Hija de Dios Padre','Madre de Dios Hijo','Esposa de Dios Espíritu Santo'].forEach((inv,i)=>
+      old.push({title:'Avemaría',m:5,kind:'dedication',dedication:i}));
+    old.push({title:'Salve',m:5},
+      {title:'Ruega por nosotros',m:5,kind:'dialogue',verse:'Ruega por nosotros, Santa Madre de Dios.'});
+    litanyLines.forEach((v,i)=>old.push({title:'Letanías',m:5,kind:'litany',litanyIndex:i}));
+    lambLines.forEach((v,i)=>old.push({title:'Cordero de Dios',m:5,kind:'final',part:i}));
+    old.push({title:'Bajo tu amparo',m:5},
+      {title:'Ruega por nosotros',m:5,kind:'dialogue',verse:'Ruega por nosotros, Santa Madre de Dios.'},
+      {title:'Oración final',m:5});
+    for(let i=0;i<3;i++){
+      old.push({title:'Intenciones finales',m:5,kind:'intention'});
+      old.push({title:'Padrenuestro',m:5});
+      old.push({title:'Avemaría',m:5});
+      old.push({title:i===2?'Descansen en paz':'Gloria',m:5});
+    }
+    return old;
+  }
+
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 5) {
+  if (Number(saved.sequenceVersion) >= 6) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 5) {
+    // El índice guardado se refiere a la secuencia anterior.
+    const old = buildLegacyVersionFive();
+    const prev = old[Math.max(0, Math.min(Number(saved.index) || 0, old.length))];
+    restoredIndex = prev ? findStep(prev) : steps.length;
+    if (restoredIndex < 0 && prev)
+      restoredIndex = steps.findIndex(step => step.title === prev.title && step.m === prev.m && step.n === prev.n);
   } else if (Number(saved.sequenceVersion) === 4) {
     const legacySteps = buildRosarySteps(true);
     const original = legacySteps[Math.max(0, Math.min(Number(saved.index) || 0, legacySteps.length))];
@@ -286,7 +348,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 5;
+  state.sequenceVersion = 6;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -319,6 +381,8 @@
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
       if (step.kind === 'dialogue') prayers[step.title] = 'V/ ' + step.verse + '\nR/ ' + step.response;
+      if (step.kind === 'dialogue-group') prayers[step.title] = step.dialogues
+        .map(part => 'V/ ' + part.verse + '\nR/ ' + part.response).join('\n\n');
       if (step.title === 'Avemaría' && step.kind !== 'dedication') prayers.Avemaría = originalAvemaria;
       if (step.kind === 'dedication' || step.kind === 'intention') prayers[step.title] = step.text;
       if (step.title === 'Descansen en paz') prayers[step.title] = step.text;
@@ -555,6 +619,7 @@
             ['Alabanzas y gracias', 'Después de María, Madre de gracia'],
             ['Jaculatoria de Fátima', 'Oh Jesús mío'],
             ['Tres Avemarías', 'Al terminar los cinco misterios'],
+            ['Virgen purísima y castísima', 'Antes de cada Avemaría final'],
             ['Salve', 'Oración final de los cinco misterios'],
             ['Ruega por nosotros', 'Respuesta a la Virgen'],
             ['Letanías', 'Una invocación por deslizamiento'],
@@ -579,6 +644,7 @@
           list.append(info);
           [
             ['maria', 'María, Madre de gracia', prayers.Jaculatoria],
+            ['alabanzas', 'Alabanzas y gracias', prayers['Alabanzas y gracias']],
             ['fatima', 'Oh Jesús mío', prayers['Jaculatoria de Fátima']]
           ].forEach(([id, label, content]) => {
             const row = document.createElement('label');
@@ -601,7 +667,7 @@
           });
           const notice = document.createElement('p');
           notice.className = 'jac-intro';
-          notice.textContent = '«Alabanzas y gracias» se reza siempre después de «María, Madre de gracia» cuando esta esté seleccionada.';
+          notice.textContent = 'Puedes activar cualquiera de las tres jaculatorias, por separado o en combinación. Se rezarán después del Gloria, en el orden de la lista.';
           list.append(notice);
         } else if (selected === 'text') {
           const modes = [
