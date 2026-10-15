@@ -46,12 +46,18 @@ body.dark .physical-path{
   fill:var(--physical-number)!important;
   opacity:.52;
 }
-.physical-path .physical-loop-link.is-pending{
-  stroke:var(--physical-shadow)!important;
-  opacity:.33!important;
-}
+/* Cada enlace es una línea ABIERTA. Sin fill:none, SVG cierra
+   implícitamente el arco y dibuja triángulos negros en las curvas.
+   La cuerda mantiene el mismo color en el aro y en el colgante:
+   sólo las cuentas cambian de gris a su color al progresar. */
+.physical-path .physical-link,
+.physical-path .physical-loop-link.is-pending,
 .physical-path .physical-loop-link.is-complete{
+  fill:none!important;
   stroke:var(--physical-line)!important;
+  stroke-width:3.5px;
+  stroke-linecap:round;
+  stroke-linejoin:round;
   opacity:1!important;
 }
 .physical-path .physical-bead.is-complete .ring{
