@@ -113,14 +113,12 @@ Una pequeña vista previa en Ajustes permite comprobar los colores antes de volv
 
 La distinción de **Guía** y **Asamblea** continúa siendo independiente de la paleta; las respuestas de la asamblea conservan su dorado configurable. La cadena sigue utilizando el scroll cinético nativo del navegador, sin cambios en el progreso ni en las oraciones.
 
-## Vista experimental «Rosario físico» (octubre de 2026)
+## Vista experimental «Rosario físico»: una sola cadena cerrada (octubre de 2026)
 
-En **Ajustes → Presentación del rosario** se puede elegir entre la **Vista vertical** de siempre y **Rosario físico · experimental**. La preferencia se conserva en `localStorage`; elegir una presentación no altera el progreso ni las oraciones.
+En **Ajustes → Presentación del rosario** puede alternarse entre **Vista vertical** (inalterada) y **Rosario físico · experimental**. La preferencia se guarda localmente y no altera oraciones, progreso ni gestos del texto.
 
-La vista experimental parte de la **cruz en la parte inferior**, como un rosario que cuelga por gravedad. Encima se ven, en orden físico, una cuenta grande, tres pequeñas, otra grande y el medallón de unión. Al seguir avanzando se recorre la zona de las cinco decenas, hasta representar el regreso simbólico a la misma cruz. La cruz se dibuja en los extremos de la representación lineal para hacer visible ese retorno, no para añadir oraciones nuevas.
+Esta versión representa **un solo rosario**, no una cadena acompañada de una sombra inventada. La **única cruz** cuelga abajo de una única sección introductoria: cuenta grande, tres pequeñas, cuenta grande y medallón de unión. Desde ese medallón nace un **aro muy alargado** de 55 cuentas: las primeras 28 ascienden ligeramente por delante y las siguientes 27 regresan **por detrás en gris**, a unos 42 px de distancia horizontal. Ambas ramas se unen de nuevo al **mismo medallón**. Una curva muy estrecha en la parte superior cierra visualmente el circuito.
 
-**Gesto de las cuentas:** desde la cruz inferior, **deslizar el dedo hacia abajo** en la zona izquierda hace subir la cadena hacia el aro. Se utiliza `overflow-y:auto` con scroll cinético nativo del navegador, y la oración de la derecha conserva su navegación normal. Se pueden tocar las cuentas y las cruces para navegar.
+Las cuentas del tramo gris **son cuentas reales de la misma cadena**, pero quedan en segundo plano y no son pulsables mientras se muestran detrás. Al recorrer la otra mitad del rosario, esa rama pasa al frente y la anterior queda atenuada. No existe un segundo rosario, un aro decorativo independiente ni una segunda cruz. La misma cruz es punto inicial y final.
 
-Una **silueta tenue** del rosario completo forma un aro detrás de las cuentas; no es interactiva y se desplaza apenas unos píxeles para sugerir profundidad. No sustituye las cuentas activas. Funciona con los temas Clásico, Misionero y Según los misterios, incluidos los fondos claros y oscuros.
-
-La vista vertical actual permanece disponible y se conserva intacta. Esta alternativa es una prueba visual; la sensación de peso y la transición al aro deben revisarse en un teléfono antes de darla por definitiva.
+La zona izquierda conserva **scroll nativo con inercia** sin cambiar el texto, y las cuentas en primer plano permiten saltar a la oración correspondiente. Se conserva la compatibilidad con los modos Clásico, Misionero y Según los misterios, tanto claros como oscuros. La versión física todavía requiere validación visual y táctil en móvil.
