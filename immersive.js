@@ -12,9 +12,9 @@ topControls.innerHTML='<button id="iTheme" class="top-control" type="button"></b
 document.body.append(topControls);
 const topStyle=document.createElement('style');
 topStyle.textContent=`
-.top-controls{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);z-index:6;display:flex;align-items:center;gap:3px;padding:5px;border:1px solid rgba(119,105,80,.12);border-radius:19px;background:rgba(255,254,250,.82);box-shadow:0 3px 16px rgba(52,43,27,.055),inset 0 1px 0 rgba(255,255,255,.8);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);touch-action:none}
-.top-control{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:14px;background:transparent;color:#56574f;touch-action:none;-webkit-tap-highlight-color:transparent;transition:background .18s,color .18s,transform .18s}
-.top-control svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.top-controls{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:calc(env(safe-area-inset-right,0px) + 16px);z-index:6;display:flex;align-items:center;gap:2px;padding:3px;border:1px solid rgba(119,105,80,.12);border-radius:19px;background:rgba(255,254,250,.82);box-shadow:0 3px 16px rgba(52,43,27,.055),inset 0 1px 0 rgba(255,255,255,.8);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);touch-action:none}
+.top-control{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:14px;background:transparent;color:#56574f;touch-action:none;-webkit-tap-highlight-color:transparent;transition:background .18s,color .18s,transform .18s}
+.top-control svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .top-control:active{transform:scale(.93);background:rgba(121,106,77,.12)}
 .top-control:focus-visible{outline:2px solid #a4875c;outline-offset:2px}
 .top-divider{width:1px;height:18px;background:rgba(119,105,80,.13);margin:0 2px}
@@ -25,6 +25,48 @@ topStyle.textContent=`
 @media(prefers-reduced-motion:reduce){.top-control{transition:none}}
 `;
 document.head.append(topStyle);
+
+const controlsDot=document.createElement('button');
+controlsDot.className='controls-dot';
+controlsDot.type='button';
+controlsDot.setAttribute('aria-label','Mostrar controles de pantalla');
+controlsDot.setAttribute('aria-expanded','false');
+controlsDot.innerHTML='<span aria-hidden="true"></span>';
+controlsDot.hidden=true;
+document.body.append(controlsDot);
+const compactStyle=document.createElement('style');
+compactStyle.textContent=`
+.top-controls[hidden],.controls-dot[hidden]{display:none!important}
+.controls-dot{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 10px);z-index:7;width:40px;height:40px;display:grid;place-items:center;padding:0;border:0;background:transparent;border-radius:50%;color:#8c7957;touch-action:none;-webkit-tap-highlight-color:transparent}
+.controls-dot span{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px #a4875c14}
+.dark .controls-dot{color:#c7b48d}
+.controls-dot:focus-visible{outline:2px solid currentColor;outline-offset:-4px}
+`;
+document.head.append(compactStyle);
+let controlsTimer;
+function collapseTopControls(){
+  clearTimeout(controlsTimer);
+  const full=Boolean(document.fullscreenElement);
+  topControls.hidden=full;
+  controlsDot.hidden=!full;
+  controlsDot.setAttribute('aria-expanded','false');
+}
+function scheduleControlsCollapse(){
+  clearTimeout(controlsTimer);
+  if(document.fullscreenElement)controlsTimer=setTimeout(()=>{
+    if(topControls.querySelector(':focus-visible')){scheduleControlsCollapse();return;}
+    collapseTopControls();
+  },3000);
+}
+controlsDot.onclick=()=>{
+  topControls.hidden=false;
+  controlsDot.hidden=true;
+  controlsDot.setAttribute('aria-expanded','true');
+  scheduleControlsCollapse();
+};
+topControls.addEventListener('click',scheduleControlsCollapse);
+document.addEventListener('fullscreenchange',collapseTopControls);
+
 const topIcons={
   moon:'<path d="M20.6 14.1A8.7 8.7 0 0 1 9.9 3.4 8.7 8.7 0 1 0 20.6 14.1Z"/>',
   sun:'<circle cx="12" cy="12" r="3.8"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -83,7 +125,7 @@ document.addEventListener('fullscreenchange',()=>{
   $('iFullscreen').setAttribute('aria-pressed',String(active));
   if(!active) navigator.keyboard?.unlock?.();
 });
-let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:s.m*11+10;chain.setAttribute('viewBox',`0 0 ${w} ${h}`);chain.querySelector('.chain-track').style.transform=`translate(${Math.min(w*.22,220)-89}px,${h/2-(!s||s.m>4?point(55).y+50:point(bead).y)}px)`;$('immersiveText').textContent=s?prayers[s.title]:'Has terminado el rosario.\nQue la paz te acompañe.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
+let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);chain.querySelector('.chain-track').style.transform=`translate(${Math.min(w*.22,220)-89}px,${h/2-(!s||s.m>4||bead===55?point(55).y+50:point(bead).y)}px)`;$('immersiveText').textContent=s?prayers[s.title]:'Has terminado el rosario.\nQue la paz te acompañe.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
