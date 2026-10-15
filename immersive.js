@@ -170,7 +170,7 @@ document.addEventListener('pointerdown',event=>{
   if(event.button!==0||$('modal').open)return;
   suppressClickUntil=0;
   const bead=event.target.closest('.focus-bead');
-  const leftArea=!!event.target.closest('.rosary-scroll-viewport');
+  const leftArea=!!event.target.closest('.rosary-scroll-viewport,.physical-scroll-viewport');
   const scrollPane=event.target.closest('.immersive-prayer');
   const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
   const scrollTop=scrollPane?.scrollTop||0;
