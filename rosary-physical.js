@@ -1,100 +1,138 @@
-/* Vista experimental: la cruz cuelga debajo del aro. La vista vertical original se conserva. */
+/* Un solo rosario físico: la misma cadena sube por un costado y regresa
+   por el otro, ligeramente detrás y en gris. Una sola cruz en el colgante. */
 (() => {
   'use strict';
   document.addEventListener('DOMContentLoaded', () => {
     const stage=document.querySelector('.rosary');
     if(!stage || !window.rosarioNativeScroll)return;
-    const sheet=document.createElement('link');
-    sheet.rel='stylesheet';
-    sheet.href='rosary-physical.css?v=20261015-2';
-    document.head.append(sheet);
-    state.rosaryViewLayout=state.rosaryViewLayout==='physical'?'physical':'vertical';
-    const ns='http://www.w3.org/2000/svg',HEIGHT=3820;
-    const location=i=>3180-i*55;
+    const css=document.createElement('link');
+    css.rel='stylesheet';
+    css.href='rosary-physical.css?v=20261015-3';
+    document.head.append(css);
+
+    const NS='http://www.w3.org/2000/svg';
+    const HEIGHT=2670,TOP=320,GAP=62,MEDAL_Y=2104,CROSS_Y=2533;
+    const FRONT_END=27;
     const intro=[
-      {id:'medal',y:3252,r:14},
-      {id:'large1',y:3320,r:23},
-      {id:'small1',y:3374,r:17},
-      {id:'small2',y:3428,r:17},
-      {id:'small3',y:3482,r:17},
-      {id:'large2',y:3536,r:23}
+      {key:'large-top',y:2172,r:23},
+      {key:'small-1',y:2230,r:17},
+      {key:'small-2',y:2288,r:17},
+      {key:'small-3',y:2346,r:17},
+      {key:'large-bottom',y:2410,r:23}
     ];
     const missionary=[
-      ['#23845E','#23845E','#FFFFFF'],['#BD3948','#BD3948','#FFFFFF'],
-      ['#FAF9F6','#9BA19D','#37413C'],['#365DAB','#365DAB','#FFFFFF'],
+      ['#23845E','#23845E','#FFFFFF'],
+      ['#BD3948','#BD3948','#FFFFFF'],
+      ['#FAF9F6','#9BA19D','#37413C'],
+      ['#365DAB','#365DAB','#FFFFFF'],
       ['#DEB82C','#D3AA22','#453816']
     ];
+    state.rosaryViewLayout=state.rosaryViewLayout==='physical'?'physical':'vertical';
+
     const viewport=document.createElement('div');
     viewport.className='physical-scroll-viewport';
-    viewport.setAttribute('aria-label','Deslizar las cuentas del rosario físico');
-    const svg=document.createElementNS(ns,'svg');
-    svg.setAttribute('class','physical-path');
+    viewport.setAttribute('aria-label','Rosario completo. Desliza por sus cuentas sin cambiar la oración.');
+    const svg=document.createElementNS(NS,'svg');
+    svg.classList.add('physical-path');
     svg.setAttribute('role','group');
+    svg.setAttribute('aria-label','Un solo rosario: cinco decenas en un lazo y un colgante con una cruz.');
     svg.style.setProperty('--physical-path-height',HEIGHT+'px');
     viewport.append(svg);
-    const ghost=document.createElementNS(ns,'svg');
-    ghost.setAttribute('class','physical-ghost');
-    ghost.setAttribute('viewBox','0 0 320 700');
-    ghost.setAttribute('preserveAspectRatio','xMidYMid meet');
-    ghost.setAttribute('aria-hidden','true');
-    let faded='<path class="loop" d="M126 163 C34 160 16 275 27 409 C39 540 99 561 131 559 C183 559 226 476 236 358 C247 238 210 162 126 163 Z"/>';
-    for(let i=0;i<34;i++){
-      const a=2*Math.PI*i/34;
-      faded+='<circle class="ghost-beads" cx="'+(131+102*Math.sin(a)).toFixed(2)+
-        '" cy="'+(356+197*Math.cos(a)).toFixed(2)+'" r="'+(i%7===0?8:5)+'"/>';
-    }
-    faded+='<path class="side" d="M131 554 Q112 580 128 604 L130 656 M130 645 v40 m-13-23 h26"/>';
-    ghost.innerHTML=faded;
-    stage.append(ghost,viewport);
-    const xFor=(i,w)=>Math.max(78,Math.min(150,w*.205))+12*Math.sin(i*.55);
-    function drawCross(x,y,which){
-      return '<g class="physical-cross" role="button" tabindex="0" data-cross="'+which+
-        '" aria-label="'+(which==='start'?'Cruz inicial':'Cruz de regreso')+
-        '" transform="translate('+x+' '+y+')">'+
-        '<circle cy="-54" r="7" fill="none" stroke="#B49663" stroke-width="3"/>'+
-        '<path d="M-8 -46 Q-8 -49 -5 -49 H5 Q8 -49 8 -46 V-19 H29 Q32 -19 32 -16 V-4 Q32 -1 29 -1 H8 V57 Q8 60 5 60 H-5 Q-8 60 -8 57 V-1 H-29 Q-32 -1 -32 -4 V-16 Q-32 -19 -29 -19 H-8 Z"/>'+
-        '<path class="cross-detail" d="M0 -39 V49 M-23 -10 H23"/></g>';
-    }
-    function drawBead(x,y,r,attrs,label){
-      return '<g class="physical-bead" role="button" tabindex="0" '+attrs+
-        ' aria-label="'+label+'">'+
-        '<circle class="physical-hit" cx="'+x+'" cy="'+y+'" r="'+Math.max(30,r+8)+'"/>'+
-        '<circle class="halo" cx="'+x+'" cy="'+y+'" r="'+(r+18)+'" fill="#D8B66F"/>'+
-        '<circle class="ring" cx="'+x+'" cy="'+y+'" r="'+r+'"/>'+
-        (r===17?'<text class="number" x="'+x+'" y="'+(y+4)+'" text-anchor="middle">•</text>':'')+
+    stage.append(viewport);
+
+    let positions=[],introPoints=[],crossX=0;
+    let beforeIndex=-1,beforeMode='';
+    function format(n){return Number(n).toFixed(2);}
+    function beadMarkup(x,y,r,attributes,label,number){
+      return '<g class="physical-bead" role="button" tabindex="0" '+
+        attributes+' aria-label="'+label+'">'+
+        '<circle class="physical-hit" cx="'+format(x)+'" cy="'+format(y)+
+        '" r="'+Math.max(29,r+8)+'"/>'+
+        '<circle class="halo" cx="'+format(x)+'" cy="'+format(y)+
+        '" r="'+(r+16)+'" fill="url(#physicalHalo)"/>'+
+        '<circle class="ring" cx="'+format(x)+'" cy="'+format(y)+'" r="'+r+'"/>'+
+        (number?'<text class="number" x="'+format(x)+'" y="'+format(y+4)+
+          '" text-anchor="middle">'+number+'</text>':'')+
         '</g>';
     }
+    function crossMarkup(x,y){
+      return '<g class="physical-cross" role="button" tabindex="0" data-cross="only" '+
+        'aria-label="Única cruz del rosario, al principio y al final" '+
+        'transform="translate('+format(x)+' '+format(y)+')">'+
+        '<circle cy="-54" r="7" fill="none" stroke="#B49663" stroke-width="3"/>'+
+        '<path d="M-8 -46 Q-8 -49 -5 -49 H5 Q8 -49 8 -46 V-19 H29 Q32 -19 32 -16 '+
+        'V-4 Q32 -1 29 -1 H8 V57 Q8 60 5 60 H-5 Q-8 60 -8 57 V-1 H-29 '+
+        'Q-32 -1 -32 -4 V-16 Q-32 -19 -29 -19 H-8 Z"/>'+
+        '<path class="cross-detail" d="M0 -39 V49 M-23 -10 H23"/></g>';
+    }
     function draw(){
-      const w=Math.max(320,document.documentElement.clientWidth);
-      const x=xFor(0,w);
-      svg.setAttribute('viewBox','0 0 '+w+' '+HEIGHT);
-      const nodes=[{x,y:93,type:'return'}];
-      for(let i=54;i>=0;i--)nodes.push({x:xFor(i,w),y:location(i),type:'bead',bead:i});
-      intro.forEach((p,i)=>nodes.push({x:x+6*Math.sin(p.y*.012),y:p.y,type:i===0?'medal':'intro',r:p.r,index:i}));
-      nodes.push({x,y:3690,type:'start'});
-      let result='';
-      for(let i=1;i<nodes.length;i++){
-        const a=nodes[i-1],b=nodes[i];
-        result+='<path class="physical-link" d="M'+a.x.toFixed(2)+' '+a.y+
-          ' L'+b.x.toFixed(2)+' '+b.y+'"/>';
-      }
-      nodes.forEach(p=>{
-        if(p.type==='start'||p.type==='return')result+=drawCross(p.x,p.y,p.type);
-        else if(p.type==='medal')result+='<circle class="physical-medallion" cx="'+p.x+
-          '" cy="'+p.y+'" r="14"/>';
-        else if(p.type==='intro')result+=drawBead(p.x,p.y,p.r,'data-intro="'+p.index+'"',
-          'Cuenta introductoria '+p.index);
-        else{
-          const big=p.bead%11===0;
-          result+=drawBead(p.x,p.y,big?23:17,'data-bead="'+p.bead+'"',
-            (big?'Padrenuestro':'Avemaría '+p.bead%11)+
-            ', misterio '+(Math.floor(p.bead/11)+1));
-        }
+      const width=Math.max(320,document.documentElement.clientWidth);
+      const center=Math.max(84,Math.min(123,width*.225));
+      const frontX=center-20,backX=center+22;
+      crossX=center;
+      // Es UNA sola serie de 55 cuentas: 28 suben y las 27 restantes
+      // regresan por detrás, desplazadas sólo 42px horizontalmente.
+      positions=Array.from({length:55},(_,i)=>{
+        const outbound=i<=FRONT_END;
+        const n=outbound?FRONT_END-i:i-FRONT_END-1;
+        return{
+          x:(outbound?frontX:backX)+3*Math.sin(i*.27),
+          y:TOP+n*GAP,
+          strand:outbound?'out':'back'
+        };
       });
-      svg.innerHTML=result;
+      introPoints=intro.map((bead,i)=>({
+        x:center+3*Math.sin(i*.5),y:bead.y,r:bead.r
+      }));
+      svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
+      const fore=positions.slice(0,FRONT_END+1);
+      const rear=positions.slice(FRONT_END+1);
+      const at=p=>format(p.x)+' '+format(p.y);
+      const route=(group,first)=>{
+        let d='M '+at(first);
+        group.forEach(p=>d+=' L '+at(p));
+        return d;
+      };
+      // La trayectoria sube, da una curva estrecha y baja AL MISMO medallón.
+      // La rama gris no es otra ilustración: sus cuentas completan las 55.
+      let loop=route(fore,{x:center,y:MEDAL_Y});
+      const crownX=(fore[fore.length-1].x+rear[0].x)/2;
+      loop+=' Q '+format(crownX)+' '+format(TOP-45)+' '+at(rear[0]);
+      rear.slice(1).forEach(p=>loop+=' L '+at(p));
+      loop+=' L '+format(center)+' '+format(MEDAL_Y);
+      const body=[];
+      body.push('<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
+        '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient></defs>');
+      body.push('<path class="physical-whole-loop" d="'+loop+'"/>');
+      function branch(items,id,start){
+        let html='<g class="physical-strand" data-strand="'+id+'">';
+        html+='<path class="physical-link" d="'+route(items,start)+'"/>';
+        items.forEach(p=>{
+          const i=positions.indexOf(p);
+          const big=i%11===0;
+          const n=i%11;
+          const label=(big?'Padrenuestro':'Avemaría '+n)+
+            ', misterio '+(Math.floor(i/11)+1);
+          html+=beadMarkup(p.x,p.y,big?23:17,'data-bead="'+i+'"',label,big?'':String(n));
+        });
+        return html+'</g>';
+      }
+      body.push(branch(fore,'out',{x:center,y:MEDAL_Y}));
+      body.push(branch(rear,'back',fore[fore.length-1]));
+      let tail='<g class="physical-pendant">';
+      const tailPoints=[{x:center,y:MEDAL_Y},...introPoints,{x:center,y:CROSS_Y-54}];
+      tail+='<path class="physical-link" d="'+route(tailPoints.slice(1),tailPoints[0])+'"/>';
+      tail+='<circle class="physical-medallion" cx="'+format(center)+'" cy="'+MEDAL_Y+'" r="15"/>';
+      introPoints.forEach((p,i)=>{
+        tail+=beadMarkup(p.x,p.y,p.r,'data-intro="'+i+'"',
+          'Cuenta introductoria '+(i+1),'');
+      });
+      tail+=crossMarkup(center,CROSS_Y);
+      body.push(tail+'</g>');
+      svg.innerHTML=body.join('');
       svg.querySelectorAll('[data-bead]').forEach(el=>{
-        const bead=Number(el.dataset.bead);
-        const colors=missionary[Math.floor(bead/11)];
+        const index=Number(el.dataset.bead);
+        const colors=missionary[Math.floor(index/11)];
         el.classList.add('is-decade');
         el.style.setProperty('--mission-color',colors[0]);
         el.style.setProperty('--mission-border',colors[1]);
@@ -102,106 +140,120 @@
       });
     }
     draw();
-    let oldIndex=-1,oldMode='';
+
     function positionFor(step){
-      if(!step)return{kind:'end',y:93};
-      if(Number.isInteger(step.bead))return{kind:'bead',bead:step.bead,y:location(step.bead)};
-      if(step.m>=0&&step.m<5){
-        const bead=step.kind==='mystery'?step.m*11:Math.min(54,(step.m+1)*11-1);
-        return{kind:'bead',bead,y:location(bead)};
+      if(!step || step.m>=5)return{type:'cross',y:CROSS_Y};
+      if(Number.isInteger(step.bead)){
+        const i=Math.max(0,Math.min(54,step.bead));
+        return{type:'loop',bead:i,y:positions[i].y,strand:positions[i].strand};
       }
-      if(step.m>=5)return{kind:'end',y:93};
-      const cross=steps.findIndex(item=>item.title==='Señal de la cruz');
-      const start=steps.findIndex(item=>item.kind==='mystery');
-      if(state.index<=cross||cross<0)return{kind:'start',y:3690};
-      const ratio=Math.max(0,Math.min(1,(state.index-cross)/Math.max(1,start-cross)));
-      const index=Math.min(5,Math.floor(ratio*5));
-      return{kind:'intro',intro:5-index,y:intro[5-index].y};
+      if(step.m>=0 && step.m<5){
+        const n=step.kind==='mystery'?step.m*11:
+          Math.min(54,(step.m+1)*11-1);
+        return{type:'loop',bead:n,y:positions[n].y,strand:positions[n].strand};
+      }
+      const crossStep=steps.findIndex(p=>p.title==='Señal de la cruz');
+      const first=steps.findIndex(p=>p.kind==='mystery');
+      if(crossStep<0 || state.index<=crossStep)
+        return{type:'cross',y:CROSS_Y};
+      const progress=Math.min(1,Math.max(0,
+        (state.index-crossStep)/Math.max(1,first-crossStep)));
+      const index=Math.min(4,Math.floor((1-progress)*5));
+      return{type:'intro',intro:index,y:introPoints[index].y};
     }
     function paint(){
       const physical=state.rosaryViewLayout==='physical';
       document.body.classList.toggle('rosario-physical-view',physical);
       if(!physical){
-        if(oldMode==='physical'){
+        if(beforeMode==='physical'){
           const step=steps[state.index];
           const bead=step?.bead!==undefined?step.bead:
-            !step||step.m>=5?54:step.m<0?0:Math.min(54,(step.m+1)*11-1);
+            !step||step.m>=5?54:step.m<0?0:
+              Math.min(54,(step.m+1)*11-1);
           window.rosarioScrollToBead?.(bead,!step||step.m>=5);
         }
-        oldMode='vertical';oldIndex=state.index;return;
+        beforeMode='vertical';beforeIndex=state.index;
+        return;
       }
       const selected=positionFor(steps[state.index]);
-      svg.querySelectorAll('[data-cross]').forEach(el=>{
-        const active=selected.kind===el.dataset.cross;
+      const selectedSide=selected.type==='loop' ? selected.strand : 'out';
+      const strandOut=svg.querySelector('[data-strand="out"]');
+      const strandBack=svg.querySelector('[data-strand="back"]');
+      [strandOut,strandBack].forEach(el=>{
+        const rear=el.dataset.strand!==selectedSide;
+        el.classList.toggle('is-rear',rear);
+        el.classList.toggle('is-front',!rear);
+        el.setAttribute('aria-hidden',rear?'true':'false');
+        el.querySelectorAll('.physical-bead').forEach(b=>{
+          b.tabIndex=rear?-1:0;
+        });
+      });
+      // Siempre hay un ramo en primer plano y uno en gris detrás. Ambos
+      // pertenecen a la misma serie de cuentas y se unen en el medallón.
+      svg.insertBefore(selectedSide==='out'?strandBack:strandOut,
+        selectedSide==='out'?strandOut:strandBack);
+      svg.querySelectorAll('[data-bead]').forEach(el=>{
+        const index=Number(el.dataset.bead);
+        const stepIndex=steps.findIndex(s=>s.bead===index);
+        const active=selected.type==='loop' && selected.bead===index;
         el.classList.toggle('active',active);
+        el.classList.toggle('done',stepIndex>=0 && stepIndex<state.index);
         el.setAttribute('aria-current',active?'step':'false');
       });
-      svg.querySelectorAll('.physical-bead').forEach(el=>{
-        const active=selected.kind==='bead'&&el.hasAttribute('data-bead')?
-          Number(el.dataset.bead)===selected.bead:
-          selected.kind==='intro'&&el.hasAttribute('data-intro')&&
+      svg.querySelectorAll('[data-intro]').forEach(el=>{
+        const active=selected.type==='intro' &&
           Number(el.dataset.intro)===selected.intro;
         el.classList.toggle('active',active);
         el.setAttribute('aria-current',active?'step':'false');
-        const idx=el.hasAttribute('data-bead') ?
-          steps.findIndex(t=>t.bead===Number(el.dataset.bead)):-1;
-        el.classList.toggle('done',idx>=0&&idx<state.index);
       });
-      if(oldMode!=='physical'||oldIndex!==state.index){
+      const cross=svg.querySelector('[data-cross]');
+      cross.classList.toggle('active',selected.type==='cross');
+      cross.setAttribute('aria-current',selected.type==='cross'?'step':'false');
+      if(beforeMode!=='physical' || beforeIndex!==state.index){
         const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
-        const target=selected.kind==='end'?0:
-          Math.max(0,selected.y-viewport.clientHeight*.68);
+        const target=Math.max(0,selected.y-viewport.clientHeight*.64);
         viewport.scrollTop=Math.min(max,target);
       }
-      oldMode='physical';oldIndex=state.index;
+      beforeMode='physical';beforeIndex=state.index;
     }
-    let pending=false;
-    viewport.addEventListener('scroll',()=>{
-      if(pending)return;
-      pending=true;
-      requestAnimationFrame(()=>{
-        pending=false;
-        const max=Math.max(1,viewport.scrollHeight-viewport.clientHeight);
-        ghost.style.setProperty('--physical-parallax',
-          ((viewport.scrollTop/max-.5)*10).toFixed(2)+'px');
-      });
-    },{passive:true});
-    function selectNode(node){
-      if(node.hasAttribute('data-cross')){
-        if(node.dataset.cross==='return')state.index=steps.length;
-        else{
-          const start=steps.findIndex(t=>t.title==='Señal de la cruz');
-          if(start<0)return;
-          state.index=start;
-        }
-      }else if(node.hasAttribute('data-bead')){
-        const index=steps.findIndex(t=>t.bead===Number(node.dataset.bead));
+    function goToNode(el){
+      if(el.hasAttribute('data-cross')){
+        // La misma cruz es el punto de partida y de llegada.
+        const current=steps[state.index];
+        state.index=(!current||current.m>=5)?0:
+          Math.max(0,steps.findIndex(s=>s.title==='Señal de la cruz'));
+      }else if(el.hasAttribute('data-bead')){
+        const index=steps.findIndex(s=>s.bead===Number(el.dataset.bead));
         if(index<0)return;
         state.index=index;
-      }else if(node.hasAttribute('data-intro')){
-        const start=steps.findIndex(t=>t.title==='Señal de la cruz');
-        if(start<0)return;
-        state.index=Math.min(steps.length-1,
-          start+Math.round((5-Number(node.dataset.intro))));
+      }else if(el.hasAttribute('data-intro')){
+        const crossStep=steps.findIndex(s=>s.title==='Señal de la cruz');
+        const first=steps.findIndex(s=>s.kind==='mystery');
+        if(crossStep<0||first<=crossStep)return;
+        const ratio=(4-Number(el.dataset.intro))/5;
+        state.index=Math.min(first-1,
+          crossStep+Math.round(ratio*(first-crossStep)));
       }
       render();
     }
-    svg.addEventListener('click',e=>{
-      const node=e.target.closest('[data-cross],[data-bead],[data-intro]');
-      if(node)selectNode(node);
+    svg.addEventListener('click',event=>{
+      const bead=event.target.closest('[data-cross],[data-bead],[data-intro]');
+      if(bead&&!bead.closest('.is-rear'))goToNode(bead);
     });
-    svg.addEventListener('keydown',e=>{
-      if(e.key!=='Enter'&&e.key!==' ')return;
-      const node=e.target.closest('[data-cross],[data-bead],[data-intro]');
-      if(node){e.preventDefault();selectNode(node);}
+    svg.addEventListener('keydown',event=>{
+      if(event.key!=='Enter' && event.key!==' ')return;
+      const bead=event.target.closest('[data-cross],[data-bead],[data-intro]');
+      if(bead&&!bead.closest('.is-rear')){
+        event.preventDefault();goToNode(bead);
+      }
     });
-    const renderOriginal=render;
-    render=function(){renderOriginal();paint();};
-    const settingsOriginal=$('settings').onclick;
+    const originalRender=render;
+    render=function(){originalRender();paint();};
+    const originalSettings=$('settings').onclick;
     $('settings').onclick=function(event){
-      settingsOriginal.call(this,event);
-      const root=$('modalContent');
-      if(!root.querySelector('#groupSelect'))return;
+      originalSettings.call(this,event);
+      const host=$('modalContent');
+      if(!host.querySelector('#groupSelect'))return;
       const field=document.createElement('fieldset');
       field.className='physical-layout-settings';
       const legend=document.createElement('legend');
@@ -209,42 +261,48 @@
       const list=document.createElement('div');
       list.className='physical-layout-options';
       [
-        {id:'vertical',name:'Vista vertical',help:'Conserva exactamente el diseño actual.'},
-        {id:'physical',name:'Rosario físico · experimental',help:'Cruz abajo, aro tenue y movimiento de las cuentas hacia arriba.'}
+        {id:'vertical',name:'Vista vertical',
+          help:'Conserva el diseño anterior, con sus gestos y funciones.'},
+        {id:'physical',name:'Rosario físico · experimental',
+          help:'Una sola cruz y un aro estrecho que sube y regresa por detrás en gris.'}
       ].forEach(item=>{
         const label=document.createElement('label');
         label.className='physical-layout-option';
-        const radio=document.createElement('input');
-        radio.type='radio';radio.name='rosaryViewLayout';radio.value=item.id;
-        radio.checked=state.rosaryViewLayout===item.id;
-        const body=document.createElement('span');
+        const input=document.createElement('input');
+        input.type='radio';
+        input.name='rosaryViewLayout';
+        input.value=item.id;
+        input.checked=state.rosaryViewLayout===item.id;
+        const content=document.createElement('span');
         const title=document.createElement('strong');
         title.textContent=item.name;
-        const help=document.createElement('small');
-        help.textContent=item.help;
-        body.append(title,help);
-        label.append(radio,body);
-        label.classList.toggle('selected',radio.checked);
-        radio.onchange=()=>{
-          if(!radio.checked)return;
+        const small=document.createElement('small');
+        small.textContent=item.help;
+        content.append(title,small);
+        label.append(input,content);
+        label.classList.toggle('selected',input.checked);
+        input.onchange=()=>{
+          if(!input.checked)return;
           state.rosaryViewLayout=item.id;
           persist();render();
-          root.querySelectorAll('.physical-layout-option').forEach(row=>
+          host.querySelectorAll('.physical-layout-option').forEach(row=>
             row.classList.toggle('selected',row.querySelector('input').checked));
         };
         list.append(label);
       });
       const hint=document.createElement('p');
       hint.className='physical-layout-hint';
-      hint.textContent='Prueba visual: empieza en la cruz inferior y desliza el dedo hacia abajo sobre las cuentas para subir hacia el aro. La silueta tenue sólo es decorativa; el texto mantiene sus gestos habituales.';
+      hint.textContent='La cadena asciende desde la única cruz, rodea una curva pequeña y regresa por el mismo medallón. El tramo gris detrás contiene las cuentas reales del otro lado; no es un segundo rosario.';
       field.append(legend,list,hint);
-      const controls=root.querySelector('.controls-position-setting');
-      if(controls)root.insertBefore(field,controls);
-      else root.append(field);
+      const controls=host.querySelector('.controls-position-setting');
+      if(controls)host.insertBefore(field,controls);
+      else host.append(field);
     };
     window.addEventListener('resize',()=>{
       if(state.rosaryViewLayout!=='physical')return;
-      draw();oldIndex=-1;paint();
+      draw();
+      beforeIndex=-1;
+      paint();
     });
     paint();
   });
