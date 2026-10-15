@@ -131,6 +131,19 @@
       const ord=['primer','segundo','tercer','cuarto','quinto'][step.m];
       const sing={Gozosos:'gozoso',Dolorosos:'doloroso',
         Gloriosos:'glorioso',Luminosos:'luminoso'}[state.group];
+      const intention=window.rosarioIntentionFor?.(step.m);
+      if(intention){
+        const block=document.createElement('div');
+        block.className='mystery-random-intention';
+        const caption=document.createElement('span');
+        caption.className='mystery-intention-caption';
+        caption.textContent='Intención de este misterio';
+        const content=document.createElement('span');
+        content.className='mystery-intention-body';
+        content.textContent=intention;
+        block.append(caption,content);
+        prayer.append(block);
+      }
       const label=document.createElement('span');
       label.className='mystery-announcement-label';
       label.textContent=ord+' misterio '+sing;
@@ -223,7 +236,8 @@
           // En el segundo y cuarto misterio, el guía introduce la respuesta
           // del Avemaría con «Gloria.» antes de «Santa María».
           appendVoice(second && step.title==='Avemaría' &&
-            (step.m===1 || step.m===3) && b==='guide'
+            (step.m===1 || step.m===3) && b==='guide' &&
+            state.voiceColors !== false
             ? 'Gloria.\n'+second : second,b);
         }else appendWithAmen(prayer,source);
       }else{
