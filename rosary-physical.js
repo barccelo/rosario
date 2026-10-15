@@ -6,7 +6,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const sheet=document.createElement('link');
     sheet.rel='stylesheet';
-    sheet.href='rosary-physical.css?v=20261015-1';
+    sheet.href='rosary-physical.css?v=20261015-2';
     document.head.append(sheet);
     state.rosaryViewLayout=state.rosaryViewLayout==='physical'?'physical':'vertical';
     const ns='http://www.w3.org/2000/svg',HEIGHT=3820;
@@ -123,6 +123,11 @@
       document.body.classList.toggle('rosario-physical-view',physical);
       if(!physical){oldMode='vertical';oldIndex=state.index;return;}
       const selected=positionFor(steps[state.index]);
+      svg.querySelectorAll('[data-cross]').forEach(el=>{
+        const active=selected.kind===el.dataset.cross;
+        el.classList.toggle('active',active);
+        el.setAttribute('aria-current',active?'step':'false');
+      });
       svg.querySelectorAll('.physical-bead').forEach(el=>{
         const active=selected.kind==='bead'&&el.hasAttribute('data-bead')?
           Number(el.dataset.bead)===selected.bead:
@@ -223,7 +228,7 @@
       });
       const hint=document.createElement('p');
       hint.className='physical-layout-hint';
-      hint.textContent='Prueba visual: la cruz inferior es el punto inicial; las cuentas ascienden hacia el aro y se termina con el regreso simbólico a la cruz. La silueta tenue no es interactiva.';
+      hint.textContent='Prueba visual: empieza en la cruz inferior y desliza el dedo hacia abajo sobre las cuentas para subir hacia el aro. La silueta tenue sólo es decorativa; el texto mantiene sus gestos habituales.';
       field.append(legend,list,hint);
       const controls=root.querySelector('.controls-position-setting');
       if(controls)root.insertBefore(field,controls);
