@@ -201,3 +201,20 @@ body[data-rosary-color-mode="mystery"] .physical-pendant .physical-bead.active .
 body.rosario-physical-view .physical-scroll-viewport{
   -webkit-tap-highlight-color:transparent;
 }
+
+/* Ajuste de navegación táctil: interruptor compacto independiente de la vista. */
+dialog label.physical-tap-option{
+  display:flex!important;align-items:center!important;
+  justify-content:space-between!important;gap:16px!important;
+  padding:8px 0!important;margin:0!important;
+  font:500 13px/1.55 system-ui;
+}
+.physical-tap-option span{flex:1}
+.physical-tap-option input[type="checkbox"]{
+  flex:0 0 auto;width:20px;height:20px;
+  margin:0;accent-color:#A48555;
+}
+.physical-tap-settings{margin-top:14px}
+.physical-tap-settings .physical-layout-hint{
+  margin-top:4px;line-height:1.65;
+}
