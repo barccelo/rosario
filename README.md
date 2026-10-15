@@ -112,3 +112,15 @@ En **Ajustes → Colores del rosario** hay tres estilos persistentes:
 Una pequeña vista previa en Ajustes permite comprobar los colores antes de volver al rosario. El modo elegido y cada variante se guardan en el mismo `localStorage` de las demás preferencias. El modo inicial sigue siendo **Clásico** para no modificar la apariencia de los usuarios existentes.
 
 La distinción de **Guía** y **Asamblea** continúa siendo independiente de la paleta; las respuestas de la asamblea conservan su dorado configurable. La cadena sigue utilizando el scroll cinético nativo del navegador, sin cambios en el progreso ni en las oraciones.
+
+## Vista experimental «Rosario físico» (octubre de 2026)
+
+En **Ajustes → Presentación del rosario** se puede elegir entre la **Vista vertical** de siempre y **Rosario físico · experimental**. La preferencia se conserva en `localStorage`; elegir una presentación no altera el progreso ni las oraciones.
+
+La vista experimental parte de la **cruz en la parte inferior**, como un rosario que cuelga por gravedad. Encima se ven, en orden físico, una cuenta grande, tres pequeñas, otra grande y el medallón de unión. Al seguir avanzando se recorre la zona de las cinco decenas, hasta representar el regreso simbólico a la misma cruz. La cruz se dibuja en los extremos de la representación lineal para hacer visible ese retorno, no para añadir oraciones nuevas.
+
+**Gesto de las cuentas:** desde la cruz inferior, **deslizar el dedo hacia abajo** en la zona izquierda hace subir la cadena hacia el aro. Se utiliza `overflow-y:auto` con scroll cinético nativo del navegador, y la oración de la derecha conserva su navegación normal. Se pueden tocar las cuentas y las cruces para navegar.
+
+Una **silueta tenue** del rosario completo forma un aro detrás de las cuentas; no es interactiva y se desplaza apenas unos píxeles para sugerir profundidad. No sustituye las cuentas activas. Funciona con los temas Clásico, Misionero y Según los misterios, incluidos los fondos claros y oscuros.
+
+La vista vertical actual permanece disponible y se conserva intacta. Esta alternativa es una prueba visual; la sensación de peso y la transición al aro deben revisarse en un teléfono antes de darla por definitiva.
