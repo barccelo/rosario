@@ -125,7 +125,7 @@ document.addEventListener('fullscreenchange',()=>{
   $('iFullscreen').setAttribute('aria-pressed',String(active));
   if(!active) navigator.keyboard?.unlock?.();
 });
-let previousPrayerIndex=-1;const sectionRender=render;render=function(){if(previousPrayerIndex!==-1&&previousPrayerIndex!==state.index)window.rosarioManualOffset=0;sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
+let previousPrayerIndex=-1;const sectionRender=render;render=function(){if(previousPrayerIndex!==-1&&previousPrayerIndex!==state.index){stopChainInertia();window.rosarioManualOffset=0;}sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
   x:Math.min(w*.22,220)-89,
   y:(!s || s.m>4 || bead===55) ? h-116-point(55).y : h/2-point(bead).y
 };window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
@@ -298,7 +298,7 @@ for(const name of ['touchcancel'])
   reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
 document.addEventListener('pointercancel',cancelGesture,true);
 window.addEventListener('blur',()=>{cancelGesture();stopChainInertia();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelGesture()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelGesture();stopChainInertia();}});
 document.addEventListener('click',event=>{
   if(event.detail!==0&&performance.now()<suppressClickUntil){
     event.preventDefault();event.stopImmediatePropagation();return;
