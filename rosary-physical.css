@@ -35,6 +35,9 @@ body.dark .physical-path{
 .physical-path .physical-strand.is-rear .ring{
   stroke:var(--physical-shadow)!important;fill:var(--physical-shadow)!important;
 }
+.physical-path .physical-strand.is-rear .physical-link{
+  stroke:var(--physical-shadow)!important;
+}
 .physical-path .physical-strand.is-rear .number{fill:var(--physical-shadow)!important}
 .physical-path .physical-strand.is-rear .halo{display:none}
 .physical-path .physical-link{
@@ -92,7 +95,7 @@ body[data-rosary-color-mode="missionary"] .physical-strand.is-front .physical-be
 body[data-rosary-color-mode="mystery"] .physical-path{
   --physical-fill:var(--rc-bead);--physical-outline:var(--rc-outline);
   --physical-line:var(--rc-link);--physical-number:var(--rc-bead-label);
-  --physical-metal:var(--rc-active-fill);--physical-shadow:var(--rc-link);
+  --physical-metal:var(--rc-active-fill);
 }
 body[data-rosary-color-mode="mystery"] .physical-strand.is-front .physical-bead .ring{
   fill:var(--rc-bead)!important;stroke:var(--rc-outline)!important;
