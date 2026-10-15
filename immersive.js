@@ -125,7 +125,10 @@ document.addEventListener('fullscreenchange',()=>{
   $('iFullscreen').setAttribute('aria-pressed',String(active));
   if(!active) navigator.keyboard?.unlock?.();
 });
-let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);chain.querySelector('.chain-track').style.transform=`translate(${Math.min(w*.22,220)-89}px,${h/2-(!s||s.m>4||bead===55?point(55).y+50:point(bead).y)}px)`;$('immersiveText').textContent=s?prayers[s.title]:'Has terminado el rosario.\nQue la paz te acompañe.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
+let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
+  x:Math.min(w*.22,220)-89,
+  y:h/2-(!s||s.m>4||bead===55?point(55).y+50:point(bead).y)
+};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'Has terminado el rosario.\nQue la paz te acompañe.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
@@ -152,6 +155,20 @@ $('readFull').onclick=()=>{
   $('fullPrayerText').textContent=prayers[step.title];
 };
 
+// Mover la camándula a mano sin alterar el paso de oración.
+window.rosarioManualOffset=window.rosarioManualOffset||0;
+window.rosarioChainOrigin={x:0,y:0};
+window.rosarioApplyChainPan=function(){
+  const track=chain.querySelector('.chain-track');
+  if(!track)return;
+  const x=window.rosarioChainOrigin.x,y=window.rosarioChainOrigin.y;
+  track.style.transform='translate('+x+'px,'+(y+window.rosarioManualOffset)+'px)';
+};
+function boundedChainOffset(y){
+  const h=window.innerHeight,base=window.rosarioChainOrigin.y;
+  const lower=h/2-point(54).y-base,upper=h/2-point(0).y-base;
+  return Math.max(lower,Math.min(upper,y));
+}
 // One gesture handler for the entire prayer surface, including text and top edge.
 // Dialogs and the visible toolbar retain their own controls and scrolling.
 let gesture=null,holdTimeout=null,suppressClickUntil=0;
@@ -161,11 +178,14 @@ document.addEventListener('pointerdown',event=>{
   if(event.button!==0||$('modal').open||event.target.closest('.prayer-toolbar'))return;
   suppressClickUntil=0;
   const bead=event.target.closest('.focus-bead');
+  const leftArea=!!event.target.closest('.focus-chain') &&
+    event.clientX<=window.innerWidth*.42;
   const scrollPane=event.target.closest('.immersive-prayer');
   const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
   const scrollTop=scrollPane?.scrollTop||0;
   gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,
-    readingScroll,scrollTop,scrollPane};
+    readingScroll,scrollTop,scrollPane,
+    leftPan:leftArea,startOffset:window.rosarioManualOffset};
   if(bead)holdTimeout=setTimeout(()=>{
     if(!gesture||gesture.moved||$('modal').open)return;
     gesture.held=true;suppressClickUntil=performance.now()+800;
@@ -176,6 +196,14 @@ document.addEventListener('pointermove',event=>{
   if(!gesture||gesture.id!==event.pointerId)return;
   if(Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y)>12){
     gesture.moved=true;clearTimeout(holdTimeout);
+    if(gesture.leftPan){
+      const track=chain.querySelector('.chain-track');
+      if(track)track.style.transition='none';
+      window.rosarioManualOffset=boundedChainOffset(
+        gesture.startOffset+(event.clientY-gesture.y)*1.6);
+      window.rosarioApplyChainPan();
+      suppressClickUntil=performance.now()+850;
+    }
   }
 },true);
 document.addEventListener('pointerup',event=>{
@@ -183,6 +211,12 @@ document.addEventListener('pointerup',event=>{
   const current=gesture,dy=event.clientY-current.y,dx=event.clientX-current.x;
   cancelGesture();
   if(current.held||current.moved)suppressClickUntil=performance.now()+800;
+  if(current.leftPan){
+    const track=chain.querySelector('.chain-track');
+    if(track)track.style.transition='';
+    // Un arrastre del lado izquierdo nunca cambia la oración ni activa una cuenta.
+    return;
+  }
   if($('modal').open||current.held)return;
   // Un texto largo primero se desplaza: no saltar de oración mientras se lee.
   // En sus límites se permite el avance/retroceso con otro deslizamiento.
@@ -195,6 +229,7 @@ document.addEventListener('pointerup',event=>{
   }
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
+    window.rosarioManualOffset=0;
     if(dy<0)advance();else{state.index=Math.max(0,state.index-1);render();}
   }
 },true);
@@ -221,6 +256,7 @@ reading.addEventListener('touchend',event=>{
   if(!back&&!next)return;
   suppressClickUntil=performance.now()+850;
   cancelGesture();
+  window.rosarioManualOffset=0;
   if(next)advance();else{state.index=Math.max(0,state.index-1);render();}
 },{passive:true,capture:true});
 for(const name of ['touchcancel'])
