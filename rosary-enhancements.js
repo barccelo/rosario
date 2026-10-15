@@ -210,7 +210,7 @@
   window.rosarioIntentionFor = intentionFor;
   window.rosarioResetIntentionCycle = resetIntentionCycle;
 
-  function buildRosarySteps(legacy = false) {
+  function buildRosarySteps(legacy = false, legacySalvePosition = false) {
   // Estación, comunión espiritual y oraciones introductorias.
   const nextSteps = [];
   // Estación completa tres veces: invocación, Padrenuestro, Avemaría y Gloria.
@@ -257,11 +257,14 @@
       text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
     });
   });
-  // Se conservan la Salve y su respuesta como oraciones independientes.
-  nextSteps.push({ title: 'Salve', m: 5 });
-  nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
-    verse: 'Ruega por nosotros, Santa Madre de Dios.',
-    response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  // Sólo para migrar el progreso de la versión 6: la Salve estaba
+  // antes de las letanías, ahora se reserva para el cierre del Rosario.
+  if (legacySalvePosition) {
+    nextSteps.push({ title: 'Salve', m: 5 });
+    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+      verse: 'Ruega por nosotros, Santa Madre de Dios.',
+      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  }
   litanyLines.forEach((line, i) => nextSteps.push({
     title: 'Letanías', kind: 'litany', m: 5, text: line,
     verse: litanyPairs[i].verse, response: litanyPairs[i].response, litanyIndex: i
@@ -288,6 +291,14 @@
       intentionNumber: i, text: 'Descansen en paz. Amén.' });
     else nextSteps.push({ title: 'Gloria', m: 5, intentionNumber: i });
   });
+  // Última oración del Rosario: la Salve seguida de su respuesta
+  // independiente, y después la bendición de la pantalla final.
+  if (!legacySalvePosition) {
+    nextSteps.push({ title: 'Salve', m: 5 });
+    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+      verse: 'Ruega por nosotros, Santa Madre de Dios.',
+      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  }
     return nextSteps;
   }
   steps = buildRosarySteps();
@@ -365,8 +376,25 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 6) {
+  if (Number(saved.sequenceVersion) >= 7) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 6) {
+    // Las mismas oraciones cambian de posición; conservar la oración
+    // concreta y también distinguir las dos respuestas «Ruega».
+    const old = buildRosarySteps(false, true);
+    const index = Math.max(0,Math.min(Number(saved.index)||0,old.length));
+    const previous = old[index];
+    if (!previous) restoredIndex = steps.length;
+    else {
+      const occurrence = old.slice(0,index+1).filter(s=>sameStep(s,previous)).length;
+      let seen=0;
+      restoredIndex=steps.findIndex(s=>{
+        if(!sameStep(s,previous))return false;
+        return ++seen===occurrence;
+      });
+      if(restoredIndex<0)restoredIndex=findStep(previous);
+      if(restoredIndex<0)restoredIndex=Math.min(index,steps.length);
+    }
   } else if (Number(saved.sequenceVersion) === 5) {
     // El índice guardado se refiere a la secuencia anterior.
     const old = buildLegacyVersionFive();
@@ -405,7 +433,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 6;
+  state.sequenceVersion = 7;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
