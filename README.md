@@ -12,8 +12,9 @@ La aplicación es estática y no requiere compilación ni dependencias. Publicar
 ## Controles
 
 - Tocar o mantener pulsada una cuenta para completarla.
-- Deslizar hacia arriba para avanzar; hacia abajo para retroceder.
-- Tocar la zona superior para mostrar los controles: anterior, avanzar, navegar, ajustes y prueba de volumen. El tema y la pantalla completa se controlan desde los iconos superiores.
+- **Zona derecha (texto):** deslizar hacia arriba avanza una oración y hacia abajo retrocede; las oraciones largas se desplazan hasta sus extremos.
+- **Zona izquierda (cuentas):** arrastrar mueve sólo la cadena. Un gesto rápido produce un desplazamiento con inercia prolongada; tocar de nuevo detiene el impulso. En ordenadores también funciona con rueda/trackpad. Tocar una cuenta conserva el salto directo a esa oración.
+- Hay **una sola barra de controles**: Navegar, T−, T+, Tema, Ajustes y Pantalla completa. Se puede colocar arriba o abajo. En pantalla completa se pliega dentro del punto compacto. Ya no hay un botón/zona superior invisible que abra una segunda barra.
 - En **Navegar** se puede elegir el día, uno de sus cinco misterios o una oración concreta.
 - Cada misterio se anuncia antes de su decena. La meditación completa se abre en una ventana emergente al pulsar **Ver meditación** o el número romano del misterio.
 - En las letanías se muestra una invocación por paso, con la anterior y la siguiente visibles parcialmente. Deslizar hacia arriba o abajo avanza o retrocede una invocación.
@@ -83,3 +84,9 @@ El menú permanente de tres líneas de la esquina superior abre **Días**, **Mis
 - Al terminar el rosario, la cruz se mantiene cerca de la parte inferior de la pantalla para que la cadena no siga subiendo excesivamente.
 - La oración «Te suplicamos, Señor, que derrames tu gracia...» aparece con el encabezado **Oración**.
 - La pantalla final muestra una cruz y «El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.», con el Amén en línea independiente.
+
+## Barra única e inercia prolongada (octubre de 2026)
+
+- Se eliminó del DOM la barra secundaria que aparecía al tocar la zona superior y su superficie invisible. Los **Ajustes** están en la barra principal; el test de volumen está en Ajustes y en **Navegar → Acciones**, donde también aparecen **Anterior** y **Avanzar**.
+- El impulso de las cuentas utiliza muestras temporales del movimiento táctil, permite alcanzar rápidamente otras decenas y continúa tras levantar el dedo. La fricción reduce gradualmente la velocidad y los extremos limitan el recorrido; la preferencia del sistema de reducir movimiento desactiva la inercia.
+- El desplazamiento de las cuentas no modifica el estado del rezo. Cambiar de oración vuelve a centrar la cuenta activa.
