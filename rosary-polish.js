@@ -15,26 +15,27 @@
     state.voiceLabels = state.voiceLabels !== false;
     state.voiceColors = state.voiceColors !== false;
 
-    const context = document.createElement('div');
+    // El número romano y el nombre forman una sola unidad dentro del panel de lectura.
+    const context = document.createElement('button');
+    context.type = 'button';
     context.className = 'rosary-mystery-context';
     context.hidden = true;
-    context.setAttribute('role', 'heading');
-    context.setAttribute('aria-level', '2');
+    context.setAttribute('aria-label', 'Leer meditación del misterio en curso');
     context.innerHTML =
-      '<button type="button" class="rosary-mystery-badge" id="rosaryMysteryRoman" aria-label="Abrir meditación del misterio"></button>' +
-      '<div class="rosary-mystery-name" id="rosaryMysteryName"></div>';
-    document.querySelector('.rosary').append(context);
-    document.getElementById('rosaryMysteryRoman').onclick = () => {
+      '<span class="rosary-mystery-badge" id="rosaryMysteryRoman"></span>' +
+      '<span class="rosary-mystery-name" id="rosaryMysteryName"></span>';
+    reading.insertBefore(context, prayer);
+    context.onclick = () => {
       const step = steps[state.index];
       if (step && step.m >= 0 && step.m < 5)
         window.rosarioOpenMeditation?.(step.m);
     };
 
     // Controles visibles en la barra y, sin barra expandida, cerca del menú compacto.
-    function makeSizeButton(sign, fullscreen) {
+    function makeSizeButton(sign) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = fullscreen ? 'font-button font-button-compact' : 'font-button top-control';
+      button.className = 'font-button top-control';
       button.textContent = sign === 1 ? 'T+' : 'T−';
       button.title = sign === 1 ? 'Aumentar tamaño del texto' : 'Reducir tamaño del texto';
       button.setAttribute('aria-label', button.title);
@@ -46,24 +47,12 @@
       };
       return button;
     }
-    const topBar = document.querySelector('.top-controls');
-    const increase = makeSizeButton(1,false);
-    const decrease = makeSizeButton(-1,false);
-    const fullscreenSize = document.createElement('div');
-    fullscreenSize.className = 'font-controls-compact';
-    fullscreenSize.append(makeSizeButton(-1,true), makeSizeButton(1,true));
-    document.body.append(fullscreenSize);
-    const nav = document.getElementById('iNavigate');
-    nav.after(decrease,increase);
-    function syncCompact() {
-      const full = Boolean(document.fullscreenElement);
-      fullscreenSize.hidden = !full || !topBar.hidden;
-      // Solo debe aparecer el grupo compacto cuando se oculta la barra.
-      fullscreenSize.hidden = !(full && topBar.hidden);
-    }
-    new MutationObserver(syncCompact).observe(topBar,{attributes:true,attributeFilter:['hidden']});
-    document.addEventListener('fullscreenchange',syncCompact);
-    syncCompact();
+    const increase = makeSizeButton(1);
+    const decrease = makeSizeButton(-1);
+    document.getElementById('iNavigate').after(decrease, increase);
+    // Los tres controles (menú, T− y T+) pertenecen a .top-controls:
+    // al ocultarse la barra en pantalla completa quedan detrás del punto.
+
 
     function applyPrefs() {
       document.documentElement.classList.toggle('voice-labels-hidden', !state.voiceLabels);
@@ -136,9 +125,12 @@
       const label=document.createElement('span');
       label.className='mystery-announcement-label';
       label.textContent=ord+' misterio '+sing;
-      const title=document.createElement('span');
-      title.className='mystery-announcement-name';
+      const title=document.createElement('button');
+      title.type='button';
+      title.className='mystery-announcement-name mystery-announcement-link';
       title.textContent=groups[state.group][step.m];
+      title.setAttribute('aria-label','Leer meditación: '+title.textContent);
+      title.onclick=()=>window.rosarioOpenMeditation?.(step.m);
       prayer.append(label,title);
     }
     function specialSymbol() {
@@ -184,13 +176,13 @@
       if(showMystery){
         document.getElementById('rosaryMysteryRoman').textContent=['I','II','III','IV','V'][step.m];
         document.getElementById('rosaryMysteryName').textContent=groups[state.group][step.m];
+        context.setAttribute('aria-label','Leer meditación: '+groups[state.group][step.m]);
       }
       const intro=step?.intention;
       if(announced)announce(step);
       else if(step?.kind==='litany'){
         prayer.replaceChildren();
       } else if(step?.kind==='dialogue-group'){
-        specialSymbol();
         addVerses(step.dialogues);
         // addVerses sustituye los nodos: dejar la cruz sobre los dos diálogos.
         prayer.prepend(makeCross());
@@ -205,12 +197,25 @@
           prayer.append(label);
         }
         const source=prayerSource(step);
-        const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||step.kind==='jaculatory');
+        if (step.title==='Comunión espiritual' || step.title==='Salve') {
+          const heading=document.createElement('span');
+          heading.className='reading-prayer-heading';
+          heading.textContent=step.title==='Salve' ?
+            'Y ahora te saludamos con una Salve' : 'Comunión espiritual';
+          prayer.append(heading);
+        }
+        const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
+          step.title==='Gloria'||step.kind==='jaculatory');
         const pair=step.kind==='jaculatory'?addJaculatoria(step,source):source.split(/\n\s*\n/);
         if(voices && pair.length>=2){
           const [a,b]=voiceOrder(step);
           appendVoice(pair[0],a);
-          appendVoice(pair.slice(1).join('\n\n'),b);
+          const second=pair.slice(1).join('\n\n');
+          // En el segundo y cuarto misterio, el guía introduce la respuesta
+          // del Avemaría con «Gloria.» antes de «Santa María».
+          appendVoice(second && step.title==='Avemaría' &&
+            (step.m===1 || step.m===3) && b==='guide'
+            ? 'Gloria.\n'+second : second,b);
         }else appendWithAmen(prayer,source);
       }else{
         prayer.replaceChildren();
@@ -233,32 +238,64 @@
     const readFull=document.getElementById('readFull');
     if(readFull)readFull.hidden=true;
 
-    // Pulsación prolongada de una intervención dorada: abrir ajustes de voces.
-    let hold=null,origin=null,suppressVoiceClickUntil=0;
-    reading.addEventListener('click',event=>{
+    // Pulsación prolongada sobre dorado, compatible con touch y ratón.
+    // Prevenir el menú nativo del navegador (seleccionar/copiar texto).
+    let hold=null,origin=null,holdFired=false,suppressVoiceClickUntil=0;
+    const goldTarget=target=>target.closest?.('.voice-assembly,.wheel-response');
+    function openVoiceSettings(){
+      if(holdFired)return;
+      holdFired=true;
+      clearTimeout(hold);hold=null;
+      suppressVoiceClickUntil=performance.now()+950;
+      window.rosarioOpenVoiceSettings?.();
+    }
+    function cancelHold(){
+      clearTimeout(hold);hold=null;origin=null;
+    }
+    reading.addEventListener('contextmenu',e=>{
+      if(!state.voiceColors || !goldTarget(e.target))return;
+      e.preventDefault();
+      openVoiceSettings();
+    });
+    reading.addEventListener('click',e=>{
       if(performance.now()<suppressVoiceClickUntil){
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        e.preventDefault();
+        e.stopImmediatePropagation();
       }
     },true);
     reading.addEventListener('pointerdown',e=>{
-      const gold=e.target.closest('.voice-assembly,.wheel-response');
-      if(!gold || !state.voiceColors || e.button!==0)return;
-      origin={x:e.clientX,y:e.clientY};
-      clearTimeout(hold);
-      hold=setTimeout(()=>{
-        hold=null;
-        suppressVoiceClickUntil=performance.now()+900;
-        window.rosarioOpenVoiceSettings?.();
-      },620);
-    });
+      if(!state.voiceColors || e.button!==0 || !goldTarget(e.target))return;
+      cancelHold();
+      holdFired=false;
+      origin={x:e.clientX,y:e.clientY,id:e.pointerId};
+      hold=setTimeout(openVoiceSettings,510);
+    },true);
     reading.addEventListener('pointermove',e=>{
-      if(origin && Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>12){
-        clearTimeout(hold);hold=null;origin=null;
-      }
-    });
+      if(origin && e.pointerId===origin.id &&
+         Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>10)cancelHold();
+    },true);
     for(const name of ['pointerup','pointercancel','pointerleave'])
-      reading.addEventListener(name,()=>{clearTimeout(hold);hold=null;origin=null});
+      reading.addEventListener(name,cancelHold,true);
+    // En pantallas táctiles Android el menú de selección puede interceptar
+    // pointercancel; conservar también el temporizador de touchstart.
+    let touchTimer=null,touchOrigin=null;
+    reading.addEventListener('touchstart',e=>{
+      if(!state.voiceColors || e.touches.length!==1 || !goldTarget(e.target))return;
+      touchOrigin={x:e.touches[0].clientX,y:e.touches[0].clientY};
+      holdFired=false;
+      clearTimeout(touchTimer);
+      touchTimer=setTimeout(openVoiceSettings,530);
+    },{passive:true,capture:true});
+    reading.addEventListener('touchmove',e=>{
+      if(touchOrigin && Math.hypot(e.touches[0].clientX-touchOrigin.x,
+          e.touches[0].clientY-touchOrigin.y)>10){
+        clearTimeout(touchTimer);touchTimer=null;touchOrigin=null;
+      }
+    },{passive:true,capture:true});
+    for(const name of ['touchend','touchcancel'])
+      reading.addEventListener(name,()=>{
+        clearTimeout(touchTimer);touchTimer=null;touchOrigin=null;
+      },{passive:true,capture:true});
     render();
   });
 })();
