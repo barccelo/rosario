@@ -78,8 +78,8 @@
     'Bajo tu amparo nos acogemos, Santa Madre de Dios: no desprecies las súplicas que te dirigimos en nuestras necesidades; ' +
     'antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.';
   prayers['Oración final'] =
-    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que los que, por el anuncio del ángel, ' +
-    'hemos conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, seamos llevados a la gloria de su resurrección. ' +
+    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que aquellos que, por el anuncio del ángel, ' +
+    'han conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, sean llevados a la gloria de su resurrección. ' +
     'Por Jesucristo nuestro Señor. Amén.';
 
   const litanyOpening = [
@@ -138,6 +138,8 @@
   delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
     'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos.';
+  // Respuestas en dos intervenciones, igual que en el Padrenuestro y el Avemaría.
+  prayers.Gloria = 'Gloria al Padre, y al Hijo, y al Espíritu Santo.\n\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
   prayers['Señor mío Jesucristo'] =
     'Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío: por ser Vos quien sois y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido.\n\n' +
     'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n\n' +
@@ -811,18 +813,8 @@
     document.querySelector('.top-controls').prepend(quickNav);
     quickNav.onclick = () => openNavigation('days');
 
-    const fullscreenMenu = quickNav.cloneNode(true);
-    fullscreenMenu.id = 'iNavigateFullscreen';
-    fullscreenMenu.className = 'nav-fullscreen-quick';
-    fullscreenMenu.hidden = true;
-    document.body.append(fullscreenMenu);
-    fullscreenMenu.onclick = () => openNavigation('days');
-    const syncMenu = () => {
-      fullscreenMenu.hidden = !(document.fullscreenElement && document.querySelector('.top-controls').hidden);
-    };
-    new MutationObserver(syncMenu).observe(document.querySelector('.top-controls'), { attributes: true, attributeFilter: ['hidden'] });
-    document.addEventListener('fullscreenchange', syncMenu);
-    syncMenu();
+    // En pantalla completa se oculta junto con los demás controles dentro del punto.
+    // El mismo grupo superior reaparece al tocar ese punto.
     $('allMysteries').onclick = () => openNavigation('mysteries');
 
     const alignButton=document.createElement('button');
