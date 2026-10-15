@@ -132,8 +132,8 @@ window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='
 
 const readingStyle=document.createElement('style');
 readingStyle.textContent=`
-.immersive-prayer{max-height:calc(100dvh - 100px);overflow:hidden}
-.immersive-prayer p{max-height:calc(100dvh - 210px);overflow:hidden}
+.immersive-prayer{max-height:none;overflow-y:auto;scrollbar-width:thin}
+.immersive-prayer p{max-height:none;overflow:visible}
 .read-full{display:block;margin-top:16px;padding:10px 0;border:0;background:none;color:#967746;text-align:left;font-size:12px;min-height:44px;touch-action:none}
 .read-full[hidden]{display:none}.dark .read-full{color:#dbc18b}
 #fullPrayerText{font:19px/1.8 Georgia,serif;white-space:pre-line}
@@ -141,8 +141,8 @@ readingStyle.textContent=`
 `;
 document.head.append(readingStyle);
 function updateReading() {
-  const paragraph=$('immersiveText');
-  $('readFull').hidden=paragraph.scrollHeight<=paragraph.clientHeight+2;
+  // Nunca truncar una oración para forzar su lectura en otra ventana.
+  $('readFull').hidden=true;
 }
 $('readFull').onclick=()=>{
   const step=steps[state.index];
@@ -161,7 +161,9 @@ document.addEventListener('pointerdown',event=>{
   if(event.button!==0||$('modal').open||event.target.closest('.prayer-toolbar'))return;
   suppressClickUntil=0;
   const bead=event.target.closest('.focus-bead');
-  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false};
+  const scrollPane=event.target.closest('.immersive-prayer');
+  const readingScroll=!!(scrollPane && scrollPane.scrollHeight>scrollPane.clientHeight+2);
+  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,bead,held:false,moved:false,readingScroll};
   if(bead)holdTimeout=setTimeout(()=>{
     if(!gesture||gesture.moved||$('modal').open)return;
     gesture.held=true;suppressClickUntil=performance.now()+800;
@@ -180,6 +182,8 @@ document.addEventListener('pointerup',event=>{
   cancelGesture();
   if(current.held||current.moved)suppressClickUntil=performance.now()+800;
   if($('modal').open||current.held)return;
+  // Un texto extenso se desplaza con el dedo; no se toma como cambio de cuenta.
+  if(current.readingScroll)return;
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
     if(dy<0)advance();else{state.index=Math.max(0,state.index-1);render();}
