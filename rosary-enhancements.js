@@ -417,6 +417,12 @@
   state.dayDate = dateKey();
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
+  // La barra y el botón compacto comparten ubicación configurada.
+  state.controlsPosition = saved.controlsPosition === 'bottom' ? 'bottom' : 'top';
+  function applyControlsPosition(){
+    document.body.classList.toggle('controls-bottom',state.controlsPosition==='bottom');
+  }
+  applyControlsPosition();
 
   const mysterySingular = {
     Gozosos: 'gozoso', Dolorosos: 'doloroso',
@@ -786,7 +792,8 @@
               (title !== 'Tres Avemarías' || item.kind === 'dedication') ? i : -1).filter(i => i >= 0);
             if (!positions.length) return;
             const closest = positions.find(i => i >= state.index) ?? positions[0];
-            const display=title==='Jaculatoria'?'María, Madre de gracia':title;
+            const display=title==='Jaculatoria'?'María, Madre de gracia':
+              title==='Oración final'?'Oración':title;
             addPreviewRow(list,display,subtitle,()=>goTo(closest),
               steps[state.index]?.title===title,display,
               prayerPreview(title,steps[closest]));
@@ -1053,6 +1060,26 @@
     const originalSettings = $('settings').onclick;
     $('settings').onclick = () => {
       originalSettings();
+      const controlSetting = document.createElement('label');
+      controlSetting.className='controls-position-setting';
+      const heading = document.createElement('span');
+      heading.textContent='Posición de los controles';
+      const select = document.createElement('select');
+      select.setAttribute('aria-label','Posición de la barra de controles y del botón compacto');
+      [['top','Arriba'],['bottom','Abajo']].forEach(([value,label])=>{
+        const option=document.createElement('option');
+        option.value=value;
+        option.textContent=label;
+        option.selected=state.controlsPosition===value;
+        select.append(option);
+      });
+      select.onchange=()=>{
+        state.controlsPosition=select.value;
+        applyControlsPosition();
+        persist();
+      };
+      controlSetting.append(heading,select);
+      $('modalContent').append(controlSetting);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'voice-settings-link';
@@ -1117,7 +1144,8 @@
       options.forEach(name => {
         const option = document.createElement('option');
         option.value = name;
-        option.textContent = name === 'Jaculatoria' ? 'María, Madre de gracia' : name;
+        option.textContent = name === 'Jaculatoria' ? 'María, Madre de gracia' :
+          name === 'Oración final' ? 'Oración' : name;
         select.append(option);
       });
       const showSelectedPrayer = () => {
