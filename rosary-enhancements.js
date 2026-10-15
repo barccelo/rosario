@@ -323,7 +323,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 6;
+    state.sequenceVersion = 7;
     render();
   }
 
@@ -387,10 +387,15 @@
     if (!previous) restoredIndex = steps.length;
     else {
       const occurrence = old.slice(0,index+1).filter(s=>sameStep(s,previous)).length;
+      const isRuega = previous.title==='Ruega por nosotros' && previous.m===5;
+      // La antigua respuesta posterior a la Salve era la primera;
+      // ahora, tras trasladar el bloque al final, es la segunda.
+      // La respuesta tras «Bajo tu amparo» realiza el movimiento inverso.
+      const intendedOccurrence=isRuega?(occurrence===1?2:1):occurrence;
       let seen=0;
       restoredIndex=steps.findIndex(s=>{
         if(!sameStep(s,previous))return false;
-        return ++seen===occurrence;
+        return ++seen===intendedOccurrence;
       });
       if(restoredIndex<0)restoredIndex=findStep(previous);
       if(restoredIndex<0)restoredIndex=Math.min(index,steps.length);
