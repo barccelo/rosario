@@ -1,14 +1,12 @@
 const immersiveStyle=document.createElement('style');immersiveStyle.textContent=`
-html,body{height:100%;overflow:hidden}body{overscroll-behavior:none}.layout{padding:0;max-width:none;height:100vh;height:100dvh}.layout>header,.intro,.tabs,footer,.panel,.hint,.section-dots,.simpleActions{display:none!important}main,.simple main{display:block;width:100%;height:100%}main>section{height:100%;width:100%}.rosary{touch-action:none;position:fixed;inset:0;width:100%;height:100dvh!important;max-width:none!important;border-radius:0;margin:0;background:#f6f4ef}.dark .rosary{background:#171e19}.rosary .center{display:none}.focus-chain{position:absolute;inset:0;touch-action:none}.immersive-prayer{position:absolute;left:42%;right:7%;top:50%;transform:translateY(-50%);max-height:calc(100dvh - 96px);overflow:hidden;overscroll-behavior:contain;touch-action:none;padding:18px 0;scrollbar-width:thin;pointer-events:auto}.immersive-prayer p{font:clamp(17px,2.3vw,25px)/1.75 Georgia,serif;white-space:pre-line;margin:0;color:#50594e}.dark .immersive-prayer p{color:#d9ded3}.immersive-prayer .quiet-count{display:block;margin-top:22px;font:10px system-ui;letter-spacing:2px;color:#9a937f}.prayer-toolbar{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px;border-radius:20px;background:#fffffff2;box-shadow:0 8px 40px #0002;width:min(94vw,570px)}.prayer-toolbar[hidden]{display:none}.prayer-toolbar button{border:0;background:transparent;border-radius:12px;padding:12px;font-size:13px;min-height:44px}.dark .prayer-toolbar{background:#303a31f5}.controls-zone{touch-action:none;position:fixed;right:0;top:0;width:100%;height:48px;border:0;background:transparent;z-index:3;color:transparent}.controls-zone:focus-visible{color:inherit;background:#aaa2}.prayer-toolbar button:hover{background:#aaa2}@media(min-width:900px){.immersive-prayer{left:38%;right:17%;max-width:650px}.immersive-prayer p{font-size:26px}}@media(max-height:500px){.immersive-prayer p{font-size:16px;line-height:1.5}.immersive-prayer{max-height:calc(100dvh - 40px)}}
+html,body{height:100%;overflow:hidden}body{overscroll-behavior:none}.layout{padding:0;max-width:none;height:100vh;height:100dvh}.layout>header,.intro,.tabs,footer,.panel,.hint,.section-dots,.simpleActions{display:none!important}main,.simple main{display:block;width:100%;height:100%}main>section{height:100%;width:100%}.rosary{touch-action:none;position:fixed;inset:0;width:100%;height:100dvh!important;max-width:none!important;border-radius:0;margin:0;background:#f6f4ef}.dark .rosary{background:#171e19}.rosary .center{display:none}.focus-chain{position:absolute;inset:0;touch-action:none}.immersive-prayer{position:absolute;left:42%;right:7%;top:50%;transform:translateY(-50%);max-height:calc(100dvh - 96px);overflow:hidden;overscroll-behavior:contain;touch-action:none;padding:18px 0;scrollbar-width:thin;pointer-events:auto}.immersive-prayer p{font:clamp(17px,2.3vw,25px)/1.75 Georgia,serif;white-space:pre-line;margin:0;color:#50594e}.dark .immersive-prayer p{color:#d9ded3}.immersive-prayer .quiet-count{display:block;margin-top:22px;font:10px system-ui;letter-spacing:2px;color:#9a937f}@media(min-width:900px){.immersive-prayer{left:38%;right:17%;max-width:650px}.immersive-prayer p{font-size:26px}}@media(max-height:500px){.immersive-prayer p{font-size:16px;line-height:1.5}.immersive-prayer{max-height:calc(100dvh - 40px)}}
 `;document.head.append(immersiveStyle);
 const reading=document.createElement('div');reading.className='immersive-prayer';reading.setAttribute('aria-live','polite');reading.innerHTML='<p id="immersiveText"></p><span class="quiet-count" id="immersiveCount"></span><button class="read-full" id="readFull" hidden>Leer oración completa</button>';document.querySelector('.rosary').append(reading);
-const toolbar=document.createElement('div');toolbar.className='prayer-toolbar';toolbar.hidden=true;toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Controles del rosario');toolbar.innerHTML='<button id="iBack" aria-label="Oración anterior">↶</button><button id="iNext">Avanzar →</button><button id="iMysteries">Misterios</button><button id="iSettings">Ajustes</button><button id="iVolume">Probar volumen</button><button id="iClose" aria-label="Ocultar controles">×</button>';document.body.append(toolbar);
-
 const topControls=document.createElement('div');
 topControls.className='top-controls';
 topControls.setAttribute('role','group');
 topControls.setAttribute('aria-label','Apariencia y pantalla');
-topControls.innerHTML='<button id="iTheme" class="top-control" type="button"></button><span class="top-divider" aria-hidden="true"></span><button id="iFullscreen" class="top-control" type="button"></button>';
+topControls.innerHTML='<button id="iTheme" class="top-control" type="button"></button><button id="iSettingsTop" class="top-control" type="button" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2 1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg></button><span class="top-divider" aria-hidden="true"></span><button id="iFullscreen" class="top-control" type="button"></button>';
 document.body.append(topControls);
 const topStyle=document.createElement('style');
 topStyle.textContent=`
@@ -85,8 +83,8 @@ function updateTopControls(){
   $('iFullscreen').title=fullLabel;
 }
 
-const controlsZone=document.createElement('button');controlsZone.className='controls-zone';controlsZone.setAttribute('aria-label','Mostrar controles del rosario');controlsZone.textContent='Mostrar controles';controlsZone.onclick=()=>{toolbar.hidden=!toolbar.hidden};document.body.append(controlsZone);
-$('iBack').onclick=()=>{state.index=Math.max(0,state.index-1);render()};$('iNext').onclick=advance;$('iMysteries').onclick=()=>$('allMysteries').click();$('iSettings').onclick=()=>$('settings').click();$('iTheme').onclick=()=>$('theme').click();$('iClose').onclick=()=>toolbar.hidden=true;
+$('iSettingsTop').onclick=()=>$('settings').click();
+$('iTheme').onclick=()=>$('theme').click();
 
 async function enterFullscreen() {
   if (document.fullscreenElement) return;
@@ -105,7 +103,7 @@ async function fullscreen() {
   } catch { notice('No se pudo activar la pantalla completa. Abre la web directamente en tu navegador y vuelve a pulsar el botón de pantalla completa.'); }
 }
 $('iFullscreen').onclick=fullscreen;
-$('iVolume').onclick=async()=>{
+window.rosarioTestVolume=async()=>{
   try {
     await enterFullscreen();
     if (!navigator.keyboard?.lock) {
@@ -128,7 +126,7 @@ document.addEventListener('fullscreenchange',()=>{
 let previousPrayerIndex=-1;const sectionRender=render;render=function(){if(previousPrayerIndex!==-1&&previousPrayerIndex!==state.index){stopChainInertia();window.rosarioManualOffset=0;}sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);chain.setAttribute('viewBox',`0 0 ${w} ${h}`);window.rosarioChainOrigin={
   x:Math.min(w*.22,220)-89,
   y:(!s || s.m>4 || bead===55) ? h-116-point(55).y : h/2-point(bead).y
-};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);$('iNext').disabled=!s;$('iBack').disabled=state.index===0;};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
+};window.rosarioApplyChainPan();$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
@@ -198,7 +196,7 @@ let gesture=null,holdTimeout=null,suppressClickUntil=0;
 function cancelGesture(){clearTimeout(holdTimeout);gesture=null;}
 document.addEventListener('pointerdown',event=>{
   if(!event.isPrimary){cancelGesture();return;}
-  if(event.button!==0||$('modal').open||event.target.closest('.prayer-toolbar'))return;
+  if(event.button!==0||$('modal').open)return;
   suppressClickUntil=0;
   stopChainInertia();
   const bead=event.target.closest('.focus-bead');
@@ -303,7 +301,7 @@ document.addEventListener('click',event=>{
   if(event.detail!==0&&performance.now()<suppressClickUntil){
     event.preventDefault();event.stopImmediatePropagation();return;
   }
-  if($('modal').open||event.target.closest('.prayer-toolbar'))return;
+  if($('modal').open)return;
   const bead=event.target.closest('.focus-bead');
   if(bead)selectFocusBead(bead);
   else if(event.target.closest('.rosary-cross'))advance();
