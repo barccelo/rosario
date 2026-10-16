@@ -378,3 +378,33 @@ html:has(#modal[open]),body:has(#modal[open]){
 @media(prefers-reduced-motion:reduce){
   #modalContent *{scroll-behavior:auto!important;transition-duration:0s!important}
 }
+
+/* Componentes de selección y muestras: una sola fuente de estilos. */
+#modalContent .rosary-color-dot{display:inline-block;vertical-align:middle}
+#modalContent .rosary-colors-variants[hidden]{display:none!important}
+#modalContent .rosary-color-preview{
+  background:var(--preview-bg,#F6F4EF);
+  color:var(--preview-text,#343C36);
+  text-align:center;
+}
+#modalContent .rosary-color-preview-beads{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 0 12px;
+}
+#modalContent .rosary-color-preview-bead{
+  display:grid;
+  place-items:center;
+  border:3px solid var(--preview-outline,#B89A68);
+  background:var(--preview-bead,#F2E5CA);
+}
+#modalContent .rosary-color-preview-bead.is-active{
+  outline:2px solid var(--preview-active,#BC9A60);
+  outline-offset:2px;
+}
+#modalContent .rosary-color-preview-caption{
+  font:12px/1.5 system-ui;
+  opacity:.8;
+}
+#modalContent label.physical-tap-option span{flex:1;min-width:0}
