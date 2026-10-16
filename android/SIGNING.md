@@ -202,3 +202,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - El **hilo** adquiere pequeñas irregularidades suaves y deterministas de hasta aproximadamente 5 unidades de SVG en los controles Bézier entre cuentas. El efecto es estable, sin movimiento ni aleatoriedad por render. Las posiciones y tamaños de las cuentas, el arco superior y la curva inferior se mantienen intactos.
 - No se cambian el swipe manual, el seguimiento automático, el orden de oraciones, el encuadre inicial/final, el halo existente de la cuenta activa ni la confirmación de saltos. Se han verificado la sintaxis de JavaScript y la carga de los nuevos recursos CSS/JS.
 - Validar visualmente en Android la iluminación acumulada y la naturalidad de los pequeños cambios de cuerda antes de considerarlos definitivos.
+
+## Arco superior y alternancia natural de cuentas — v0.1.18
+
+- Se modifica únicamente la geometría dibujada del Rosario completo. El arco superior utiliza controles Bézier 55 unidades por encima de las cuentas de los extremos, frente a 90 antes. Así queda **más bajo, menos ovalado y más parecido a un arco**; mantiene los mismos puntos de contacto y las tangentes verticales para no romper la continuidad.
+- La rama de retorno incorpora un desfase vertical progresivo y determinista `46 * sin(π * n / 26)`. Las cuentas grandes dejan de quedar emparejadas horizontalmente con las de la rama de subida; además, la distancia entre cuentas consecutivas varía ligeramente como en una cadena real.
+- El desfase vale **cero en ambos extremos**, por lo que ni la unión inferior ni el inicio/fin del arco superior cambian de posición. Se conservan las curvas inferiores, el colgante, la cruz y las ondulaciones previas del hilo.
+- No se alteran el desplazamiento manual nativo, el seguimiento automático, el encuadre inicial/final, el mapeo de oraciones ni el halo acumulativo de cuentas y cruz.
+- Validación estática: todas las cuentas de la rama de retorno conservan el orden vertical; los segmentos entre cuentas pequeñas permanecen dentro de distancias seguras. El efecto visual debe evaluarse en Android.
