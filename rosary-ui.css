@@ -69,6 +69,8 @@ html:has(#modal[open]),body:has(#modal[open]){
   z-index:12;
 }
 #modal .modal-screen-name{
+  flex:1;
+  min-width:0;
   font:600 15px/1.3 system-ui,-apple-system,sans-serif;
   letter-spacing:.01em;
   color:var(--ui-accent);
