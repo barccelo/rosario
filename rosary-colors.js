@@ -173,9 +173,6 @@
       fieldset.className='rosary-colors-settings';
       const legend=document.createElement('legend');
       legend.textContent='Colores del rosario';
-      const desc=document.createElement('p');
-      desc.className='rosary-colors-hint';
-      desc.textContent='Clásico conserva los colores actuales. Misionero cambia sólo las cuentas. Según los misterios adapta las cuentas, el fondo y los acentos; respeta claro y oscuro.';
       const list=document.createElement('div');
       list.className='rosary-colors-mode-list';
       const classic=addMode('classic','Clásico',['#B79355'],list);
@@ -239,7 +236,7 @@
       caption.className='rosary-color-preview-caption';
       preview.append(previewBeads,caption);
 
-      fieldset.append(legend,desc,list,variations,preview);
+      fieldset.append(legend,list,variations,preview);
       root.insertBefore(fieldset,root.querySelector('.controls-position-setting'));
 
       refreshSettings=()=>{
