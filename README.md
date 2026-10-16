@@ -167,3 +167,11 @@ El hilo del aro y del colgante emplea una base dorada más fina y una capa SVG c
 Se retiraron los detectores `touchstart/touchend` de navegación de oraciones que se habían instalado en `.physical-scroll-viewport`. Esta zona vuelve a reservarse exclusivamente al desplazamiento nativo de las cuentas, sin modificar `state.index` al soltar el dedo. La zona del texto conserva su navegación contextual y los toques breves sobre cuentas conservan la selección directa.
 
 Se aumentó la holgura entre la última Avemaría de la rama derecha (número 10 de la quinta decena) y la cuenta grande compartida. En lugar de deformar sólo la última unión, el desfase vertical se reparte gradualmente a lo largo de los 27 puntos de regreso para mantener la caída asimétrica y la separación entre cuentas.
+
+## Pantallas completas y estilos compartidos (octubre de 2026)
+
+Las ventanas de navegación, ajustes, lectura, meditación y confirmación utilizan ahora el mismo `<dialog>` semántico, pero ocupan **toda la pantalla del dispositivo**, con barra superior fija, flecha de regreso, controles de alineación conservados y contenido con desplazamiento propio de página. La presentación no altera el orden de oraciones, el progreso, los gestos del rosario ni las preferencias.
+
+Se consolidaron los estilos de los formularios, selectores, tarjetas, pestañas, opciones de color, muestras y controles de la vista física en `rosary-ui.css`, cargado al final por `rosary-ui.js`. Se retiraron reglas duplicadas de `rosary-colors.css`, `rosary-physical.css`, `rosary-polish.css` y el antiguo tamaño compacto definido en `index.html`. Las variantes claro, oscuro y por misterio tienen variables de interfaz específicas.
+
+Se eliminaron los textos auxiliares excesivos o técnicos de Ajustes, la selección de colores y la presentación física. Se conservaron las opciones funcionales, los rótulos necesarios, las acciones de navegación y las oraciones.
