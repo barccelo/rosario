@@ -553,3 +553,21 @@ html:has(#modal[open]),body:has(#modal[open]){
   stroke-linejoin:round;
   pointer-events:none;
 }
+
+/* Misma flecha de desplegable en todos los selectores de Ajustes. */
+#modalContent label.controls-position-setting{position:relative}
+#modalContent label.controls-position-setting::after,
+#modalContent label.rosary-color-variant:has(select)::after{
+  content:"";position:absolute;right:38px;top:50%;width:9px;height:9px;
+  border:solid var(--ui-ink);border-width:0 1.8px 1.8px 0;
+  transform:translateY(-70%) rotate(45deg);pointer-events:none;
+}
+#modalContent label.controls-position-setting select,
+#modalContent .rosary-color-variant select{
+  -webkit-appearance:none!important;appearance:none!important;
+  background-image:none!important;padding-right:46px!important;
+}
+@media(max-width:420px){
+  #modalContent label.controls-position-setting::after,
+  #modalContent label.rosary-color-variant:has(select)::after{right:34px}
+}
