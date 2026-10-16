@@ -461,9 +461,9 @@
       list.className='physical-layout-options';
       [
         {id:'vertical',name:'Vista vertical',
-          help:'Conserva el diseño anterior, con sus gestos y funciones.'},
-        {id:'physical',name:'Rosario físico · experimental',
-          help:'Una cruz; una cuenta grande compartida, tres pequeñas y una grande inferior. El color progresa por ambas ramas.'}
+          help:'Cadena vertical tradicional.'},
+        {id:'physical',name:'Rosario físico',
+          help:'Aro y colgante con caída natural.'}
       ].forEach(item=>{
         const label=document.createElement('label');
         label.className='physical-layout-option';
@@ -489,10 +489,7 @@
         };
         list.append(label);
       });
-      const hint=document.createElement('p');
-      hint.className='physical-layout-hint';
-      hint.textContent='En el lado izquierdo, desliza el dedo de arriba hacia abajo para subir a la curva superior. En el lado derecho, de abajo hacia arriba para bajar. La cadena utiliza la inercia nativa del navegador.';
-      field.append(legend,list,hint);
+      field.append(legend,list);
       const tapField=document.createElement('fieldset');
       tapField.className='physical-layout-settings physical-tap-settings';
       const tapLegend=document.createElement('legend');
@@ -507,7 +504,7 @@
       tapLabel.append(tapTitle,toggle);
       const tapHint=document.createElement('p');
       tapHint.className='physical-layout-hint';
-      tapHint.textContent='Mitad superior: oración anterior. Mitad inferior: siguiente oración. No se activará sobre el texto, cuentas, controles ni durante un deslizamiento.';
+      tapHint.textContent='Arriba: anterior · Abajo: siguiente.';
       tapField.append(tapLegend,tapLabel,tapHint);
       toggle.onchange=()=>{
         state.screenTapNavigation=toggle.checked;
