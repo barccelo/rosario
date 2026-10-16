@@ -30,6 +30,12 @@
       ['#DEB82C','#D3AA22','#453816']
     ];
     state.rosaryViewLayout=state.rosaryViewLayout==='vertical'?'vertical':'physical';
+    // El modo actual de halos acumulados es el predeterminado, incluso
+    // tras actualizar una instalación que aún no tenga esta preferencia.
+    // Los tres modos conservan su valor entre aperturas de la app.
+    const haloModes=['normal','continuous','none'];
+    if(!haloModes.includes(state.rosaryHaloMode))
+      state.rosaryHaloMode='continuous';
     // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
     state.screenTapNavigation=state.screenTapNavigation===true;
 
@@ -353,6 +359,9 @@
       return{type:'cross',phase:'opening',y:CROSS_Y,completed:0};
     }
     function paint(){
+      // El CSS controla solamente el brillo, nunca la geometría ni la
+      // navegación. Cambiar de modo no afecta el progreso del rosario.
+      document.body.dataset.rosaryHaloMode=state.rosaryHaloMode;
       const physical=state.rosaryViewLayout==='physical';
       document.body.classList.toggle('rosario-physical-view',physical);
       if(!physical){
@@ -692,6 +701,46 @@
         list.append(label);
       });
       field.append(legend,list);
+      const haloField=document.createElement('fieldset');
+      haloField.className='physical-layout-settings physical-halo-settings';
+      const haloLegend=document.createElement('legend');
+      haloLegend.textContent='Iluminación de las cuentas';
+      const haloOptions=document.createElement('div');
+      haloOptions.className='physical-layout-options';
+      [
+        {id:'normal',name:'Halo normal',
+          hint:'Sólo sigue la cuenta actual; la cruz conserva una luz tenue.'},
+        {id:'continuous',name:'Halo continuo',
+          hint:'Las cuentas completadas permanecen iluminadas.'},
+        {id:'none',name:'Sin halo',
+          hint:'Desactiva el brillo de todas las cuentas y de la cruz.'}
+      ].forEach(item=>{
+        const label=document.createElement('label');
+        label.className='physical-layout-option physical-halo-option';
+        const input=document.createElement('input');
+        input.type='radio';
+        input.name='rosaryHaloMode';
+        input.value=item.id;
+        input.checked=state.rosaryHaloMode===item.id;
+        const content=document.createElement('span');
+        const title=document.createElement('strong');
+        title.textContent=item.name;
+        const description=document.createElement('small');
+        description.textContent=item.hint;
+        content.append(title,description);
+        label.append(input,content);
+        label.classList.toggle('selected',input.checked);
+        input.onchange=()=>{
+          if(!input.checked)return;
+          state.rosaryHaloMode=item.id;
+          persist();
+          paint();
+          haloOptions.querySelectorAll('.physical-halo-option').forEach(row=>
+            row.classList.toggle('selected',row.querySelector('input').checked));
+        };
+        haloOptions.append(label);
+      });
+      haloField.append(haloLegend,haloOptions);
       const tapField=document.createElement('fieldset');
       tapField.className='physical-layout-settings physical-tap-settings';
       const tapLegend=document.createElement('legend');
@@ -715,8 +764,9 @@
       const controls=host.querySelector('.controls-position-setting');
       if(controls){
         host.insertBefore(field,controls);
+        host.insertBefore(haloField,controls);
         host.insertBefore(tapField,controls);
-      }else host.append(field,tapField);
+      }else host.append(field,haloField,tapField);
     };
     // Cambios de altura (barras del sistema, scroll nativo) NO deben
     // regenerar la cadena ni alterar la posición actual de las cuentas.
