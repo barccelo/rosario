@@ -219,11 +219,23 @@
       const wrapped=((index%count)+count)%count;
       const i=Math.floor(wrapped);
       const fraction=wrapped-i;
-      const a=positions[i],b=positions[(i+1)%count];
-      // Interpolación continua sobre la geometría original, incluida la
-      // vuelta superior y la llegada natural a la cuenta compartida.
-      const t=smooth(fraction);
-      return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
+      const from=positions[i],to=positions[(i+1)%count];
+      const previous=positions[(i+count-1)%count];
+      const next=positions[(i+2)%count];
+      // Seguir EXACTAMENTE los mismos Bézier que dibuja la cuerda.
+      // Especialmente importante en el arco superior: una interpolación
+      // recta haría que las cuentas se salieran de la trayectoria.
+      const c1=i===FRONT_END?
+        {x:from.x,y:from.y-90}:
+        {x:from.x+(to.x-previous.x)/6,y:from.y+(to.y-previous.y)/6};
+      const c2=i===FRONT_END?
+        {x:to.x,y:to.y-90}:
+        {x:to.x-(next.x-from.x)/6,y:to.y-(next.y-from.y)/6};
+      const t=fraction,s=1-t;
+      return{
+        x:s*s*s*from.x+3*s*s*t*c1.x+3*s*t*t*c2.x+t*t*t*to.x,
+        y:s*s*s*from.y+3*s*s*t*c1.y+3*s*t*t*c2.y+t*t*t*to.y
+      };
     }
     function clearTrackMotion(){
       svg.style.transform='';
