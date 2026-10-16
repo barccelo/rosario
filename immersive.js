@@ -42,16 +42,18 @@ compactStyle.textContent=`
 `;
 document.head.append(compactStyle);
 let controlsTimer;
+let androidFullscreen=false;
+const isRosarioFullscreen=()=>Boolean(document.fullscreenElement)||androidFullscreen;
 function collapseTopControls(){
   clearTimeout(controlsTimer);
-  const full=Boolean(document.fullscreenElement);
+  const full=isRosarioFullscreen();
   topControls.hidden=full;
   controlsDot.hidden=!full;
   controlsDot.setAttribute('aria-expanded','false');
 }
 function scheduleControlsCollapse(){
   clearTimeout(controlsTimer);
-  if(document.fullscreenElement)controlsTimer=setTimeout(()=>{
+  if(isRosarioFullscreen())controlsTimer=setTimeout(()=>{
     if(topControls.querySelector(':focus-visible')){scheduleControlsCollapse();return;}
     collapseTopControls();
   },3000);
@@ -71,13 +73,13 @@ const topIcons={
   expand:'<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>',
   collapse:'<path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"/>'
 };
-let androidFullscreen=false;
 window.rosarioNativeFullscreenChanged=enabled=>{
   androidFullscreen=Boolean(enabled);
   updateTopControls();
+  collapseTopControls();
 };
 function updateTopControls(){
-  const full=Boolean(document.fullscreenElement)||androidFullscreen;
+  const full=isRosarioFullscreen();
   const themeLabel=state.dark?'Activar modo claro':'Activar modo oscuro';
   const fullLabel=full?'Salir de pantalla completa':'Entrar en pantalla completa';
   $('iTheme').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+topIcons[state.dark?'sun':'moon']+'</svg>';
@@ -86,6 +88,7 @@ function updateTopControls(){
   $('iTheme').title=themeLabel;
   $('iFullscreen').setAttribute('aria-label',fullLabel);
   $('iFullscreen').title=fullLabel;
+  $('iFullscreen').setAttribute('aria-pressed',String(full));
 }
 
 $('iSettingsTop').onclick=()=>$('settings').click();
@@ -115,11 +118,8 @@ async function fullscreen() {
 }
 $('iFullscreen').onclick=fullscreen;
 document.addEventListener('fullscreenchange',()=>{
-  const active=Boolean(document.fullscreenElement);
   updateTopControls();
-  $('iFullscreen').setAttribute('aria-label',active?'Salir de pantalla completa':'Pantalla completa');
-  $('iFullscreen').setAttribute('aria-pressed',String(active));
-  if(!active) navigator.keyboard?.unlock?.();
+  if(!document.fullscreenElement) navigator.keyboard?.unlock?.();
 });
 let previousPrayerIndex=-1;const sectionRender=render;render=function(){sectionRender();updateTopControls();const s=steps[state.index],w=document.documentElement.clientWidth,h=window.innerHeight;let bead=s?.bead;if(bead===undefined)bead=!s||s.m>4?54:s.m<0?0:Math.min((s.m+1)*11,55);if(s?.kind==='mystery')bead=s.m*11;
 const svgHeight=point(55).y+112;
