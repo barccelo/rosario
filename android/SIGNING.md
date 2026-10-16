@@ -210,3 +210,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - El desfase vale **cero en ambos extremos**, por lo que ni la unión inferior ni el inicio/fin del arco superior cambian de posición. Se conservan las curvas inferiores, el colgante, la cruz y las ondulaciones previas del hilo.
 - No se alteran el desplazamiento manual nativo, el seguimiento automático, el encuadre inicial/final, el mapeo de oraciones ni el halo acumulativo de cuentas y cruz.
 - Validación estática: todas las cuentas de la rama de retorno conservan el orden vertical; los segmentos entre cuentas pequeñas permanecen dentro de distancias seguras. El efecto visual debe evaluarse en Android.
+
+## Opciones de iluminación — v0.1.19
+
+- En **Ajustes → Iluminación de las cuentas** se ofrecen tres opciones mutuamente excluyentes que pueden cambiarse durante el rezo y se guardan en `state.rosaryHaloMode` mediante la persistencia existente: **Halo normal**, **Halo continuo** y **Sin halo**. Se conserva **Halo continuo** como valor inicial de nuevas instalaciones y como alternativa de compatibilidad para preferencias antiguas.
+- **Halo normal**: el halo sigue exclusivamente a la cuenta activa; las cuentas previamente rezadas mantienen su color, pero no su halo. La cruz queda discretamente iluminada una vez completada su oración inicial, y se realza cuando vuelve a ser la estación actual.
+- **Halo continuo**: se conserva sin cambios la iluminación acumulativa de las cuentas completadas y la intensidad mayor de la cuenta activa, incluida la cruz.
+- **Sin halo**: desaparecen todos los halos de cuentas y sombras luminosas del crucifijo, incluidos los efectos de foco. Los colores que indican el progreso continúan funcionando.
+- La elección es inmediata, persiste al volver a abrir la app y no reinicia el progreso. No se alteran el scroll manual, el seguimiento automático, el dibujo ni las posiciones de las cuentas.
+- Validación estática: sintaxis de JavaScript, los tres modos, persistencia, actualización sin resetear progreso, reglas CSS y versiones de caché de WebView.
