@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261016-3';
+    css.href='rosary-physical.css?v=20261016-6';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -45,6 +45,7 @@
     stage.append(viewport);
 
     let positions=[],introPoints=[],crossX=0;
+    let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
@@ -83,32 +84,27 @@
       return copy.outerHTML;
     }
     function draw(){
+      lastDrawWidth=stage.getBoundingClientRect().width;
       const width=Math.max(320,document.documentElement.clientWidth);
       // La cadena permanece junto al borde izquierdo, sin invadir
       // el texto; hay espacio entre dos cuentas grandes.
-      // La franja de scroll mide el 42% de .rosary, NO del viewport.
-      // Calcular con el ancho real evita recortes y falsos cambios de apertura.
-      const railWidth=Math.max(110,stage.getBoundingClientRect().width*.42);
-      // Hay dos raíles RECTOS de ancho constante. La cuenta grande de
-      // unión está en el mismo eje de la primera rama: no hay transición
-      // en X ni apertura aparente al pasar por esa cuenta.
-      const separation=Math.min(64,Math.max(54,railWidth-104));
-      const center=Math.max(30,Math.min(86,railWidth-separation-29));
-      const leftX=center,rightX=center+separation;
+      const railWidth=Math.max(120,stage.getBoundingClientRect().width*.42);
+      const separation=Math.min(66,Math.max(56,railWidth-72));
+      const center=Math.max(68,Math.min(88,railWidth-separation/2-35));
+      const leftX=center-separation/2,rightX=center+separation/2;
       crossX=center;
-      // Dos ramas de separación fija, sin desplazamiento lateral de cuentas:
-      // al desplazar el rosario no se abren ni se cierran visualmente.
-      // Sólo la cuenta compartida inferior une las dos ramas.
+      // Ramas verticales paralelas, cuenta de unión centrada como antes.
+      // No hay variaciones en X al avanzar o desplazar.
       const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
       positions=Array.from({length:55},(_,i)=>{
-        if(i===0)return{x:leftX,y:MEDAL_Y,strand:'junction'};
+        if(i===0)return{x:center,y:MEDAL_Y,strand:'junction'};
         if(i<=FRONT_END){
           return{x:leftX,y:MEDAL_Y-i*rise,strand:'out'};
         }
         const n=i-FRONT_END-1;
         return{x:rightX,y:TOP+48+n*rise-18*n/26,strand:'back'};
       });
-      introPoints=intro.map(item=>({x:center,y:item.y,r:item.r}));
+      introPoints=intro.map((item,i)=>({x:center+3.5*Math.sin(i*.9+.4),y:item.y,r:item.r}));
       svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
       const at=p=>format(p.x)+' '+format(p.y);
       // Tangentes Catmull–Rom pasadas a curvas cúbicas Bézier para que
@@ -509,10 +505,15 @@
         host.insertBefore(tapField,controls);
       }else host.append(field,tapField);
     };
+    // Cambios de altura (barras del sistema, scroll nativo) NO deben
+    // regenerar la cadena ni alterar la posición actual de las cuentas.
     window.addEventListener('resize',()=>{
       if(state.rosaryViewLayout!=='physical')return;
+      if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
+      const previousScroll=viewport.scrollTop;
       draw();
-      beforeIndex=-1;
+      viewport.scrollTop=previousScroll;
+      beforeIndex=state.index;
       paint();
     });
     paint();
