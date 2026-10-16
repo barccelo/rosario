@@ -577,3 +577,62 @@ html:has(#modal[open]),body:has(#modal[open]){
   display:block;font:600 21px/1 Georgia,serif;letter-spacing:-1.7px;
   color:var(--ui-accent);transform:translateX(-1px);
 }
+
+/* Preferencias sólo de la APK, reutilizando el lenguaje visual de Ajustes. */
+#modalContent .android-native-settings{margin-top:28px}
+#modalContent .android-native-settings > h3{
+  margin:0 0 18px;font:600 21px/1.35 Georgia,serif;color:var(--ui-ink)
+}
+#modalContent .android-native-settings fieldset{
+  margin:22px 0 0!important;padding:22px 0 0!important;
+  border:0!important;border-top:1px solid var(--ui-rule)!important
+}
+#modalContent .android-setting-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin:10px 0;padding:12px 15px;min-height:64px;
+  border:1px solid var(--ui-outline);border-radius:13px;
+  background:var(--ui-surface);color:var(--ui-ink);
+  font:14px/1.5 system-ui
+}
+#modalContent .android-setting-row > span{min-width:0;flex:1}
+#modalContent .android-setting-row > select{
+  min-width:0;max-width:52%;width:52%;padding-right:35px!important;
+}
+#modalContent .android-setting-row input[type=checkbox]{
+  width:21px;height:21px;accent-color:var(--ui-accent)
+}
+#modalContent .android-setting-label{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  margin:16px 0;color:var(--ui-ink);font:14px/1.5 system-ui
+}
+#modalContent .android-setting-label input[type=time]{
+  max-width:155px;width:45%;font:15px system-ui!important;
+}
+#modalContent .android-setting-days-title{
+  font:14px/1.4 system-ui;color:var(--ui-muted);margin:18px 0 12px
+}
+#modalContent .android-setting-days{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px
+}
+#modalContent .android-setting-days label{
+  display:flex;align-items:center;justify-content:center;
+  min-height:44px;margin:0!important;border:1px solid var(--ui-outline);
+  border-radius:11px;background:var(--ui-surface);
+  font:600 13px system-ui;position:relative;cursor:pointer
+}
+#modalContent .android-setting-days input{
+  position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer
+}
+#modalContent .android-setting-days label:has(input:checked){
+  border-color:var(--ui-accent);background:var(--ui-selected);color:var(--ui-accent)
+}
+#modalContent .android-setting-days label:has(input:focus-visible){
+  outline:2px solid var(--ui-accent);outline-offset:2px
+}
+#modalContent button.android-save-reminder{
+  width:100%;min-height:48px;margin-top:17px;padding:12px;
+  border:1px solid var(--ui-accent);border-radius:13px;
+  background:var(--ui-selected);color:var(--ui-ink);
+  font:600 14px system-ui
+}
+#modalContent #androidReminderStatus{font:13px/1.5 system-ui;color:var(--ui-muted)}
