@@ -159,32 +159,6 @@ body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.activ
 body[data-rosary-color-mode="mystery"] .physical-cross.active{
   filter:drop-shadow(0 0 6px var(--rc-accent));
 }
-/* Selector independiente, sin afectar la vista vertical actual. */
-.physical-layout-settings{
-  display:block;clear:both;border:0;border-top:1px solid #A69C854A;
-  margin:20px 0 0;padding:14px 0 6px;
-}
-.physical-layout-settings legend{
-  width:100%;font:600 16px/1.5 Georgia,serif;padding:0 0 10px;
-}
-.physical-layout-options{display:grid;gap:7px}
-dialog label.physical-layout-option{
-  display:flex!important;align-items:center;justify-content:flex-start!important;
-  gap:12px!important;margin:0!important;padding:13px!important;
-  min-height:50px;border:1px solid #AAA18A66;border-radius:12px;
-  font:13px/1.4 system-ui;
-}
-.physical-layout-option input{
-  width:17px;height:17px;flex:0 0 auto;accent-color:#A48555;
-}
-.physical-layout-option span{flex:1}
-.physical-layout-option small{
-  display:block;color:inherit;opacity:.69;margin-top:4px;line-height:1.5;
-}
-.physical-layout-option.selected{background:#BD9D6720;border-color:#B39261}
-.physical-layout-hint{
-  margin:10px 0 0;font:12px/1.6 system-ui;color:inherit;opacity:.7;
-}
 @media(prefers-reduced-motion:reduce){.physical-path .physical-strand{transition:none}}
 
 /* El punto compartido permanece visible incluso antes de empezar la decena. */
@@ -213,23 +187,6 @@ body[data-rosary-color-mode="mystery"] .physical-pendant .physical-bead.active .
 }
 body.rosario-physical-view .physical-scroll-viewport{
   -webkit-tap-highlight-color:transparent;
-}
-
-/* Ajuste de navegación táctil: interruptor compacto independiente de la vista. */
-dialog label.physical-tap-option{
-  display:flex!important;align-items:center!important;
-  justify-content:space-between!important;gap:16px!important;
-  padding:8px 0!important;margin:0!important;
-  font:500 13px/1.55 system-ui;
-}
-.physical-tap-option span{flex:1}
-.physical-tap-option input[type="checkbox"]{
-  flex:0 0 auto;width:20px;height:20px;
-  margin:0;accent-color:#A48555;
-}
-.physical-tap-settings{margin-top:14px}
-.physical-tap-settings .physical-layout-hint{
-  margin-top:4px;line-height:1.65;
 }
 
 /* La terminación del colgante conserva las cuatro cuentas rezadas
