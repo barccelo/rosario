@@ -144,9 +144,11 @@
     root.append(reminder);
     host.append(root);
   }
-  const settings=document.getElementById('settings');
-  if(settings){
+  document.addEventListener('DOMContentLoaded',()=>{
+    // Esperar a que los otros módulos terminen de envolver Ajustes.
+    const settings=document.getElementById('settings');
+    if(!settings)return;
     const existing=settings.onclick;
     settings.onclick=()=>{existing?.();attachPreferences();};
-  }
+  });
 })();
