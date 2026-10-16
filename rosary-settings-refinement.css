@@ -98,11 +98,9 @@
   max-width:60%;width:60%!important;
 }
 /* iOS-style switches. The real checkbox remains operable and accessible. */
-#modalContent :is(
-  >label>input[type="checkbox"],
-  .physical-tap-option>input[type="checkbox"],
-  .android-setting-row>input[type="checkbox"]
-){
+#modalContent>label>input[type="checkbox"],
+#modalContent .physical-tap-option>input[type="checkbox"],
+#modalContent .android-setting-row>input[type="checkbox"]{
   appearance:none!important;-webkit-appearance:none!important;
   display:inline-block!important;flex:0 0 45px!important;
   width:45px!important;height:27px!important;
@@ -111,25 +109,19 @@
   background:var(--ui-rule)!important;
   box-shadow:none;cursor:pointer;transition:background .16s;
 }
-#modalContent :is(
-  >label>input[type="checkbox"],
-  .physical-tap-option>input[type="checkbox"],
-  .android-setting-row>input[type="checkbox"]
-)::before{
+#modalContent>label>input[type="checkbox"]::before,
+#modalContent .physical-tap-option>input[type="checkbox"]::before,
+#modalContent .android-setting-row>input[type="checkbox"]::before{
   content:"";position:absolute;width:21px;height:21px;left:2px;top:2px;
   border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;
   transition:transform .17s;pointer-events:none;
 }
-#modalContent :is(
-  >label>input[type="checkbox"],
-  .physical-tap-option>input[type="checkbox"],
-  .android-setting-row>input[type="checkbox"]
-):checked{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important}
-#modalContent :is(
-  >label>input[type="checkbox"],
-  .physical-tap-option>input[type="checkbox"],
-  .android-setting-row>input[type="checkbox"]
-):checked::before{transform:translateX(18px)}
+#modalContent>label>input[type="checkbox"]:checked,
+#modalContent .physical-tap-option>input[type="checkbox"]:checked,
+#modalContent .android-setting-row>input[type="checkbox"]:checked{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important}
+#modalContent>label>input[type="checkbox"]:checked::before,
+#modalContent .physical-tap-option>input[type="checkbox"]:checked::before,
+#modalContent .android-setting-row>input[type="checkbox"]:checked::before{transform:translateX(18px)}
 #modalContent input[type=checkbox]:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}
 @media(max-width:450px){
   #modalContent .android-setting-row:has(>.rosario-choice-trigger){
