@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-10';
+    css.href='rosary-physical.css?v=20261015-11';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -62,15 +62,25 @@
           '" text-anchor="middle">'+number+'</text>':'')+
         '</g>';
     }
+    // Se reutiliza EXACTAMENTE la cruz de la vista vertical, incluyendo
+    // su tamaño, forma, trazos y detalles, sin construir otra ilustración.
+    // El degradado original se recrea con ID local a este SVG.
     function crossMarkup(x,y){
-      return '<g class="physical-cross" role="button" tabindex="0" data-cross="only" '+
-        'aria-label="Única cruz del rosario, al principio y al final" '+
-        'transform="translate('+format(x)+' '+format(y)+')">'+
-        '<circle cy="-54" r="7" fill="none" stroke="#B49663" stroke-width="3"/>'+
-        '<path d="M-8 -46 Q-8 -49 -5 -49 H5 Q8 -49 8 -46 V-19 H29 Q32 -19 32 -16 '+
-        'V-4 Q32 -1 29 -1 H8 V57 Q8 60 5 60 H-5 Q-8 60 -8 57 V-1 H-29 '+
-        'Q-32 -1 -32 -4 V-16 Q-32 -19 -29 -19 H-8 Z"/>'+
-        '<path class="cross-detail" d="M0 -39 V49 M-23 -10 H23"/></g>';
+      const original=chain.querySelector('.rosary-cross');
+      if(!original)return '';
+      const copy=original.cloneNode(true);
+      copy.classList.remove('rosary-cross');
+      copy.classList.add('physical-cross');
+      copy.setAttribute('data-cross','only');
+      copy.setAttribute('tabindex','0');
+      copy.setAttribute('role','button');
+      copy.setAttribute('aria-label','Única cruz del rosario, al comienzo y al final');
+      // En la original, la argolla está a +7 y el cuerpo entre +14 y +97.
+      // La argolla del colgante físico se une a CROSS_Y-54.
+      copy.setAttribute('transform','translate('+format(x)+' '+format(y-61)+')');
+      const body=copy.querySelector('path[fill="url(#crossGold)"]');
+      if(body)body.setAttribute('fill','url(#physicalCrossGold)');
+      return copy.outerHTML;
     }
     function draw(){
       const width=Math.max(320,document.documentElement.clientWidth);
@@ -114,7 +124,11 @@
       }
       const body=[
         '<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
-        '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient></defs>'
+        '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient>'+
+        '<linearGradient id="physicalCrossGold" x1="0" y1="0" x2="1" y2="1">'+
+        '<stop stop-color="#f3e3bc"/><stop offset=".45" stop-color="#bd9657"/>'+
+        '<stop offset=".7" stop-color="#e1c58d"/><stop offset="1" stop-color="#96713f"/>'+
+        '</linearGradient></defs>'
       ];
       // La trayectoria es UN solo óvalo curvo y angosto. Sus segmentos
       // pueden colorearse de manera acumulativa, sin intercambiar ramas.
@@ -173,6 +187,58 @@
       });
     }
     draw();
+
+    // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
+    // Exactamente en la primera cuenta del lado derecho (n.º 28),
+    // el avance cambia al gesto hacia ARRIBA y sigue así hasta la cruz.
+    // Las oraciones introductorias y los cierres de cada misterio
+    // heredan la dirección de su cuenta correspondiente.
+    function physicalSwipeDown(){
+      if(state.rosaryViewLayout!=='physical')return false;
+      const step=steps[state.index];
+      if(!step)return false;
+      if(step.m<0)return true;
+      if(step.m>=5)return false;
+      if(Number.isInteger(step.bead))
+        return step.bead<=FRONT_END;
+      const previous=steps.slice(0,state.index+1).reverse().find(
+        s=>Number.isInteger(s.bead));
+      if(previous)return previous.bead<=FRONT_END;
+      return step.m<2;
+    }
+    window.rosarioPhysicalSwipeDown=physicalSwipeDown;
+
+    function navigatePhysicalSwipe(dy){
+      if(Math.abs(dy)<45||$('modal').open)return false;
+      const forward=physicalSwipeDown()?dy>0:dy<0;
+      if(forward)advance();
+      else if(state.index>0){state.index-=1;render();}
+      return true;
+    }
+    // El scroll inercial de las cuentas sigue siendo nativo, pero un
+    // swipe realizado sobre ellas también recorre la oración según la
+    // dirección física. Sólo se procesa al terminar el gesto.
+    let chainTouch=null;
+    viewport.addEventListener('touchstart',event=>{
+      chainTouch=null;
+      if(state.rosaryViewLayout!=='physical'||$('modal').open||
+         event.touches.length!==1)return;
+      const t=event.touches[0];
+      chainTouch={id:t.identifier,x:t.clientX,y:t.clientY,
+        initialIndex:state.index};
+    },{passive:true});
+    viewport.addEventListener('touchend',event=>{
+      const touch=chainTouch;
+      chainTouch=null;
+      if(!touch||state.rosaryViewLayout!=='physical'||$('modal').open)return;
+      const t=Array.from(event.changedTouches).find(t=>t.identifier===touch.id);
+      if(!t)return;
+      const dy=t.clientY-touch.y,dx=t.clientX-touch.x;
+      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=45 &&
+         touch.initialIndex===state.index)
+        navigatePhysicalSwipe(dy);
+    },{passive:true});
+    viewport.addEventListener('touchcancel',()=>{chainTouch=null;},{passive:true});
 
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
