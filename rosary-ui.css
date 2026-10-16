@@ -653,3 +653,56 @@ html:has(#modal[open]),body:has(#modal[open]){
   font:600 14px system-ui
 }
 #modalContent #androidReminderStatus{font:13px/1.5 system-ui;color:var(--ui-muted)}
+
+/* Flecha única: centrada en el alto REAL de cada select de Ajustes.
+   Evita que la flecha salte a la esquina inferior del control Android. */
+#modalContent select{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 9l7 7 7-7' fill='none' stroke='%23977647' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 18px center!important;
+  background-size:18px 18px!important;
+  padding-right:51px!important;
+}
+#modalContent .android-setting-row > select{
+  background-position:right 16px center!important;
+  padding-right:49px!important;
+}
+#modalContent :is(.android-setting-row:has(> select),.controls-position-setting,.rosary-color-variant:has(select))::after{
+  content:none!important;
+}
+#modalContent #groupSelect{
+  min-height:54px!important;
+  background-position:right 17px center!important;
+}
+/* El área azul nativa de toque no debe quedar sobre la interfaz:
+   se mantiene visible el foco de teclado mediante :focus-visible. */
+html,body,button,select,input,label,[role="button"]{
+  -webkit-tap-highlight-color:transparent!important;
+}
+#modal :is(button,select,input):focus:not(:focus-visible){
+  outline:none!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+/* Confirmación accesible y visible al cambiar la alineación con Aa. */
+#modal .modal-alignment-feedback{
+  position:fixed;z-index:40;
+  top:calc(env(safe-area-inset-top,0px) + 76px);
+  right:clamp(16px,4vw,34px);
+  width:max-content;max-width:calc(100vw - 32px);
+  padding:10px 15px;
+  border:1px solid var(--ui-accent);
+  border-radius:12px;
+  background:var(--ui-surface);
+  color:var(--ui-ink);
+  box-shadow:0 6px 20px #00000012;
+  font:600 13px/1.4 system-ui;
+  pointer-events:none;
+}
+#modal .modal-alignment-feedback[hidden]{display:none!important}
+#modal .modal-align-button.align-changed{
+  color:var(--ui-accent)!important;
+  border-color:var(--ui-accent)!important;
+  background:var(--ui-selected)!important;
+}
