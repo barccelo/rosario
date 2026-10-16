@@ -49,6 +49,7 @@
     let beforeIndex=-1,beforeMode='';
     let lastPhysicalType=null;
     let lastPhysicalBead=-1;
+    let autoFollowTarget=null;
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
       return '<g class="physical-bead" role="button" tabindex="0" '+
@@ -223,6 +224,13 @@
     }
     draw();
 
+    // Los gestos manuales siguen siendo 100 % nativos. Sólo anulan
+    // el destino de centrado automático pendiente cuando empiezan.
+    function clearAutoFollow(){autoFollowTarget=null;}
+    viewport.addEventListener('pointerdown',clearAutoFollow,{passive:true});
+    viewport.addEventListener('touchstart',clearAutoFollow,{passive:true});
+    viewport.addEventListener('wheel',clearAutoFollow,{passive:true});
+
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
     // el avance cambia al gesto hacia ARRIBA y sigue así hasta la cruz.
@@ -322,6 +330,7 @@
         beforeMode='vertical';beforeIndex=state.index;
         lastPhysicalType=null;
         lastPhysicalBead=-1;
+        autoFollowTarget=null;
         return;
       }
       const selected=positionFor(steps[state.index]);
@@ -368,7 +377,11 @@
         const entering=beforeMode!=='physical';
         const fromPendant=lastPhysicalType!=='loop';
         const closeToJunction=bead>=0&&(bead<=5||bead>=50);
-        const previous=viewport.scrollTop;
+        const currentTop=viewport.scrollTop;
+        // Mientras WebView realiza un scroll suave, utilizar el
+        // destino anterior, no una posición intermedia. Así los clics
+        // rápidos no interrumpen el movimiento ni provocan temblores.
+        const previous=autoFollowTarget===null?currentTop:autoFollowTarget;
         let target=previous;
 
         // Sólo se mueve el scroll de la cadena, NUNCA las cuentas.
@@ -404,12 +417,13 @@
 
         target=Math.max(0,Math.min(max,target));
         if(Math.abs(target-previous)>.5){
+          autoFollowTarget=target;
           // Usar el propio suavizado de WebView: acompaña de forma
           // fluida cada oración. No altera los swipes manuales.
           // Saltos deliberados a puntos distantes o cambio de vista
           // son inmediatos para evitar recorrer todo el rosario.
           const longJump=entering||
-            Math.abs(target-previous)>height*1.35;
+            Math.abs(target-currentTop)>height*1.35;
           if(!longJump&&typeof viewport.scrollTo==='function'){
             viewport.scrollTo({top:target,behavior:'smooth'});
           }else{
@@ -592,6 +606,7 @@
       if(state.rosaryViewLayout!=='physical')return;
       if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
       const previousScroll=viewport.scrollTop;
+      autoFollowTarget=null;
       draw();
       viewport.scrollTop=previousScroll;
       beforeIndex=state.index;
