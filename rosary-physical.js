@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-12';
+    css.href='rosary-physical.css?v=20261015-13';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -111,7 +111,10 @@
         const drift=5*(.5+.5*Math.sin(n*.41+1.1));
         return{
           x:rightX+3+drift,
-          y:TOP+48+n*rise+36*n/26+9*Math.sin(n*.36),
+          // La última Avemaría queda más arriba que la cuenta
+          // compartida; repartimos la holgura por toda esta rama,
+          // sin apretar las últimas cuentas entre sí.
+          y:TOP+48+n*rise-18*n/26+9*Math.sin(n*.36),
           strand:'back'
         };
       });
@@ -227,37 +230,10 @@
     }
     window.rosarioPhysicalSwipeDown=physicalSwipeDown;
 
-    function navigatePhysicalSwipe(dy){
-      if(Math.abs(dy)<45||$('modal').open)return false;
-      const forward=physicalSwipeDown()?dy>0:dy<0;
-      if(forward)advance();
-      else if(state.index>0){state.index-=1;render();}
-      return true;
-    }
-    // El scroll inercial de las cuentas sigue siendo nativo, pero un
-    // swipe realizado sobre ellas también recorre la oración según la
-    // dirección física. Sólo se procesa al terminar el gesto.
-    let chainTouch=null;
-    viewport.addEventListener('touchstart',event=>{
-      chainTouch=null;
-      if(state.rosaryViewLayout!=='physical'||$('modal').open||
-         event.touches.length!==1)return;
-      const t=event.touches[0];
-      chainTouch={id:t.identifier,x:t.clientX,y:t.clientY,
-        initialIndex:state.index};
-    },{passive:true});
-    viewport.addEventListener('touchend',event=>{
-      const touch=chainTouch;
-      chainTouch=null;
-      if(!touch||state.rosaryViewLayout!=='physical'||$('modal').open)return;
-      const t=Array.from(event.changedTouches).find(t=>t.identifier===touch.id);
-      if(!t)return;
-      const dy=t.clientY-touch.y,dx=t.clientX-touch.x;
-      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>=45 &&
-         touch.initialIndex===state.index)
-        navigatePhysicalSwipe(dy);
-    },{passive:true});
-    viewport.addEventListener('touchcancel',()=>{chainTouch=null;},{passive:true});
+    // IMPORTANTE: el panel izquierdo es únicamente un desplazamiento
+    // inercial nativo del rosario. Nunca avanza ni retrocede oraciones
+    // al soltar un swipe. La dirección contextual se conserva sólo en
+    // los gestos de navegación del texto, gestionados por immersive.js.
 
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
