@@ -50,6 +50,15 @@
     let lastPhysicalType=null;
     let lastPhysicalBead=-1;
     let autoFollowTarget=null;
+    // La opción «Reiniciar progreso» debe restaurar también el
+    // encuadre inicial, incluso si ya está seleccionada la oración 0.
+    window.rosarioPhysicalReset=()=>{
+      autoFollowTarget=null;
+      beforeMode='';
+      beforeIndex=-1;
+      lastPhysicalType=null;
+      lastPhysicalBead=-1;
+    };
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
       return '<g class="physical-bead" role="button" tabindex="0" '+
@@ -416,9 +425,12 @@
         let target=previous;
 
         if(entering){
-          // Abrir una vista o saltar a una posición lejana no es avanzar
-          // una sola oración: se permite situarla directamente.
-          if(atClosing||atFinalMystery||bead>=50){
+          // Al iniciar un rosario nuevo, la cruz debe quedar completa
+          // en el límite inferior real, igual que al terminarlo.
+          // Esto cubre primer uso, recarga con progreso 0 y reinicio.
+          if(state.index===0 && selected.phase==='opening'){
+            target=finalTop;
+          }else if(atClosing||atFinalMystery||bead>=50){
             target=finalTop;
           }else if(bead>=0&&bead<=5){
             target=Math.min(firstFiveTop,clamp(selected.y-height*.64));
@@ -632,8 +644,8 @@
       const list=document.createElement('div');
       list.className='physical-layout-options';
       [
-        {id:'vertical',name:'Vista vertical'},
-        {id:'physical',name:'Rosario completo'}
+        {id:'physical',name:'Rosario completo'},
+        {id:'vertical',name:'Vista vertical'}
       ].forEach(item=>{
         const label=document.createElement('label');
         label.className='physical-layout-option';
