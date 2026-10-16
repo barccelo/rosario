@@ -10,11 +10,14 @@ body.rosario-physical-view .physical-scroll-viewport{
 }
 .physical-scroll-viewport::-webkit-scrollbar{display:none}
 .rosary .physical-scroll-viewport .physical-path{
-  display:block!important;position:relative!important;inset:auto!important;
+  display:block!important;position:absolute!important;inset:auto!important;
+  top:var(--physical-track-top,0px)!important;left:0!important;
   width:100vw!important;height:var(--physical-path-height,2640px)!important;
   max-width:none!important;max-height:none!important;
   overflow:visible!important;touch-action:pan-y!important;
+  will-change:transform;
 }
+.physical-motion-track{width:1px;pointer-events:none}
 .physical-path{
   --physical-fill:#F6F4EF;--physical-line:#BCA06B;
   --physical-outline:#B79355;--physical-number:#776B55;
@@ -211,22 +214,4 @@ body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physica
   stroke:#927344;
   stroke-width:.7;
   pointer-events:none;
-}
-
-
-/* PRUEBA AISLADA: sin halos ni resplandores — v0.1.7.
-   Sólo afecta a Rosario completo. Se mantienen intactos la trayectoria,
-   los enlaces, las coordenadas, los tamaños y el comportamiento del scroll.
-   Para revertir, eliminar este bloque y actualizar la versión del CSS. */
-body.rosario-physical-view .physical-path .physical-bead .halo{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-body.rosario-physical-view .physical-path .physical-cross,
-body.rosario-physical-view .physical-path .physical-bead,
-body.rosario-physical-view .physical-path .physical-bead .ring{
-  filter:none!important;
-  box-shadow:none!important;
-  text-shadow:none!important;
 }
