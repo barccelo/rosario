@@ -1,0 +1,86 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'index.html'
+      - '*.js'
+      - '*.css'
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Rosario
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Compile test APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: gradle -p android :app:assembleDebug --no-daemon
+
+      - name: Upload test APK
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rosario-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Restore stable signing key
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ROSARIO_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ROSARIO_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ROSARIO_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ROSARIO_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          if [[ -z "$KEYSTORE_BASE64" || -z "$KEYSTORE_PASSWORD" ||
+                -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
+            echo "::error::Configure all four ROSARIO signing secrets before publishing an APK."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rosario-release.jks"
+
+      - name: Build signed release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          ROSARIO_KEYSTORE_FILE: ${{ runner.temp }}/rosario-release.jks
+          ROSARIO_KEYSTORE_PASSWORD: ${{ secrets.ROSARIO_KEYSTORE_PASSWORD }}
+          ROSARIO_KEY_ALIAS: ${{ secrets.ROSARIO_KEY_ALIAS }}
+          ROSARIO_KEY_PASSWORD: ${{ secrets.ROSARIO_KEY_PASSWORD }}
+          ROSARIO_VERSION: ${{ github.ref_name }}
+        run: |
+          gradle -p android :app:assembleRelease --no-daemon
+          cp android/app/build/outputs/apk/release/app-release.apk "Rosario-${GITHUB_REF_NAME}.apk"
+
+      - name: Publish APK for Obtainium
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Rosario-*.apk
+          generate_release_notes: true
