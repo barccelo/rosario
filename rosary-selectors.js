@@ -34,6 +34,9 @@
     overlay.addEventListener('click',e=>{
       if(e.target===overlay)closeSheet();
     });
+    modal.addEventListener('close',()=>{
+      if(!overlay.hidden)closeSheet(false);
+    });
     overlay.addEventListener('keydown',e=>{
       if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeSheet();}
       if(e.key!=='Tab')return;
