@@ -6,6 +6,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Build;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.View;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -23,11 +29,97 @@ public final class MainActivity extends Activity {
             "https://appassets.androidplatform.net/assets/www/index.html";
     private WebView webView;
     private volatile boolean prayerActive = false;
+    private volatile boolean upIsSystem = false;
+    private volatile boolean downIsSystem = false;
+    private boolean nativeFullscreen = false;
+    private static final int NOTIFICATION_PERMISSION_REQUEST = 42;
 
     public final class RosarioBridge {
         @JavascriptInterface
         public void setPrayerActive(boolean active) {
             prayerActive = active;
+        }
+
+        @JavascriptInterface
+        public void setFullscreen(boolean enabled) {
+            runOnUiThread(() -> applyFullscreen(enabled));
+        }
+
+        @JavascriptInterface
+        public void configureVolumeActions(String up, String down) {
+            upIsSystem = "system".equals(up);
+            downIsSystem = "system".equals(down);
+        }
+
+        @JavascriptInterface
+        public void configureReminder(boolean enabled, int hour, int minute, String weekdays) {
+            runOnUiThread(() -> {
+                ReminderScheduler.save(MainActivity.this, enabled, hour, minute, weekdays);
+                if (enabled && Build.VERSION.SDK_INT >= 33 &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[] {
+                        Manifest.permission.POST_NOTIFICATIONS
+                    }, NOTIFICATION_PERMISSION_REQUEST);
+                } else {
+                    ReminderScheduler.schedule(MainActivity.this);
+                    notifyReminderPermission();
+                }
+            });
+        }
+    }
+
+    private void applyFullscreen(boolean enabled) {
+        nativeFullscreen = enabled;
+        View decor = getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController controller = decor.getWindowInsetsController();
+            if (controller != null) {
+                if (enabled) {
+                    controller.hide(WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars());
+                    controller.setSystemBarsBehavior(
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                } else {
+                    controller.show(WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars());
+                }
+            }
+        } else {
+            int flags = enabled ?
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE : 0;
+            decor.setSystemUiVisibility(flags);
+        }
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "window.rosarioNativeFullscreenChanged&&" +
+                "window.rosarioNativeFullscreenChanged(" + enabled + ")", null);
+        }
+    }
+
+    private void notifyReminderPermission() {
+        boolean allowed = Build.VERSION.SDK_INT < 33 ||
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "window.rosarioAndroidReminderPermission&&" +
+                "window.rosarioAndroidReminderPermission(" + allowed + ")", null);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
+            ReminderScheduler.schedule(this);
+            notifyReminderPermission();
         }
     }
 
@@ -81,14 +173,15 @@ public final class MainActivity extends Activity {
         });
         webView.addJavascriptInterface(new RosarioBridge(), "RosarioAndroid");
         setContentView(webView);
+        ReminderScheduler.schedule(this);
         webView.loadUrl(ROOT);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (prayerActive &&
-                (keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-                 keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
+                ((keyCode == KeyEvent.KEYCODE_VOLUME_UP && !upIsSystem) ||
+                 (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && !downIsSystem))) {
             if (event.getRepeatCount() == 0) {
                 String direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP ? "up" : "down";
                 webView.evaluateJavascript(
@@ -103,8 +196,8 @@ public final class MainActivity extends Activity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (prayerActive &&
-                (keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-                 keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
+                ((keyCode == KeyEvent.KEYCODE_VOLUME_UP && !upIsSystem) ||
+                 (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && !downIsSystem))) {
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -113,12 +206,17 @@ public final class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     @Override
     public void onBackPressed() {
+        if (webView == null) {
+            super.onBackPressed();
+            return;
+        }
         webView.evaluateJavascript(
                 "(function(){const m=document.getElementById('modal');"
                 + "if(m&&m.open){m.close();return true;}return false;})()",
                 result -> {
                     if (!"true".equals(result)) {
-                        if (webView.canGoBack()) webView.goBack();
+                        if (nativeFullscreen) applyFullscreen(false);
+                        else if (webView.canGoBack()) webView.goBack();
                         else MainActivity.super.onBackPressed();
                     }
                 });
