@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261016-2';
+    css.href='rosary-physical.css?v=20261016-3';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -87,25 +87,26 @@
       // La cadena permanece junto al borde izquierdo, sin invadir
       // el texto; hay espacio entre dos cuentas grandes.
       const railWidth=width*.42;
-      const separation=Math.min(66,Math.max(56,railWidth-72));
-      const center=Math.max(68,Math.min(88,railWidth-separation/2-35));
-      const leftX=center-separation/2,rightX=center+separation/2;
+      // Hay dos raíles RECTOS de ancho constante. La cuenta grande de
+      // unión está en el mismo eje de la primera rama: no hay transición
+      // en X ni apertura aparente al pasar por esa cuenta.
+      const separation=Math.min(64,Math.max(54,railWidth-104));
+      const center=Math.max(30,Math.min(86,railWidth-separation-29));
+      const leftX=center,rightX=center+separation;
       crossX=center;
       // Dos ramas de separación fija, sin desplazamiento lateral de cuentas:
       // al desplazar el rosario no se abren ni se cierran visualmente.
       // Sólo la cuenta compartida inferior une las dos ramas.
       const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
       positions=Array.from({length:55},(_,i)=>{
-        if(i===0)return{x:center,y:MEDAL_Y,strand:'junction'};
+        if(i===0)return{x:leftX,y:MEDAL_Y,strand:'junction'};
         if(i<=FRONT_END){
           return{x:leftX,y:MEDAL_Y-i*rise,strand:'out'};
         }
         const n=i-FRONT_END-1;
         return{x:rightX,y:TOP+48+n*rise-18*n/26,strand:'back'};
       });
-      introPoints=intro.map((item,i)=>({
-        x:center+3.5*Math.sin(i*.9+.4),y:item.y,r:item.r
-      }));
+      introPoints=intro.map(item=>({x:center,y:item.y,r:item.r}));
       svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
       const at=p=>format(p.x)+' '+format(p.y);
       // Tangentes Catmull–Rom pasadas a curvas cúbicas Bézier para que
