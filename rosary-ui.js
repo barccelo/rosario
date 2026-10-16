@@ -9,7 +9,7 @@
 
     const style=document.createElement('link');
     style.rel='stylesheet';
-    style.href='rosary-ui.css?v=20261015-4';
+    style.href='rosary-ui.css?v=20261015-5';
     document.head.append(style);
 
     const header=document.createElement('div');
@@ -28,7 +28,8 @@
     modal.setAttribute('aria-label','Pantalla de Rosario');
     close.setAttribute('aria-label','Volver al rosario');
     close.title='Volver al rosario';
-    close.textContent='←';
+    close.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+
+      '<path d="M15 4.5 7.5 12 15 19.5"/></svg>';
 
     function refreshTitle(){
       if(content.querySelector('#groupSelect')){
