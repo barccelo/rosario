@@ -102,8 +102,13 @@ body.dark .physical-path{
 .physical-path .physical-bead .number{
   font:12px system-ui;fill:var(--physical-number);pointer-events:none;
 }
-.physical-path .physical-bead .halo{opacity:0;pointer-events:none}
-.physical-path .physical-bead.active .halo{opacity:.65}
+.physical-path .physical-bead .halo{
+  opacity:0;pointer-events:none;transition:opacity .22s ease;
+}
+/* Cada cuenta que ya se rezó conserva una luz tenue, y la actual
+   mantiene el halo más destacado. También incluye el colgante. */
+.physical-path .physical-bead.is-complete .halo{opacity:.52}
+.physical-path .physical-bead.active .halo{opacity:.75}
 .physical-path .physical-bead.active .ring{
   fill:#E9D7B6;stroke:#B18A48;stroke-width:6;
 }
@@ -121,8 +126,11 @@ body.dark .physical-path{
   cursor:pointer;outline:none!important;
   -webkit-tap-highlight-color:transparent;
 }
+.physical-path .physical-cross.is-complete{
+  filter:drop-shadow(0 0 5px #C6A46699);
+}
 .physical-path .physical-cross.active{
-  filter:drop-shadow(0 0 5px #C6A46688);
+  filter:drop-shadow(0 0 7px #C6A466CC);
 }
 .physical-path .physical-cross:focus-visible{
   filter:drop-shadow(0 0 6px #577D60AA);
@@ -156,8 +164,11 @@ body[data-rosary-color-mode="mystery"] .physical-loop-beads .physical-bead.activ
   fill:var(--rc-active-fill)!important;stroke:var(--rc-accent)!important;
   stroke-width:7!important;
 }
+body[data-rosary-color-mode="mystery"] .physical-cross.is-complete{
+  filter:drop-shadow(0 0 5px var(--rc-accent));
+}
 body[data-rosary-color-mode="mystery"] .physical-cross.active{
-  filter:drop-shadow(0 0 6px var(--rc-accent));
+  filter:drop-shadow(0 0 7px var(--rc-accent));
 }
 @media(prefers-reduced-motion:reduce){.physical-path .physical-strand{transition:none}}
 
@@ -212,3 +223,5 @@ body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physica
   stroke-width:.7;
   pointer-events:none;
 }
+
+@media(prefers-reduced-motion:reduce){.physical-path .physical-bead .halo{transition:none}}
