@@ -117,3 +117,12 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 Esta versión es **diagnóstica**, no una solución confirmada a la apertura visual. Frente a v0.1.6, desactiva temporalmente exclusivamente en «Rosario completo» el círculo de halo de las cuentas y los filtros de resplandor/sombra de las cuentas y la cruz. Mantiene intactos la geometría, el hilo, las posiciones, la navegación, los colores, los tamaños y el desplazamiento. Se utilizará para comparar los movimientos desde la cuenta grande hasta la 1 y de la 8 hacia la cuenta grande.
 
 Si persiste la apertura, el halo queda descartado como causa suficiente; si desaparece, analizar el efecto antes de restaurarlo. La firma Android permanece igual.
+
+## Prueba de desplazamiento circular — v0.1.8
+
+- Se **restauran todos los halos y resplandores** que estuvieron desactivados en v0.1.7.
+- El Rosario completo conserva su dibujo estático, las curvas, la cuenta grande compartida, el colgante, las dimensiones y los colores.
+- Al hacer swipe, una pista virtual permite conservar el scroll nativo con inercia mientras el aro permanece espacialmente estable; ya no entra o sale del encuadre la unión inferior en cada gesto.
+- Las cuentas ordinarias circulan ordenadamente por el mismo trazado SVG según su **longitud geométrica real** (`getTotalLength` / `getPointAtLength`), no mediante posiciones aproximadas o interpolación por número de cuenta. La cuenta grande de unión y su colgante permanecen como referencia fija.
+- El tap sobre una cuenta sigue permitiendo navegar con confirmación y el cambio de oración restaura el centrado normal.
+- **Versión experimental para validar visualmente en Android:** comprobar el movimiento en ambos sentidos, el giro superior, el inferior y las cuentas junto a la cuenta grande. No considerar resuelto el efecto hasta comprobarlo en el dispositivo.
