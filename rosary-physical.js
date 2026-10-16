@@ -8,6 +8,12 @@
     const css=document.createElement('link');
     css.rel='stylesheet';
     css.href='rosary-physical.css?v=20261016-16';
+    // El visor se coloca al final después de que este CSS haya cargado.
+    // Antes de ello scrollHeight/clientHeight puede dar cero y dejar
+    // el rosario incorrectamente posicionado en el arco superior.
+    css.addEventListener('load',()=>{
+      requestAnimationFrame(restoreInitialFrame);
+    });
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -56,6 +62,31 @@
     let lastPhysicalType=null;
     let lastPhysicalBead=-1;
     let autoFollowTarget=null;
+    const launchPrayerIndex=state.index;
+    let initialFramePending=true;
+    let initialFrameAnchored=false;
+    let startFrameInterrupted=false;
+    function restoreInitialFrame(){
+      if(!initialFramePending&&!initialFrameAnchored)return;
+      if(state.rosaryViewLayout!=='physical'||
+         state.index!==launchPrayerIndex||startFrameInterrupted){
+        initialFramePending=false;
+        initialFrameAnchored=false;
+        return;
+      }
+      // No basta con que exista el SVG: es imprescindible que el
+      // viewport ya tenga overflow y altura medidos por el CSS.
+      if(getComputedStyle(viewport).overflowY!=='auto')return;
+      const height=viewport.clientHeight;
+      const end=viewport.scrollHeight-height;
+      if(height<=0||end<=1)return;
+      viewport.scrollTop=end;
+      autoFollowTarget=null;
+      initialFramePending=false;
+      // Hasta que el usuario empiece a rezar o desplace la cadena,
+      // mantener la cruz en el fondo si Android reajusta las barras.
+      initialFrameAnchored=true;
+    }
     // La opción «Reiniciar progreso» debe restaurar también el
     // encuadre inicial, incluso si ya está seleccionada la oración 0.
     window.rosarioPhysicalReset=()=>{
@@ -260,7 +291,12 @@
 
     // Los gestos manuales siguen siendo 100 % nativos. Sólo anulan
     // el destino de centrado automático pendiente cuando empiezan.
-    function clearAutoFollow(){autoFollowTarget=null;}
+    function clearAutoFollow(){
+      autoFollowTarget=null;
+      startFrameInterrupted=true;
+      initialFramePending=false;
+      initialFrameAnchored=false;
+    }
     viewport.addEventListener('pointerdown',clearAutoFollow,{passive:true});
     viewport.addEventListener('touchstart',clearAutoFollow,{passive:true});
     viewport.addEventListener('wheel',clearAutoFollow,{passive:true});
@@ -378,6 +414,10 @@
         autoFollowTarget=null;
         return;
       }
+      if(initialFramePending&&state.index!==launchPrayerIndex)
+        initialFramePending=false;
+      if(initialFrameAnchored&&state.index!==launchPrayerIndex)
+        initialFrameAnchored=false;
       const selected=positionFor(steps[state.index]);
       const completed=Math.max(0,Math.min(55,selected.completed||0));
       // El recorrido se acumula: el lado izquierdo NO se vuelve gris
@@ -459,7 +499,8 @@
           // Al iniciar un rosario nuevo, la cruz debe quedar completa
           // en el límite inferior real, igual que al terminarlo.
           // Esto cubre primer uso, recarga con progreso 0 y reinicio.
-          if(state.index===0 && selected.phase==='opening'){
+          if(initialFramePending&&state.index===launchPrayerIndex ||
+             state.index===0&&selected.phase==='opening'){
             target=finalTop;
           }else if(atClosing||atFinalMystery||bead>=50){
             target=finalTop;
@@ -768,6 +809,17 @@
         host.insertBefore(tapField,controls);
       }else host.append(field,haloField,tapField);
     };
+    // Primer encuadre: después de pintar y de medir el CSS cargado.
+    // Se vuelve a intentar si el navegador todavía no ha terminado
+    // el layout. Nunca altera la oración que quedó guardada.
+    requestAnimationFrame(restoreInitialFrame);
+    if(typeof ResizeObserver!=='undefined'){
+      const resizeObserver=new ResizeObserver(()=>{
+        if(initialFramePending||initialFrameAnchored)
+          requestAnimationFrame(restoreInitialFrame);
+      });
+      resizeObserver.observe(viewport);
+    }
     // Cambios de altura (barras del sistema, scroll nativo) NO deben
     // regenerar la cadena ni alterar la posición actual de las cuentas.
     window.addEventListener('resize',()=>{
@@ -779,7 +831,10 @@
       viewport.scrollTop=previousScroll;
       beforeIndex=state.index;
       paint();
+      if(initialFramePending||initialFrameAnchored)
+        requestAnimationFrame(restoreInitialFrame);
     });
     paint();
+    restoreInitialFrame();
   });
 })();
