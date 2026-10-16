@@ -108,7 +108,9 @@
       const trigger=select.nextElementSibling;
       if(!trigger?.classList.contains('rosario-choice-trigger'))return;
       const name=labelFor(select);
-      trigger.querySelector('.rosario-choice-value').textContent=selectedLabel(select);
+      const value=trigger.querySelector('.rosario-choice-value');
+      const label=selectedLabel(select);
+      if(value.textContent!==label)value.textContent=label;
       trigger.setAttribute('aria-label',name+': '+selectedLabel(select)+'. Cambiar opción.');
     }
     function syncTriggers(){
