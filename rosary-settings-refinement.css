@@ -14,9 +14,12 @@
 }
 #modalContent .rosario-choice-value{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #modalContent .rosario-choice-chevron{
-  display:block!important;flex:0 0 19px;width:19px;height:19px;
-  fill:none!important;stroke:var(--ui-accent)!important;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
+  display:inline-block!important;flex:0 0 11px!important;
+  width:11px!important;height:11px!important;
+  margin:0 6px 5px 0!important;
+  border-right:2px solid var(--ui-accent)!important;
+  border-bottom:2px solid var(--ui-accent)!important;
+  transform:rotate(45deg)!important;pointer-events:none!important;
 }
 #modalContent .rosario-choice-trigger--full{
   display:flex!important;width:100%!important;min-height:52px!important;
