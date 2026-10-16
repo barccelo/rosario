@@ -161,3 +161,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se elimina el salto inverso que existía entre las cuentas 49 y 50: el seguimiento se prepara progresivamente hasta 49 y conserva el destino durante las últimas cinco.
 - Un destino de scroll pendiente evita recalcular desde posiciones intermedias cuando se avanza rápidamente, y se limpia al terminar el desplazamiento o iniciar un gesto manual.
 - La fluidez visual debe probarse en Android. Una compilación exitosa no confirma por sí sola la ausencia de saltos.
+
+## Ajuste fino del seguimiento automático — v0.1.13
+
+- Se mantiene intacta la solución de apertura de v0.1.12, los halos, las 55 cuentas, las curvas, las jaculatorias y el Gloria en sus cuentas grandes, así como el **swipe manual**.
+- Se limita exclusivamente el `scrollTop` de **navegación automática entre oraciones contiguas**: máximo del 15 % de la altura visible junto a la unión inferior (hasta 128 px), o del 22 % fuera de ella (hasta 176 px), mediante desplazamientos suaves.
+- En la subida del colgante, la tercera cuenta pequeña prepara gradualmente el encuadre de la cuenta grande; ya no se fuerza un recentrado excesivo al entrar al aro.
+- Al avanzar por la rama derecha, la transición hacia el encuadre inferior comienza desde la cuenta 39 y termina en la **cuenta 51 (séptima Avemaría de la última decena)**. El encuadre final sitúa la cuenta grande inferior cerca del 39 % de la pantalla, con el crucifijo visible debajo. Desde las cuentas 8–10 permanece en el mismo lugar.
+- Los desplazamientos deliberados a posiciones lejanas conservan el salto de navegación; el límite pequeño se aplica sólo a pasos consecutivos. El seguimiento de scrollend ya no borra prematuramente el destino de una animación posterior.
+- El comportamiento y el ajuste exacto de la imagen final deben comprobarse visualmente en el dispositivo.
