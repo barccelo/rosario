@@ -114,7 +114,13 @@
           return{x:leftX,y:MEDAL_Y-i*rise,strand:'out'};
         }
         const n=i-FRONT_END-1;
-        return{x:rightX,y:TOP+48+n*rise-18*n/26,strand:'back'};
+        // Disparidad vertical progresiva entre las dos ramas: las
+        // cuentas grandes no quedan una frente a la otra como filas.
+        // El desfase es cero en ambos extremos para mantener intactos
+        // el arco superior y la unión inferior ya corregida.
+        const naturalStagger=46*Math.sin(Math.PI*n/26);
+        return{x:rightX,y:TOP+48+n*rise-18*n/26+
+          naturalStagger,strand:'back'};
       });
       introPoints=intro.map((item,i)=>({x:center+3.5*Math.sin(i*.9+.4),y:item.y,r:item.r}));
       svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
@@ -138,8 +144,11 @@
       }
       function topTurn(left,right){
         // Arco redondeado en la parte superior, no una línea recta.
-        return'M '+at(left)+' C '+format(left.x)+' '+format(left.y-90)+
-          ' '+format(right.x)+' '+format(right.y-90)+' '+at(right);
+        // Un arco más bajo y compacto (antes controles a -90). Las
+        // tangentes verticales en los extremos siguen enlazando sin
+        // quiebres con el hilo de las dos ramas.
+        return'M '+at(left)+' C '+format(left.x)+' '+format(left.y-55)+
+          ' '+format(right.x)+' '+format(right.y-55)+' '+at(right);
       }
       // Una sola curva inferior como en la vuelta superior, pero con la
       // cuenta grande existente en su punto de unión. Se parte la misma
