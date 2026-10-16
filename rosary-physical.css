@@ -200,3 +200,12 @@ body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physica
   fill:var(--rc-bead)!important;
   stroke:var(--rc-outline)!important;
 }
+
+/* Remate de cuerda oculto bajo la argolla del crucifijo; sin
+   trazos de hilo atravesando su interior. */
+.physical-path .physical-cross-ferrule{
+  fill:#B89A66;
+  stroke:#927344;
+  stroke-width:.7;
+  pointer-events:none;
+}
