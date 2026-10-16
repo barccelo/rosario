@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Vibrator;
+import android.os.VibratorManager;
+import android.os.VibrationEffect;
 import android.os.Bundle;
 import android.os.Build;
 import android.Manifest;
@@ -38,6 +41,33 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void setPrayerActive(boolean active) {
             prayerActive = active;
+        }
+
+        @JavascriptInterface
+        public void vibrate(int milliseconds) {
+            if (milliseconds <= 0) return;
+            final int duration = Math.min(milliseconds, 150);
+            runOnUiThread(() -> {
+                try {
+                    Vibrator vibrator;
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        VibratorManager manager = (VibratorManager)
+                            getSystemService(VIBRATOR_MANAGER_SERVICE);
+                        vibrator = manager != null ? manager.getDefaultVibrator() : null;
+                    } else {
+                        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    }
+                    if (vibrator == null || !vibrator.hasVibrator()) return;
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        vibrator.vibrate(VibrationEffect.createOneShot(duration,
+                            VibrationEffect.DEFAULT_AMPLITUDE));
+                    } else {
+                        vibrator.vibrate(duration);
+                    }
+                } catch (SecurityException ignored) {
+                    // El sistema puede denegar vibración según sus permisos.
+                }
+            });
         }
 
         @JavascriptInterface
@@ -178,29 +208,25 @@ public final class MainActivity extends Activity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (prayerActive &&
-                ((keyCode == KeyEvent.KEYCODE_VOLUME_UP && !upIsSystem) ||
-                 (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && !downIsSystem))) {
-            if (event.getRepeatCount() == 0) {
-                String direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP ? "up" : "down";
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        final boolean assigned =
+            (keyCode == KeyEvent.KEYCODE_VOLUME_UP && !upIsSystem) ||
+            (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && !downIsSystem);
+        // Interceptar antes de que WebView procese la tecla. Sólo es
+        // posible cuando Android realmente entrega el evento a esta Activity.
+        if (prayerActive && assigned) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN &&
+                    event.getRepeatCount() == 0 && webView != null) {
+                final String direction =
+                    keyCode == KeyEvent.KEYCODE_VOLUME_UP ? "up" : "down";
                 webView.evaluateJavascript(
-                        "window.rosarioHardwareKey && window.rosarioHardwareKey('"
-                                + direction + "')", null);
+                    "window.rosarioHardwareKey && window.rosarioHardwareKey('"
+                        + direction + "')", null);
             }
             return true;
         }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (prayerActive &&
-                ((keyCode == KeyEvent.KEYCODE_VOLUME_UP && !upIsSystem) ||
-                 (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && !downIsSystem))) {
-            return true;
-        }
-        return super.onKeyUp(keyCode, event);
+        return super.dispatchKeyEvent(event);
     }
 
     @SuppressWarnings("deprecation")
