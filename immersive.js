@@ -71,8 +71,13 @@ const topIcons={
   expand:'<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>',
   collapse:'<path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"/>'
 };
+let androidFullscreen=false;
+window.rosarioNativeFullscreenChanged=enabled=>{
+  androidFullscreen=Boolean(enabled);
+  updateTopControls();
+};
 function updateTopControls(){
-  const full=Boolean(document.fullscreenElement);
+  const full=Boolean(document.fullscreenElement)||androidFullscreen;
   const themeLabel=state.dark?'Activar modo claro':'Activar modo oscuro';
   const fullLabel=full?'Salir de pantalla completa':'Entrar en pantalla completa';
   $('iTheme').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+topIcons[state.dark?'sun':'moon']+'</svg>';
@@ -97,10 +102,16 @@ function notice(message) {
   $('controlMessage').textContent=message;
 }
 async function fullscreen() {
+  if (window.RosarioAndroid?.setFullscreen) {
+    window.RosarioAndroid.setFullscreen(!androidFullscreen);
+    return;
+  }
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await enterFullscreen();
-  } catch { notice('No se pudo activar la pantalla completa. Abre la web directamente en tu navegador y vuelve a pulsar el botón de pantalla completa.'); }
+  } catch {
+    notice('Este navegador no permite entrar en pantalla completa.');
+  }
 }
 $('iFullscreen').onclick=fullscreen;
 document.addEventListener('fullscreenchange',()=>{
@@ -119,7 +130,20 @@ if(previousPrayerIndex!==state.index)
   window.rosarioScrollToBead?.(bead,!s||s.m>4||bead===55);$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
-window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
+window.rosarioHardwareKey=direction=>{
+  if($('modal').open) return false;
+  const configured=window.rosarioAndroidGetVolumeActions?.();
+  const action=configured?.[direction] || (direction==='up'?'next':'previous');
+  if(action==='next'){
+    if(state.index < steps.length) advance();
+    return true;
+  }
+  if(action==='previous'){
+    if(state.index>0){ state.index--; render(); }
+    return true;
+  }
+  return false;
+};
 /* En Android sólo se reservan las teclas de volumen mientras se reza.
    En Ajustes o cualquier otra pantalla recuperan su función del sistema. */
 if(window.RosarioAndroid?.setPrayerActive){
