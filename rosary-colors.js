@@ -90,7 +90,7 @@
 
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = 'rosary-colors.css?v=20261015-1';
+    stylesheet.href = 'rosary-colors.css?v=20261015-2';
     document.head.append(stylesheet);
 
     const beads = [...chain.querySelectorAll('.focus-bead')];
