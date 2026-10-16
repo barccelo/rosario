@@ -20,7 +20,6 @@
 .jac-choice small{display:block;font:13px/1.55 Georgia,serif;color:#8c9085;white-space:normal}
 .meditation-tools button{display:inline-flex;align-items:center;gap:7px}
 .meditation-tools svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-#modal:has(.meditation-dialog){width:min(92vw,650px);max-height:calc(100dvh - 36px);overflow-y:auto;overscroll-behavior:contain}
 .meditation-kicker{font:600 10px/1.5 system-ui;letter-spacing:2px;text-transform:uppercase;color:#b29666;margin-top:7px}
 .meditation-dialog h2{font:600 clamp(25px,4vw,34px)/1.24 Georgia,serif;margin:13px 24px 20px 0}
 .meditation-full{font:clamp(16px,2vw,20px)/1.8 Georgia,serif;white-space:pre-wrap;text-align:var(--rosary-text-align,justify);color:inherit;hyphens:none;word-break:normal;overflow-wrap:break-word;padding-bottom:14px}
@@ -62,7 +61,6 @@
 .nav-item{flex:0 0 auto!important;min-height:64px!important;height:auto!important;padding:11px 16px 13px!important;gap:4px!important;justify-content:center!important;align-items:flex-start!important;overflow:visible!important}
 .nav-item small{display:block!important;font-size:12px!important;line-height:1.35!important;white-space:normal!important;margin:0!important}
 .nav-list{max-height:51dvh;gap:7px}
-#modal{overflow-y:auto;overscroll-behavior:contain}
 .modal-align-button{float:right;display:grid;place-items:center;width:34px;height:34px;margin:-1px 8px 5px 0;padding:6px;border-radius:10px;border:0;background:transparent;color:#ab8e5f;cursor:pointer}
 .modal-align-button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;pointer-events:none}
 .modal-align-button:focus-visible{outline:2px solid #b69a68}
