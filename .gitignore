@@ -1,0 +1,7 @@
+# Nunca versionar archivos de firma ni sus credenciales.
+*.jks
+*.keystore
+rosario-firma-secrets.txt
+rosario-firma-respaldo.zip
+rosario-release*.zip
+*signing.properties
