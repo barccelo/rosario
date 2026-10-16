@@ -186,3 +186,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Para mantener la fluidez en pantallas compactas, la preparación de ese encuadre comienza antes en la rama derecha según la altura visible, siempre sin mover las cuentas individualmente.
 - **Sin cambios** en el swipe manual, geometría, curvas, halo, colores, iconos o mapeo litúrgico de las oraciones.
 - Se verificó el cálculo del seguimiento automático con alturas de 540–1100 px y varios desplazamientos iniciales: en las pruebas se alcanza el límite real en la cuenta 7 y se conserva durante el cierre. La prueba visual en Android sigue siendo necesaria.
+
+## Encuadre al iniciar/reiniciar y orden de vistas — v0.1.16
+
+- En el primer uso, cuando la oración actual es la inicial (índice 0), el **Rosario completo** se sitúa automáticamente en el mismo **límite inferior real** del desplazamiento que se usa al final del rezo. La cruz queda dentro del marco con su margen inferior, independientemente de la altura del teléfono.
+- Al confirmar «Reiniciar progreso», también se restaura expresamente el encuadre inicial. Se fuerza el seguimiento aunque el índice ya sea 0, sin depender de un cambio de oración; los avances siguientes conservan el desplazamiento suave.
+- En Ajustes, la opción ya predeterminada **«Rosario completo» aparece ahora en primer lugar** y «Vista vertical» en segundo, sin cambiar ni eliminar ninguna función.
+- Permanecen intactos el swipe manual, la geometría, el halo, la corrección de la apertura y el seguimiento automático de las cuentas.
+- Se comprobaron sintaxis de ambos scripts y simulaciones de inicio/reinicio en diferentes alturas del visor; la presentación visual debe verificarse en el teléfono.
