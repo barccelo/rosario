@@ -96,7 +96,61 @@ jobs:
             echo "::error::Configure all four ROSARIO signing secrets before publishing an APK."
             exit 1
           fi
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rosario-release.jks"
+          # Accept a pasted KEY=VALUE line or wrapped Base64 without logging private material.
+          encoded="$KEYSTORE_BASE64"
+          if [[ "$encoded" == *ROSARIO_KEYSTORE_BASE64=* ]]; then
+            encoded="${encoded#*ROSARIO_KEYSTORE_BASE64=}"
+            encoded="${encoded%%
+
+      - name: Build signed release
+        if: ${{ steps.version.outputs.tag != '' }}
+        env:
+          ROSARIO_KEYSTORE_FILE: ${{ runner.temp }}/rosario-release.jks
+          ROSARIO_KEYSTORE_PASSWORD: ${{ secrets.ROSARIO_KEYSTORE_PASSWORD }}
+          ROSARIO_KEY_ALIAS: ${{ secrets.ROSARIO_KEY_ALIAS }}
+          ROSARIO_KEY_PASSWORD: ${{ secrets.ROSARIO_KEY_PASSWORD }}
+          ROSARIO_VERSION: ${{ steps.version.outputs.tag }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gradle -p android :app:assembleRelease --no-daemon
+          cp android/app/build/outputs/apk/release/app-release.apk "Rosario-${RELEASE_TAG}.apk"
+
+      - name: Verify permanent APK signing certificate
+        if: ${{ steps.version.outputs.tag != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
+          expected="4cde91175bed44bd8a1c3b9be333ef4600bec1f3f34e5afd5bb7ea2b14bb8bf3"
+          actual="$("$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$APK" |
+            sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -n1)"
+          if [[ "${actual,,}" != "$expected" ]]; then
+            echo "::error::APK signing certificate differs from Rosario's permanent signing key."
+            exit 1
+          fi
+
+      - name: Publish APK for Obtainium
+        if: ${{ steps.version.outputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Rosario-*.apk
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+\n'*}"
+          fi
+          encoded="$(printf '%s' "$encoded" | tr -d '[:space:]')"
+          encoded="${encoded#\"}"
+          encoded="${encoded%\"}"
+          encoded="${encoded#\'}"
+          encoded="${encoded%\'}"
+          if ! printf '%s' "$encoded" | base64 --decode > "$RUNNER_TEMP/rosario-release.jks" 2>/dev/null; then
+            rm -f "$RUNNER_TEMP/rosario-release.jks"
+            echo "::error::ROSARIO_KEYSTORE_BASE64 is invalid. Paste only the Base64 value after the equals sign in the private secrets file."
+            exit 1
+          fi
+          test -s "$RUNNER_TEMP/rosario-release.jks" || { echo "::error::The decoded signing key is empty."; exit 1; }
 
       - name: Build signed release
         if: ${{ steps.version.outputs.tag != '' }}
