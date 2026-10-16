@@ -110,3 +110,10 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 - La unión inferior se traza como una única curva cúbica continua, siguiendo el criterio ya empleado en el arco superior; se divide matemáticamente en dos segmentos que coinciden con precisión en la cuenta compartida para no alterar el estado de las oraciones.
 - No se desplaza ninguna cuenta independientemente de la cuerda, ni se cambia el tamaño de las cuentas, sus colores o el colgante.
 - Pendiente de validación perceptual en el teléfono durante el recorrido entre la cuenta grande y las cuentas 1–10.
+
+
+## Prueba de aislamiento de halo — v0.1.7
+
+Esta versión es **diagnóstica**, no una solución confirmada a la apertura visual. Frente a v0.1.6, desactiva temporalmente exclusivamente en «Rosario completo» el círculo de halo de las cuentas y los filtros de resplandor/sombra de las cuentas y la cruz. Mantiene intactos la geometría, el hilo, las posiciones, la navegación, los colores, los tamaños y el desplazamiento. Se utilizará para comparar los movimientos desde la cuenta grande hasta la 1 y de la 8 hacia la cuenta grande.
+
+Si persiste la apertura, el halo queda descartado como causa suficiente; si desaparece, analizar el efecto antes de restaurarlo. La firma Android permanece igual.
