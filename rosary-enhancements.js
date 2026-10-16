@@ -1139,18 +1139,12 @@
     const alignButton=document.createElement('button');
     alignButton.type='button';
     alignButton.className='modal-align-button';
-    alignButton.title='Cambiar alineación del texto';
+    alignButton.title='Alineación del texto';
     $('modal').querySelector('.close').after(alignButton);
     const alignNames={justify:'Justificado',left:'Izquierda',center:'Centrado',right:'Derecha'};
-    const alignIcons={
-      justify:'<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
-      left:'<path d="M4 6h16M4 10h11M4 14h16M4 18h10"/>',
-      center:'<path d="M4 6h16M7 10h10M4 14h16M8 18h8"/>',
-      right:'<path d="M4 6h16M9 10h11M4 14h16M10 18h10"/>'
-    };
     function updateModalAlign(){
-      alignButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+alignIcons[state.textAlign]+'</svg>';
-      alignButton.setAttribute('aria-label','Alineación: '+alignNames[state.textAlign]+'. Pulsar para cambiar.');
+      alignButton.innerHTML='<span class="text-align-icon" aria-hidden="true">Aa</span>';
+      alignButton.setAttribute('aria-label','Alineación del texto: '+alignNames[state.textAlign]+'. Pulsar para cambiar.');
     }
     alignButton.onclick=()=>{
       state.textAlign=alignments[(alignments.indexOf(state.textAlign)+1)%alignments.length];
