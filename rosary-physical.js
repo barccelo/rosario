@@ -119,6 +119,25 @@
         return'M '+at(left)+' C '+format(left.x)+' '+format(left.y-90)+
           ' '+format(right.x)+' '+format(right.y-90)+' '+at(right);
       }
+      // Una sola curva inferior como en la vuelta superior, pero con la
+      // cuenta grande existente en su punto de unión. Se parte la misma
+      // Bézier cúbica en dos MITADES EXACTAS para conservar data-link 54/0:
+      // los dos hilos coinciden en posición y tangente en la cuenta grande.
+      // No se mueve ninguna cuenta ni cambia el contenedor al hacer swipe.
+      function bottomTurn(right,shared,left){
+        const delta=left.y-right.y;
+        const total=(8*shared.y-right.y-left.y)/3;
+        const c1={x:right.x,y:(total-delta)/2};
+        const c2={x:left.x,y:(total+delta)/2};
+        const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+        const a=mid(right,c1),b=mid(c1,c2),d=mid(c2,left);
+        const e=mid(a,b),f=mid(b,d),m=mid(e,f);
+        return [
+          'M '+at(right)+' C '+at(a)+' '+at(e)+' '+at(m),
+          'M '+at(m)+' C '+at(f)+' '+at(d)+' '+at(left)
+        ];
+      }
+      const lowerTurn=bottomTurn(positions[54],positions[0],positions[1]);
       const body=[
         '<defs><radialGradient id="physicalHalo"><stop stop-color="#D8B66F" stop-opacity=".67"/>'+
         '<stop offset="1" stop-color="#D8B66F" stop-opacity="0"/></radialGradient>'+
@@ -141,6 +160,8 @@
         const to=positions[(i+1)%55];
         const next=positions[(i+2)%55];
         const d=i===FRONT_END?topTurn(from,to):
+          i===54?lowerTurn[0]:
+          i===0?lowerTurn[1]:
           curvedSegment(previous,from,to,next);
         lines+='<path fill="none" class="physical-link physical-loop-link" data-link="'+i+
           '" d="'+d+'"/>'+
@@ -199,98 +220,6 @@
       });
     }
     draw();
-
-    // Desplazamiento sobre un riel visual ESTABLE alrededor de la cuenta
-    // compartida. Antes se trasladaba todo el SVG y el encuentro de las
-    // ramas parecía abrirse/cerrarse al entrar en pantalla.
-    //
-    // El trazado, todas las coordenadas en reposo, el hilo y el colgante
-    // siguen intactos. Sólo se desplazan las 54 cuentas del aro según el
-    // scroll nativo, mientras la cuenta central sirve de referencia.
-    // Fuera de la zona de unión el SVG vuelve gradualmente a su scroll
-    // normal: se conserva el acceso a toda la cadena y la inercia.
-    let motionFrame=0;
-    let flowActive=false;
-    let programmaticScroll=false;
-    const motionBeads=()=>[...svg.querySelectorAll('.physical-loop-beads [data-bead]')];
-    const smooth=(t)=>t*t*(3-2*t);
-    function loopPoint(index){
-      const count=positions.length;
-      const wrapped=((index%count)+count)%count;
-      const i=Math.floor(wrapped);
-      const fraction=wrapped-i;
-      const from=positions[i],to=positions[(i+1)%count];
-      const previous=positions[(i+count-1)%count];
-      const next=positions[(i+2)%count];
-      // Seguir EXACTAMENTE los mismos Bézier que dibuja la cuerda.
-      // Especialmente importante en el arco superior: una interpolación
-      // recta haría que las cuentas se salieran de la trayectoria.
-      const c1=i===FRONT_END?
-        {x:from.x,y:from.y-90}:
-        {x:from.x+(to.x-previous.x)/6,y:from.y+(to.y-previous.y)/6};
-      const c2=i===FRONT_END?
-        {x:to.x,y:to.y-90}:
-        {x:to.x-(next.x-from.x)/6,y:to.y-(next.y-from.y)/6};
-      const t=fraction,s=1-t;
-      return{
-        x:s*s*s*from.x+3*s*s*t*c1.x+3*s*t*t*c2.x+t*t*t*to.x,
-        y:s*s*s*from.y+3*s*s*t*c1.y+3*s*t*t*c2.y+t*t*t*to.y
-      };
-    }
-    function clearTrackMotion(){
-      svg.style.transform='';
-      motionBeads().forEach(bead=>bead.removeAttribute('transform'));
-    }
-    function applyTrackMotion(){
-      motionFrame=0;
-      if(!flowActive||state.rosaryViewLayout!=='physical'){
-        clearTrackMotion();
-        return;
-      }
-      const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
-      const anchor=Math.min(max,Math.max(0,MEDAL_Y-viewport.clientHeight*.64));
-      const displacement=viewport.scrollTop-anchor;
-      const extent=Math.abs(displacement);
-      // Mantener el vértice fijo durante el paso de las cuentas 1–10
-      // en ambos sentidos, la zona que provocaba la falsa apertura.
-      // Liberarlo sólo cuando ya va a salir del encuadre.
-      const weight=extent<=720?1:extent>=1300?0:
-        1-smooth((extent-720)/580);
-      if(weight<=0){
-        clearTrackMotion();
-        return;
-      }
-      // Compensar únicamente la traslación vertical del SVG, no deformar
-      // su curva ni abrir sus ramas.
-      svg.style.transform='translate3d(0,'+(displacement*weight).toFixed(2)+'px,0)';
-      const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
-      const travel=displacement/rise*weight;
-      motionBeads().forEach((bead)=>{
-        const index=Number(bead.dataset.bead);
-        if(index===0){
-          bead.removeAttribute('transform'); // Unión con el colgante fija
-          return;
-        }
-        const from=positions[index],to=loopPoint(index+travel);
-        bead.setAttribute('transform',
-          'translate('+format(to.x-from.x)+' '+format(to.y-from.y)+')');
-      });
-    }
-    function scheduleTrackMotion(){
-      if(!motionFrame)motionFrame=requestAnimationFrame(applyTrackMotion);
-    }
-    viewport.addEventListener('touchstart',()=>{
-      if(state.rosaryViewLayout==='physical')flowActive=true;
-    },{passive:true});
-    viewport.addEventListener('pointerdown',()=>{
-      if(state.rosaryViewLayout==='physical')flowActive=true;
-    },{passive:true});
-    viewport.addEventListener('wheel',()=>{
-      if(state.rosaryViewLayout==='physical')flowActive=true;
-    },{passive:true});
-    viewport.addEventListener('scroll',()=>{
-      if(!programmaticScroll)scheduleTrackMotion();
-    },{passive:true});
 
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
@@ -426,15 +355,9 @@
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
-        // Una elección de oración centra su cuenta de forma habitual.
-        // La animación de recorrido sólo afecta al gesto sobre las cuentas.
-        flowActive=false;
-        clearTrackMotion();
         const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
         const target=Math.max(0,selected.y-viewport.clientHeight*.64);
-        programmaticScroll=true;
         viewport.scrollTop=Math.min(max,target);
-        programmaticScroll=false;
       }
       beforeMode='physical';beforeIndex=state.index;
     }
@@ -609,9 +532,6 @@
       if(state.rosaryViewLayout!=='physical')return;
       if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
       const previousScroll=viewport.scrollTop;
-      flowActive=false;
-      if(motionFrame)cancelAnimationFrame(motionFrame);
-      motionFrame=0;
       draw();
       viewport.scrollTop=previousScroll;
       beforeIndex=state.index;
