@@ -7,8 +7,8 @@
     <application
         android:allowBackup="true"
         android:label="Rosario"
-        android:icon="@drawable/ic_rosario"
-        android:roundIcon="@drawable/ic_rosario"
+        android:icon="@drawable/rosario_launcher"
+        android:roundIcon="@drawable/rosario_launcher"
         android:supportsRtl="true"
         android:theme="@style/RosarioTheme"
         android:usesCleartextTraffic="false">
