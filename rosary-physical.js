@@ -47,7 +47,7 @@
     let positions=[],introPoints=[],crossX=0;
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
-    let armClip=null,junction=null,joinedScroll=null;
+    let armClip=null,junction=null,junctionWires=null,joinFeeds=[];
     let armHoldFrame=0,armHoldScrollStart=null,autoCentering=false;
     // Las ramas siguen siendo dos conjuntos rígidos. El colgante y
     // la única cuenta de unión constituyen una capa independiente.
@@ -226,6 +226,7 @@
       const defs=svg.querySelector('defs');
       const clip=svgNode('clipPath',{id:'physicalArmWindow',clipPathUnits:'userSpaceOnUse'});
       armClip=svgNode('rect',{x:0,y:0,width:width,height:HEIGHT});
+      joinFeeds=[];
       clip.append(armClip);
       defs.append(clip);
       const arms=svgNode('g',{'class':'physical-moving-arms','clip-path':'url(#physicalArmWindow)'});
@@ -233,6 +234,7 @@
       const armBeads=svg.querySelector('.physical-loop-beads');
       const joined=svgNode('g',{'class':'physical-fixed-junction'});
       const lowerLinks=svgNode('g',{'class':'physical-loop-links'});
+      junctionWires=svgNode('g',{'class':'physical-fixed-junction-wires'});
       for(const i of [54,0]){
         const path=armLinks.querySelector('[data-link="'+i+'"]');
         if(!path)throw Error('Falta el enlace inferior '+i);
@@ -247,22 +249,23 @@
         const wire=svgNode('path',{
           'class':'physical-link physical-junction-feed',
           d:'M '+format(x)+' 0 V '+format(MEDAL_Y),
-          'aria-hidden':'true'
+          'aria-hidden':'true',display:'none'
         });
         lowerLinks.prepend(wire);
+        joinFeeds.push(wire);
       }
       arms.append(armLinks,armBeads);
-      joined.append(lowerLinks);
+      junctionWires.append(lowerLinks,svg.querySelector('.physical-pendant-links'));
       const joinedBeads=svgNode('g',{'class':'physical-loop-beads'});
       const junctionBead=armBeads.querySelector('[data-bead="0"]');
       if(!junctionBead)throw Error('Falta la cuenta grande compartida');
       joinedBeads.append(junctionBead);
-      joined.append(svg.querySelector('.physical-pendant-links'),joinedBeads,
-        svg.querySelector('.physical-pendant'));
-      svg.append(arms,joined);
+      joined.append(joinedBeads,svg.querySelector('.physical-pendant'));
+      // Hilos primero, cuentas del brazo encima, cuenta compartida y
+      // colgante al frente: no quedan líneas sobre las cuentas.
+      svg.append(junctionWires,arms,joined);
       junction=joined;
       armHoldScrollStart=null;
-      joinedScroll=null;
       svg.querySelectorAll('[data-bead]').forEach(el=>{
         const index=Number(el.dataset.bead);
         const colors=missionary[Math.floor(index/11)];
@@ -279,6 +282,8 @@
       if(armHoldFrame)cancelAnimationFrame(armHoldFrame);
       armHoldFrame=0;
       if(junction)junction.removeAttribute('transform');
+      if(junctionWires)junctionWires.removeAttribute('transform');
+      joinFeeds.forEach(feed=>feed.setAttribute('display','none'));
       if(armClip)armClip.setAttribute('height',String(HEIGHT));
     }
     function refreshJunctionHold(){
@@ -293,6 +298,8 @@
       const held=Math.max(-MAX_JUNCTION_HOLD,
         Math.min(MAX_JUNCTION_HOLD,delta));
       junction.setAttribute('transform','translate(0 '+format(held)+')');
+      junctionWires?.setAttribute('transform','translate(0 '+format(held)+')');
+      joinFeeds.forEach(feed=>feed.setAttribute('display','inline'));
       // Ocultar los extremos móviles debajo del encuentro, sin
       // estirar ni recalcular la forma original de las curvas.
       armClip.setAttribute('height',
