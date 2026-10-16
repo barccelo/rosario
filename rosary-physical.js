@@ -378,8 +378,10 @@
         if(firstPhysical || (nearJunction && cameFromPendant)){
           // Al entrar en el aro, dejar visible la cuenta grande y las
           // primeras cinco pequeñas, sin recentrar tras cada avance.
-          target=nearJunction
-            ? MEDAL_Y-height*.82
+          // Al abrir la vista directamente en las últimas cinco,
+          // también deben quedar visibles la seleccionada y la grande.
+          target=nearJunction && height>=455
+            ? MEDAL_Y-height*(selected.bead>=50?.94:.87)
             : selected.y-height*.64;
         }else if(selected.type==='loop' && height>=455 &&
           selected.bead>=44 && selected.bead<=49 &&
