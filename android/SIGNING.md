@@ -170,3 +170,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Al avanzar por la rama derecha, la transición hacia el encuadre inferior comienza desde la cuenta 39 y termina en la **cuenta 51 (séptima Avemaría de la última decena)**. El encuadre final sitúa la cuenta grande inferior cerca del 39 % de la pantalla, con el crucifijo visible debajo. Desde las cuentas 8–10 permanece en el mismo lugar.
 - Los desplazamientos deliberados a posiciones lejanas conservan el salto de navegación; el límite pequeño se aplica sólo a pasos consecutivos. El seguimiento de scrollend ya no borra prematuramente el destino de una animación posterior.
 - El comportamiento y el ajuste exacto de la imagen final deben comprobarse visualmente en el dispositivo.
+
+## Ajuste del arco superior y posición final — v0.1.14
+
+- El encuadre de transición de la rama izquierda a la derecha se corrige sólo en la navegación **automática**: entre las cuentas 24 y 27 se revela progresivamente el arco superior, y desde las cuentas 27 y 28 se conserva el límite superior (`scrollTop = 0`). El arco completo permanece visible con el margen del diseño original.
+- La posición inferior alcanzada al completar la **séptima Avemaría de la última decena** (cuenta 51) queda fija al avanzar por las cuentas 8, 9 y 10, el Gloria y jaculatorias del quinto misterio, el colgante, la Salve y todas las letanías. Las oraciones finales no vuelven a centrar el SVG según sus posiciones geométricas.
+- Abrir directamente una oración de cierre desde otro punto sitúa el rosario en el encuadre final, sin recorrer artificialmente las cuentas.
+- Se conservan exactamente la geometría, el halo, el orden y tamaño de las cuentas, el hilo, el desplazamiento manual nativo, la confirmación de saltos y el mapeo litúrgico.
+- Se verificó con simulación de la misma lógica de `paint()`: el límite superior se alcanza en la cuenta 27 y el encuadre final queda inalterado entre las cuentas 51–54, Gloria, dedicaciones, Salve y letanías. Falta validación visual en teléfono Android.
