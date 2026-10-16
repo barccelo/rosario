@@ -208,7 +208,13 @@ document.addEventListener('pointerup',event=>{
   }
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
-    if(dy<0)advance();else{state.index=Math.max(0,state.index-1);render();}
+    // En la vista física, el avance sigue la dirección del hilo:
+    // izquierda/colgante = swipe hacia abajo; derecha = hacia arriba.
+    const forwardDown=state.rosaryViewLayout==='physical' &&
+      window.rosarioPhysicalSwipeDown?.();
+    const forward=forwardDown?dy>0:dy<0;
+    if(forward)advance();
+    else{state.index=Math.max(0,state.index-1);render();}
   }
 },true);
 // En móvil, el navegador puede cancelar pointerup cuando activa pan-y.
@@ -234,7 +240,11 @@ reading.addEventListener('touchend',event=>{
   if(!back&&!next)return;
   suppressClickUntil=performance.now()+850;
   cancelGesture();
-  if(next)advance();else{state.index=Math.max(0,state.index-1);render();}
+  const forwardDown=state.rosaryViewLayout==='physical' &&
+    window.rosarioPhysicalSwipeDown?.();
+  const forward=forwardDown?back:next;
+  if(forward)advance();
+  else{state.index=Math.max(0,state.index-1);render();}
 },{passive:true,capture:true});
 for(const name of ['touchcancel'])
   reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
