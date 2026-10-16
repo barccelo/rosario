@@ -8,20 +8,28 @@ Cada cambio en `main` que afecte a la web o a Android genera un `Rosario-debug` 
 
 ## Firma estable de la versión distribuible
 
-Sólo se hace **una vez**. En un equipo de confianza con JDK:
+La clave estable exclusiva de Rosario se creó el **16 de octubre de 2026**. La clave y los cuatro valores necesarios para los secretos de GitHub se entregaron de forma privada al responsable del proyecto. **No regenerar otra clave para versiones futuras:** la clave original se conserva para que Android pueda actualizar la aplicación sin reinstalarla.
 
-```bash
-keytool -genkeypair -v -keystore rosario-release.jks -alias rosario -keyalg RSA -keysize 3072 -validity 10000 -storetype PKCS12
+Certificado oficial de Rosario, huella SHA-256 (dato público, no secreto):
+
+```text
+4C:DE:91:17:5B:ED:44:BD:8A:1C:3B:9B:E3:33:EF:46:00:BE:C1:F3:F3:4E:5A:FD:5B:B7:EA:2B:14:BB:8B:F3
 ```
 
-Conserva este archivo de forma privada y haz una copia de seguridad. Nunca lo subas a GitHub. En **Repository → Settings → Secrets and variables → Actions**, crea:
+La acción de publicación comprueba automáticamente que la APK final está firmada con este certificado.
 
-- `ROSARIO_KEYSTORE_BASE64`: contenido del archivo `rosario-release.jks` codificado en Base64 en **una sola línea**.
+### Configuración inicial (una sola vez)
+
+Guardar fuera del repositorio `rosario-release.jks`, `rosario-firma-secrets.txt` y el respaldo `rosario-firma-respaldo.zip`. El ZIP entregado no está cifrado y contiene material privado; guardarlo en almacenamiento cifrado o en un gestor de archivos seguro.
+
+En **Repository → Settings → Secrets and variables → Actions → Repository secrets**, crear cuatro secretos copiando los valores del archivo privado:
+
+- `ROSARIO_KEYSTORE_BASE64`: contenido Base64 completo de la clave `.jks`, en una sola línea.
 - `ROSARIO_KEYSTORE_PASSWORD`: contraseña del almacén.
-- `ROSARIO_KEY_ALIAS`: `rosario` (o el alias escogido).
-- `ROSARIO_KEY_PASSWORD`: contraseña de la clave privada.
+- `ROSARIO_KEY_ALIAS`: `rosario`.
+- `ROSARIO_KEY_PASSWORD`: contraseña de la clave.
 
-En Linux puede obtenerse Base64 con `base64 -w 0 rosario-release.jks`; en macOS con `base64 -i rosario-release.jks | tr -d '\\n'`. **No compartas estos valores por el chat.**
+**Nunca pegar los valores en Issues, commits, README, comentarios ni capturas públicas.** No sustituir o perder la clave original: una clave diferente impide actualizar una instalación previa sin desinstalarla.
 
 ## Publicar una versión
 
