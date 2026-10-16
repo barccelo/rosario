@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-17';
+    css.href='rosary-physical.css?v=20261016-2';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -29,7 +29,7 @@
       ['#365DAB','#365DAB','#FFFFFF'],
       ['#DEB82C','#D3AA22','#453816']
     ];
-    state.rosaryViewLayout=state.rosaryViewLayout==='physical'?'physical':'vertical';
+    state.rosaryViewLayout=state.rosaryViewLayout==='vertical'?'vertical':'physical';
     // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
     state.screenTapNavigation=state.screenTapNavigation===true;
 
@@ -91,32 +91,17 @@
       const center=Math.max(68,Math.min(88,railWidth-separation/2-35));
       const leftX=center-separation/2,rightX=center+separation/2;
       crossX=center;
-      // Una única serie de 55 cuentas suspendida: la forma cede
-      // ligeramente a la gravedad en ambas ramas. La derecha no copia
-      // las alturas de la izquierda, por lo que las cuentas grandes no
-      // forman parejas rígidas. El pequeño margen extra en X evita que
-      // dos cuentas grandes enfrentadas lleguen a tocarse.
+      // Dos ramas de separación fija, sin desplazamiento lateral de cuentas:
+      // al desplazar el rosario no se abren ni se cierran visualmente.
+      // Sólo la cuenta compartida inferior une las dos ramas.
       const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
       positions=Array.from({length:55},(_,i)=>{
         if(i===0)return{x:center,y:MEDAL_Y,strand:'junction'};
         if(i<=FRONT_END){
-          const drift=4*(.5+.5*Math.sin(i*.34+.4));
-          return{
-            x:leftX-3-drift+12*Math.exp(-(i-1)/2.5),
-            y:MEDAL_Y-i*rise+5*Math.sin(i*.47),
-            strand:'out'
-          };
+          return{x:leftX,y:MEDAL_Y-i*rise,strand:'out'};
         }
         const n=i-FRONT_END-1;
-        const drift=5*(.5+.5*Math.sin(n*.41+1.1));
-        return{
-          x:rightX+3+drift-12*Math.exp(-(26-n)/2.5),
-          // La última Avemaría queda más arriba que la cuenta
-          // compartida; repartimos la holgura por toda esta rama,
-          // sin apretar las últimas cuentas entre sí.
-          y:TOP+48+n*rise-18*n/26+9*Math.sin(n*.36),
-          strand:'back'
-        };
+        return{x:rightX,y:TOP+48+n*rise-18*n/26,strand:'back'};
       });
       introPoints=intro.map((item,i)=>({
         x:center+3.5*Math.sin(i*.9+.4),y:item.y,r:item.r
@@ -357,15 +342,16 @@
       beforeMode='physical';beforeIndex=state.index;
     }
     function goToNode(el){
+      let destination=-1;
       if(el.hasAttribute('data-cross')){
         // Misma cruz: Estación al empezar y Salve al finalizar.
         const current=steps[state.index];
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
-        state.index=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
+        destination=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
       }else if(el.hasAttribute('data-bead')){
         const index=steps.findIndex(s=>s.bead===Number(el.dataset.bead));
         if(index<0)return;
-        state.index=index;
+        destination=index;
       }else if(el.hasAttribute('data-intro')){
         const item=Number(el.dataset.intro);
         const closing=steps[state.index]?.m>=5;
@@ -374,22 +360,24 @@
             const dedication=steps.findIndex(s=>s.m===5 &&
               s.dedication===item);
             if(dedication<0)return;
-            state.index=dedication;
+            destination=dedication;
           }else{
             const afterDedications=steps.findIndex((s,i)=>
               s.m===5 && !Number.isInteger(s.dedication));
             if(afterDedications<0)return;
-            state.index=afterDedications;
+            destination=afterDedications;
           }
         }else{
           const title=['Versículos iniciales','Señor mío Jesucristo',
             'Señal de la cruz','Comunión espiritual'][item];
           const index=steps.findIndex(s=>s.m===-1 && s.title===title);
           if(index<0)return;
-          state.index=index;
+          destination=index;
         }
       }
-      render();
+      // Igual que en la vista vertical: confirmar cualquier salto a
+      // otra cuenta antes de modificar el progreso del rosario.
+      if(destination>=0)pick(destination);
     }
     svg.addEventListener('click',event=>{
       const bead=event.target.closest('[data-cross],[data-bead],[data-intro]');
@@ -466,10 +454,8 @@
       const list=document.createElement('div');
       list.className='physical-layout-options';
       [
-        {id:'vertical',name:'Vista vertical',
-          help:'Cadena vertical tradicional.'},
-        {id:'physical',name:'Rosario físico',
-          help:'Aro y colgante con caída natural.'}
+        {id:'vertical',name:'Vista vertical'},
+        {id:'physical',name:'Rosario completo'}
       ].forEach(item=>{
         const label=document.createElement('label');
         label.className='physical-layout-option';
@@ -481,9 +467,7 @@
         const content=document.createElement('span');
         const title=document.createElement('strong');
         title.textContent=item.name;
-        const small=document.createElement('small');
-        small.textContent=item.help;
-        content.append(title,small);
+        content.append(title);
         label.append(input,content);
         label.classList.toggle('selected',input.checked);
         input.onchange=()=>{
