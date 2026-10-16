@@ -212,3 +212,21 @@ body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physica
   stroke-width:.7;
   pointer-events:none;
 }
+
+
+/* PRUEBA AISLADA: sin halos ni resplandores — v0.1.7.
+   Sólo afecta a Rosario completo. Se mantienen intactos la trayectoria,
+   los enlaces, las coordenadas, los tamaños y el comportamiento del scroll.
+   Para revertir, eliminar este bloque y actualizar la versión del CSS. */
+body.rosario-physical-view .physical-path .physical-bead .halo{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+body.rosario-physical-view .physical-path .physical-cross,
+body.rosario-physical-view .physical-path .physical-bead,
+body.rosario-physical-view .physical-path .physical-bead .ring{
+  filter:none!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+}
