@@ -103,19 +103,6 @@ async function fullscreen() {
   } catch { notice('No se pudo activar la pantalla completa. Abre la web directamente en tu navegador y vuelve a pulsar el botón de pantalla completa.'); }
 }
 $('iFullscreen').onclick=fullscreen;
-window.rosarioTestVolume=async()=>{
-  try {
-    await enterFullscreen();
-    if (!navigator.keyboard?.lock) {
-      notice('Este navegador no permite solicitar la captura de las teclas de volumen. Puedes probarlas al cerrar este aviso: si ajustan el sonido, el sistema las está reservando. Usa el swipe para avanzar.');
-      return;
-    }
-    await navigator.keyboard.lock(['AudioVolumeUp','AudioVolumeDown']);
-    notice('Captura solicitada. Cierra este aviso y prueba volumen arriba para avanzar y volumen abajo para volver. Si solo cambia el sonido, el sistema no entrega estas teclas a la web.');
-  } catch {
-    notice('No se pudo solicitar la captura de volumen. La pantalla completa puede funcionar aunque el sistema reserve esas teclas para el sonido.');
-  }
-};
 document.addEventListener('fullscreenchange',()=>{
   const active=Boolean(document.fullscreenElement);
   updateTopControls();
