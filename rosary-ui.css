@@ -410,3 +410,19 @@ html:has(#modal[open]),body:has(#modal[open]){
   opacity:.8;
 }
 #modalContent label.physical-tap-option span{flex:1;min-width:0}
+
+#modalContent label.settings-field-label{
+  display:block!important;
+  width:100%;
+  margin:8px 0 2px!important;
+  font:600 14px/1.4 system-ui!important;
+  color:var(--ui-ink);
+}
+#modalContent #groupSelect{width:100%!important;margin:8px 0 16px!important}
+#modalContent button.voice-settings-link{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  margin:10px 0;
+}
