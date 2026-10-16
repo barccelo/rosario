@@ -45,28 +45,45 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
+      - name: Determine release version
+        id: version
+        shell: bash
+        env:
+          REQUESTED_VERSION: ${{ inputs.release_version }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          tag="$REQUESTED_VERSION"
+          if [[ -z "$tag" && "$GITHUB_REF" == refs/tags/v* ]]; then
+            tag="$GITHUB_REF_NAME"
+          elif [[ -z "$tag" && "$GITHUB_REF" == refs/heads/main ]]; then
+            if [[ "$COMMIT_MESSAGE" =~ ^Release[[:space:]]Rosario[[:space:]](v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              tag="${BASH_REMATCH[1]}"
+            fi
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
       - name: Compile test APK
-        if: ${{ !(startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag == '' }}
         run: gradle -p android :app:assembleDebug --no-daemon
 
       - name: Upload test APK
-        if: ${{ !(startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: Rosario-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Validate release name
-        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag != '' }}
         env:
-          RELEASE_TAG: ${{ inputs.release_version || github.ref_name }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
             echo "::error::Use a version like v0.1.0"; exit 1;
           }
 
       - name: Restore stable signing key
-        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag != '' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.ROSARIO_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ROSARIO_KEYSTORE_PASSWORD }}
@@ -82,20 +99,20 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rosario-release.jks"
 
       - name: Build signed release
-        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag != '' }}
         env:
           ROSARIO_KEYSTORE_FILE: ${{ runner.temp }}/rosario-release.jks
           ROSARIO_KEYSTORE_PASSWORD: ${{ secrets.ROSARIO_KEYSTORE_PASSWORD }}
           ROSARIO_KEY_ALIAS: ${{ secrets.ROSARIO_KEY_ALIAS }}
           ROSARIO_KEY_PASSWORD: ${{ secrets.ROSARIO_KEY_PASSWORD }}
-          ROSARIO_VERSION: ${{ inputs.release_version || github.ref_name }}
-          RELEASE_TAG: ${{ inputs.release_version || github.ref_name }}
+          ROSARIO_VERSION: ${{ steps.version.outputs.tag }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           gradle -p android :app:assembleRelease --no-daemon
           cp android/app/build/outputs/apk/release/app-release.apk "Rosario-${RELEASE_TAG}.apk"
 
       - name: Verify permanent APK signing certificate
-        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -110,10 +127,10 @@ jobs:
           fi
 
       - name: Publish APK for Obtainium
-        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        if: ${{ steps.version.outputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
           files: Rosario-*.apk
-          tag_name: ${{ inputs.release_version || github.ref_name }}
+          tag_name: ${{ steps.version.outputs.tag }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
