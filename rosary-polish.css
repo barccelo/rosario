@@ -357,27 +357,6 @@
   top:auto!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;
 }
-.controls-position-setting{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:8px!important;
-  padding:15px 0 13px!important;
-  margin:15px 0 6px!important;
-  border-top:1px solid #aaa18a55;
-  font:600 13px/1.4 system-ui;
-}
-.controls-position-setting select{
-  width:100%;
-  min-height:42px;
-  padding:9px 12px;
-  border:1px solid #aaa18a77;
-  border-radius:11px;
-  background:transparent;
-  color:inherit;
-  font:14px system-ui;
-}
-.controls-position-setting option{color:#343c36}
-
 /* Contraste del misterio en el tema claro. El gris anterior era demasiado pálido. */
 body:not(.dark) .immersive-prayer .rosary-mystery-name{
   color:#465347!important;
