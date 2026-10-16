@@ -407,9 +407,12 @@
         const clamp=n=>Math.max(0,Math.min(max,n));
         const margin=Math.max(22,Math.min(34,height*.055));
         const firstFiveTop=clamp(positions[5].y-margin);
-        // Encuadre de la fotografía: cuenta grande inferior sobre el
-        // 39 % de la altura; cruz y colgante visibles en la parte baja.
-        const finalTop=clamp(MEDAL_Y-height*.39);
+        // El encuadre inferior es el límite REAL del scroll nativo.
+        // El antiguo 39 % dejaba ~90 px de recorrido sin utilizar en
+        // pantallas de 780 px y cortaba la cruz por el borde inferior.
+        // Al llegar a la cuenta 7 de la última decena, ese límite se
+        // alcanza gradualmente y se conserva durante los cierres.
+        const finalTop=max;
         let target=previous;
 
         if(entering){
