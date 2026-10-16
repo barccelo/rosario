@@ -1,0 +1,380 @@
+/* Pantallas y controles compartidos de Rosario. */
+#modal{
+  --ui-bg:#F8F7F2;
+  --ui-surface:#FFFEFA;
+  --ui-ink:#343C36;
+  --ui-muted:#74796F;
+  --ui-outline:#C9C2B5;
+  --ui-accent:#977647;
+  --ui-selected:rgba(167,138,88,.12);
+  --ui-rule:rgba(126,115,91,.22);
+  position:fixed!important;
+  inset:0!important;
+  margin:0!important;
+  padding:0!important;
+  width:100vw!important;
+  width:100dvw!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-height:none!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  box-sizing:border-box;
+  background:var(--ui-bg)!important;
+  color:var(--ui-ink)!important;
+}
+.dark #modal{
+  --ui-bg:#222B24;
+  --ui-surface:#2D362E;
+  --ui-ink:#ECE9DC;
+  --ui-muted:#C1C3B5;
+  --ui-outline:#616A5E;
+  --ui-accent:#D2B587;
+  --ui-selected:rgba(198,169,109,.16);
+  --ui-rule:rgba(201,198,172,.21);
+}
+body[data-rosary-color-mode="mystery"] #modal{
+  --ui-bg:var(--rc-bg);
+  --ui-surface:var(--rc-surface);
+  --ui-ink:var(--rc-text);
+  --ui-accent:var(--rc-accent);
+  --ui-outline:var(--rc-link);
+  --ui-selected:var(--rc-subtle);
+  --ui-rule:var(--rc-link);
+}
+#modal::backdrop{
+  background:rgba(16,20,16,.45);
+  backdrop-filter:none;
+}
+html:has(#modal[open]),body:has(#modal[open]){
+  overflow:hidden!important;
+}
+#modal .modal-screen-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:calc(64px + env(safe-area-inset-top,0px));
+  gap:15px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--ui-rule);
+  background:var(--ui-bg);
+  position:sticky;
+  top:0;
+  z-index:12;
+}
+#modal .modal-screen-name{
+  font:600 15px/1.3 system-ui,-apple-system,sans-serif;
+  letter-spacing:.01em;
+  color:var(--ui-accent);
+}
+#modal .modal-screen-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+#modal .close,
+#modal .modal-align-button{
+  position:static!important;
+  display:grid!important;
+  place-items:center;
+  float:none!important;
+  flex:0 0 44px;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px;
+  min-height:44px;
+  padding:0!important;
+  margin:0!important;
+  border:1px solid var(--ui-rule)!important;
+  border-radius:12px!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  box-shadow:none!important;
+  line-height:1!important;
+}
+#modal .close{font:normal 26px/1 system-ui}
+#modal .modal-align-button{color:var(--ui-accent)!important}
+#modal .close:focus-visible,
+#modal .modal-align-button:focus-visible,
+#modalContent :focus-visible{
+  outline:2px solid var(--ui-accent);
+  outline-offset:2px;
+}
+#modalContent{
+  width:min(100%,780px);
+  max-width:780px;
+  margin:0 auto;
+  padding:clamp(22px,4vw,40px) clamp(19px,4vw,42px)
+    max(48px,env(safe-area-inset-bottom,0px));
+  color:var(--ui-ink);
+  box-sizing:border-box;
+}
+#modalContent > h2,
+#modalContent > .meditation-dialog > h2{
+  margin:0 0 23px!important;
+  font:500 clamp(27px,4vw,34px)/1.26 Georgia,serif!important;
+  color:var(--ui-ink);
+}
+#modalContent > .eyebrow{margin:0 0 8px;color:var(--ui-accent)}
+#modalContent > p{line-height:1.65;color:var(--ui-muted)}
+#modalContent > h2 + p{margin-top:-10px;margin-bottom:24px}
+#modalContent fieldset{
+  width:100%;
+  min-width:0;
+  margin:24px 0 0!important;
+  padding:25px 0 0!important;
+  border:0!important;
+  border-top:1px solid var(--ui-rule)!important;
+}
+#modalContent fieldset legend{
+  display:block;
+  width:100%;
+  padding:0 0 12px;
+  font:600 18px/1.4 Georgia,serif!important;
+  color:var(--ui-ink);
+}
+#modalContent .rosary-colors-hint,
+#modalContent .physical-layout-hint{
+  margin:0 0 14px!important;
+  color:var(--ui-muted)!important;
+  font:13px/1.55 system-ui!important;
+  opacity:1!important;
+}
+#modalContent .rosary-colors-mode-list,
+#modalContent .physical-layout-options{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+#modalContent label.rosary-colors-mode,
+#modalContent label.physical-layout-option{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:14px!important;
+  min-width:0;
+  min-height:65px!important;
+  padding:14px 16px!important;
+  margin:0!important;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:13px!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink);
+  font:14px/1.45 system-ui!important;
+}
+#modalContent label.rosary-colors-mode.selected,
+#modalContent label.physical-layout-option.selected{
+  background:var(--ui-selected)!important;
+  border-color:var(--ui-accent)!important;
+}
+#modalContent label.rosary-colors-mode input,
+#modalContent label.physical-layout-option input{
+  width:19px;
+  height:19px;
+  flex:0 0 19px;
+  margin:0;
+  accent-color:var(--ui-accent);
+}
+#modalContent .rosary-colors-mode .mode-label,
+#modalContent .physical-layout-option span{flex:1;min-width:0}
+#modalContent .physical-layout-option small{margin-top:5px;font:12px/1.4 system-ui;color:var(--ui-muted);opacity:1}
+#modalContent .rosary-color-dots{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+#modalContent .rosary-color-dot{
+  width:17px;height:17px;flex:0 0 17px;
+  border-radius:50%;
+  border:1px solid var(--ui-outline);
+}
+#modalContent .rosary-colors-variants{
+  margin-top:17px;
+  padding-top:6px;
+}
+#modalContent .rosary-colors-variants h3{
+  font:600 16px/1.4 Georgia,serif;
+  color:var(--ui-ink);
+  margin:6px 0 12px;
+}
+#modalContent label.rosary-color-variant{
+  display:grid!important;
+  grid-template-columns:24px minmax(0,1fr) minmax(128px,175px);
+  align-items:center;
+  gap:12px!important;
+  margin:0 0 10px!important;
+  padding:12px 14px!important;
+  min-height:64px;
+  border:1px solid var(--ui-outline);
+  border-radius:13px;
+  background:var(--ui-surface);
+  color:var(--ui-ink);
+  font:14px/1.45 system-ui;
+}
+#modalContent .rosary-color-variant .rosary-color-dot{width:21px;height:21px}
+#modalContent .rosary-color-variant > span:not(.rosary-color-dot){
+  flex:none;
+  min-width:0;
+}
+#modalContent .rosary-color-variant small{
+  grid-column:3;
+  color:var(--ui-muted);
+  font:13px system-ui;
+}
+#modalContent :is(select,input:not([type="checkbox"]):not([type="radio"]),textarea){
+  color:var(--ui-ink)!important;
+  background:var(--ui-surface)!important;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:11px!important;
+  box-shadow:none!important;
+  font:14px/1.4 system-ui!important;
+}
+#modalContent :is(select,input:not([type="checkbox"]):not([type="radio"])){
+  min-height:48px!important;
+  padding:11px 13px!important;
+}
+#modalContent select option{color:#29352F}
+#modalContent .rosary-color-variant select{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+#modalContent .rosary-color-preview{
+  border:1px solid var(--ui-outline);
+  border-radius:13px;
+  padding:20px 12px 16px;
+  margin:18px 0 2px;
+}
+#modalContent .rosary-color-preview-beads{gap:clamp(8px,3vw,19px)}
+#modalContent .rosary-color-preview-bead{
+  flex:0 0 auto;
+  width:38px;height:38px;
+  border-radius:50%;
+  font:12px/1 system-ui;
+}
+#modalContent label.controls-position-setting,
+#modalContent label.physical-tap-option{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  min-height:62px;
+  margin:15px 0!important;
+  padding:12px 15px!important;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:13px;
+  background:var(--ui-surface)!important;
+  font:14px/1.45 system-ui!important;
+}
+#modalContent .controls-position-setting select{
+  width:min(44%,190px)!important;
+  margin:0!important;
+}
+#modalContent .physical-tap-option input{
+  flex:0 0 auto;
+  width:21px;height:21px;
+  accent-color:var(--ui-accent);
+}
+#modalContent > label:has(> input[type="checkbox"]){
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  min-height:62px;
+  margin:12px 0!important;
+  padding:12px 15px;
+  border:1px solid var(--ui-outline);
+  border-radius:13px;
+  background:var(--ui-surface);
+}
+#modalContent > label > input[type="checkbox"]{
+  width:21px;height:21px;accent-color:var(--ui-accent);
+}
+#modalContent .voice-settings-link,
+#modalContent .advance,
+#modalContent .intention-backup button,
+#modalContent .intention-add button{
+  min-height:48px;
+  border:1px solid var(--ui-outline);
+  border-radius:12px;
+  padding:11px 16px;
+  background:var(--ui-surface);
+  color:var(--ui-ink);
+  font:600 14px/1.35 system-ui;
+  text-align:left;
+}
+#modalContent .advance{width:100%;text-align:center;color:var(--ui-ink)}
+#modalContent .nav-tabs{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin:18px 0 20px;
+  padding:0!important;
+  background:transparent!important;
+  border-radius:0;
+}
+#modalContent .nav-tabs button{
+  min-height:44px;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:11px!important;
+  padding:10px 5px!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  font:600 12px/1.3 system-ui!important;
+}
+#modalContent .nav-tabs button[aria-selected="true"]{
+  border-color:var(--ui-accent)!important;
+  background:var(--ui-selected)!important;
+  box-shadow:none!important;
+}
+#modalContent .nav-list{
+  max-height:none!important;
+  overflow:visible!important;
+  padding-bottom:16px;
+}
+#modalContent .nav-item,
+#modalContent .jac-choice,
+#modalContent .litany-directory-item,
+#modalContent .nav-align-option{
+  border:1px solid var(--ui-outline)!important;
+  border-radius:13px!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  box-shadow:none!important;
+}
+#modalContent .nav-item.active,
+#modalContent .litany-directory-item.selected,
+#modalContent .nav-align-option[aria-pressed="true"]{
+  border-color:var(--ui-accent)!important;
+  background:var(--ui-selected)!important;
+}
+#modalContent .nav-detail,
+#modalContent .meditation-dialog,
+#modalContent #fullPrayerText{
+  max-height:none!important;
+  overflow:visible!important;
+}
+#modalContent .prayer{max-height:none!important;overflow:visible!important}
+#modalContent .nav-preview-reading{max-height:none!important}
+#modalContent a{color:var(--ui-accent)}
+#modalContent .intention-entry textarea{min-height:92px}
+@media(min-width:850px){
+  #modalContent .rosary-colors-mode-list,
+  #modalContent .physical-layout-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #modalContent .rosary-colors-mode:last-child:nth-child(odd){grid-column:1/-1}
+}
+@media(max-width:420px){
+  #modal .modal-screen-header{
+    padding-left:max(15px,env(safe-area-inset-left,0px));
+    padding-right:max(15px,env(safe-area-inset-right,0px));
+  }
+  #modalContent{padding-left:17px;padding-right:17px}
+  #modalContent label.rosary-color-variant{
+    grid-template-columns:20px minmax(0,1fr) 108px;
+    gap:8px!important;padding:10px 12px!important;
+  }
+  #modalContent .rosary-color-variant select{min-width:0}
+  #modalContent .rosary-color-dots{gap:3px}
+  #modalContent .rosary-color-dot{width:13px;height:13px;flex-basis:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  #modalContent *{scroll-behavior:auto!important;transition-duration:0s!important}
+}
