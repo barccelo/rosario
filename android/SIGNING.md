@@ -126,3 +126,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Las cuentas ordinarias circulan ordenadamente por el mismo trazado SVG según su **longitud geométrica real** (`getTotalLength` / `getPointAtLength`), no mediante posiciones aproximadas o interpolación por número de cuenta. La cuenta grande de unión y su colgante permanecen como referencia fija.
 - El tap sobre una cuenta sigue permitiendo navegar con confirmación y el cambio de oración restaura el centrado normal.
 - **Versión experimental para validar visualmente en Android:** comprobar el movimiento en ambos sentidos, el giro superior, el inferior y las cuentas junto a la cuenta grande. No considerar resuelto el efecto hasta comprobarlo en el dispositivo.
+
+## Restauración segura del desplazamiento — v0.1.9
+
+- Se revierte por completo la circulación independiente de cuentas de v0.1.8, que introdujo movimientos anormales al realizar swipes.
+- `rosary-physical.js` vuelve al comportamiento exacto de v0.1.6, excepto por la revisión de la versión de caché de su CSS.
+- `rosary-physical.css` vuelve íntegramente a v0.1.6: halos restaurados, sin pista virtual de desplazamiento ni transformaciones adicionales.
+- El defecto visual de apertura/cierre inferior sigue **pendiente**. La reversión es deliberada y no se presenta como una solución de ese defecto.
+- Para eliminar la apertura sin cambiar la forma inferior será necesario independizar su representación visual del desplazamiento del resto de las ramas; cualquier propuesta futura deberá probarse sin mover cuentas individualmente.
