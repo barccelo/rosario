@@ -134,3 +134,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - `rosary-physical.css` vuelve íntegramente a v0.1.6: halos restaurados, sin pista virtual de desplazamiento ni transformaciones adicionales.
 - El defecto visual de apertura/cierre inferior sigue **pendiente**. La reversión es deliberada y no se presenta como una solución de ese defecto.
 - Para eliminar la apertura sin cambiar la forma inferior será necesario independizar su representación visual del desplazamiento del resto de las ramas; cualquier propuesta futura deberá probarse sin mover cuentas individualmente.
+
+## Prueba de unión inferior independiente — v0.1.10
+
+- Se mantiene la geometría, colores, halos, estilos y coordenadas de cuentas del rosario completo que estaban en v0.1.9.
+- Se divide el SVG en dos capas: las **ramas completas** (hilos y cuentas 1–54) se desplazan con el scroll nativo; la **cuenta grande compartida**, el giro inferior original y el colgante forman una sola capa que permanece estable durante los primeros movimientos próximos a la unión.
+- Los dos brazos conservan entre sí su separación horizontal fija. Se utiliza una ventana de recorte en el extremo inferior y dos prolongaciones rectas del mismo hilo detrás de las cuentas para evitar que se vea la conexión estirándose.
+- La inmovilización de la unión es temporal (máximo 520 píxeles de movimiento); fuera de esa región, o cuando el usuario cambia de oración, vuelve al desplazamiento normal. No se mueven ni reposicionan cuentas de forma individual.
+- Se conserva el tap sobre cuentas, la confirmación del salto, la vibración y las preferencias. El halo de la cuenta activa permanece habilitado.
+- **Versión experimental**: validar en el teléfono las primeras cinco cuentas al subir, las últimas cinco al bajar y el cambio de rama superior. Si aparece una discontinuidad, detener la prueba y reportar video; no se afirma que el efecto esté solucionado antes de esa comprobación.
