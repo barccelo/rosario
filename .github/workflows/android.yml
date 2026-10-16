@@ -94,6 +94,21 @@ jobs:
           gradle -p android :app:assembleRelease --no-daemon
           cp android/app/build/outputs/apk/release/app-release.apk "Rosario-${RELEASE_TAG}.apk"
 
+      - name: Verify permanent APK signing certificate
+        if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
+          expected="4cde91175bed44bd8a1c3b9be333ef4600bec1f3f34e5afd5bb7ea2b14bb8bf3"
+          actual="$("$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$APK" |
+            sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -n1)"
+          if [[ "${actual,,}" != "$expected" ]]; then
+            echo "::error::APK signing certificate differs from Rosario's permanent signing key."
+            exit 1
+          fi
+
       - name: Publish APK for Obtainium
         if: ${{ (startsWith(github.ref, 'refs/tags/v') || inputs.release_version != '') }}
         uses: softprops/action-gh-release@v2
