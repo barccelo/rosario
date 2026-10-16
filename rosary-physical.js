@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-16';
+    css.href='rosary-physical.css?v=20261015-17';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -102,7 +102,7 @@
         if(i<=FRONT_END){
           const drift=4*(.5+.5*Math.sin(i*.34+.4));
           return{
-            x:leftX-3-drift,
+            x:leftX-3-drift+12*Math.exp(-(i-1)/2.5),
             y:MEDAL_Y-i*rise+5*Math.sin(i*.47),
             strand:'out'
           };
@@ -110,7 +110,7 @@
         const n=i-FRONT_END-1;
         const drift=5*(.5+.5*Math.sin(n*.41+1.1));
         return{
-          x:rightX+3+drift,
+          x:rightX+3+drift-12*Math.exp(-(26-n)/2.5),
           // La última Avemaría queda más arriba que la cuenta
           // compartida; repartimos la holgura por toda esta rama,
           // sin apretar las últimas cuentas entre sí.
