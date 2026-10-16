@@ -143,9 +143,21 @@
       button.append(value,chevron);
       select.after(button);
       button.onclick=e=>{
+        // A button within a label must cancel its implicit native-select
+        // activation, otherwise Android may open the old system picker.
+        e.preventDefault();
         e.stopPropagation();
         openSheet(select,button);
       };
+      const label=select.parentElement?.matches('label')?select.parentElement:null;
+      if(label){
+        label.addEventListener('click',e=>{
+          if(e.target===button||button.contains(e.target)||e.target===select)return;
+          e.preventDefault();
+          e.stopPropagation();
+          button.click();
+        });
+      }
       select.addEventListener('change',syncTriggers);
       updateTrigger(select);
     }
