@@ -571,3 +571,9 @@ html:has(#modal[open]),body:has(#modal[open]){
   #modalContent label.controls-position-setting::after,
   #modalContent label.rosary-color-variant:has(select)::after{right:34px}
 }
+
+/* Texto y alineación no utilizan el icono de menú. */
+#modal .modal-align-button .text-align-icon{
+  display:block;font:600 21px/1 Georgia,serif;letter-spacing:-1.7px;
+  color:var(--ui-accent);transform:translateX(-1px);
+}
