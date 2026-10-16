@@ -194,3 +194,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - En Ajustes, la opción ya predeterminada **«Rosario completo» aparece ahora en primer lugar** y «Vista vertical» en segundo, sin cambiar ni eliminar ninguna función.
 - Permanecen intactos el swipe manual, la geometría, el halo, la corrección de la apertura y el seguimiento automático de las cuentas.
 - Se comprobaron sintaxis de ambos scripts y simulaciones de inicio/reinicio en diferentes alturas del visor; la presentación visual debe verificarse en el teléfono.
+
+## Luz acumulativa y cordón más natural — v0.1.17
+
+- Se incorpora un **halo tenue persistente** a todas las cuentas que ya han sido rezadas, incluido el colgante. La cuenta activa se ilumina con más intensidad; al terminar, todas las cuentas del rosario conservan su halo. Es una prueba estética y puede afinarse según el resultado en el teléfono.
+- La **cruz** conserva la iluminación después de que se completa la primera oración (índice de progreso mayor que cero), y se vuelve a destacar al rezar sobre ella al final. Reiniciar el progreso limpia ese estado acumulado.
+- El **hilo** adquiere pequeñas irregularidades suaves y deterministas de hasta aproximadamente 5 unidades de SVG en los controles Bézier entre cuentas. El efecto es estable, sin movimiento ni aleatoriedad por render. Las posiciones y tamaños de las cuentas, el arco superior y la curva inferior se mantienen intactos.
+- No se cambian el swipe manual, el seguimiento automático, el orden de oraciones, el encuadre inicial/final, el halo existente de la cuenta activa ni la confirmación de saltos. Se han verificado la sintaxis de JavaScript y la carga de los nuevos recursos CSS/JS.
+- Validar visualmente en Android la iluminación acumulada y la naturalidad de los pequeños cambios de cuerda antes de considerarlos definitivos.
