@@ -93,3 +93,12 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 - Los cheurones de selección se dibujan mediante trazos CSS independientes de SVG de fondo; los toques no abren involuntariamente el selector nativo de un control dentro de una etiqueta HTML.
 - No se modifican la firma permanente ni los datos de usuario guardados.
 
+
+## Recorrido sobre trayectoria estable — v0.1.5
+
+- Conserva exactamente las coordenadas, cuentas, ramas, colores y curvas en reposo de v0.1.4.
+- Durante el desplazamiento manual cerca de la unión inferior mantiene fija visualmente esa unión, mientras las cuentas del aro recorren los segmentos originales; la cuenta grande compartida sirve de referencia y el colgante permanece unido a ella.
+- Las cuentas se interpolan sobre los mismos segmentos cúbicos Bézier que dibujan la cuerda, incluido el arco superior. No se trazan rectas de transición nuevas.
+- El bloqueo de la unión se libera gradualmente cuando sale del encuadre y continúa el scroll nativo con su inercia.
+- Al elegir otra oración se conserva el centrado habitual de su cuenta, sin alterar el progreso guardado.
+- La corrección debe comprobarse en el teléfono especialmente al mover de la cuenta grande hacia la 1 y, en sentido inverso, desde la 8 hacia la unión.
