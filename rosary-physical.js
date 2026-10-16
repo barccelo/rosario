@@ -88,7 +88,7 @@
       // el texto; hay espacio entre dos cuentas grandes.
       const railWidth=width*.42;
       const separation=Math.min(66,Math.max(56,railWidth-72));
-      const center=Math.max(74,Math.min(88,railWidth-27-separation/2));
+      const center=Math.max(68,Math.min(88,railWidth-separation/2-35));
       const leftX=center-separation/2,rightX=center+separation/2;
       crossX=center;
       // Una única serie de 55 cuentas suspendida: la forma cede
