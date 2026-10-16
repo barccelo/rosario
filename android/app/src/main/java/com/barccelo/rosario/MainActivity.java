@@ -237,8 +237,10 @@ public final class MainActivity extends Activity {
             return;
         }
         webView.evaluateJavascript(
-                "(function(){const m=document.getElementById('modal');"
-                + "if(m&&m.open){m.close();return true;}return false;})()",
+                "(function(){if(window.rosarioCloseChoiceSheet&&" +
+                "window.rosarioCloseChoiceSheet())return true;" +
+                "const m=document.getElementById('modal');" +
+                "if(m&&m.open){m.close();return true;}return false;})()",
                 result -> {
                     if (!"true".equals(result)) {
                         if (nativeFullscreen) applyFullscreen(false);
