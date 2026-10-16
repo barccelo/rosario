@@ -61,7 +61,7 @@ final class ReminderScheduler {
         for (int i = 0; i <= 7; i++) {
             // ISO weekdays: Monday=1, Sunday=7.
             int iso = (next.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1;
-            if (days.contains(Integer.toString(iso)) &&
+            if (("," + days + ",").contains("," + iso + ",") &&
                 next.getTimeInMillis() > now.getTimeInMillis() + 10000L) {
                 alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                     next.getTimeInMillis(), pending);
