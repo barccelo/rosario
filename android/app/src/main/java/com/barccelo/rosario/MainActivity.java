@@ -67,8 +67,8 @@ public final class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 if ("appassets.androidplatform.net".equals(uri.getHost())
-                        && "/assets/www/".equals(uri.getPath().substring(0,
-                            Math.min(uri.getPath().length(), "/assets/www/".length())))) {
+                        && uri.getPath() != null
+                        && uri.getPath().startsWith("/assets/www/")) {
                     return false;
                 }
                 try {
