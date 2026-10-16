@@ -227,3 +227,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - La versión web usa `icon.png` como favicon e icono para accesos directos de iOS. La compilación de Android copia este mismo recurso en WebView junto a los HTML, CSS y JavaScript.
 - No cambian identificador de la app, certificado de firma, progresos guardados, gestos, diseño ni oraciones. La actualización se distribuye mediante Obtainium.
 - El tratamiento de iconos transparentes puede depender del lanzador Android; la imagen suministrada en sí conserva transparencia.
+
+## Encuadre inicial seguro en la cruz — v0.1.23
+
+- Al **abrir o recargar** Rosario completo, el visor físico empieza en el **límite inferior real del scroll**, mostrando la cruz y el colgante, tanto en una instalación nueva como con una oración/progreso previamente guardados. No se cambia el paso actual.
+- Se corrige la carrera de inicialización: el primer `paint()` podía ejecutarse antes de cargar `rosary-physical.css` y antes de que el visor tuviera altura y overflow válidos, dejando `scrollTop=0` (arco superior). Ahora se reintenta el encuadre en el evento de carga del CSS y tras el primer frame hasta disponer de una zona realmente desplazable.
+- Mientras el usuario no haya tocado la cadena ni avanzado, un `ResizeObserver` mantiene la cruz abajo frente a reajustes iniciales de altura por las barras del sistema. El primer gesto o avance detiene este anclaje; ningún movimiento posterior vuelve a forzarlo.
+- Se conserva la lógica independiente del botón de **Reiniciar progreso**, que ya sitúa el rosario en la cruz, junto con el auto-follow durante las cuentas, el swipe manual, las curvas, los halos y todas las preferencias.
+- Comprobación: JavaScript sintácticamente válido y simulación del arranque con progreso nuevo y guardado, CSS todavía no cargado, navegación temprana y gesto manual temprano. Requiere confirmación visual en Android.
