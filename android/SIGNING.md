@@ -102,3 +102,11 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 - El bloqueo de la unión se libera gradualmente cuando sale del encuadre y continúa el scroll nativo con su inercia.
 - Al elegir otra oración se conserva el centrado habitual de su cuenta, sin alterar el progreso guardado.
 - La corrección debe comprobarse en el teléfono especialmente al mover de la cuenta grande hacia la 1 y, en sentido inverso, desde la 8 hacia la unión.
+
+## Corrección de la unión inferior — v0.1.6
+
+- Se elimina completamente la animación experimental de cuentas de v0.1.5, que provocaba superposiciones durante los swipes.
+- Se conserva el desplazamiento vertical nativo y la distribución de las 55 cuentas de v0.1.4.
+- La unión inferior se traza como una única curva cúbica continua, siguiendo el criterio ya empleado en el arco superior; se divide matemáticamente en dos segmentos que coinciden con precisión en la cuenta compartida para no alterar el estado de las oraciones.
+- No se desplaza ninguna cuenta independientemente de la cuerda, ni se cambia el tamaño de las cuentas, sus colores o el colgante.
+- Pendiente de validación perceptual en el teléfono durante el recorrido entre la cuenta grande y las cuentas 1–10.
