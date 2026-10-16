@@ -219,3 +219,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - **Sin halo**: desaparecen todos los halos de cuentas y sombras luminosas del crucifijo, incluidos los efectos de foco. Los colores que indican el progreso continúan funcionando.
 - La elección es inmediata, persiste al volver a abrir la app y no reinicia el progreso. No se alteran el scroll manual, el seguimiento automático, el dibujo ni las posiciones de las cuentas.
 - Validación estática: sintaxis de JavaScript, los tres modos, persistencia, actualización sin resetear progreso, reglas CSS y versiones de caché de WebView.
+
+## Nuevo icono transparente — v0.1.22
+
+- Se reemplaza el antiguo icono del lanzador Android (vector verde opaco) por el rosario de la imagen proporcionada: cadena circular beige y crucifijo, con **fondo transparente**. La imagen se adapta a 192 × 192 px, con un pequeño margen de seguridad transparente para evitar recortes en los lanzadores.
+- La imagen es idéntica para `android/app/src/main/res/drawable-nodpi/rosario_launcher.png` e `icon.png`. El manifiesto Android asigna el nuevo recurso tanto a `android:icon` como a `android:roundIcon`.
+- La versión web usa `icon.png` como favicon e icono para accesos directos de iOS. La compilación de Android copia este mismo recurso en WebView junto a los HTML, CSS y JavaScript.
+- No cambian identificador de la app, certificado de firma, progresos guardados, gestos, diseño ni oraciones. La actualización se distribuye mediante Obtainium.
+- El tratamiento de iconos transparentes puede depender del lanzador Android; la imagen suministrada en sí conserva transparencia.
