@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.barccelo.rosario'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.barccelo.rosario'
+        minSdk 24
+        targetSdk 35
+        versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+        versionName (System.getenv('ROSARIO_VERSION') ?: '0.1.0-dev')
+    }
+
+    signingConfigs {
+        release {
+            def path = System.getenv('ROSARIO_KEYSTORE_FILE')
+            if (path) {
+                storeFile file(path)
+                storePassword System.getenv('ROSARIO_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ROSARIO_KEY_ALIAS')
+                keyPassword System.getenv('ROSARIO_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('ROSARIO_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// La web de GitHub Pages y la APK usan los mismos archivos de la raíz.
+// Gradle copia una instantánea de ellos en cada compilación; no hay
+// segunda versión de las oraciones ni del diseño que mantener.
+tasks.register('syncWebAssets', Sync) {
+    from(rootProject.projectDir.parentFile) {
+        include 'index.html', '*.js', '*.css'
+    }
+    into layout.projectDirectory.dir('src/main/assets/www')
+}
+tasks.named('preBuild') {
+    dependsOn tasks.named('syncWebAssets')
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+}
