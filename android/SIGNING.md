@@ -152,3 +152,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Al llegar al aro se conserva la cuenta grande y las primeras cinco cuentas en un encuadre común. Antes de las últimas cinco, el encuadre se prepara progresivamente para poder mantenerlo estable durante las cuentas 50–54 en pantallas de altura suficiente.
 - Las cuentas, hilo, curvas, cuenta grande y colgante **no cambian ni se animan individualmente**. El scroll manual de las cuentas no se intercepta ni modifica.
 - La visualización de primera/última decena debe validarse en el dispositivo. La compilación por sí sola no demuestra que el problema perceptivo esté resuelto.
+
+## Fluidez del centrado y oraciones de cierre — v0.1.12
+
+- Se corrige el mapeo litúrgico de los cuatro primeros misterios: **Gloria, Alabanzas y jaculatorias** vuelven a la **cuenta grande siguiente** (11, 22, 33 y 44), en lugar de quedar sobre la última Avemaría (10, 21, 32 y 43). El quinto misterio mantiene sus oraciones de cierre sobre la cuenta grande compartida 0.
+- Se conserva sin cambios el **swipe manual** del rosario, la geometría de sus cuentas, los halos, el hilo y el colgante.
+- El seguimiento automático usa `scrollTo({behavior:'smooth'})` únicamente cuando una cuenta requiere recolocar el encuadre; no se desplaza ni anima ninguna cuenta por separado.
+- Se elimina el salto inverso que existía entre las cuentas 49 y 50: el seguimiento se prepara progresivamente hasta 49 y conserva el destino durante las últimas cinco.
+- Un destino de scroll pendiente evita recalcular desde posiciones intermedias cuando se avanza rápidamente, y se limpia al terminar el desplazamiento o iniciar un gesto manual.
+- La fluidez visual debe probarse en Android. Una compilación exitosa no confirma por sí sola la ausencia de saltos.
