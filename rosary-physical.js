@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-15';
+    css.href='rosary-physical.css?v=20261015-16';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
