@@ -32,7 +32,7 @@ Para evaluar en el teléfono:
 2. Comprobar si el navegador entrega las teclas de volumen.
 3. Si se prepara una app Android, implementar pantalla inmersiva y teclas de volumen en la capa nativa, reutilizando esta interfaz.
 
-Esta primera importación no incluye APK, contenedor Android ni configuración de GitHub Pages. El progreso usa almacenamiento local: no se transfiere automáticamente entre el dominio de Sites y otro dominio o una app instalada.
+El repositorio ahora incorpora un contenedor Android nativo en `android/` y una compilación automática en `.github/workflows/android.yml`. La publicación permanente de un APK en GitHub Releases necesita configurar primero la firma descrita en [`android/SIGNING.md`](android/SIGNING.md). El progreso usa almacenamiento local: no se transfiere automáticamente entre el dominio de Sites y otro dominio o una app instalada.
 
 
 ## Estructura y lectura (octubre de 2026)
@@ -175,3 +175,11 @@ Las ventanas de navegación, ajustes, lectura, meditación y confirmación utili
 Se consolidaron los estilos de los formularios, selectores, tarjetas, pestañas, opciones de color, muestras y controles de la vista física en `rosary-ui.css`, cargado al final por `rosary-ui.js`. Se retiraron reglas duplicadas de `rosary-colors.css`, `rosary-physical.css`, `rosary-polish.css` y el antiguo tamaño compacto definido en `index.html`. Las variantes claro, oscuro y por misterio tienen variables de interfaz específicas.
 
 Se eliminaron los textos auxiliares excesivos o técnicos de Ajustes, la selección de colores y la presentación física. Se conservaron las opciones funcionales, los rótulos necesarios, las acciones de navegación y las oraciones.
+
+## Versión Android (octubre de 2026)
+
+La app Android incorpora los HTML, CSS y JavaScript publicados por GitHub Pages en cada compilación. El código de oraciones y de interfaz sigue siendo único. Un WebView con `WebViewAssetLoader` carga los recursos locales; el contenedor Android intercepta volumen arriba y abajo para avanzar y retroceder oraciones mientras está activa la pantalla de oración. Las teclas vuelven a regular el volumen del sistema al abrir Ajustes, Navegación y demás ventanas.
+
+En la interfaz se unificó el chevrón de todas las listas desplegables. El control de alineación ahora usa `Aa` para diferenciarse del icono de menú. Se oculta el HTML inicial antiguo hasta que acaba la carga visual para evitar su aparición fugaz.
+
+Cada cambio en `main` compila un APK de prueba como artefacto de GitHub Actions; para distribución y actualizaciones mediante Obtainium se requiere **firmar con una misma clave** y publicar etiquetas de versión (`v0.1.0`, `v0.1.1`, etc.) en GitHub Releases. Consulta [Configuración y firma para Android](android/SIGNING.md).
