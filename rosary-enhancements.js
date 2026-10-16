@@ -1142,15 +1142,32 @@
     alignButton.title='Alineación del texto';
     $('modal').querySelector('.close').after(alignButton);
     const alignNames={justify:'Justificado',left:'Izquierda',center:'Centrado',right:'Derecha'};
+    const alignFeedback=document.createElement('div');
+    alignFeedback.className='modal-alignment-feedback';
+    alignFeedback.setAttribute('role','status');
+    alignFeedback.setAttribute('aria-live','polite');
+    alignFeedback.hidden=true;
+    $('modal').append(alignFeedback);
+    let alignmentFeedbackTimer;
     function updateModalAlign(){
       alignButton.innerHTML='<span class="text-align-icon" aria-hidden="true">Aa</span>';
+      alignButton.dataset.align=state.textAlign;
       alignButton.setAttribute('aria-label','Alineación del texto: '+alignNames[state.textAlign]+'. Pulsar para cambiar.');
+      alignButton.title='Alineación: '+alignNames[state.textAlign];
     }
     alignButton.onclick=()=>{
       state.textAlign=alignments[(alignments.indexOf(state.textAlign)+1)%alignments.length];
       applyAlignment();
       persist();
       updateModalAlign();
+      alignFeedback.textContent='Alineación: '+alignNames[state.textAlign];
+      alignFeedback.hidden=false;
+      alignButton.classList.add('align-changed');
+      clearTimeout(alignmentFeedbackTimer);
+      alignmentFeedbackTimer=setTimeout(()=>{
+        alignFeedback.hidden=true;
+        alignButton.classList.remove('align-changed');
+      },1700);
     };
     updateModalAlign();
     new MutationObserver(()=>{if($('modal').open)updateModalAlign();})
