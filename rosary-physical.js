@@ -280,9 +280,12 @@
         return{type:'loop',bead:0,y:positions[0].y,
           strand:'junction',completed:55};
       if(step.m>=0 && step.m<5){
+        // Gloria y jaculatorias se rezan en la cuenta GRANDE
+        // siguiente, nunca sobre la décima Avemaría. El quinto
+        // misterio ya se resuelve arriba en la grande compartida.
         const bead=Number.isInteger(step.bead) ? step.bead :
           step.kind==='mystery' ? step.m*11 :
-            Math.min(54,(step.m+1)*11-1);
+            (step.m+1)*11;
         return{type:'loop',bead,y:positions[bead].y,
           strand:positions[bead].strand,completed:bead+1};
       }
@@ -359,59 +362,59 @@
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
-        // El dedo sigue usando exactamente el scroll nativo existente.
-        // Sólo el avance AUTOMÁTICO de una oración aplica esta política.
-        // Antes se recentraba cada cuenta al 64 % de la pantalla,
-        // desplazando el giro inferior unos 75 px POR CADA ORACIÓN.
-        // Eso producía la apertura/cierre progresivos al pasar de la
-        // grande a 1–5 y desde las últimas pequeñas de regreso.
-        //
-        // Si la cuenta siguiente YA ES VISIBLE, no mover el rosario.
-        // Sólo desplazar lo estrictamente necesario si sale del marco.
         const height=viewport.clientHeight;
         const max=Math.max(0,viewport.scrollHeight-height);
-        const nearJunction=selected.type==='loop' &&
-          (selected.bead<=5||selected.bead>=50);
-        const cameFromPendant=lastPhysicalType!=='loop';
-        const firstPhysical=beforeMode!=='physical';
-        let target=viewport.scrollTop;
-        if(firstPhysical || (nearJunction && cameFromPendant)){
-          // Al entrar en el aro, dejar visible la cuenta grande y las
-          // primeras cinco pequeñas, sin recentrar tras cada avance.
-          // Al abrir la vista directamente en las últimas cinco,
-          // también deben quedar visibles la seleccionada y la grande.
-          target=nearJunction && height>=455
-            ? MEDAL_Y-height*(selected.bead>=50?.94:.87)
+        const bead=selected.type==='loop'?selected.bead:-1;
+        const entering=beforeMode!=='physical';
+        const fromPendant=lastPhysicalType!=='loop';
+        const closeToJunction=bead>=0&&(bead<=5||bead>=50);
+        const previous=viewport.scrollTop;
+        let target=previous;
+
+        // Sólo se mueve el scroll de la cadena, NUNCA las cuentas.
+        // Primera decena: encuadrar una vez la unión y mantenerla
+        // quieta mientras las cinco pequeñas sigan visibles.
+        if(entering || (closeToJunction&&fromPendant)){
+          target=closeToJunction&&height>=455
+            ? MEDAL_Y-height*(bead>=50?.82:.87)
             : selected.y-height*.64;
-        }else if(selected.type==='loop' && height>=455 &&
-          selected.bead>=44 && selected.bead<=49 &&
-          lastPhysicalBead===selected.bead-1){
-          // Preparar la vuelta inferior ANTES de las últimas cinco
-          // cuentas. El seguimiento llega gradualmente a una posición
-          // desde la que 50–54 y la cuenta grande caben en pantalla.
-          // No se mueve ninguna cuenta aparte del scroll estándar.
-          const amount=(selected.bead-44)/5;
-          const focusRatio=.64-(.64-.12)*amount;
+        }else if(bead>=44&&bead<=49&&height>=455&&
+                 lastPhysicalBead===bead-1){
+          // Regreso por la rama derecha: transición continua en
+          // seis pasos. Nunca cambiar de dirección ni provocar un
+          // salto de encuadre justo al llegar a la cuenta 50.
+          const amount=(bead-44)/5;
+          const focusRatio=.64-(.64-.13)*amount;
           target=selected.y-height*focusRatio;
-        }else if(selected.type==='loop' && height>=455 &&
-          selected.bead===50 && lastPhysicalBead===49){
-          // Últimas cinco: encuadrar UNA vez el giro inferior y luego
-          // dejarlo quieto mientras la selección avanza hasta 54.
-          target=MEDAL_Y-height*.94;
+        }else if(bead===50 && lastPhysicalBead===49&&height>=455){
+          // Las últimas cinco y la grande inferior ya caben juntas:
+          // conservar el encuadre obtenido al llegar a la 49.
+          target=previous;
         }else{
-          const radius=selected.type==='loop' &&
-            selected.bead%11===0?23:17;
+          // Al avanzar por el resto de cuentas, mantener una franja
+          // cómoda. No recentrar si la cuenta sigue visible.
+          const radius=bead>=0&&bead%11===0?23:17;
           const padding=Math.max(16,Math.min(32,height*.055));
-          const top=padding+radius;
-          const bottom=height-padding-radius;
-          const screenY=selected.y-viewport.scrollTop;
-          if(screenY<top)target=selected.y-top;
-          else if(screenY>bottom)target=selected.y-bottom;
+          const upper=padding+radius;
+          const lower=height-padding-radius;
+          const screenY=selected.y-previous;
+          if(screenY<upper)target=selected.y-upper;
+          else if(screenY>lower)target=selected.y-lower;
         }
-        // Asignación directa; no hay interpolación, escala, deformación
-        // de ramas, ni transformaciones sobre el SVG o las cuentas.
-        if(Math.abs(target-viewport.scrollTop)>0.5){
-          viewport.scrollTop=Math.max(0,Math.min(max,target));
+
+        target=Math.max(0,Math.min(max,target));
+        if(Math.abs(target-previous)>.5){
+          // Usar el propio suavizado de WebView: acompaña de forma
+          // fluida cada oración. No altera los swipes manuales.
+          // Saltos deliberados a puntos distantes o cambio de vista
+          // son inmediatos para evitar recorrer todo el rosario.
+          const longJump=entering||
+            Math.abs(target-previous)>height*1.35;
+          if(!longJump&&typeof viewport.scrollTo==='function'){
+            viewport.scrollTo({top:target,behavior:'smooth'});
+          }else{
+            viewport.scrollTop=target;
+          }
         }
       }
       lastPhysicalType=selected.type;
