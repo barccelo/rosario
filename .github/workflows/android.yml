@@ -61,7 +61,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.release_version || github.ref_name }}
         run: |
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]] || {
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
             echo "::error::Use a version like v0.1.0"; exit 1;
           }
 
