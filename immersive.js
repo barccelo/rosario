@@ -128,7 +128,7 @@ chain.setAttribute('viewBox',(-horizontalShift)+' 0 '+w+' '+svgHeight);
 chain.style.setProperty('--rosary-native-height',svgHeight+'px');
 if(previousPrayerIndex!==state.index)
   window.rosarioScrollToBead?.(bead,!s||s.m>4||bead===55);$('immersiveText').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('immersiveCount').textContent=s?.n?`${s.n} / 10`:'';if(previousPrayerIndex!==state.index){reading.scrollTop=0;previousPrayerIndex=state.index}chain.querySelectorAll('.focus-bead').forEach(el=>{if(!s||s.m>4){el.classList.remove('active');el.setAttribute('aria-current','false')}});requestAnimationFrame(updateReading);};window.addEventListener('resize',()=>render());document.addEventListener('fullscreenchange',()=>render());
-document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
+document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else if(state.index>0){state.index--;rosarioHaptic();render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{
   if($('modal').open) return false;
@@ -139,7 +139,7 @@ window.rosarioHardwareKey=direction=>{
     return true;
   }
   if(action==='previous'){
-    if(state.index>0){ state.index--; render(); }
+    if(state.index>0){ state.index--; rosarioHaptic(); render(); }
     return true;
   }
   return false;
@@ -235,7 +235,7 @@ document.addEventListener('pointerup',event=>{
       window.rosarioPhysicalSwipeDown?.();
     const forward=forwardDown?dy>0:dy<0;
     if(forward)advance();
-    else{state.index=Math.max(0,state.index-1);render();}
+    else if(state.index>0){state.index--;rosarioHaptic();render();}
   }
 },true);
 // En móvil, el navegador puede cancelar pointerup cuando activa pan-y.
@@ -265,7 +265,7 @@ reading.addEventListener('touchend',event=>{
     window.rosarioPhysicalSwipeDown?.();
   const forward=forwardDown?back:next;
   if(forward)advance();
-  else{state.index=Math.max(0,state.index-1);render();}
+  else if(state.index>0){state.index--;rosarioHaptic();render();}
 },{passive:true,capture:true});
 for(const name of ['touchcancel'])
   reading.addEventListener(name,()=>{touchReading=null;},{passive:true,capture:true});
