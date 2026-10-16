@@ -33,6 +33,7 @@
     // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
     state.screenTapNavigation=state.screenTapNavigation===true;
 
+    const TRACK_PADDING=6800;
     const viewport=document.createElement('div');
     viewport.className='physical-scroll-viewport';
     viewport.setAttribute('aria-label','Rosario completo. Desliza por sus cuentas sin cambiar la oración.');
@@ -41,12 +42,21 @@
     svg.setAttribute('role','group');
     svg.setAttribute('aria-label','Un solo rosario: cinco decenas en un lazo y un colgante con una cruz.');
     svg.style.setProperty('--physical-path-height',HEIGHT+'px');
-    viewport.append(svg);
+    svg.style.setProperty('--physical-track-top',TRACK_PADDING+'px');
+    // El scroll nativo conduce el movimiento, pero el aro se mantiene
+    // espacialmente estable. Esta pista virtual da recorrido en ambos
+    // sentidos sin alterar la geometría del SVG.
+    const track=document.createElement('div');
+    track.className='physical-motion-track';
+    track.style.height=(HEIGHT+TRACK_PADDING*2)+'px';
+    viewport.append(svg,track);
     stage.append(viewport);
 
     let positions=[],introPoints=[],crossX=0;
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
+    let motionPaths=[],motionOffsets=[],motionTotal=0;
+    let restingScroll=0,motionFrame=0;
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
       return '<g class="physical-bead" role="button" tabindex="0" '+
@@ -210,6 +220,17 @@
       pendant+=crossMarkup(center,CROSS_Y);
       body.push(pendant+'</g>');
       svg.innerHTML=body.join('');
+      // La cuenta grande compartida debe tapar cualquier cuenta que
+      // atraviese el encuentro de las ramas al circular por el aro.
+      const big=svg.querySelector('[data-bead="0"]');
+      const loopBeads=svg.querySelector('.physical-loop-beads');
+      if(big && loopBeads)loopBeads.append(big);
+      motionPaths=[...svg.querySelectorAll('.physical-loop-links [data-link]')];
+      motionOffsets=[0];
+      motionPaths.forEach(path=>{
+        motionOffsets.push(motionOffsets[motionOffsets.length-1]+path.getTotalLength());
+      });
+      motionTotal=motionOffsets[motionOffsets.length-1];
       svg.querySelectorAll('[data-bead]').forEach(el=>{
         const index=Number(el.dataset.bead);
         const colors=missionary[Math.floor(index/11)];
@@ -220,6 +241,60 @@
       });
     }
     draw();
+
+    // Desplazamiento circular uniforme sobre los Bézier del aro.
+    // La silueta y el hilo permanecen unidos, sin que dos ramas se
+    // separen durante los gestos. A diferencia de la prueba v0.1.5,
+    // NO se interpola por número de cuenta, ni se deforma el aro,
+    // ni se combina una animación independiente con un pan variable.
+    // Todos los puntos se calculan con distancia real sobre los mismos
+    // trazados SVG. El colgante y la cuenta grande compartida quedan
+    // estables, como referencia del giro inferior.
+    function resetBelt(){
+      svg.style.transform='';
+      svg.querySelectorAll('.physical-loop-beads [data-bead]')
+        .forEach(el=>el.removeAttribute('transform'));
+    }
+    function onPath(distance){
+      if(!motionTotal)return{x:0,y:0};
+      const wrapped=((distance%motionTotal)+motionTotal)%motionTotal;
+      let low=0,high=motionPaths.length-1;
+      while(low<high){
+        const mid=(low+high)>>1;
+        if(motionOffsets[mid+1]<=wrapped)low=mid+1;
+        else high=mid;
+      }
+      const point=motionPaths[low].getPointAtLength(wrapped-motionOffsets[low]);
+      return{x:point.x,y:point.y};
+    }
+    function animateBelt(){
+      motionFrame=0;
+      if(state.rosaryViewLayout!=='physical'){
+        resetBelt();return;
+      }
+      const scrollDelta=viewport.scrollTop-restingScroll;
+      if(Math.abs(scrollDelta)<.1){
+        resetBelt();return;
+      }
+      // Contrarrestar el scroll sólo para la silueta: la curva no
+      // entra/sale en pantalla como una V que se abre o se cierra.
+      svg.style.transform='translate3d(0,'+format(scrollDelta)+'px,0)';
+      // Se conserva el orden original y la distancia entre cuentas.
+      // Cada cuenta pasa por el giro inferior, sube, gira arriba y baja.
+      const distance=scrollDelta*1.12;
+      svg.querySelectorAll('.physical-loop-beads [data-bead]').forEach(el=>{
+        const i=Number(el.dataset.bead);
+        if(i===0)return; // Cuenta grande y colgante fijos en la unión.
+        const reference=positions[i];
+        const point=onPath(motionOffsets[i]+distance);
+        el.setAttribute('transform','translate('+
+          format(point.x-reference.x)+' '+format(point.y-reference.y)+')');
+      });
+    }
+    function scheduleBelt(){
+      if(!motionFrame)motionFrame=requestAnimationFrame(animateBelt);
+    }
+    viewport.addEventListener('scroll',scheduleBelt,{passive:true});
 
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
@@ -355,9 +430,13 @@
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
+        if(motionFrame)cancelAnimationFrame(motionFrame);
+        motionFrame=0;
+        resetBelt();
         const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
-        const target=Math.max(0,selected.y-viewport.clientHeight*.64);
-        viewport.scrollTop=Math.min(max,target);
+        const target=TRACK_PADDING+selected.y-viewport.clientHeight*.64;
+        viewport.scrollTop=Math.max(0,Math.min(max,target));
+        restingScroll=viewport.scrollTop;
       }
       beforeMode='physical';beforeIndex=state.index;
     }
@@ -531,10 +610,13 @@
     window.addEventListener('resize',()=>{
       if(state.rosaryViewLayout!=='physical')return;
       if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
-      const previousScroll=viewport.scrollTop;
+      // Redibujar únicamente al cambiar el ANCHO de la vista; reiniciar
+      // el desplazamiento virtual preservando el progreso de oración.
+      if(motionFrame)cancelAnimationFrame(motionFrame);
+      motionFrame=0;
+      resetBelt();
       draw();
-      viewport.scrollTop=previousScroll;
-      beforeIndex=state.index;
+      beforeIndex=-1;
       paint();
     });
     paint();
