@@ -160,6 +160,8 @@ public final class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(32, 41, 36));
+        // Prevent Android 12+ edge stretch from visually spreading bead columns.
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
