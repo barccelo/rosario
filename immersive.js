@@ -120,6 +120,16 @@ if(previousPrayerIndex!==state.index)
 document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('input,select,textarea'))return;const volume=['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.key)||['AudioVolumeUp','AudioVolumeDown','VolumeUp','VolumeDown'].includes(e.code);if(!volume)return;e.preventDefault();if(e.repeat)return;if(/Up$/.test(e.key)||/Up$/.test(e.code))advance();else{state.index=Math.max(0,state.index-1);render()}},{capture:true});
 // Entry point for a future Android wrapper to deliver hardware volume events.
 window.rosarioHardwareKey=direction=>{if($('modal').open)return;if(direction==='up')advance();else if(direction==='down'){state.index=Math.max(0,state.index-1);render()}};
+/* En Android sólo se reservan las teclas de volumen mientras se reza.
+   En Ajustes o cualquier otra pantalla recuperan su función del sistema. */
+if(window.RosarioAndroid?.setPrayerActive){
+  const syncNativePrayer=()=>window.RosarioAndroid.setPrayerActive(!$('modal').open);
+  new MutationObserver(syncNativePrayer).observe($('modal'),{
+    attributes:true,attributeFilter:['open']
+  });
+  syncNativePrayer();
+}
+
 
 const readingStyle=document.createElement('style');
 readingStyle.textContent=`
