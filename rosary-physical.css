@@ -10,14 +10,11 @@ body.rosario-physical-view .physical-scroll-viewport{
 }
 .physical-scroll-viewport::-webkit-scrollbar{display:none}
 .rosary .physical-scroll-viewport .physical-path{
-  display:block!important;position:absolute!important;inset:auto!important;
-  top:var(--physical-track-top,0px)!important;left:0!important;
+  display:block!important;position:relative!important;inset:auto!important;
   width:100vw!important;height:var(--physical-path-height,2640px)!important;
   max-width:none!important;max-height:none!important;
   overflow:visible!important;touch-action:pan-y!important;
-  will-change:transform;
 }
-.physical-motion-track{width:1px;pointer-events:none}
 .physical-path{
   --physical-fill:#F6F4EF;--physical-line:#BCA06B;
   --physical-outline:#B79355;--physical-number:#776B55;
