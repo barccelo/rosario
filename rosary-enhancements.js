@@ -715,11 +715,10 @@
         '<button type="button" data-nav="jaculatorias" role="tab">Jaculatorias</button>' +
         '<button type="button" data-nav="intentions" role="tab">Intenciones</button>' +
         '<button type="button" data-nav="text" role="tab">Texto</button>' +
-        '<button type="button" data-nav="voices" role="tab">Voces</button>' +
-        '<button type="button" data-nav="controls" role="tab">Acciones</button></div>' +
+        '<button type="button" data-nav="voices" role="tab">Voces</button></div>' +
         '<div class="nav-list" id="navList"></div>' +
         '<section class="nav-detail" id="navDetail" hidden aria-label="Consulta de oración"></section>');
-      const tabs = ['days','mysteries','prayers','jaculatorias','intentions','text','voices','controls'];
+      const tabs = ['days','mysteries','prayers','jaculatorias','intentions','text','voices'];
       let currentTab = tab;
       let savedScroll = 0;
       function openPreview(title,content) {
@@ -859,10 +858,6 @@
             };
             list.append(row);
           });
-          const notice = document.createElement('p');
-          notice.className = 'jac-intro';
-          notice.textContent = 'Puedes activar cualquiera de las tres jaculatorias, por separado o en combinación. Se rezarán después del Gloria, en el orden de la lista.';
-          list.append(notice);
         } else if (selected === 'intentions') {
           const caption=document.createElement('p');
           caption.className='jac-intro';
@@ -960,14 +955,15 @@
             row.append(span,edit,del);
             list.append(row);
           });
-          const backup=document.createElement('div');
+          const backup=document.createElement('details');
           backup.className='intention-backup';
-          const backupLabel=document.createElement('p');
-          backupLabel.className='jac-intro';
-          backupLabel.textContent='Copia de seguridad: exporta la lista o pega aquí una lista JSON para restaurarla.';
+          const summary=document.createElement('summary');
+          summary.textContent='Exportar';
+          const backupPanel=document.createElement('div');
+          backupPanel.className='intention-backup-panel';
           const exportButton=document.createElement('button');
           exportButton.type='button';
-          exportButton.textContent='Exportar JSON';
+          exportButton.textContent='Descargar archivo JSON';
           exportButton.onclick=()=>{
             const payload=JSON.stringify({intentions:state.intentionPool},null,2);
             const blob=new Blob([payload],{type:'application/json'});
@@ -997,34 +993,12 @@
               fill('intentions');
             }catch{feedback.textContent='No se pudo leer la lista. Comprueba el formato JSON.';}
           };
-          backup.append(backupLabel,exportButton,restore,restoreButton,feedback);
+          const restoreLabel=document.createElement('label');
+          restoreLabel.className='intention-backup-restore-label';
+          restoreLabel.textContent='Restaurar copia';
+          backupPanel.append(exportButton,restoreLabel,restore,restoreButton,feedback);
+          backup.append(summary,backupPanel);
           list.append(backup);
-        } else if (selected === 'controls') {
-          const info=document.createElement('p');
-          info.className='jac-intro';
-          info.textContent='Puedes cambiar de oración deslizando sobre el texto. Estas acciones también están disponibles aquí.';
-          list.append(info);
-          const actions=[
-            ['← Oración anterior',()=>{
-              state.index=Math.max(0,state.index-1);render();$('modal').close();
-            }],
-            ['Avanzar oración →',()=>{
-              advance();$('modal').close();
-            }],
-            ['Probar teclas de volumen',()=>{
-              $('modal').close();
-              window.rosarioTestVolume?.();
-            }],
-            ['Abrir ajustes',()=>{$('modal').close();$('settings').click();}]
-          ];
-          actions.forEach(([name,action])=>{
-            const button=document.createElement('button');
-            button.type='button';
-            button.className='nav-item';
-            button.textContent=name;
-            button.onclick=action;
-            list.append(button);
-          });
         } else if (selected === 'voices') {
           const description=document.createElement('p');
           description.className='jac-intro';
@@ -1135,15 +1109,6 @@
       };
       controlSetting.append(heading,select);
       $('modalContent').append(controlSetting);
-      const volume=document.createElement('button');
-      volume.type='button';
-      volume.className='voice-settings-link';
-      volume.textContent='Probar teclas de volumen';
-      volume.onclick=()=>{
-        $('modal').close();
-        window.rosarioTestVolume?.();
-      };
-      $('modalContent').append(volume);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'voice-settings-link';
