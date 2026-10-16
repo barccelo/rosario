@@ -86,7 +86,9 @@
       const width=Math.max(320,document.documentElement.clientWidth);
       // La cadena permanece junto al borde izquierdo, sin invadir
       // el texto; hay espacio entre dos cuentas grandes.
-      const railWidth=width*.42;
+      // La franja de scroll mide el 42% de .rosary, NO del viewport.
+      // Calcular con el ancho real evita recortes y falsos cambios de apertura.
+      const railWidth=Math.max(110,stage.getBoundingClientRect().width*.42);
       // Hay dos raíles RECTOS de ancho constante. La cuenta grande de
       // unión está en el mismo eje de la primera rama: no hay transición
       // en X ni apertura aparente al pasar por esa cuenta.
