@@ -417,7 +417,12 @@
                   lastPhysicalBead>=0&&lastPhysicalBead<=5)){
           // Entre la grande y las primeras cinco, mostrar toda la zona
           // en un encuadre estable. Nunca recentrar cuenta por cuenta.
-          target=Math.min(previous,firstFiveTop);
+          // Si el usuario había desplazado la cadena manualmente,
+          // también garantizar que la cuenta seleccionada no quede
+          // por debajo del límite visible.
+          const radius=bead%11===0?23:17;
+          const visibleMinimum=selected.y-height+margin+radius;
+          target=Math.max(visibleMinimum,Math.min(previous,firstFiveTop));
         }else if(goingForward&&bead>=39&&bead<=54&&
                  lastPhysicalBead===bead-1){
           // Sobre la rama derecha, preparar la imagen final desde antes
