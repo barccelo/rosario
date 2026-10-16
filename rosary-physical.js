@@ -200,6 +200,85 @@
     }
     draw();
 
+    // Desplazamiento sobre un riel visual ESTABLE alrededor de la cuenta
+    // compartida. Antes se trasladaba todo el SVG y el encuentro de las
+    // ramas parecía abrirse/cerrarse al entrar en pantalla.
+    //
+    // El trazado, todas las coordenadas en reposo, el hilo y el colgante
+    // siguen intactos. Sólo se desplazan las 54 cuentas del aro según el
+    // scroll nativo, mientras la cuenta central sirve de referencia.
+    // Fuera de la zona de unión el SVG vuelve gradualmente a su scroll
+    // normal: se conserva el acceso a toda la cadena y la inercia.
+    let motionFrame=0;
+    let flowActive=false;
+    let programmaticScroll=false;
+    const motionBeads=()=>[...svg.querySelectorAll('.physical-loop-beads [data-bead]')];
+    const smooth=(t)=>t*t*(3-2*t);
+    function loopPoint(index){
+      const count=positions.length;
+      const wrapped=((index%count)+count)%count;
+      const i=Math.floor(wrapped);
+      const fraction=wrapped-i;
+      const a=positions[i],b=positions[(i+1)%count];
+      // Interpolación continua sobre la geometría original, incluida la
+      // vuelta superior y la llegada natural a la cuenta compartida.
+      const t=smooth(fraction);
+      return{x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
+    }
+    function clearTrackMotion(){
+      svg.style.transform='';
+      motionBeads().forEach(bead=>bead.removeAttribute('transform'));
+    }
+    function applyTrackMotion(){
+      motionFrame=0;
+      if(!flowActive||state.rosaryViewLayout!=='physical'){
+        clearTrackMotion();
+        return;
+      }
+      const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
+      const anchor=Math.min(max,Math.max(0,MEDAL_Y-viewport.clientHeight*.64));
+      const displacement=viewport.scrollTop-anchor;
+      const extent=Math.abs(displacement);
+      // En 420 px próximos a la unión no se mueve el vértice.
+      // La transición termina cuando el vértice queda fuera de pantalla.
+      const weight=extent<=420?1:extent>=920?0:
+        1-smooth((extent-420)/500);
+      if(weight<=0){
+        clearTrackMotion();
+        return;
+      }
+      // Compensar únicamente la traslación vertical del SVG, no deformar
+      // su curva ni abrir sus ramas.
+      svg.style.transform='translate3d(0,'+(displacement*weight).toFixed(2)+'px,0)';
+      const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
+      const travel=displacement/rise*weight;
+      motionBeads().forEach((bead)=>{
+        const index=Number(bead.dataset.bead);
+        if(index===0){
+          bead.removeAttribute('transform'); // Unión con el colgante fija
+          return;
+        }
+        const from=positions[index],to=loopPoint(index+travel);
+        bead.setAttribute('transform',
+          'translate('+format(to.x-from.x)+' '+format(to.y-from.y)+')');
+      });
+    }
+    function scheduleTrackMotion(){
+      if(!motionFrame)motionFrame=requestAnimationFrame(applyTrackMotion);
+    }
+    viewport.addEventListener('touchstart',()=>{
+      if(state.rosaryViewLayout==='physical')flowActive=true;
+    },{passive:true});
+    viewport.addEventListener('pointerdown',()=>{
+      if(state.rosaryViewLayout==='physical')flowActive=true;
+    },{passive:true});
+    viewport.addEventListener('wheel',()=>{
+      if(state.rosaryViewLayout==='physical')flowActive=true;
+    },{passive:true});
+    viewport.addEventListener('scroll',()=>{
+      if(!programmaticScroll)scheduleTrackMotion();
+    },{passive:true});
+
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
     // el avance cambia al gesto hacia ARRIBA y sigue así hasta la cruz.
@@ -334,9 +413,15 @@
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
+        // Una elección de oración centra su cuenta de forma habitual.
+        // La animación de recorrido sólo afecta al gesto sobre las cuentas.
+        flowActive=false;
+        clearTrackMotion();
         const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
         const target=Math.max(0,selected.y-viewport.clientHeight*.64);
+        programmaticScroll=true;
         viewport.scrollTop=Math.min(max,target);
+        programmaticScroll=false;
       }
       beforeMode='physical';beforeIndex=state.index;
     }
@@ -511,6 +596,9 @@
       if(state.rosaryViewLayout!=='physical')return;
       if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
       const previousScroll=viewport.scrollTop;
+      flowActive=false;
+      if(motionFrame)cancelAnimationFrame(motionFrame);
+      motionFrame=0;
       draw();
       viewport.scrollTop=previousScroll;
       beforeIndex=state.index;
