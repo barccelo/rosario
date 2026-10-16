@@ -187,6 +187,9 @@ body[data-rosary-color-mode="mystery"] .physical-pendant .physical-bead.active .
 }
 body.rosario-physical-view .physical-scroll-viewport{
   -webkit-tap-highlight-color:transparent;
+  /* Do not stretch the bead columns at the scroll edges on Android. */
+  overscroll-behavior:none!important;
+  overscroll-behavior-y:none!important;
 }
 
 /* La terminación del colgante conserva las cuatro cuentas rezadas
