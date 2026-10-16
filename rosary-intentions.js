@@ -210,7 +210,7 @@
     const panel=document.getElementById('prayer');
     createBlock('rosary-intention-panel',panel?.parentElement,panel);
     const immersive=document.querySelector('.immersive-prayer');
-    createBlock('rosary-intention-immersive',immersive?.parentElement,immersive);
+    createBlock('rosary-intention-immersive',immersive,immersive?.querySelector('#immersiveText'));
     // Los módulos anteriores ya envolvieron render; conservar toda su lógica.
     const previousRender=render;
     render=function(){previousRender();updateIntention();};
