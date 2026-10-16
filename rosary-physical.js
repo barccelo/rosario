@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-11';
+    css.href='rosary-physical.css?v=20261015-12';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -91,22 +91,32 @@
       const center=Math.max(74,Math.min(88,railWidth-27-separation/2));
       const leftX=center-separation/2,rightX=center+separation/2;
       crossX=center;
-      // 55 cuentas únicas. La primera es una sola cuenta grande,
-      // compartida por el comienzo y el cierre de la quinta decena.
-      // Las 27 siguientes ascienden; las otras 27 regresan por la derecha.
+      // Una única serie de 55 cuentas suspendida: la forma cede
+      // ligeramente a la gravedad en ambas ramas. La derecha no copia
+      // las alturas de la izquierda, por lo que las cuentas grandes no
+      // forman parejas rígidas. El pequeño margen extra en X evita que
+      // dos cuentas grandes enfrentadas lleguen a tocarse.
       const rise=(MEDAL_Y-(TOP+48))/FRONT_END;
       positions=Array.from({length:55},(_,i)=>{
         if(i===0)return{x:center,y:MEDAL_Y,strand:'junction'};
-        if(i<=FRONT_END)
-          return{x:leftX+2*Math.sin(i*.24),y:MEDAL_Y-i*rise,strand:'out'};
+        if(i<=FRONT_END){
+          const drift=4*(.5+.5*Math.sin(i*.34+.4));
+          return{
+            x:leftX-3-drift,
+            y:MEDAL_Y-i*rise+5*Math.sin(i*.47),
+            strand:'out'
+          };
+        }
+        const n=i-FRONT_END-1;
+        const drift=5*(.5+.5*Math.sin(n*.41+1.1));
         return{
-          x:rightX+2*Math.sin(i*.24),
-          y:TOP+48+(i-FRONT_END-1)*rise,
+          x:rightX+3+drift,
+          y:TOP+48+n*rise+36*n/26+9*Math.sin(n*.36),
           strand:'back'
         };
       });
       introPoints=intro.map((item,i)=>({
-        x:center+2*Math.sin(i*.5),y:item.y,r:item.r
+        x:center+3.5*Math.sin(i*.9+.4),y:item.y,r:item.r
       }));
       svg.setAttribute('viewBox','0 0 '+width+' '+HEIGHT);
       const at=p=>format(p.x)+' '+format(p.y);
@@ -128,7 +138,13 @@
         '<linearGradient id="physicalCrossGold" x1="0" y1="0" x2="1" y2="1">'+
         '<stop stop-color="#f3e3bc"/><stop offset=".45" stop-color="#bd9657"/>'+
         '<stop offset=".7" stop-color="#e1c58d"/><stop offset="1" stop-color="#96713f"/>'+
-        '</linearGradient></defs>'
+        '</linearGradient>'+
+        // Reflejos diminutos y trenzado diagonal, sin imagen externa
+        // ni filtros de ruido costosos para Android.
+        '<pattern id="physicalCordThreads" patternUnits="userSpaceOnUse" width="6" height="8">'+
+        '<path d="M-1 3 L3 -1 M2 9 L8 3" stroke="#F3DFA9" stroke-width=".85" opacity=".78" fill="none"/>'+
+        '<path d="M-1 6 L4 1 M4 9 L8 5" stroke="#7B5B2E" stroke-width=".50" opacity=".50" fill="none"/>'+
+        '</pattern></defs>'
       ];
       // La trayectoria es UN solo óvalo curvo y angosto. Sus segmentos
       // pueden colorearse de manera acumulativa, sin intercambiar ramas.
@@ -137,9 +153,11 @@
         const previous=positions[(i+54)%55];
         const to=positions[(i+1)%55];
         const next=positions[(i+2)%55];
+        const d=i===FRONT_END?topTurn(from,to):
+          curvedSegment(previous,from,to,next);
         lines+='<path fill="none" class="physical-link physical-loop-link" data-link="'+i+
-          '" d="'+(i===FRONT_END?topTurn(from,to):
-            curvedSegment(previous,from,to,next))+'"/>';
+          '" d="'+d+'"/>'+
+          '<path fill="none" class="physical-cord-grain" aria-hidden="true" d="'+d+'"/>';
       });
       lines+='</g>';
       body.push(lines);
@@ -150,8 +168,9 @@
       tail.slice(0,-1).forEach((from,i)=>{
         const previous=tail[Math.max(0,i-1)];
         const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
-        pendantWire+='<path fill="none" class="physical-link physical-intro-link" d="'+
-          curvedSegment(previous,from,to,next)+'"/>';
+        const d=curvedSegment(previous,from,to,next);
+        pendantWire+='<path fill="none" class="physical-link physical-intro-link" d="'+d+'"/>'+
+          '<path fill="none" class="physical-cord-grain" aria-hidden="true" d="'+d+'"/>';
       });
       body.push(pendantWire+'</g>');
       // Las cuentas del aro se dibujan una sola vez.
@@ -242,7 +261,7 @@
 
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
-      if(!step)return{type:'cross',phase:'finished',y:CROSS_Y,completed:55};
+      if(!step)return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
       // Mapeo litúrgico exacto: la Estación COMPLETA (tres ciclos con
       // sus invocaciones, padrenuestros, avemarías y glorias) permanece
       // en la cruz. El resto llega al aro sin inventar cuentas.
