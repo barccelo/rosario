@@ -76,7 +76,7 @@
 .dark .litany-directory-item{border-color:#67706077}.dark .litany-directory-item.selected{background:#b99b6330;border-color:#c1a26d}
 
 /* Glifos reales del versículo y la respuesta, no recuadros de V/ y R/. */
-.verse-mark{display:inline-block!important;min-width:0!important;height:auto!important;margin-right:10px!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;color:inherit!important;font:normal 27px/1.05 Georgia,"Times New Roman",serif!important;vertical-align:baseline!important}
+.verse-mark{display:inline-block!important;min-width:0!important;height:auto!important;margin-right:10px!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;color:inherit!important;font:normal 27px/1.05 Georgia,"Times New Roman",serif!important;vertical-align:baseline!important;clip-path:inset(.14em 0 0 0)}
 .dialogue-line{display:block;margin-bottom:22px;line-height:1.65}
 .dialogue-line:last-child{margin-bottom:0}
 .dialogue-line.voice-assembly{color:#bc9a61}
