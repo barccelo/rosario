@@ -380,56 +380,89 @@
         const max=Math.max(0,viewport.scrollHeight-height);
         const bead=selected.type==='loop'?selected.bead:-1;
         const entering=beforeMode!=='physical';
-        const fromPendant=lastPhysicalType!=='loop';
-        const closeToJunction=bead>=0&&(bead<=5||bead>=50);
+        const goingForward=!entering&&state.index===beforeIndex+1;
+        const goingBackward=!entering&&state.index===beforeIndex-1;
+        const sequential=goingForward||goingBackward;
         const currentTop=viewport.scrollTop;
-        // Mientras WebView realiza un scroll suave, utilizar el
-        // destino anterior, no una posición intermedia. Así los clics
-        // rápidos no interrumpen el movimiento ni provocan temblores.
+        // Los avances rápidos utilizan el destino pendiente, nunca una
+        // coordenada intermedia de una animación todavía en marcha.
         const previous=autoFollowTarget===null?currentTop:autoFollowTarget;
+        const clamp=n=>Math.max(0,Math.min(max,n));
+        const margin=Math.max(22,Math.min(34,height*.055));
+        const firstFiveTop=clamp(positions[5].y-margin);
+        // Encuadre de la fotografía: cuenta grande inferior sobre el
+        // 39 % de la altura; cruz y colgante visibles en la parte baja.
+        const finalTop=clamp(MEDAL_Y-height*.39);
         let target=previous;
 
-        // Sólo se mueve el scroll de la cadena, NUNCA las cuentas.
-        // Primera decena: encuadrar una vez la unión y mantenerla
-        // quieta mientras las cinco pequeñas sigan visibles.
-        if(entering || (closeToJunction&&fromPendant)){
-          target=closeToJunction&&height>=455
-            ? MEDAL_Y-height*(bead>=50?.82:.87)
-            : selected.y-height*.64;
-        }else if(bead>=44&&bead<=49&&height>=455&&
+        if(entering){
+          // Abrir una vista o saltar a una posición lejana no es avanzar
+          // una sola oración: se permite situarla directamente.
+          if(bead>=50||bead===0&&selected.completed===55){
+            target=finalTop;
+          }else if(bead>=0&&bead<=5){
+            target=Math.min(firstFiveTop,clamp(selected.y-height*.64));
+          }else{
+            target=selected.y-height*.64;
+          }
+        }else if(goingForward &&
+                 selected.type==='intro' &&
+                 selected.phase==='opening' &&
+                 selected.intro===0){
+          // La tercera pequeña del colgante ya prepara el paso a la
+          // grande, evitando un salto en la siguiente oración.
+          target=Math.min(previous,firstFiveTop);
+        }else if(bead>=0&&bead<=5 && sequential &&
+                 (lastPhysicalType==='intro'||
+                  lastPhysicalBead>=0&&lastPhysicalBead<=5)){
+          // Entre la grande y las primeras cinco, mostrar toda la zona
+          // en un encuadre estable. Nunca recentrar cuenta por cuenta.
+          target=Math.min(previous,firstFiveTop);
+        }else if(goingForward&&bead>=39&&bead<=54&&
                  lastPhysicalBead===bead-1){
-          // Regreso por la rama derecha: transición continua en
-          // seis pasos. Nunca cambiar de dirección ni provocar un
-          // salto de encuadre justo al llegar a la cuenta 50.
-          const amount=(bead-44)/5;
-          const focusRatio=.64-(.64-.13)*amount;
-          target=selected.y-height*focusRatio;
-        }else if(bead===50 && lastPhysicalBead===49&&height>=455){
-          // Las últimas cinco y la grande inferior ya caben juntas:
-          // conservar el encuadre obtenido al llegar a la 49.
-          target=previous;
+          // Sobre la rama derecha, preparar la imagen final desde antes
+          // de la última decena: desplazamiento monótono y de magnitud
+          // uniforme. En la cuenta 7 (51) se alcanza el límite visual.
+          const startTop=clamp(positions[39].y-height*.57);
+          const progress=Math.max(0,Math.min(1,(bead-39)/12));
+          const planned=startTop+(finalTop-startTop)*progress;
+          target=Math.max(previous,planned);
+        }else if(goingForward&&bead===0&&lastPhysicalBead===54){
+          // Final del aro: conservar la imagen ya alcanzada en 6–7.
+          target=Math.max(previous,finalTop);
         }else{
-          // Al avanzar por el resto de cuentas, mantener una franja
-          // cómoda. No recentrar si la cuenta sigue visible.
+          // El seguimiento habitual mueve la cadena sólo cuando la
+          // siguiente cuenta deja de estar dentro de la zona visible.
           const radius=bead>=0&&bead%11===0?23:17;
-          const padding=Math.max(16,Math.min(32,height*.055));
-          const upper=padding+radius;
-          const lower=height-padding-radius;
           const screenY=selected.y-previous;
+          const upper=margin+radius;
+          const lower=height-margin-radius;
           if(screenY<upper)target=selected.y-upper;
           else if(screenY>lower)target=selected.y-lower;
         }
 
-        target=Math.max(0,Math.min(max,target));
+        target=clamp(target);
+        if(sequential){
+          // Límite exclusivamente para los movimientos AUTOMÁTICOS
+          // entre oraciones adyacentes. No modifica el swipe manual.
+          // Más corto junto a la unión inferior; suficiente margen
+          // para llegar gradualmente al encuadre final en la cuenta 7.
+          const closeToBottom=bead>=0&&bead<=5 ||
+            selected.type==='intro'&&selected.phase==='opening';
+          const limit=closeToBottom
+            ?Math.max(60,Math.min(128,height*.15))
+            :Math.max(90,Math.min(176,height*.22));
+          target=clamp(previous+
+            Math.max(-limit,Math.min(limit,target-previous)));
+        }
         if(Math.abs(target-previous)>.5){
           autoFollowTarget=target;
-          // Usar el propio suavizado de WebView: acompaña de forma
-          // fluida cada oración. No altera los swipes manuales.
-          // Saltos deliberados a puntos distantes o cambio de vista
-          // son inmediatos para evitar recorrer todo el rosario.
-          const longJump=entering||
+          // No saltar por una sucesión rápida de clics: los trayectos
+          // adyacentes son SIEMPRE suaves, incluso si WebView aún está
+          // interpolando el anterior. El swipe conserva su scroll nativo.
+          const distant=!sequential&&
             Math.abs(target-currentTop)>height*1.35;
-          if(!longJump&&typeof viewport.scrollTo==='function'){
+          if(!entering&&!distant&&typeof viewport.scrollTo==='function'){
             viewport.scrollTo({top:target,behavior:'smooth'});
           }else{
             viewport.scrollTop=target;
