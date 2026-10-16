@@ -10,8 +10,8 @@ android {
         applicationId 'com.barccelo.rosario'
         minSdk 24
         targetSdk 35
-        versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
-        versionName (System.getenv('ROSARIO_VERSION') ?: '0.1.0-dev')
+        versionCode = Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+        versionName = System.getenv('ROSARIO_VERSION') ?: '0.1.0-dev'
     }
 
     signingConfigs {
