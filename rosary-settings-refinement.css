@@ -1,0 +1,202 @@
+/* Rosario preferences: one compact visual rhythm and one shared choice control. */
+#modalContent select.rosario-native-select{display:none!important}
+#modalContent .rosario-choice-trigger{
+  appearance:none!important;-webkit-appearance:none!important;
+  display:inline-flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;position:relative;vertical-align:middle;
+  width:min(48%,210px);min-width:0;min-height:48px!important;
+  padding:11px 13px 11px 16px!important;margin:0!important;
+  border:1px solid var(--ui-outline)!important;border-radius:12px!important;
+  background:var(--ui-surface)!important;color:var(--ui-ink)!important;
+  font:400 15px/1.4 system-ui,-apple-system,sans-serif!important;
+  box-shadow:none!important;outline-offset:3px;text-align:left;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+#modalContent .rosario-choice-value{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#modalContent .rosario-choice-chevron{
+  display:block!important;flex:0 0 19px;width:19px;height:19px;
+  fill:none!important;stroke:var(--ui-accent)!important;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
+}
+#modalContent .rosario-choice-trigger--full{
+  display:flex!important;width:100%!important;min-height:52px!important;
+  margin:4px 0 11px!important;padding:13px 15px 13px 17px!important;
+}
+#modalContent :is(.controls-position-setting,.android-setting-row)>.rosario-choice-trigger{flex:0 0 auto}
+#modalContent label.rosary-color-variant>.rosario-choice-trigger{
+  width:100%!important;max-width:none!important;grid-column:3;
+}
+#modalContent :is(.controls-position-setting,.android-setting-row,.rosary-color-variant)::after{
+  content:none!important;display:none!important;
+}
+#modalContent .rosario-choice-trigger:focus-visible{
+  outline:2px solid var(--ui-accent)!important;outline-offset:2px!important;
+}
+#modalContent>h2{margin-bottom:18px!important;letter-spacing:-.025em}
+#modalContent label.settings-field-label{
+  margin:0 0 5px!important;font-size:13px!important;font-weight:600!important;
+}
+#modalContent fieldset{
+  margin:19px 0 0!important;padding:18px 0 0!important;
+  border-top:1px solid var(--ui-rule)!important;
+}
+#modalContent fieldset legend{
+  float:none;padding:0 0 10px!important;
+  font:600 18px/1.25 Georgia,serif!important;
+}
+#modalContent .rosary-colors-variants{margin:14px 0 0!important;padding:0!important}
+#modalContent .rosary-colors-variants h3{
+  margin:3px 0 10px!important;
+  font:600 14px/1.4 system-ui!important;
+}
+#modalContent .rosary-colors-mode-list,
+#modalContent .physical-layout-options{gap:8px!important}
+#modalContent label.rosary-color-variant{
+  min-height:60px!important;padding:9px 11px!important;
+  margin:0 0 8px!important;gap:10px!important;
+}
+#modalContent label.rosary-color-variant .rosario-choice-trigger{
+  min-height:44px!important;padding:9px 10px 9px 12px!important;
+}
+#modalContent label.physical-layout-option,
+#modalContent label.rosary-colors-mode{
+  min-height:58px!important;padding:11px 14px!important;
+}
+#modalContent label.controls-position-setting,
+#modalContent label.physical-tap-option,
+#modalContent .android-setting-row{
+  min-height:58px!important;margin:7px 0!important;
+  padding:9px 13px!important;gap:12px!important;
+}
+#modalContent>label:has(>input[type="checkbox"]){
+  min-height:58px!important;margin:7px 0 12px!important;padding:10px 13px!important;
+}
+#modalContent .physical-layout-settings{margin-top:18px!important}
+#modalContent .physical-tap-settings{margin-top:18px!important}
+#modalContent .physical-layout-hint{
+  margin:5px 3px 8px!important;font-size:12px!important;
+}
+#modalContent .rosary-color-preview{margin:12px 0 2px!important;padding:16px 10px 13px!important}
+#modalContent button.voice-settings-link{
+  min-height:51px!important;margin:8px 0!important;padding:12px 14px!important;
+}
+#modalContent .android-native-settings{
+  margin-top:19px!important;padding-top:15px;border-top:1px solid var(--ui-rule);
+}
+#modalContent .android-native-settings>h3{
+  margin:0 0 8px!important;font:600 19px/1.3 Georgia,serif!important;
+}
+#modalContent .android-native-settings fieldset{
+  margin:13px 0 0!important;padding:12px 0 0!important;
+}
+#modalContent .android-native-settings fieldset legend{
+  margin:0!important;padding:0 0 9px!important;font-size:17px!important;
+}
+#modalContent .android-setting-days-title{margin:14px 0 9px!important}
+#modalContent .android-setting-label{margin:10px 0!important}
+#modalContent .android-setting-row>.rosario-choice-trigger{
+  max-width:60%;width:60%!important;
+}
+/* iOS-style switches. The real checkbox remains operable and accessible. */
+#modalContent :is(
+  >label>input[type="checkbox"],
+  .physical-tap-option>input[type="checkbox"],
+  .android-setting-row>input[type="checkbox"]
+){
+  appearance:none!important;-webkit-appearance:none!important;
+  display:inline-block!important;flex:0 0 45px!important;
+  width:45px!important;height:27px!important;
+  position:relative;border-radius:16px!important;
+  border:1px solid var(--ui-outline)!important;
+  background:var(--ui-rule)!important;
+  box-shadow:none;cursor:pointer;transition:background .16s;
+}
+#modalContent :is(
+  >label>input[type="checkbox"],
+  .physical-tap-option>input[type="checkbox"],
+  .android-setting-row>input[type="checkbox"]
+)::before{
+  content:"";position:absolute;width:21px;height:21px;left:2px;top:2px;
+  border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;
+  transition:transform .17s;pointer-events:none;
+}
+#modalContent :is(
+  >label>input[type="checkbox"],
+  .physical-tap-option>input[type="checkbox"],
+  .android-setting-row>input[type="checkbox"]
+):checked{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important}
+#modalContent :is(
+  >label>input[type="checkbox"],
+  .physical-tap-option>input[type="checkbox"],
+  .android-setting-row>input[type="checkbox"]
+):checked::before{transform:translateX(18px)}
+#modalContent input[type=checkbox]:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}
+@media(max-width:450px){
+  #modalContent .android-setting-row:has(>.rosario-choice-trigger){
+    flex-direction:row!important;align-items:center!important;
+  }
+  #modalContent .android-setting-row>.rosario-choice-trigger{
+    width:59%!important;max-width:59%!important;
+  }
+  #modalContent .rosary-color-variant{grid-template-columns:22px minmax(0,1fr) minmax(130px,43%)!important}
+  #modalContent .rosario-choice-trigger{font-size:14px!important}
+}
+/* Native-menu replacement inside Rosario's existing full-screen modal. */
+#modal .rosario-selection-overlay{
+  position:fixed;z-index:90;inset:0;
+  display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(20,24,22,.38);
+  -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  overscroll-behavior:contain;
+}
+#modal .rosario-selection-overlay[hidden]{display:none!important}
+#modal .rosario-selection-sheet{
+  width:100%;max-width:780px;max-height:min(78dvh,680px);
+  display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid var(--ui-rule);border-bottom:0;
+  border-radius:24px 24px 0 0;
+  background:var(--ui-bg);color:var(--ui-ink);
+  box-shadow:0 -12px 45px #00000024;
+}
+#modal .rosario-selection-header{
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:69px;padding:16px 20px 12px;
+  border-bottom:1px solid var(--ui-rule);gap:12px;
+}
+#modal .rosario-selection-header h2{
+  margin:0;font:600 18px/1.3 system-ui;letter-spacing:-.025em;
+}
+#modal .rosario-selection-close{
+  width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;
+  border:0;border-radius:50%;background:var(--ui-selected);color:var(--ui-ink);
+}
+#modal .rosario-selection-close svg{
+  width:17px;height:17px;fill:none;stroke:currentColor;
+  stroke-width:1.9;stroke-linecap:round;pointer-events:none;
+}
+#modal .rosario-selection-list{
+  overflow:auto;overscroll-behavior:contain;
+  padding:6px 15px max(15px,env(safe-area-inset-bottom,0px));
+}
+#modal .rosario-selection-option{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;min-height:54px;gap:18px;padding:12px 13px;
+  border:0;border-bottom:1px solid var(--ui-rule);
+  background:transparent;color:var(--ui-ink);
+  text-align:left;font:400 16px/1.35 system-ui;
+}
+#modal .rosario-selection-option:last-child{border-bottom:0}
+#modal .rosario-selection-option.is-selected{
+  color:var(--ui-accent);font-weight:600;
+}
+#modal .rosario-selection-option svg{
+  width:20px;height:20px;flex:0 0 20px;fill:none;
+  stroke:var(--ui-accent);stroke-width:2.3;
+  stroke-linecap:round;stroke-linejoin:round;
+  visibility:hidden;
+}
+#modal .rosario-selection-option.is-selected svg{visibility:visible}
+#modal .rosario-selection-option:focus-visible,
+#modal .rosario-selection-close:focus-visible{
+  outline:2px solid var(--ui-accent);outline-offset:-2px;
+}
