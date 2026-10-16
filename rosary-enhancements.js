@@ -707,8 +707,7 @@
     }
 
     function openNavigation(tab = 'days') {
-      show('<h2>Navegar por el rosario</h2>' +
-        '<div class="nav-tabs" role="tablist" aria-label="Secciones del rosario">' +
+      show('<div class="nav-tabs" role="tablist" aria-label="Secciones del rosario">' +
         '<button type="button" data-nav="days" role="tab">Días</button>' +
         '<button type="button" data-nav="mysteries" role="tab">Misterios</button>' +
         '<button type="button" data-nav="prayers" role="tab">Oraciones</button>' +
