@@ -83,3 +83,13 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 - El ancho de las dos ramas se calcula con el contenedor real del rosario (42% de la vista), y no con el ancho total del navegador. Esto mantiene las cuentas dentro del área visible del teléfono y evita recortes laterales.
 - Se renuevan las versiones de caché de los recursos modificados.
 - La versión conserva el mismo certificado permanente de firma Android que v0.1.0, v0.1.1 y v0.1.2.
+
+## Ajustes correctivos v0.1.4
+
+- Se restaura la forma centrada del cierre inferior del rosario de v0.1.1: cuenta grande compartida entre las dos ramas y separación constante de las columnas.
+- Se suprime el efecto de estiramiento elástico de los límites del desplazamiento en Android (WebView y contenedor físico).
+- Se evita regenerar el SVG cuando Android notifica únicamente un cambio de altura, conservando la posición y geometría.
+- Se restauran los signos litúrgicos originales ℣/℟; se recorta únicamente el saliente superior que alteraba su apariencia.
+- Los cheurones de selección se dibujan mediante trazos CSS independientes de SVG de fondo; los toques no abren involuntariamente el selector nativo de un control dentro de una etiqueta HTML.
+- No se modifican la firma permanente ni los datos de usuario guardados.
+
