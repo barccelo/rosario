@@ -597,8 +597,8 @@
       const paragraph = $('immersiveText');
       paragraph.replaceChildren();
       [
-        ['V/', step.verse, 'Versículo'],
-        ['R/', step.response, 'Respuesta']
+        ['℣.', step.verse, 'Versículo'],
+        ['℟.', step.response, 'Respuesta']
       ].forEach(([mark, text, label]) => {
         const line = document.createElement('span');
         line.className = 'dialogue-line';
