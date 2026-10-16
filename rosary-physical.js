@@ -230,6 +230,11 @@
     viewport.addEventListener('pointerdown',clearAutoFollow,{passive:true});
     viewport.addEventListener('touchstart',clearAutoFollow,{passive:true});
     viewport.addEventListener('wheel',clearAutoFollow,{passive:true});
+    viewport.addEventListener('scrollend',()=>{
+      // Al concluir una animación de centrado, la siguiente oración
+      // toma como referencia la posición real, no un destino antiguo.
+      autoFollowTarget=null;
+    },{passive:true});
 
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
