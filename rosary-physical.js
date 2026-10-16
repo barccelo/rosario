@@ -48,6 +48,7 @@
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
     let lastPhysicalType=null;
+    let lastPhysicalBead=-1;
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
       return '<g class="physical-bead" role="button" tabindex="0" '+
@@ -317,6 +318,7 @@
         }
         beforeMode='vertical';beforeIndex=state.index;
         lastPhysicalType=null;
+        lastPhysicalBead=-1;
         return;
       }
       const selected=positionFor(steps[state.index]);
@@ -379,6 +381,21 @@
           target=nearJunction
             ? MEDAL_Y-height*.82
             : selected.y-height*.64;
+        }else if(selected.type==='loop' && height>=455 &&
+          selected.bead>=44 && selected.bead<=49 &&
+          lastPhysicalBead===selected.bead-1){
+          // Preparar la vuelta inferior ANTES de las últimas cinco
+          // cuentas. El seguimiento llega gradualmente a una posición
+          // desde la que 50–54 y la cuenta grande caben en pantalla.
+          // No se mueve ninguna cuenta aparte del scroll estándar.
+          const amount=(selected.bead-44)/5;
+          const focusRatio=.64-(.64-.12)*amount;
+          target=selected.y-height*focusRatio;
+        }else if(selected.type==='loop' && height>=455 &&
+          selected.bead===50 && lastPhysicalBead===49){
+          // Últimas cinco: encuadrar UNA vez el giro inferior y luego
+          // dejarlo quieto mientras la selección avanza hasta 54.
+          target=MEDAL_Y-height*.94;
         }else{
           const radius=selected.type==='loop' &&
             selected.bead%11===0?23:17;
@@ -396,6 +413,7 @@
         }
       }
       lastPhysicalType=selected.type;
+      lastPhysicalBead=selected.type==='loop'?selected.bead:-1;
       beforeMode='physical';beforeIndex=state.index;
     }
     function goToNode(el){
