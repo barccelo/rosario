@@ -143,3 +143,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - La inmovilización de la unión es temporal (máximo 520 píxeles de movimiento); fuera de esa región, o cuando el usuario cambia de oración, vuelve al desplazamiento normal. No se mueven ni reposicionan cuentas de forma individual.
 - Se conserva el tap sobre cuentas, la confirmación del salto, la vibración y las preferencias. El halo de la cuenta activa permanece habilitado.
 - **Versión experimental**: validar en el teléfono las primeras cinco cuentas al subir, las últimas cinco al bajar y el cambio de rama superior. Si aparece una discontinuidad, detener la prueba y reportar video; no se afirma que el efecto esté solucionado antes de esa comprobación.
+
+## Corrección del centrado automático — v0.1.11
+
+- Revierte por completo la arquitectura de capas móviles de v0.1.10; vuelve al rosario y al **scroll manual nativo** de v0.1.9 con el halo original.
+- Cambia **únicamente** la política de `viewport.scrollTop` utilizada al avanzar, retroceder o seleccionar una oración.
+- Deja de recentrar todas las cuentas en el 64 % de la ventana; si la cuenta nueva está visible, **no desplaza** el SVG. Si se sale, realiza el desplazamiento mínimo para volver a verla.
+- Al llegar al aro se conserva la cuenta grande y las primeras cinco cuentas en un encuadre común. Antes de las últimas cinco, el encuadre se prepara progresivamente para poder mantenerlo estable durante las cuentas 50–54 en pantallas de altura suficiente.
+- Las cuentas, hilo, curvas, cuenta grande y colgante **no cambian ni se animan individualmente**. El scroll manual de las cuentas no se intercepta ni modifica.
+- La visualización de primera/última decena debe validarse en el dispositivo. La compilación por sí sola no demuestra que el problema perceptivo esté resuelto.
