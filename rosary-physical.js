@@ -121,9 +121,19 @@
       const at=p=>format(p.x)+' '+format(p.y);
       // Tangentes Catmull–Rom pasadas a curvas cúbicas Bézier para que
       // los encuentros superior e inferior sean suaves, sin vértices.
-      function curvedSegment(previous,from,to,next){
+      function curvedSegment(previous,from,to,next,threadIndex){
         const c1={x:from.x+(to.x-previous.x)/6,y:from.y+(to.y-previous.y)/6};
         const c2={x:to.x-(next.x-from.x)/6,y:to.y-(next.y-from.y)/6};
+        // Leve irregularidad de un cordón real: sólo sus controles
+        // Bézier cambian, las cuentas y sus anclajes quedan intactos.
+        // Los giros completos superior e inferior no se modifican.
+        if(Number.isInteger(threadIndex)&&
+           Math.abs(to.x-from.x)<8&&Math.abs(to.y-from.y)>35){
+          c1.x+=Math.sin(threadIndex*1.73+.4)*4.0+
+            Math.cos(threadIndex*.63)*1.0;
+          c2.x+=Math.sin(threadIndex*2.19+1.1)*3.8+
+            Math.cos(threadIndex*.87+.7)*.8;
+        }
         return'M '+at(from)+' C '+at(c1)+' '+at(c2)+' '+at(to);
       }
       function topTurn(left,right){
@@ -174,7 +184,7 @@
         const d=i===FRONT_END?topTurn(from,to):
           i===54?lowerTurn[0]:
           i===0?lowerTurn[1]:
-          curvedSegment(previous,from,to,next);
+          curvedSegment(previous,from,to,next,i);
         lines+='<path fill="none" class="physical-link physical-loop-link" data-link="'+i+
           '" d="'+d+'"/>'+
           '<path fill="none" class="physical-cord-grain" aria-hidden="true" d="'+d+'"/>';
@@ -188,7 +198,7 @@
       tail.slice(0,-1).forEach((from,i)=>{
         const previous=tail[Math.max(0,i-1)];
         const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
-        const d=curvedSegment(previous,from,to,next);
+        const d=curvedSegment(previous,from,to,next,100+i);
         pendantWire+='<path fill="none" class="physical-link physical-intro-link" d="'+d+'"/>'+
           '<path fill="none" class="physical-cord-grain" aria-hidden="true" d="'+d+'"/>';
       });
@@ -385,6 +395,9 @@
       });
       const cross=svg.querySelector('[data-cross]');
       const crossActive=selected.type==='cross';
+      // Después de rezar la primera estación, la cruz conserva su
+      // luz durante el resto del rosario y vuelve a resaltar al final.
+      cross.classList.toggle('is-complete',state.index>0);
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
