@@ -96,11 +96,23 @@ jobs:
             echo "::error::Configure all four ROSARIO signing secrets before publishing an APK."
             exit 1
           fi
-          # Accept a pasted KEY=VALUE line or wrapped Base64 without logging private material.
+          # Accept Base64 with wrapping, whitespace, or a pasted KEY=VALUE prefix.
           encoded="$KEYSTORE_BASE64"
           if [[ "$encoded" == *ROSARIO_KEYSTORE_BASE64=* ]]; then
             encoded="${encoded#*ROSARIO_KEYSTORE_BASE64=}"
-            encoded="${encoded%%
+            encoded="$(printf '%s' "$encoded" | head -n 1)"
+          fi
+          encoded="$(printf '%s' "$encoded" | tr -d '[:space:]')"
+          encoded="${encoded#\"}"
+          encoded="${encoded%\"}"
+          encoded="${encoded#\'}"
+          encoded="${encoded%\'}"
+          if ! printf '%s' "$encoded" | base64 --decode > "$RUNNER_TEMP/rosario-release.jks" 2>/dev/null; then
+            rm -f "$RUNNER_TEMP/rosario-release.jks"
+            echo "::error::ROSARIO_KEYSTORE_BASE64 is invalid. Copy only the Base64 after the equals sign in the private secrets file."
+            exit 1
+          fi
+          test -s "$RUNNER_TEMP/rosario-release.jks" || { echo "::error::Decoded signing key was empty."; exit 1; }
 
       - name: Build signed release
         if: ${{ steps.version.outputs.tag != '' }}
