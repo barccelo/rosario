@@ -55,10 +55,21 @@ body.dark .physical-path{
 .physical-path .physical-loop-link.is-complete{
   fill:none!important;
   stroke:var(--physical-line)!important;
-  stroke-width:3.5px;
+  stroke-width:2.9px;
   stroke-linecap:round;
   stroke-linejoin:round;
   opacity:1!important;
+}
+/* Fibras doradas entrelazadas dibujadas SOBRE el hilo continuo, pero
+   SIEMPRE DETRÁS de las cuentas opacas; no reciben pulsaciones. */
+.physical-path .physical-cord-grain{
+  fill:none!important;
+  stroke:url(#physicalCordThreads)!important;
+  stroke-width:2.5px!important;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:.78!important;
+  pointer-events:none!important;
 }
 .physical-path .physical-bead.is-complete .ring{
   fill:var(--physical-complete)!important;
@@ -219,4 +230,16 @@ dialog label.physical-tap-option{
 .physical-tap-settings{margin-top:14px}
 .physical-tap-settings .physical-layout-hint{
   margin-top:4px;line-height:1.65;
+}
+
+/* La terminación del colgante conserva las cuatro cuentas rezadas
+   durante la Salve y también en la bendición final. */
+.physical-path .physical-pendant .physical-bead.is-complete:not(.active) .ring{
+  opacity:1!important;
+  fill:var(--physical-complete)!important;
+  stroke:var(--physical-complete-stroke)!important;
+}
+body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physical-bead.is-complete:not(.active) .ring{
+  fill:var(--rc-bead)!important;
+  stroke:var(--rc-outline)!important;
 }
