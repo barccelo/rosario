@@ -462,13 +462,15 @@
           const radius=bead%11===0?23:17;
           const visibleMinimum=selected.y-height+margin+radius;
           target=Math.max(visibleMinimum,Math.min(previous,firstFiveTop));
-        }else if(goingForward&&bead>=39&&bead<=54&&
-                 lastPhysicalBead===bead-1){
-          // Sobre la rama derecha, preparar la imagen final desde antes
-          // de la última decena: desplazamiento monótono y de magnitud
-          // uniforme. En la cuenta 7 (51) se alcanza el límite visual.
-          const startTop=clamp(positions[39].y-height*.57);
-          const progress=Math.max(0,Math.min(1,(bead-39)/12));
+        }else if(goingForward&&bead>=(height<620?33:height<720?35:39)&&
+                 bead<=54&&lastPhysicalBead===bead-1){
+          // Sobre la rama derecha, llegar gradualmente al final REAL
+          // en la séptima cuenta (51). Pantallas compactas empiezan
+          // antes: su límite de distancia por paso es más pequeño.
+          const startBead=height<620?33:height<720?35:39;
+          const startTop=clamp(positions[startBead].y-height*.57);
+          const progress=Math.max(0,Math.min(1,
+            (bead-startBead)/(51-startBead)));
           const planned=startTop+(finalTop-startTop)*progress;
           target=Math.max(previous,planned);
         }else if(goingForward&&bead===0&&lastPhysicalBead===54){
