@@ -77,3 +77,9 @@ El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `do
 - El rosario completo elimina el desplazamiento horizontal de la cuenta grande de unión, alineándola con la rama izquierda, y mantiene las dos ramas en ejes verticales fijos.
 - Los ajustes se mantienen en la web y se empaquetan en la APK firmada, sin modificar las claves ni las preferencias guardadas.
 
+
+## Ajuste de escala de la versión v0.1.3
+
+- El ancho de las dos ramas se calcula con el contenedor real del rosario (42% de la vista), y no con el ancho total del navegador. Esto mantiene las cuentas dentro del área visible del teléfono y evita recortes laterales.
+- Se renuevan las versiones de caché de los recursos modificados.
+- La versión conserva el mismo certificado permanente de firma Android que v0.1.0, v0.1.1 y v0.1.2.
