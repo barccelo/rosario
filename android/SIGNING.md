@@ -178,3 +178,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Abrir directamente una oración de cierre desde otro punto sitúa el rosario en el encuadre final, sin recorrer artificialmente las cuentas.
 - Se conservan exactamente la geometría, el halo, el orden y tamaño de las cuentas, el hilo, el desplazamiento manual nativo, la confirmación de saltos y el mapeo litúrgico.
 - Se verificó con simulación de la misma lógica de `paint()`: el límite superior se alcanza en la cuenta 27 y el encuadre final queda inalterado entre las cuentas 51–54, Gloria, dedicaciones, Salve y letanías. Falta validación visual en teléfono Android.
+
+## Límite inferior real — v0.1.15
+
+- El encuadre final se calcula con el **límite de desplazamiento nativo** (`viewport.scrollHeight - viewport.clientHeight`) en lugar de la fórmula previa `MEDAL_Y - 39 % de la altura`, que cortaba parte de la cruz en el borde inferior.
+- La transición sigue siendo **automática, suave y gradual**, alcanzando ese límite en la **séptima Avemaría de la última decena (cuenta 51)**. Después permanece fija durante las cuentas 8–10, Gloria, jaculatorias, dedicaciones, Salve y letanías.
+- Para mantener la fluidez en pantallas compactas, la preparación de ese encuadre comienza antes en la rama derecha según la altura visible, siempre sin mover las cuentas individualmente.
+- **Sin cambios** en el swipe manual, geometría, curvas, halo, colores, iconos o mapeo litúrgico de las oraciones.
+- Se verificó el cálculo del seguimiento automático con alturas de 540–1100 px y varios desplazamientos iniciales: en las pruebas se alcanza el límite real en la cuenta 7 y se conserva durante el cierre. La prueba visual en Android sigue siendo necesaria.
