@@ -56,3 +56,14 @@ En la pantalla de oración: subir volumen = siguiente oración; bajar volumen = 
 Desde Ajustes en la APK se puede asignar a cada botón de volumen «Siguiente oración», «Oración anterior» o «Volumen del teléfono» de forma independiente. El visor conserva el progreso existente. Los recordatorios permiten hora local y días de la semana, con permiso de notificaciones a partir de Android 13 y reagendado después de reiniciar el móvil. Android puede retrasar ligeramente los avisos para preservar la batería; no se solicita permiso de alarmas exactas.
 
 El modo inmersivo de la APK usa la API de ventanas de Android; no depende de `document.requestFullscreen()` de Chrome. La página web conserva su comportamiento independiente.
+
+## Correcciones de la versión v0.1.1
+
+- «Rosario completo» pasa a ser la vista predeterminada; se mantienen las preferencias que cada usuario haya escogido explícitamente.
+- Los dos rieles de cuentas permanecen paralelos, con separación fija a lo largo de su recorrido.
+- Tocar una cuenta distinta en la vista completa vuelve a solicitar confirmación antes de cambiar la oración.
+- Ajustes utiliza una sola flecha para todos los selectores y elimina el resaltado azul de toque de WebView.
+- El botón Aa muestra durante un instante la alineación seleccionada.
+- Android utiliza el permiso VIBRATE y un puente de vibración nativa; ambas teclas de volumen se interceptan al nivel de Activity cuando el sistema entrega sus eventos.
+- Limitación: otro servicio de accesibilidad puede consumir teclas antes de que lleguen a Rosario. Debe probarse en el móvil con dicho servicio activo.
+
