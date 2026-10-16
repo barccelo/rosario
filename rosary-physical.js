@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261015-14';
+    css.href='rosary-physical.css?v=20261015-15';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -167,7 +167,7 @@
       // Todos los hilos van detrás de todas las cuentas. Antes, la
       // cuerda del colgante atravesaba la cuenta grande compartida.
       let pendantWire='<g class="physical-pendant-links">';
-      const tail=[positions[0],...introPoints,{x:center,y:CROSS_Y-54}];
+      const tail=[positions[0],...introPoints,{x:center,y:CROSS_Y-63}];
       tail.slice(0,-1).forEach((from,i)=>{
         const previous=tail[Math.max(0,i-1)];
         const to=tail[i+1],next=tail[Math.min(tail.length-1,i+2)];
@@ -196,6 +196,8 @@
           i<3?'Cuenta pequeña introductoria '+(i+1):
             'Cuenta grande junto a la cruz','');
       });
+      // El hilo termina sobre la argolla: el círculo metálico no queda
+      // atravesado por la cuerda, ni aparece una unión recta en su centro.
       pendant+=crossMarkup(center,CROSS_Y);
       body.push(pendant+'</g>');
       svg.innerHTML=body.join('');
@@ -330,10 +332,10 @@
         const active=selected.type==='intro' && selected.intro===i;
         // Al regresar, las tres pequeñas y la grande inferior se
         // iluminan progresivamente, nunca se crean cuentas adicionales.
-        const traversed=selected.phase==='closing' ?
-          (selected.type==='cross'||(selected.type==='intro'&&i<=selected.intro))
-          :selected.type==='loop'||(
-            selected.phase==='opening'&&selected.type==='intro'&&i>=selected.intro);
+        // Las cuentas del colgante no pierden su color cuando
+        // la oración pasa del aro a las invocaciones finales.
+        const traversed=selected.phase==='closing'||selected.type==='loop'||
+          (selected.phase==='opening'&&selected.type==='intro'&&i>=selected.intro);
         el.classList.toggle('is-complete',traversed);
         el.classList.toggle('is-pending',!traversed);
         el.classList.toggle('active',active);
