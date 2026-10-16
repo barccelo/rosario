@@ -131,11 +131,15 @@
         button.classList.add('rosario-choice-trigger--full');
       const value=document.createElement('span');
       value.className='rosario-choice-value';
-      const chevron=document.createElement('svg');
-      chevron.classList.add('rosario-choice-chevron');
-      chevron.setAttribute('viewBox','0 0 24 24');
+      const chevron=document.createElement('span');
+      chevron.className='rosario-choice-chevron';
       chevron.setAttribute('aria-hidden','true');
-      chevron.innerHTML='<path d="m5.5 9 6.5 6.5L18.5 9"/>';
+      // A real CSS-border chevron. Inline fallback avoids missing arrows
+      // if a browser delays or overrides the shared settings stylesheet.
+      chevron.style.cssText='display:inline-block;flex:0 0 11px;'+
+        'width:11px;height:11px;margin-right:6px;'+
+        'border-right:2px solid currentColor;border-bottom:2px solid currentColor;'+
+        'transform:translateY(-3px) rotate(45deg);color:var(--ui-accent,#977647)';
       button.append(value,chevron);
       select.after(button);
       button.onclick=e=>{
