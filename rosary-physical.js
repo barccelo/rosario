@@ -382,6 +382,20 @@
         const height=viewport.clientHeight;
         const max=Math.max(0,viewport.scrollHeight-height);
         const bead=selected.type==='loop'?selected.bead:-1;
+        const prayerStep=steps[state.index];
+        const priorStep=steps[beforeIndex];
+        // La vuelta superior sólo cambia el encuadre; NO cambia la
+        // geometría ni la lógica del swipe sobre las cuentas.
+        const atClosing=selected.phase==='closing';
+        const atFinalMystery=prayerStep?.m===4&&
+          (bead>=51||(bead===0&&selected.completed===55));
+        const priorInFinalSection=priorStep?.m>=5||
+          priorStep?.m===4&&
+          (lastPhysicalBead>=51||
+           lastPhysicalBead===0&&
+           steps[beforeIndex]?.kind!=='mystery');
+        const keepFinalFraming=atClosing||atFinalMystery;
+
         const entering=beforeMode!=='physical';
         const goingForward=!entering&&state.index===beforeIndex+1;
         const goingBackward=!entering&&state.index===beforeIndex-1;
@@ -401,13 +415,32 @@
         if(entering){
           // Abrir una vista o saltar a una posición lejana no es avanzar
           // una sola oración: se permite situarla directamente.
-          if(bead>=50||bead===0&&selected.completed===55){
+          if(atClosing||atFinalMystery||bead>=50){
             target=finalTop;
           }else if(bead>=0&&bead<=5){
             target=Math.min(firstFiveTop,clamp(selected.y-height*.64));
           }else{
             target=selected.y-height*.64;
           }
+        }else if(keepFinalFraming&&priorInFinalSection){
+          // Una vez que la séptima cuenta de la última decena ha
+          // alcanzado el encuadre final, mantenerlo también al rezar
+          // en la cuenta grande compartida, el colgante y todas las
+          // oraciones de cierre (incluidas las letanías). No importa
+          // que sus coordenadas y crucifijo estén más abajo en el SVG.
+          target=previous;
+        }else if(!sequential&&keepFinalFraming){
+          // Navegación deliberada a una oración final desde otro punto.
+          target=finalTop;
+        }else if(goingForward&&bead>=24&&bead<=28&&
+                 lastPhysicalBead===bead-1){
+          // La curva superior comienza sobre los dos extremos y está
+          // a sólo ~35 px del borde con scrollTop=0. El seguimiento
+          // previo se detenía a ~50 px y recortaba el arco.
+          // Revelarlo gradualmente entre 24–27 y conservarlo al girar
+          // de la rama izquierda a la derecha (28).
+          const beadGap=positions[26].y-positions[27].y;
+          target=Math.min(previous,Math.max(0,27-bead)*beadGap);
         }else if(goingForward &&
                  selected.type==='intro' &&
                  selected.phase==='opening' &&
@@ -436,8 +469,8 @@
           const planned=startTop+(finalTop-startTop)*progress;
           target=Math.max(previous,planned);
         }else if(goingForward&&bead===0&&lastPhysicalBead===54){
-          // Final del aro: conservar la imagen ya alcanzada en 6–7.
-          target=Math.max(previous,finalTop);
+          // La cuenta grande final no debe iniciar otro encuadre.
+          target=previous;
         }else{
           // El seguimiento habitual mueve la cadena sólo cuando la
           // siguiente cuenta deja de estar dentro de la zona visible.
