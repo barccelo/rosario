@@ -199,7 +199,9 @@
       // Remate metálico discreto: sujeta el extremo de la cuerda y
       // queda parcialmente oculto detrás de la argolla original.
       pendant+='<rect class="physical-cross-ferrule" x="'+format(center-2.7)+
-        '" y="'+format(CROSS_Y-69)+'" width="5.4" height="9" rx="2"/>';
+        '" y="'+format(CROSS_Y-69)+
+        '" width="5.4" height="9" rx="2" fill="#B89A66"'+
+        ' stroke="#927344" stroke-width=".7" pointer-events="none"/>';
       pendant+=crossMarkup(center,CROSS_Y);
       body.push(pendant+'</g>');
       svg.innerHTML=body.join('');
