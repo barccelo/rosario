@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261016-10';
+    css.href='rosary-physical.css?v=20261016-14';
     document.head.append(css);
 
     const NS='http://www.w3.org/2000/svg';
@@ -47,11 +47,7 @@
     let positions=[],introPoints=[],crossX=0;
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
-    let armClip=null,junction=null,junctionWires=null,joinFeeds=[];
-    let armHoldFrame=0,armHoldScrollStart=null,autoCentering=false;
-    // Las ramas siguen siendo dos conjuntos rígidos. El colgante y
-    // la única cuenta de unión constituyen una capa independiente.
-    const MAX_JUNCTION_HOLD=520;
+    let lastPhysicalType=null;
     function format(n){return Number(n).toFixed(2);}
     function beadMarkup(x,y,r,attributes,label,number){
       return '<g class="physical-bead" role="button" tabindex="0" '+
@@ -215,57 +211,6 @@
       pendant+=crossMarkup(center,CROSS_Y);
       body.push(pendant+'</g>');
       svg.innerHTML=body.join('');
-      // Dos capas SVG: los brazos con el scroll nativo y el nudo
-      // inferior fijo durante su paso por pantalla. No hay transform
-      // sobre las cuentas 1–54, ni cambios en sus coordenadas.
-      const svgNode=(tag,attrs={})=>{
-        const node=document.createElementNS(NS,tag);
-        Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,String(v)));
-        return node;
-      };
-      const defs=svg.querySelector('defs');
-      const clip=svgNode('clipPath',{id:'physicalArmWindow',clipPathUnits:'userSpaceOnUse'});
-      armClip=svgNode('rect',{x:0,y:0,width:width,height:HEIGHT});
-      joinFeeds=[];
-      clip.append(armClip);
-      defs.append(clip);
-      const arms=svgNode('g',{'class':'physical-moving-arms','clip-path':'url(#physicalArmWindow)'});
-      const armLinks=svg.querySelector('.physical-loop-links');
-      const armBeads=svg.querySelector('.physical-loop-beads');
-      const joined=svgNode('g',{'class':'physical-fixed-junction'});
-      const lowerLinks=svgNode('g',{'class':'physical-loop-links'});
-      junctionWires=svgNode('g',{'class':'physical-fixed-junction-wires'});
-      for(const i of [54,0]){
-        const path=armLinks.querySelector('[data-link="'+i+'"]');
-        if(!path)throw Error('Falta el enlace inferior '+i);
-        const fibre=path.nextElementSibling;
-        lowerLinks.append(path);
-        if(fibre?.classList.contains('physical-cord-grain'))lowerLinks.append(fibre);
-      }
-      // Tramos rectos del mismo hilo, detrás de las cuentas y por
-      // encima del encuentro inferior: la cuerda siempre coincide con
-      // los ejes de las ramas mientras los conjuntos se desplazan.
-      for(const x of [leftX,rightX]){
-        const wire=svgNode('path',{
-          'class':'physical-link physical-junction-feed',
-          d:'M '+format(x)+' 0 V '+format(MEDAL_Y),
-          'aria-hidden':'true',display:'none'
-        });
-        lowerLinks.prepend(wire);
-        joinFeeds.push(wire);
-      }
-      arms.append(armLinks,armBeads);
-      junctionWires.append(lowerLinks,svg.querySelector('.physical-pendant-links'));
-      const joinedBeads=svgNode('g',{'class':'physical-loop-beads'});
-      const junctionBead=armBeads.querySelector('[data-bead="0"]');
-      if(!junctionBead)throw Error('Falta la cuenta grande compartida');
-      joinedBeads.append(junctionBead);
-      joined.append(joinedBeads,svg.querySelector('.physical-pendant'));
-      // Hilos primero, cuentas del brazo encima, cuenta compartida y
-      // colgante al frente: no quedan líneas sobre las cuentas.
-      svg.append(junctionWires,arms,joined);
-      junction=joined;
-      armHoldScrollStart=null;
       svg.querySelectorAll('[data-bead]').forEach(el=>{
         const index=Number(el.dataset.bead);
         const colors=missionary[Math.floor(index/11)];
@@ -276,66 +221,6 @@
       });
     }
     draw();
-
-    function resetJunctionHold(){
-      armHoldScrollStart=null;
-      if(armHoldFrame)cancelAnimationFrame(armHoldFrame);
-      armHoldFrame=0;
-      if(junction)junction.removeAttribute('transform');
-      if(junctionWires)junctionWires.removeAttribute('transform');
-      joinFeeds.forEach(feed=>feed.setAttribute('display','none'));
-      if(armClip)armClip.setAttribute('height',String(HEIGHT));
-    }
-    function refreshJunctionHold(){
-      armHoldFrame=0;
-      if(armHoldScrollStart===null||!junction||!armClip||
-         state.rosaryViewLayout!=='physical')return;
-      const delta=viewport.scrollTop-armHoldScrollStart;
-      // Al contrario que v0.1.5 y v0.1.8, sólo se contrarresta el
-      // desplazamiento NATIVO de un grupo: la unión y su colgante.
-      // Las dos ramas, sus 54 cuentas y sus enlaces siguen viajando
-      // juntos dentro del mismo scroll, sin animación individual.
-      const held=Math.max(-MAX_JUNCTION_HOLD,
-        Math.min(MAX_JUNCTION_HOLD,delta));
-      junction.setAttribute('transform','translate(0 '+format(held)+')');
-      junctionWires?.setAttribute('transform','translate(0 '+format(held)+')');
-      joinFeeds.forEach(feed=>feed.setAttribute('display','inline'));
-      // Ocultar los extremos móviles debajo del encuentro, sin
-      // estirar ni recalcular la forma original de las curvas.
-      armClip.setAttribute('height',
-        format(Math.max(0,Math.min(HEIGHT,MEDAL_Y+held-12))));
-      const visualY=MEDAL_Y-viewport.scrollTop+held;
-      const screenHeight=viewport.clientHeight;
-      // Liberar la unión sólo cuando ha salido por completo de vista.
-      // El regreso a la representación nativa sucede fuera del marco.
-      if((visualY < -150 || visualY > screenHeight+180) &&
-         Math.abs(delta)>=MAX_JUNCTION_HOLD){
-        resetJunctionHold();
-      }
-    }
-    function scheduleJunctionHold(){
-      if(!armHoldFrame)armHoldFrame=requestAnimationFrame(refreshJunctionHold);
-    }
-    function beginJunctionHold(){
-      if(state.rosaryViewLayout!=='physical'||autoCentering||
-         armHoldScrollStart!==null)return;
-      const visualY=MEDAL_Y-viewport.scrollTop;
-      // Se activa al alcanzar el giro inferior; en el resto del aro
-      // no se altera el desplazamiento estándar.
-      if(visualY>viewport.clientHeight*.22 &&
-         visualY<viewport.clientHeight*.90){
-        armHoldScrollStart=viewport.scrollTop;
-        scheduleJunctionHold();
-      }
-    }
-    viewport.addEventListener('pointerdown',beginJunctionHold,{passive:true});
-    viewport.addEventListener('touchstart',beginJunctionHold,{passive:true});
-    viewport.addEventListener('wheel',beginJunctionHold,{passive:true});
-    viewport.addEventListener('scroll',()=>{
-      if(state.rosaryViewLayout!=='physical'||autoCentering)return;
-      if(armHoldScrollStart===null)beginJunctionHold();
-      if(armHoldScrollStart!==null)scheduleJunctionHold();
-    },{passive:true});
 
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
     // Exactamente en la primera cuenta del lado derecho (n.º 28),
@@ -423,7 +308,6 @@
       const physical=state.rosaryViewLayout==='physical';
       document.body.classList.toggle('rosario-physical-view',physical);
       if(!physical){
-        resetJunctionHold();
         if(beforeMode==='physical'){
           const step=steps[state.index];
           const bead=step?.bead!==undefined?step.bead:
@@ -432,6 +316,7 @@
           window.rosarioScrollToBead?.(bead,!step||step.m>=5);
         }
         beforeMode='vertical';beforeIndex=state.index;
+        lastPhysicalType=null;
         return;
       }
       const selected=positionFor(steps[state.index]);
@@ -472,13 +357,45 @@
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
       if(beforeMode!=='physical'||beforeIndex!==state.index){
-        resetJunctionHold();
-        const max=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
-        const target=Math.max(0,selected.y-viewport.clientHeight*.64);
-        autoCentering=true;
-        viewport.scrollTop=Math.min(max,target);
-        autoCentering=false;
+        // El dedo sigue usando exactamente el scroll nativo existente.
+        // Sólo el avance AUTOMÁTICO de una oración aplica esta política.
+        // Antes se recentraba cada cuenta al 64 % de la pantalla,
+        // desplazando el giro inferior unos 75 px POR CADA ORACIÓN.
+        // Eso producía la apertura/cierre progresivos al pasar de la
+        // grande a 1–5 y desde las últimas pequeñas de regreso.
+        //
+        // Si la cuenta siguiente YA ES VISIBLE, no mover el rosario.
+        // Sólo desplazar lo estrictamente necesario si sale del marco.
+        const height=viewport.clientHeight;
+        const max=Math.max(0,viewport.scrollHeight-height);
+        const nearJunction=selected.type==='loop' &&
+          (selected.bead<=5||selected.bead>=50);
+        const cameFromPendant=lastPhysicalType!=='loop';
+        const firstPhysical=beforeMode!=='physical';
+        let target=viewport.scrollTop;
+        if(firstPhysical || (nearJunction && cameFromPendant)){
+          // Al entrar en el aro, dejar visible la cuenta grande y las
+          // primeras cinco pequeñas, sin recentrar tras cada avance.
+          target=nearJunction
+            ? MEDAL_Y-height*.82
+            : selected.y-height*.64;
+        }else{
+          const radius=selected.type==='loop' &&
+            selected.bead%11===0?23:17;
+          const padding=Math.max(16,Math.min(32,height*.055));
+          const top=padding+radius;
+          const bottom=height-padding-radius;
+          const screenY=selected.y-viewport.scrollTop;
+          if(screenY<top)target=selected.y-top;
+          else if(screenY>bottom)target=selected.y-bottom;
+        }
+        // Asignación directa; no hay interpolación, escala, deformación
+        // de ramas, ni transformaciones sobre el SVG o las cuentas.
+        if(Math.abs(target-viewport.scrollTop)>0.5){
+          viewport.scrollTop=Math.max(0,Math.min(max,target));
+        }
       }
+      lastPhysicalType=selected.type;
       beforeMode='physical';beforeIndex=state.index;
     }
     function goToNode(el){
@@ -652,11 +569,8 @@
       if(state.rosaryViewLayout!=='physical')return;
       if(Math.abs(stage.getBoundingClientRect().width-lastDrawWidth)<2)return;
       const previousScroll=viewport.scrollTop;
-      resetJunctionHold();
       draw();
-      autoCentering=true;
       viewport.scrollTop=previousScroll;
-      autoCentering=false;
       beforeIndex=state.index;
       paint();
     });
