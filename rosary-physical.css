@@ -225,3 +225,33 @@ body[data-rosary-color-mode="mystery"] .physical-path .physical-pendant .physica
 }
 
 @media(prefers-reduced-motion:reduce){.physical-path .physical-bead .halo{transition:none}}
+
+/* Tres modos configurables de iluminación, independientes del progreso,
+   de la posición de las cuentas y de la navegación por el rosario.
+   CONTINUO: es el estilo actual, usado si no existe una preferencia.
+   NORMAL: sólo una cuenta muestra el halo móvil; la cruz conserva un
+   resplandor discreto tras rezarla, como referencia de inicio.
+   NINGUNO: ningún halo ni brillo, ni siquiera en el crucifijo. */
+body[data-rosary-halo-mode="normal"] .physical-path .physical-bead.is-complete .halo{
+  opacity:0;
+}
+body[data-rosary-halo-mode="normal"] .physical-path .physical-bead.active .halo{
+  opacity:.75;
+}
+body[data-rosary-halo-mode="normal"] .physical-path .physical-cross.is-complete:not(.active){
+  filter:drop-shadow(0 0 3px #C6A46677);
+}
+body[data-rosary-color-mode="mystery"][data-rosary-halo-mode="normal"]
+  .physical-path .physical-cross.is-complete:not(.active){
+  filter:drop-shadow(0 0 3px var(--rc-accent));
+}
+body[data-rosary-halo-mode="none"] .physical-path .physical-bead .halo{
+  opacity:0!important;
+  transition:none!important;
+}
+body[data-rosary-halo-mode="none"] .physical-path .physical-cross,
+body[data-rosary-halo-mode="none"] .physical-path .physical-cross.is-complete,
+body[data-rosary-halo-mode="none"] .physical-path .physical-cross.active,
+body[data-rosary-halo-mode="none"] .physical-path .physical-cross:focus-visible{
+  filter:none!important;
+}
