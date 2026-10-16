@@ -153,3 +153,11 @@ La navegación de las oraciones mediante swipe se adapta a la cuenta actual **en
 - **Primera cuenta de la rama derecha (28) hasta el final del Rosario:** de **abajo hacia arriba avanza**; de **arriba hacia abajo retrocede**.
 
 El cambio se realiza al pasar de la cuenta 27 a la 28, no por la posición del dedo en la pantalla. Los gestos en el sector de las cuentas también trasladan el avance o retroceso al paso de oración correspondiente, manteniendo el desplazamiento inercial nativo de la cadena. Los toques breves en una cuenta mantienen su acción original. La vista vertical convencional conserva sus gestos de siempre.
+
+## Colgante completo y caída orgánica (octubre de 2026)
+
+En la vista física, al terminar «El Señor nos bendiga» se conserva el mismo estado de **cierre** que se utiliza desde las oraciones finales: las tres cuentas pequeñas y la grande inferior permanecen coloreadas. La cruz sigue siendo el único punto de partida y llegada.
+
+El aro deja de usar dos columnas especulares. Las cuentas de la derecha tienen un ligero desfase vertical, ambas ramas se curvan de forma irregular pero controlada, y se mantienen las distancias mínimas para que las cuentas grandes no se rocen, también en pantallas estrechas. Se conserva el scroll inercial existente y el mapa de oraciones.
+
+El hilo del aro y del colgante emplea una base dorada más fina y una capa SVG con **pequeñas fibras cruzadas**, sin recursos externos ni efectos de ruido costosos. Ambas capas quedan detrás de las cuentas opacas. Se trata de una prueba estética de textura, pendiente de valoración en móvil. La vista vertical original no cambia.
