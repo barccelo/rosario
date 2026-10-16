@@ -595,8 +595,25 @@ html:has(#modal[open]),body:has(#modal[open]){
   font:14px/1.5 system-ui
 }
 #modalContent .android-setting-row > span{min-width:0;flex:1}
+#modalContent .android-setting-row:has(> select){position:relative}
+#modalContent .android-setting-row:has(> select)::after{
+  content:"";position:absolute;right:34px;top:50%;width:9px;height:9px;
+  border:solid var(--ui-ink);border-width:0 1.8px 1.8px 0;
+  transform:translateY(-70%) rotate(45deg);pointer-events:none;
+}
 #modalContent .android-setting-row > select{
   min-width:0;max-width:52%;width:52%;padding-right:35px!important;
+  appearance:none!important;-webkit-appearance:none!important;
+  background-image:none!important;text-overflow:ellipsis;
+}
+@media(max-width:430px){
+  #modalContent .android-setting-row:has(> select){
+    flex-direction:column;align-items:stretch;gap:8px;
+  }
+  #modalContent .android-setting-row > select{max-width:100%;width:100%}
+  #modalContent .android-setting-row:has(> select)::after{
+    top:auto;bottom:26px;right:32px;transform:rotate(45deg);
+  }
 }
 #modalContent .android-setting-row input[type=checkbox]{
   width:21px;height:21px;accent-color:var(--ui-accent)
