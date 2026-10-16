@@ -143,3 +143,13 @@ Se cambió el orden de la secuencia final para colocar **Salve + «Ruega por nos
 - **Toques por mitades:** en **Ajustes → Navegación por toques** se puede activar/desactivar (desactivado inicialmente) la navegación con pulsaciones cortas sobre las áreas vacías. Mitad superior retrocede y mitad inferior avanza. No intercepta el texto, enlaces, elementos interactivos, gestos de arrastre ni el movimiento de la cadena. Se guarda la preferencia para ambas presentaciones.
 
 La vista vertical anterior sigue disponible sin alteraciones de geometría. La vista física conserva su carácter experimental hasta la verificación real en Android.
+
+## Cruz compartida y sentido de los swipes en la vista física (octubre de 2026)
+
+La vista física ahora **clona la cruz SVG ya existente** en `focus.js`, conservando exactamente su geometría, argolla, contornos y detalles dorados. Únicamente se ajustan su posición y el ID local del mismo degradado para que funcione dentro del segundo SVG. Se suprimieron los estilos que convertían la cruz física en otro dibujo.
+
+La navegación de las oraciones mediante swipe se adapta a la cuenta actual **en toda la vista física**, incluidos los textos largos:
+- **Cruz, cuentas introductorias y rama izquierda del aro (hasta la cuenta 27):** arrastrar el dedo de **arriba hacia abajo avanza**; de **abajo hacia arriba retrocede**.
+- **Primera cuenta de la rama derecha (28) hasta el final del Rosario:** de **abajo hacia arriba avanza**; de **arriba hacia abajo retrocede**.
+
+El cambio se realiza al pasar de la cuenta 27 a la 28, no por la posición del dedo en la pantalla. Los gestos en el sector de las cuentas también trasladan el avance o retroceso al paso de oración correspondiente, manteniendo el desplazamiento inercial nativo de la cadena. Los toques breves en una cuenta mantienen su acción original. La vista vertical convencional conserva sus gestos de siempre.
