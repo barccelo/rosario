@@ -251,10 +251,11 @@
       const anchor=Math.min(max,Math.max(0,MEDAL_Y-viewport.clientHeight*.64));
       const displacement=viewport.scrollTop-anchor;
       const extent=Math.abs(displacement);
-      // En 420 px próximos a la unión no se mueve el vértice.
-      // La transición termina cuando el vértice queda fuera de pantalla.
-      const weight=extent<=420?1:extent>=920?0:
-        1-smooth((extent-420)/500);
+      // Mantener el vértice fijo durante el paso de las cuentas 1–10
+      // en ambos sentidos, la zona que provocaba la falsa apertura.
+      // Liberarlo sólo cuando ya va a salir del encuadre.
+      const weight=extent<=720?1:extent>=1300?0:
+        1-smooth((extent-720)/580);
       if(weight<=0){
         clearTrackMotion();
         return;
