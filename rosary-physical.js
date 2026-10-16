@@ -231,9 +231,12 @@
     viewport.addEventListener('touchstart',clearAutoFollow,{passive:true});
     viewport.addEventListener('wheel',clearAutoFollow,{passive:true});
     viewport.addEventListener('scrollend',()=>{
-      // Al concluir una animación de centrado, la siguiente oración
-      // toma como referencia la posición real, no un destino antiguo.
-      autoFollowTarget=null;
+      // No borrar el destino de una animación nueva cuando WebView
+      // emite tarde el scrollend de la animación interrumpida.
+      if(autoFollowTarget!==null&&
+         Math.abs(viewport.scrollTop-autoFollowTarget)<1.5){
+        autoFollowTarget=null;
+      }
     },{passive:true});
 
     // Antes del giro del aro el avance sigue el gesto hacia ABAJO.
