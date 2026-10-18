@@ -1559,7 +1559,7 @@
           const visual=document.createElement('span');
           visual.className='rosario-swipe-visual';
           visual.innerHTML='<svg viewBox="0 0 68 62" aria-hidden="true" focusable="false">'+
-            '<path class="rosario-demo-thread" d="M18 4 V58 M50 4 V58"/>'+
+            '<path class="rosario-demo-thread" d="M18 8 C18 -1 50 -1 50 8 M18 8V58 M50 8V58"/>'+
             '<circle class="rosario-demo-bead" cx="'+(i?50:18)+'" cy="24" r="7"/>'+
             '<circle class="rosario-demo-bead" cx="'+(i?50:18)+'" cy="45" r="7"/>'+
             '<path class="rosario-demo-arrow '+(arrow==='down'?'is-down':'is-up')+
