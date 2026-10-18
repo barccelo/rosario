@@ -79,7 +79,7 @@
     'Bajo tu amparo nos acogemos, Santa Madre de Dios: no desprecies las súplicas que te dirigimos en nuestras necesidades; ' +
     'antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.';
   prayers['Oración final'] =
-    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que aquellos que, por el anuncio del ángel, ' +
+    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que los que, por el anuncio del ángel, ' +
     'hemos conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, seamos llevados a la gloria de su resurrección. ' +
     'Por Jesucristo nuestro Señor. Amén.';
 
@@ -782,7 +782,7 @@
     const step = steps[state.index];
     document.body.dataset.voiceGuideTone=state.voiceGuideTone;
     document.body.dataset.voiceAssemblyTone=state.voiceAssemblyTone;
-    document.body.classList.toggle('subtle-bead-motion',state.subtleBeadMotion);
+    document.body.classList.toggle('subtle-bead-motion',state.subtleBeadMotion&&step?.title==='Avemaría');
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
       if (step.kind === 'dialogue'&&!state.prayerEdits[step.title])
