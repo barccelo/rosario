@@ -292,6 +292,49 @@
       cross.textContent='✝';
       return cross;
     }
+    // Se anima un único elemento real. Jamás crear una copia del
+    // texto: los clones anteriores causaban superposición y negritas.
+    const transitions=new WeakMap();
+    function animateText(element,mode,swap){
+      const active=transitions.get(element);
+      if(active)active.cancel();
+      const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      if(mode==='none'||reduced||!element.animate){
+        swap();return;
+      }
+      let stopped=false;
+      let running;
+      const task={
+        cancel(){
+          stopped=true;
+          if(running)running.cancel();
+          element.style.opacity='';
+          transitions.delete(element);
+        }
+      };
+      transitions.set(element,task);
+      running=element.animate([{opacity:1},{opacity:0}],
+        {duration:145,easing:'ease-in',fill:'forwards'});
+      running.onfinish=()=>{
+        if(stopped)return;
+        swap();
+        running.cancel();
+        const frames=mode==='slide'
+          ?[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}]
+          :mode==='soft'
+          ?[{opacity:0,filter:'blur(2px)'},{opacity:1,filter:'blur(0)'}]
+          :[{opacity:0},{opacity:1}];
+        running=element.animate(frames,{
+          duration:mode==='slide'?440:mode==='soft'?480:360,
+          easing:'cubic-bezier(.18,.65,.26,1)',fill:'both'
+        });
+        running.onfinish=()=>{
+          if(stopped)return;
+          running.cancel();transitions.delete(element);
+        };
+      };
+    }
+    window.rosarioAnimateText=animateText;
     const prior=render;
     let lastRenderedIndex=null,lastRenderedTitle=null;
     render=function(){
@@ -300,34 +343,14 @@
       const animate=lastRenderedIndex!==null&&state.index!==lastRenderedIndex&&
         lastRenderedTitle==='Avemaría'&&step?.title==='Avemaría'&&
         step.m>=0&&step.m<5&&['fade','slide','soft'].includes(mode);
-      let ghost=null,ghostOffset=null;
-      if(animate){
-        const previous=prayer.getBoundingClientRect();
-        const container=reading.getBoundingClientRect();
-        ghost=prayer.cloneNode(true);
-        ghost.removeAttribute('id');
-        ghost.setAttribute('aria-hidden','true');
-        ghost.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
-        ghostOffset={x:previous.left-container.left,
-          y:previous.top-container.top+reading.scrollTop,
-          width:previous.width};
-      }
+      transitions.get(prayer)?.cancel();
+      const oldNodes=animate?[...prayer.childNodes]:null;
       prior();
       renderPrayer();
-      prayer.classList.remove('rosario-animate-in-fade',
-        'rosario-animate-in-slide','rosario-animate-in-soft');
       if(animate){
-        if(ghost&&ghostOffset){
-          ghost.classList.add('rosario-transition-ghost',
-            'rosario-animate-out-'+mode);
-          ghost.style.left=ghostOffset.x+'px';
-          ghost.style.top=ghostOffset.y+'px';
-          ghost.style.width=ghostOffset.width+'px';
-          reading.append(ghost);
-          setTimeout(()=>ghost.remove(),540);
-        }
-        void prayer.offsetWidth;
-        prayer.classList.add('rosario-animate-in-'+mode);
+        const nextNodes=[...prayer.childNodes];
+        prayer.replaceChildren(...oldNodes);
+        animateText(prayer,mode,()=>prayer.replaceChildren(...nextNodes));
       }
       lastRenderedIndex=state.index;
       lastRenderedTitle=step?.title||null;
