@@ -36,6 +36,11 @@
       ['#DEB82C','#D3AA22','#453816']
     ];
     state.rosaryViewLayout=state.rosaryViewLayout==='vertical'?'vertical':'physical';
+    state.rosarySide=state.rosarySide==='right'?'right':'left';
+    window.rosarioSetSide=side=>{
+      state.rosarySide=side==='right'?'right':'left';
+      persist();render();
+    };
     // El modo actual de halos acumulados es el predeterminado, incluso
     // tras actualizar una instalación que aún no tenga esta preferencia.
     // Los tres modos conservan su valor entre aperturas de la app.
@@ -398,6 +403,7 @@
       // El CSS controla solamente el brillo, nunca la geometría ni la
       // navegación. Cambiar de modo no afecta el progreso del rosario.
       document.body.dataset.rosaryHaloMode=state.rosaryHaloMode;
+      document.body.dataset.rosarySide=state.rosarySide;
       const physical=state.rosaryViewLayout==='physical';
       document.body.classList.toggle('rosario-physical-view',physical);
       if(!physical){
@@ -611,7 +617,14 @@
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
         destination=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
       }else if(el.hasAttribute('data-bead')){
-        const index=steps.findIndex(s=>s.bead===Number(el.dataset.bead));
+        const touched=Number(el.dataset.bead);
+        const active=positionFor(steps[state.index]);
+        // La cuenta grande puede contener Gloria y varias jaculatorias:
+        // cada toque sucesivo sobre la misma cuenta avanza una oración.
+        if(active.type==='loop'&&active.bead===touched){
+          advance();return;
+        }
+        const index=steps.findIndex(s=>s.bead===touched);
         if(index<0)return;
         destination=index;
       }else if(el.hasAttribute('data-intro')){
@@ -782,32 +795,11 @@
         haloOptions.append(label);
       });
       haloField.append(haloLegend,haloOptions);
-      const tapField=document.createElement('fieldset');
-      tapField.className='physical-layout-settings physical-tap-settings';
-      const tapLegend=document.createElement('legend');
-      tapLegend.textContent='Navegación por toques';
-      const tapLabel=document.createElement('label');
-      tapLabel.className='physical-tap-option';
-      const toggle=document.createElement('input');
-      toggle.type='checkbox';toggle.checked=state.screenTapNavigation;
-      toggle.setAttribute('aria-label','Activar navegación por toques en las mitades de la pantalla');
-      const tapTitle=document.createElement('span');
-      tapTitle.textContent='Avanzar o retroceder tocando el fondo';
-      tapLabel.append(tapTitle,toggle);
-      const tapHint=document.createElement('p');
-      tapHint.className='physical-layout-hint';
-      tapHint.textContent='Arriba: anterior · Abajo: siguiente.';
-      tapField.append(tapLegend,tapLabel,tapHint);
-      toggle.onchange=()=>{
-        state.screenTapNavigation=toggle.checked;
-        persist();
-      };
-      const controls=host.querySelector('.controls-position-setting');
+      const controls=host.querySelector('.rosario-navigation-settings-button');
       if(controls){
         host.insertBefore(field,controls);
         host.insertBefore(haloField,controls);
-        host.insertBefore(tapField,controls);
-      }else host.append(field,haloField,tapField);
+      }else host.append(field,haloField);
     };
     // Primer encuadre: después de pintar y de medir el CSS cargado.
     // Se vuelve a intentar si el navegador todavía no ha terminado
