@@ -104,8 +104,11 @@
       prayer.append(wrapper);
     }
     function voiceOrder(step) {
+      // Durante las tres vueltas de la Estación el primer fragmento
+      // pertenece siempre al Guía y el segundo a la Asamblea. El
+      // dorado no debe alternar en la segunda vuelta.
+      if(Number.isInteger(step.stationNumber))return ['guide','assembly'];
       const i = step.m>=0 && step.m<5 ? step.m :
-        Number.isInteger(step.stationNumber) ? step.stationNumber-1 :
         Number.isInteger(step.dedication) ? step.dedication :
         Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
@@ -163,8 +166,8 @@
       prayer.append(symbol);
     }
     function prayerSource(step) {
-      if (step.kind==='dedication' || step.kind==='intention') return step.text || '';
-      return step.text || prayers[step.title] || '';
+      return window.rosarioPrayerText?.(step.title,step) ||
+        step.text || prayers[step.title] || '';
     }
     function addJaculatoria(step,source) {
       const parts = source.split(/\n\s*\n/);
@@ -208,7 +211,14 @@
         addVerses(step.dialogues);
         // addVerses sustituye los nodos: dejar la cruz sobre los dos diálogos.
         prayer.prepend(makeCross());
-      } else if(step?.verse && step?.response) addVerses([step]);
+      } else if(step?.verse && step?.response) {
+        const edited=state.prayerEdits?.[step.title];
+        if(edited){
+          const match=edited.match(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]+)/);
+          if(match)addVerses([{verse:match[1],response:match[2]}]);
+          else appendWithAmen(prayer,edited);
+        }else addVerses([step]);
+      }
       else if(step){
         prayer.replaceChildren();
         if(step.title==='Señal de la cruz') specialSymbol();
@@ -220,12 +230,26 @@
         }
         const source=prayerSource(step);
         if (step.title==='Comunión espiritual' || step.title==='Salve' ||
-            step.title==='Oración final') {
+            step.title==='Oración final'||step.title==='Señor mío Jesucristo') {
           const heading=document.createElement('span');
           heading.className='reading-prayer-heading';
-          heading.textContent=step.title==='Salve' ?
-            'Y ahora te saludamos con una Salve' :
-            step.title==='Oración final' ? 'Oración' : 'Comunión espiritual';
+          heading.textContent=step.title==='Salve'
+            ? (state.voiceLabels!==false&&state.voiceColors!==false
+              ? 'Y ahora te saludamos con una Salve'
+              : 'Y ahora te saludo con una Salve')
+            : step.title==='Oración final' ? 'Oración'
+            : step.title==='Señor mío Jesucristo'?'Acto de contrición'
+            : 'Comunión espiritual';
+          if(step.title==='Señor mío Jesucristo'){
+            // El selector sólo aparece al rezar esta oración.
+            const picker=document.createElement('button');
+            picker.type='button';
+            picker.className='contrition-quick-choice';
+            picker.setAttribute('aria-label','Cambiar acto de contrición');
+            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+            picker.onclick=()=>window.rosarioOpenContritionChoice?.();
+            heading.append(picker);
+          }
           prayer.append(heading);
         }
         const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
@@ -235,12 +259,25 @@
           const [a,b]=voiceOrder(step);
           appendVoice(pair[0],a);
           const second=pair.slice(1).join('\n\n');
-          // En el segundo y cuarto misterio, el guía introduce la respuesta
-          // del Avemaría con «Gloria.» antes de «Santa María».
-          appendVoice(second && step.title==='Avemaría' &&
-            (step.m===1 || step.m===3) && b==='guide' &&
-            state.voiceColors !== false
-            ? 'Gloria.\n'+second : second,b);
+          // Únicamente en la décima Avemaría de los misterios II y IV,
+          // añadir «Gloria» a la intervención de la Asamblea, no al
+          // fragmento definido como dorado por el tema de color.
+          const addGloria=step.title==='Avemaría'&&step.n===10&&
+            (step.m===1||step.m===3)&&state.voiceLabels!==false&&
+            state.voiceColors!==false;
+          // El orden de voces puede variar por misterio.
+          const gloriaPart=text=>addGloria?'Gloria.\n'+text:text;
+          if(addGloria&&a==='assembly'){
+            const first=prayer.querySelector('.prayer-part:first-child');
+            if(first) {
+              first.replaceChildren();
+              const name=document.createElement('span');
+              name.className='voice-label';name.textContent='Asamblea';
+              first.append(name);
+              appendWithAmen(first,gloriaPart(pair[0]));
+            }
+          }
+          appendVoice(addGloria&&b==='assembly'?gloriaPart(second):second,b);
         }else appendWithAmen(prayer,source);
       }else{
         prayer.replaceChildren();
