@@ -37,6 +37,9 @@
     ];
     state.rosaryViewLayout=state.rosaryViewLayout==='vertical'?'vertical':'physical';
     state.rosarySide=state.rosarySide==='right'?'right':'left';
+    state.rosarySwipeMode=state.rosarySwipeMode==='uniform'?'uniform':'follow';
+    // La cuerda cambia su caída un día nuevo sin cambiar las cuentas.
+    state.rosaryThreadDaily=state.rosaryThreadDaily!==false;
     window.rosarioSetSide=side=>{
       state.rosarySide=side==='right'?'right':'left';
       persist();render();
@@ -62,6 +65,17 @@
     stage.append(viewport);
 
     let positions=[],introPoints=[],crossX=0;
+    function threadDateKey(){
+      const now=new Date();
+      return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+
+        '-'+String(now.getDate()).padStart(2,'0');
+    }
+    let drawnThreadDate=threadDateKey();
+    function threadNoise(index,salt){
+      const seed=Number(drawnThreadDate.replace(/-/g,''));
+      const raw=Math.sin((index+1)*12.9898+seed*.017+salt*78.233)*43758.5453;
+      return 2*(raw-Math.floor(raw))-1;
+    }
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
     let lastPhysicalType=null;
@@ -138,6 +152,7 @@
       return copy.outerHTML;
     }
     function draw(){
+      drawnThreadDate=threadDateKey();
       lastDrawWidth=stage.getBoundingClientRect().width;
       const width=Math.max(320,document.documentElement.clientWidth);
       // La cadena permanece junto al borde izquierdo, sin invadir
@@ -177,10 +192,17 @@
         // Los giros completos superior e inferior no se modifican.
         if(Number.isInteger(threadIndex)&&
            Math.abs(to.x-from.x)<8&&Math.abs(to.y-from.y)>35){
-          c1.x+=Math.sin(threadIndex*1.73+.4)*4.0+
-            Math.cos(threadIndex*.63)*1.0;
-          c2.x+=Math.sin(threadIndex*2.19+1.1)*3.8+
-            Math.cos(threadIndex*.87+.7)*.8;
+          if(state.rosaryThreadDaily){
+            c1.x+=threadNoise(threadIndex,1)*4.6;
+            c2.x+=threadNoise(threadIndex,2)*4.6;
+            c1.y+=threadNoise(threadIndex,3)*1.7;
+            c2.y+=threadNoise(threadIndex,4)*1.7;
+          }else{
+            c1.x+=Math.sin(threadIndex*1.73+.4)*4.0+
+              Math.cos(threadIndex*.63)*1.0;
+            c2.x+=Math.sin(threadIndex*2.19+1.1)*3.8+
+              Math.cos(threadIndex*.87+.7)*.8;
+          }
         }
         return'M '+at(from)+' C '+at(c1)+' '+at(c2)+' '+at(to);
       }
@@ -320,7 +342,7 @@
     // Las oraciones introductorias y los cierres de cada misterio
     // heredan la dirección de su cuenta correspondiente.
     function physicalSwipeDown(){
-      if(state.rosaryViewLayout!=='physical')return false;
+      if(state.rosaryViewLayout!=='physical'||state.rosarySwipeMode==='uniform')return false;
       const step=steps[state.index];
       if(!step)return false;
       if(step.m<0)return true;
@@ -795,11 +817,37 @@
         haloOptions.append(label);
       });
       haloField.append(haloLegend,haloOptions);
+      const threadField=document.createElement('fieldset');
+      threadField.className='physical-layout-settings physical-thread-settings';
+      const threadLegend=document.createElement('legend');
+      threadLegend.textContent='Hilo del rosario';
+      const threadOption=document.createElement('label');
+      threadOption.className='physical-thread-option';
+      const threadCopy=document.createElement('span');
+      const threadTitle=document.createElement('strong');
+      threadTitle.textContent='Variación diaria del hilo';
+      const threadHelp=document.createElement('small');
+      threadHelp.textContent='Cada día una caída ligeramente distinta del cordón, sin mover las cuentas.';
+      threadCopy.append(threadTitle,threadHelp);
+      const threadCheck=document.createElement('input');
+      threadCheck.type='checkbox';
+      threadCheck.checked=state.rosaryThreadDaily;
+      threadCheck.onchange=()=>{
+        state.rosaryThreadDaily=threadCheck.checked;
+        persist();
+        // Conservar exactamente el encuadre actual al regenerar
+        // exclusivamente las curvas del cordón, no el movimiento.
+        const scroll=viewport.scrollTop;
+        draw();paint();viewport.scrollTop=scroll;
+      };
+      threadOption.append(threadCopy,threadCheck);
+      threadField.append(threadLegend,threadOption);
       const controls=host.querySelector('.rosario-preferences-group');
       if(controls){
         host.insertBefore(field,controls);
         host.insertBefore(haloField,controls);
-      }else host.append(field,haloField);
+        host.insertBefore(threadField,controls);
+      }else host.append(field,haloField,threadField);
     };
     // Primer encuadre: después de pintar y de medir el CSS cargado.
     // Se vuelve a intentar si el navegador todavía no ha terminado
@@ -826,6 +874,17 @@
       if(initialFramePending||initialFrameAnchored)
         requestAnimationFrame(restoreInitialFrame);
     });
+    // La caída diaria se actualiza al regresar a la aplicación después
+    // de medianoche, manteniendo el scroll y la oración actuales.
+    const checkDailyThread=()=>{
+      if(!state.rosaryThreadDaily||drawnThreadDate===threadDateKey())return;
+      const scroll=viewport.scrollTop;
+      draw();paint();viewport.scrollTop=scroll;
+    };
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden)checkDailyThread();
+    });
+    window.addEventListener('focus',checkDailyThread);
     paint();
     restoreInitialFrame();
   });
