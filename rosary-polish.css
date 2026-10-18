@@ -555,12 +555,14 @@ body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembl
  border:1px solid #bca27580;border-radius:50%;
  background:#bda57b0c;color:inherit;opacity:.76
 }
-.contrition-quick-choice .contrition-notch-grooves{
- display:block;width:11px;height:11px;border-radius:50%;
- border:1px solid currentColor;
- background:repeating-linear-gradient(90deg,transparent 0 2px,
- currentColor 2px 2.6px,transparent 2.6px 4.5px);
- opacity:.7
+.reading-prayer-heading .contrition-quick-choice svg{
+ display:block;width:16px;height:16px;fill:none;stroke:currentColor;
+ stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;
+ opacity:.92;
+}
+.reading-prayer-heading .contrition-quick-choice{
+ width:25px;height:25px;min-width:25px;border-radius:50%;
+ background:transparent;opacity:.85;
 }
 .contrition-quick-choice:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 /* Mismo medio borde de la rueda de letanías: sólo dos trazos
@@ -634,4 +636,55 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-cu
 body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-label,
 body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-progress{
  color:var(--rc-accent)!important
+}
+
+
+/* Todas las opciones de animación alineadas por la misma cuadrícula;
+   no heredan justify-content:space-between ni márgenes de dialog label. */
+#modalContent .rosario-animation-choices > label.rosario-animation-option{
+ display:grid!important;
+ grid-template-columns:24px minmax(0,1fr)!important;
+ align-items:center!important;
+ justify-content:start!important;
+ column-gap:13px!important;
+ width:100%!important;box-sizing:border-box!important;
+ margin:0!important;padding:12px 14px!important;
+ text-align:left!important;
+}
+#modalContent .rosario-animation-option > input[type="radio"]{
+ grid-column:1!important;
+ justify-self:center!important;
+ width:17px!important;height:17px!important;
+ margin:0!important;
+}
+#modalContent .rosario-animation-option > span{
+ grid-column:2!important;
+ display:block!important;width:100%!important;
+ min-width:0!important;margin:0!important;
+ flex:none!important;text-align:left!important;
+ justify-self:stretch!important;
+}
+#modalContent .rosario-animation-option > span > strong,
+#modalContent .rosario-animation-option > span > small{
+ display:block!important;width:100%!important;
+ margin:0!important;text-align:left!important;
+ letter-spacing:normal!important;
+}
+#modalContent .rosario-animation-option > span > strong{
+ font:600 14px/1.45 system-ui!important;
+}
+#modalContent .rosario-animation-option > span > small{
+ margin-top:3px!important;font:12px/1.45 system-ui!important;
+ color:var(--ui-muted,#938e86)!important;
+}
+#modalContent .rosario-text-preview{
+ isolation:isolate!important;
+ min-height:110px!important;
+}
+#modalContent .rosario-text-preview > p{
+ display:block!important;
+ width:100%!important;
+ text-align:center!important;
+ font-weight:400!important;
+ transform-origin:center center;
 }
