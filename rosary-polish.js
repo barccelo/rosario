@@ -108,7 +108,8 @@
       // pertenece siempre al Guía y el segundo a la Asamblea. El
       // dorado no debe alternar en la segunda vuelta.
       if(Number.isInteger(step.stationNumber) ||
-        step.title==='Avemaría'&&step.n===10&&(step.m===1||step.m===3))
+        (step.title==='Avemaría'&&step.m===5) ||
+        (step.title==='Avemaría'&&step.n===10&&(step.m===1||step.m===3)))
         return ['guide','assembly'];
       const i = step.m>=0 && step.m<5 ? step.m :
         Number.isInteger(step.dedication) ? step.dedication :
@@ -137,18 +138,7 @@
       const sing={Gozosos:'gozoso',Dolorosos:'doloroso',
         Gloriosos:'glorioso',Luminosos:'luminoso'}[state.group];
       const intention=window.rosarioIntentionFor?.(step.m);
-      if(intention){
-        const block=document.createElement('div');
-        block.className='mystery-random-intention';
-        const caption=document.createElement('span');
-        caption.className='mystery-intention-caption';
-        caption.textContent='Intención de este misterio';
-        const content=document.createElement('span');
-        content.className='mystery-intention-body';
-        content.textContent=intention;
-        block.append(caption,content);
-        prayer.append(block);
-      }
+
       const label=document.createElement('span');
       label.className='mystery-announcement-label';
       label.textContent=ord+' misterio '+sing;
@@ -162,6 +152,18 @@
       frame.className='rosario-mystery-frame';
       frame.append(label,title);
       prayer.append(frame);
+      if(intention){
+        const block=document.createElement('div');
+        block.className='mystery-random-intention';
+        const caption=document.createElement('span');
+        caption.className='mystery-intention-caption';
+        caption.textContent='Intención de este misterio';
+        const content=document.createElement('span');
+        content.className='mystery-intention-body';
+        content.textContent=intention;
+        block.append(caption,content);
+        prayer.append(block);
+      }
     }
     function specialSymbol() {
       const symbol=document.createElement('span');
@@ -244,7 +246,7 @@
           const heading=document.createElement('span');
           heading.className='reading-prayer-heading';
           heading.textContent=step.title==='Salve'
-            ? (state.assemblyEnabled!==false
+            ? (state.voiceLabels!==false
               ? 'Y ahora te saludamos con una Salve'
               : 'Y ahora te saludo con una Salve')
             : step.title==='Oración final' ? 'Oración'
@@ -262,8 +264,7 @@
           }
           prayer.append(heading);
         }
-        const voices=state.assemblyEnabled!==false&&
-          (step.title==='Padrenuestro'||step.title==='Avemaría'||
+        const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
           step.title==='Gloria'||step.kind==='jaculatory');
         const pair=step.kind==='jaculatory'?addJaculatoria(step,source):source.split(/\n\s*\n/);
         if(voices && pair.length>=2){
@@ -274,7 +275,7 @@
           // la Asamblea dice «Gloria» inmediatamente ANTES de «Santa María».
           // Se preserva el primer «Dios te salve» sin modificaciones.
           const addGloria=step.title==='Avemaría'&&step.n===10&&
-            (step.m===1||step.m===3)&&state.assemblyEnabled!==false;
+            (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
         }else appendWithAmen(prayer,source);
       }else{
