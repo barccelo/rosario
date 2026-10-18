@@ -665,7 +665,7 @@
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
   state.voiceGuideTone=saved.voiceGuideTone==='accent'?'accent':'white';
   state.voiceAssemblyTone=saved.voiceAssemblyTone==='white'?'white':'accent';
-  state.subtleBeadMotion=saved.subtleBeadMotion===true;
+  state.subtleBeadMotion=saved.subtleBeadMotion!==false;
   // La barra y el botón compacto comparten ubicación configurada.
   state.controlsPosition = saved.controlsPosition === 'bottom' ? 'bottom' : 'top';
   function applyControlsPosition(){
@@ -1400,32 +1400,85 @@
       fill(tab);
     }
 
-    // El menú reemplaza el atajo aislado a los misterios: días, misterios y oraciones.
+    // Menú de navegación accesible desde Preferencias sin mostrar
+    // otra lista interminable en la página principal.
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
-    // La configuración general también da acceso a las preferencias de voces.
+    function openNavigationPreferences(){
+      show('<h2>Navegación</h2><div class="rosario-nav-dialog" id="rosarioNavSettings"></div>');
+      const root=$('rosarioNavSettings');
+      const selectRow=(title,options,value,callback)=>{
+        const row=document.createElement('label');row.className='rosario-nav-setting';
+        const name=document.createElement('span');name.textContent=title;
+        const control=document.createElement('select');
+        options.forEach(([id,label])=>{
+          const option=document.createElement('option');
+          option.value=id;option.textContent=label;control.append(option);
+        });
+        control.value=value;control.onchange=()=>callback(control.value);
+        row.append(name,control);root.append(row);
+      };
+      selectRow('Lado del Rosario completo',
+        [['left','Izquierda'],['right','Derecha']],state.rosarySide,
+        value=>window.rosarioSetSide?.(value));
+      selectRow('Posición de los controles',
+        [['top','Arriba'],['bottom','Abajo']],state.controlsPosition,
+        value=>{
+          state.controlsPosition=value;applyControlsPosition();persist();
+        });
+      const toggleRow=(title,description,key)=>{
+        const row=document.createElement('label');row.className='rosario-nav-setting';
+        const text=document.createElement('span');
+        text.textContent=title;
+        const small=document.createElement('small');small.textContent=description;
+        text.append(small);
+        const check=document.createElement('input');
+        check.type='checkbox';check.checked=state[key]===true;
+        check.onchange=()=>{state[key]=check.checked;persist();render();};
+        row.append(text,check);root.append(row);
+      };
+      toggleRow('Navegar tocando el fondo','Arriba: oración anterior · Abajo: siguiente.',
+        'screenTapNavigation');
+      toggleRow('Animación sutil entre Avemarías',
+        'Un pulso breve en la nueva cuenta, sin mover el hilo.',
+        'subtleBeadMotion');
+      window.rosarioAndroidNavigationKeys?.(root);
+    }
+    window.rosarioOpenNavigationPreferences=openNavigationPreferences;
+    function openContritionChoice(){
+      show('<h2>Acto de contrición</h2><div class="rosario-contrition-choices" id="contritionOptions"></div>');
+      const root=$('contritionOptions');
+      window.rosarioContritionChoices.forEach(([value,name])=>{
+        const button=document.createElement('button');
+        button.type='button';button.className='rosario-contrition-option';
+        button.textContent=name;
+        button.setAttribute('aria-pressed',String(state.contritionVersion===value));
+        button.onclick=()=>{
+          window.rosarioSetContrition(value);$('modal').close();
+        };
+        root.append(button);
+      });
+    }
+    window.rosarioOpenContritionChoice=openContritionChoice;
     const originalSettings = $('settings').onclick;
     $('settings').onclick = () => {
       originalSettings();
-      const controlSetting = document.createElement('label');
-      controlSetting.className='controls-position-setting';
-      const heading = document.createElement('span');
-      heading.textContent='Posición de los controles';
-      const select = document.createElement('select');
-      select.setAttribute('aria-label','Posición de la barra de controles y del botón compacto');
-      [['top','Arriba'],['bottom','Abajo']].forEach(([value,label])=>{
+      const navigation=document.createElement('button');
+      navigation.type='button';
+      navigation.className='voice-settings-link rosario-navigation-settings-button';
+      navigation.textContent='Configurar navegación';
+      navigation.onclick=openNavigationPreferences;
+      $('modalContent').append(navigation);
+      const contrition=document.createElement('label');
+      contrition.className='rosario-tone-setting';
+      const name=document.createElement('span');name.textContent='Acto de contrición';
+      const choice=document.createElement('select');
+      window.rosarioContritionChoices.forEach(([value,title])=>{
         const option=document.createElement('option');
-        option.value=value;
-        option.textContent=label;
-        option.selected=state.controlsPosition===value;
-        select.append(option);
+        option.value=value;option.textContent=title;choice.append(option);
       });
-      select.onchange=()=>{
-        state.controlsPosition=select.value;
-        applyControlsPosition();
-        persist();
-      };
-      controlSetting.append(heading,select);
-      $('modalContent').append(controlSetting);
+      choice.value=state.contritionVersion;
+      choice.onchange=()=>window.rosarioSetContrition(choice.value);
+      contrition.append(name,choice);$('modalContent').append(contrition);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'voice-settings-link';
