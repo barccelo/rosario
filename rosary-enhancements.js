@@ -557,8 +557,40 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 7) {
+  if (Number(saved.sequenceVersion) >= 8) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 7) {
+    // Antes había Padrenuestro + Avemaría + Gloria en cada intención.
+    // Reproducir esos índices sólo para la migración; sin perder progreso.
+    const oldSteps=steps.flatMap(item=>{
+      if(item.title==='Avemaría purísima')return [];
+      if(item.title==='Avemaría'&&item.m===5&&
+         Number.isInteger(item.intentionNumber)){
+        const number=item.intentionNumber;
+        return [{...item,title:'Padrenuestro'},item,
+          ...(number<2?[{...item,title:'Gloria'}]:[])];
+      }
+      return [item];
+    });
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    const previous=oldSteps[oldIndex];
+    if(!previous)restoredIndex=steps.length;
+    else {
+      restoredIndex=steps.findIndex(next=>
+        next.title===previous.title&&next.m===previous.m&&
+        next.n===previous.n&&next.kind===previous.kind&&
+        next.stationNumber===previous.stationNumber&&
+        next.dedication===previous.dedication&&
+        next.litanyIndex===previous.litanyIndex&&
+        next.intentionNumber===previous.intentionNumber);
+      // Si estaba en un Padrenuestro o Gloria ahora eliminado,
+      // continuar en la Avemaría de la intención correspondiente.
+      if(restoredIndex<0&&Number.isInteger(previous.intentionNumber))
+        restoredIndex=steps.findIndex(next=>next.m===5&&
+          next.title==='Avemaría'&&
+          next.intentionNumber===previous.intentionNumber);
+      if(restoredIndex<0)restoredIndex=Math.min(oldIndex,steps.length);
+    }
   } else if (Number(saved.sequenceVersion) === 6) {
     // Las mismas oraciones cambian de posición; conservar la oración
     // concreta y también distinguir las dos respuestas «Ruega».
@@ -631,6 +663,9 @@
   state.dayDate = dateKey();
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
+  state.voiceGuideTone=saved.voiceGuideTone==='accent'?'accent':'white';
+  state.voiceAssemblyTone=saved.voiceAssemblyTone==='white'?'white':'accent';
+  state.subtleBeadMotion=saved.subtleBeadMotion===true;
   // La barra y el botón compacto comparten ubicación configurada.
   state.controlsPosition = saved.controlsPosition === 'bottom' ? 'bottom' : 'top';
   function applyControlsPosition(){
@@ -656,6 +691,14 @@
     return Object.prototype.hasOwnProperty.call(state.prayerEdits,key)
       ?state.prayerEdits[key]:(step?.text||defaultPrayerText(key));
   };
+  window.rosarioContritionChoices=[
+    ['jesucristo','Señor mío Jesucristo'],
+    ['redentor','Jesús, mi Señor y Redentor']
+  ];
+  window.rosarioSetContrition=key=>{
+    if(key!=='redentor'&&key!=='jesucristo')return;
+    state.contritionVersion=key;persist();render();
+  };
   const stepText = step => {
     if (!step) return '';
     if (step.kind === 'mystery') return announcement(step);
@@ -664,6 +707,9 @@
   const rawRender = render;
   render = function () {
     const step = steps[state.index];
+    document.body.dataset.voiceGuideTone=state.voiceGuideTone;
+    document.body.dataset.voiceAssemblyTone=state.voiceAssemblyTone;
+    document.body.classList.toggle('subtle-bead-motion',state.subtleBeadMotion);
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
       if (step.kind === 'dialogue') prayers[step.title] = '℣. ' + step.verse + '\n℟. ' + step.response;
@@ -1050,7 +1096,7 @@
         } else if (selected === 'intentions') {
           const caption=document.createElement('p');
           caption.className='jac-intro';
-          caption.textContent='Las intenciones se guardan únicamente en este dispositivo. Antes de cada misterio aparecerá una de la lista, elegida al azar y conservada durante esa decena.';
+          caption.textContent='Una intención antes de cada misterio. Elige si prefieres cualquier intención o las relacionadas con el misterio.';
           list.append(caption);
           const switchRow=document.createElement('label');
           switchRow.className='jac-choice';
@@ -1074,6 +1120,21 @@
             fill('intentions');
           };
           list.append(switchRow);
+          const modeRow=document.createElement('div');
+          modeRow.className='rosario-inline-options';
+          [['mystery','Según el misterio'],['random','Completamente aleatorias']].forEach(([value,label])=>{
+            const option=document.createElement('label');
+            const radio=document.createElement('input');
+            radio.type='radio';radio.name='intentionSelectionMode';
+            radio.value=value;radio.checked=state.intentionSelectionMode===value;
+            radio.onchange=()=>{
+              state.intentionSelectionMode=value;
+              resetIntentionCycle();fill('intentions');render();
+            };
+            const caption=document.createElement('span');caption.textContent=label;
+            option.append(radio,caption);modeRow.append(option);
+          });
+          list.append(modeRow);
           const addRow=document.createElement('div');
           addRow.className='intention-add';
           const input=document.createElement('input');
@@ -1191,7 +1252,7 @@
         } else if (selected === 'voices') {
           const description=document.createElement('p');
           description.className='jac-intro';
-          description.textContent='Personaliza las intervenciones del guía y la asamblea. La respuesta se destaca en dorado.';
+          description.textContent='Personaliza las intervenciones del guía y la asamblea, independientemente del tema del rosario.';
           list.append(description);
           [
             ['voiceLabels','Mostrar «Guía» y «Asamblea»','Conserva las etiquetas de cada intervención.'],
@@ -1215,6 +1276,19 @@
               render();
             };
             list.append(row);
+          });
+          [['voiceGuideTone','Color de Guía'],['voiceAssemblyTone','Color de Asamblea']].forEach(([key,label])=>{
+            const field=document.createElement('label');
+            field.className='rosario-tone-setting';
+            const title=document.createElement('span');title.textContent=label;
+            const control=document.createElement('select');
+            [['white','Blanco / color del texto'],['accent','Color de acento del tema']].forEach(([value,name])=>{
+              const option=document.createElement('option');option.value=value;
+              option.textContent=name;control.append(option);
+            });
+            control.value=state[key];
+            control.onchange=()=>{state[key]=control.value;persist();render();};
+            field.append(title,control);list.append(field);
           });
         } else if (selected === 'text') {
           const modes = [
