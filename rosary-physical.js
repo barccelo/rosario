@@ -795,7 +795,7 @@
         haloOptions.append(label);
       });
       haloField.append(haloLegend,haloOptions);
-      const controls=host.querySelector('.rosario-navigation-settings-button');
+      const controls=host.querySelector('.rosario-preferences-group');
       if(controls){
         host.insertBefore(field,controls);
         host.insertBefore(haloField,controls);
