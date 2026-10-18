@@ -695,6 +695,17 @@
     ['jesucristo','Señor mío Jesucristo'],
     ['redentor','Jesús, mi Señor y Redentor']
   ];
+  window.rosarioSavePrayer=(title,text)=>{
+    if(typeof text!=='string'||!title)return false;
+    if(text.length>20000)return false;
+    state.prayerEdits[title]=text;
+    // Mantener el texto elegido para las futuras lecturas.
+    persist();render();
+    return true;
+  };
+  window.rosarioRestorePrayer=title=>{
+    delete state.prayerEdits[title];persist();render();
+  };
   window.rosarioSetContrition=key=>{
     if(key!=='redentor'&&key!=='jesucristo')return;
     state.contritionVersion=key;persist();render();
@@ -712,14 +723,21 @@
     document.body.classList.toggle('subtle-bead-motion',state.subtleBeadMotion);
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
-      if (step.kind === 'dialogue') prayers[step.title] = '℣. ' + step.verse + '\n℟. ' + step.response;
+      if (step.kind === 'dialogue'&&!state.prayerEdits[step.title])
+        prayers[step.title] = '℣. ' + step.verse + '\n℟. ' + step.response;
       if (step.kind === 'dialogue-group') prayers[step.title] = step.dialogues
         .map(part => '℣. ' + part.verse + '\n℟. ' + part.response).join('\n\n');
       if (step.title === 'Avemaría' && step.kind !== 'dedication') prayers.Avemaría = originalAvemaria;
-      if (step.kind === 'dedication' || step.kind === 'intention') prayers[step.title] = step.text;
-      if (step.title === 'Descansen en paz') prayers[step.title] = step.text;
-      if (step.kind === 'litany') prayers['Letanías'] = '℣. ' + step.verse + '\n℟. ' + step.response;
-      if (step.title === 'Cordero de Dios') prayers['Cordero de Dios'] = '℣. ' + step.verse + '\n℟. ' + step.response;
+      if ((step.kind === 'dedication' || step.kind === 'intention') &&
+          !state.prayerEdits[step.title]) prayers[step.title] = step.text;
+      if (step.title === 'Descansen en paz'&&!state.prayerEdits[step.title]) prayers[step.title] = step.text;
+      if (step.kind === 'litany'&&!state.prayerEdits['Letanías']) {
+        // La rueda gestiona cada invocación; el devocionario conserva
+        // el texto completo en lugar de reemplazarlo por una sola.
+        prayers['Letanías']=fullLitany;
+      }
+      if (step.title === 'Cordero de Dios'&&!state.prayerEdits['Cordero de Dios'])
+        prayers['Cordero de Dios'] = lambLines.join('\n\n');
     }
     rawRender();
     if (step && step.kind === 'mystery') {
@@ -990,15 +1008,49 @@
         look.textContent=previewLabel+' ↗';
         look.setAttribute('aria-label',previewLabel+': '+previewTitle);
         look.onclick=()=>openPreview(previewTitle,previewContent);
-        wrapper.append(look);
+        const edit=document.createElement('button');
+        edit.type='button';edit.className='nav-preview-link';
+        edit.textContent='Editar';
+        edit.setAttribute('aria-label','Editar oración: '+previewTitle);
+        edit.onclick=()=>openPrayerEditor(previewTitle);
+        wrapper.append(look,edit);
         list.append(wrapper);
       }
+      function openPrayerEditor(title){
+        const key=title==='Tres Avemarías'?'Avemaría':
+          title==='Acto de contrición'?'Señor mío Jesucristo':title;
+        const editingKey=key==='Señor mío Jesucristo'&&state.contritionVersion==='redentor'
+          ?'Acto de contrición (Jesús, mi Señor y Redentor)':key;
+        const text=window.rosarioPrayerText?.(key)||prayers[key]||'';
+        const list=$('navList'),detail=$('navDetail');
+        savedScroll=list.scrollTop;
+        list.hidden=true;detail.hidden=false;detail.replaceChildren();
+        const back=document.createElement('button');
+        back.className='nav-preview-back';back.type='button';
+        back.textContent='← Volver a las oraciones';
+        back.onclick=()=>{detail.hidden=true;list.hidden=false;list.scrollTop=savedScroll;};
+        const heading=document.createElement('h3');heading.textContent=title;
+        const note=document.createElement('p');
+        note.textContent='Puedes corregir palabras, puntuación y saltos de párrafo. Los cambios se guardan sólo en este dispositivo.';
+        const area=document.createElement('textarea');
+        area.className='rosario-prayer-editor';area.rows=10;area.value=text;
+        area.setAttribute('aria-label','Texto editable de '+title);
+        const tools=document.createElement('div');tools.className='rosario-editor-actions';
+        const save=document.createElement('button');save.type='button';save.textContent='Guardar cambios';
+        save.onclick=()=>{if(window.rosarioSavePrayer(editingKey,area.value))openPrayerEditor(title);};
+        const restore=document.createElement('button');restore.type='button';
+        restore.textContent='Restaurar original';
+        restore.onclick=()=>{window.rosarioRestorePrayer(editingKey);openPrayerEditor(title);};
+        tools.append(save,restore);
+        detail.append(back,heading,note,area,tools);
+      }
       function prayerPreview(title,step) {
-        if(title==='Letanías')return fullLitany;
-        if(title==='Cordero de Dios')return lambLines.join('\n\n');
-        if(title==='Tres Avemarías')return originalAvemaria;
+        if(title==='Letanías')return state.prayerEdits.Letanías ?? fullLitany;
+        if(title==='Cordero de Dios')return state.prayerEdits['Cordero de Dios'] ??
+          lambLines.join('\n\n');
+        if(title==='Tres Avemarías')return window.rosarioPrayerText('Avemaría');
         if(title==='Anuncio del misterio')return announcement({m:Math.max(0,Math.min(4,step?.m||0))});
-        return step?.text || prayers[title] || '';
+        return window.rosarioPrayerText(title,step);
       }
       function fill(selected) {
         currentTab=selected;
@@ -1051,7 +1103,8 @@
             ['Cordero de Dios', 'Tres peticiones'],
             ['Bajo tu amparo', 'Oración a la Virgen'],
             ['Oración final', 'Conclusión'],
-            ['Padrenuestro', 'Intenciones finales: Iglesia, obispo y ánimas']
+            ['Avemaría purísima', 'Antes de la bendición final'],
+            ['Avemaría', 'Intenciones finales: Iglesia, intenciones y ánimas']
           ];
           titles.forEach(([title, subtitle]) => {
             const lookup = title === 'Tres Avemarías' ? 'Avemaría' : title;
@@ -1060,7 +1113,8 @@
             if (!positions.length) return;
             const closest = positions.find(i => i >= state.index) ?? positions[0];
             const display=title==='Jaculatoria'?'María, Madre de gracia':
-              title==='Oración final'?'Oración':title;
+              title==='Oración final'?'Oración':
+              title==='Señor mío Jesucristo'?'Acto de contrición':title;
             addPreviewRow(list,display,subtitle,()=>goTo(closest),
               steps[state.index]?.title===title,display,
               prayerPreview(title,steps[closest]));
@@ -1452,16 +1506,46 @@
         select.append(option);
       });
       const showSelectedPrayer = () => {
-        const text = select.value === 'Letanías' ? fullLitany :
-          select.value === 'Cordero de Dios' ? lambLines.map((line,i) =>
-            '℣. Cordero de Dios, que quitas los pecados del mundo,\n℟. ' +
-            ['perdónanos, Señor.','escúchanos, Señor.','ten misericordia de nosotros.'][i]).join('\n\n') :
-          prayers[select.value];
+        const text=window.rosarioPrayerText(select.value) ||
+          (select.value==='Letanías'?fullLitany:prayers[select.value]);
         $('reading').replaceChildren();
         if (window.rosaryFormatAmens) window.rosaryFormatAmens($('reading'), text);
         else $('reading').textContent = text;
       };
-      select.onchange = showSelectedPrayer;
+      const actions=document.createElement('div');
+      actions.className='rosario-editor-actions';
+      const editor=document.createElement('textarea');
+      editor.className='rosario-prayer-editor';
+      editor.rows=7;editor.hidden=true;
+      const editBtn=document.createElement('button');
+      editBtn.type='button';editBtn.textContent='Editar oración';
+      const saveBtn=document.createElement('button');
+      saveBtn.type='button';saveBtn.textContent='Guardar';saveBtn.hidden=true;
+      const undoBtn=document.createElement('button');
+      undoBtn.type='button';undoBtn.textContent='Restaurar original';undoBtn.hidden=true;
+      const loadEditor=()=>{
+        editor.value=window.rosarioPrayerText(select.value) || prayers[select.value] || '';
+        editor.hidden=false;saveBtn.hidden=false;undoBtn.hidden=false;
+        editBtn.hidden=true;
+      };
+      editBtn.onclick=loadEditor;
+      saveBtn.onclick=()=>{
+        if(window.rosarioSavePrayer(select.value,editor.value)){
+          editor.hidden=saveBtn.hidden=undoBtn.hidden=true;
+          editBtn.hidden=false;showSelectedPrayer();
+        }
+      };
+      undoBtn.onclick=()=>{
+        window.rosarioRestorePrayer(select.value);
+        editor.hidden=saveBtn.hidden=undoBtn.hidden=true;
+        editBtn.hidden=false;showSelectedPrayer();
+      };
+      actions.append(editBtn,saveBtn,undoBtn);
+      $('reading').after(editor,actions);
+      select.onchange=()=>{
+        editor.hidden=saveBtn.hidden=undoBtn.hidden=true;
+        editBtn.hidden=false;showSelectedPrayer();
+      };
       showSelectedPrayer();
     };
 
