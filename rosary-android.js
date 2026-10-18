@@ -76,22 +76,16 @@
     const root=document.createElement('section');
     root.className='android-native-settings';
 
-    const title=document.createElement('h3');
-    title.textContent='Android';
-    root.append(title);
-
     const reminder=document.createElement('fieldset');
     reminder.className='android-reminder';
-    const legend=document.createElement('legend');
-    legend.textContent='Recordatorio para rezar';
-    reminder.append(legend);
+    reminder.setAttribute('aria-label','Recordatorio para rezar');
     const toggle=document.createElement('label');
     toggle.className='android-setting-row';
     const txt=document.createElement('span');
     txt.textContent='Activar recordatorio';
     const enabled=document.createElement('input');
     enabled.type='checkbox';enabled.checked=Boolean(pref.remind);
-    enabled.setAttribute('aria-label','Activar recordatorio para rezar');
+    enabled.setAttribute('aria-label','Activar recordatorio');
     toggle.append(txt,enabled);
     reminder.append(toggle);
 
