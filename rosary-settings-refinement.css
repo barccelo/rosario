@@ -195,3 +195,141 @@
 #modal .rosario-selection-close:focus-visible{
   outline:2px solid var(--ui-accent);outline-offset:-2px;
 }
+
+
+/* Unificación final de Ajustes y Navegación (v0.1.26).
+   Sólo los grupos independientes usan separador. Su contenido no. */
+#modalContent > :is(
+  fieldset.physical-layout-settings,
+  fieldset.rosary-colors-settings,
+  section.rosario-preferences-group,
+  section.android-native-settings
+){
+  display:block!important;
+  margin:16px 0 0!important;
+  padding:17px 0 0!important;
+  border:0!important;
+  border-top:1px solid var(--ui-rule)!important;
+  width:100%!important;
+  min-width:0!important;
+}
+#modalContent > fieldset.physical-layout-settings legend,
+#modalContent > fieldset.rosary-colors-settings legend{
+  width:100%!important;padding:0 0 10px!important;
+  margin:0!important;float:none!important;
+  font:600 18px/1.35 Georgia,serif!important;
+}
+#modalContent > section.rosario-preferences-group > h3{
+  font:600 18px/1.35 Georgia,serif!important;
+  margin:0 0 10px!important;
+}
+#modalContent > .android-native-settings > fieldset.android-reminder{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+  border:0!important;
+  border-top:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+#modalContent .android-native-settings .android-setting-row{
+  margin:0!important;
+}
+#modalContent .android-native-settings .android-setting-label{
+  margin:0!important;
+}
+#modalContent .android-native-settings .android-setting-days-title{
+  margin:4px 0 -5px!important;
+}
+#modalContent .android-native-settings .android-setting-days{
+  margin:0!important;
+}
+#modalContent .android-native-settings .android-save-reminder{
+  margin:2px 0 0!important;
+}
+#modalContent .android-native-settings #androidReminderStatus:empty{
+  display:none!important
+}
+#modalContent .rosario-preferences-group .rosario-tone-setting,
+#modalContent .rosario-preferences-group button.voice-settings-link{
+  margin:0!important;
+}
+#modalContent > .rosario-preferences-group .voice-settings-link{
+  min-height:51px!important;
+}
+#modalContent .rosary-colors-variants,
+#modalContent .rosary-colors-mode-list,
+#modalContent .physical-layout-options{
+  gap:8px!important;
+}
+#modalContent .nav-tabs{
+  row-gap:8px!important;column-gap:8px!important;
+  margin:4px 0 17px!important;
+}
+#modalContent .nav-list{
+  gap:10px!important;
+  margin:0!important;
+  padding:0 1px 12px!important;
+}
+#modalContent .nav-list > :is(label,.rosario-inline-options,.jac-intro){
+  margin:0!important;
+}
+#modalContent .nav-list .rosario-tone-setting{
+  min-height:65px!important;
+  margin:0!important;
+  padding:11px 13px!important;
+  gap:13px!important;
+}
+#modalContent .nav-list .rosario-tone-setting > .rosario-choice-trigger{
+  margin:0!important;
+}
+#modalContent .nav-list .rosario-inline-options{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:9px!important;
+  margin:0!important;padding:0!important;
+}
+#modalContent .nav-list .rosario-inline-options label{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:13px!important;
+  margin:0!important;
+  min-height:58px!important;
+  padding:10px 14px!important;
+}
+#modalContent .nav-list .rosario-inline-options input[type=radio]{
+  margin:0!important;flex:0 0 auto!important;
+}
+#modalContent .nav-list .rosario-inline-options span{
+  flex:1!important;text-align:left!important;
+}
+#modalContent .nav-list .jac-choice{
+  margin:0!important;
+}
+#modalContent .rosario-nav-dialog{
+  gap:9px!important;margin:0!important;
+}
+#modalContent .rosario-nav-dialog > .rosario-nav-setting{
+  margin:0!important;padding:12px 14px!important;
+  min-height:68px!important;
+}
+#modalContent .rosario-text-animation-settings{
+  margin:4px 0 0!important;padding:14px 0 0!important;
+  border-top:1px solid var(--ui-rule)!important;
+}
+#modalContent .rosario-text-animation-settings .rosario-animation-choices{
+  gap:8px!important;margin:10px 0 0!important;
+}
+#modalContent .rosario-text-animation-settings .rosario-animation-option{
+  margin:0!important;
+}
+#modalContent .rosario-navigation-volume{
+  margin:13px 0 0!important;padding:12px 0 0!important;
+  border:0!important;border-top:1px solid var(--ui-rule)!important;
+}
+#modalContent .rosario-navigation-volume legend{
+  margin:0!important;padding:0 0 7px!important;
+  font:600 17px/1.3 Georgia,serif!important;
+}
