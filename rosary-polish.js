@@ -107,7 +107,9 @@
       // Durante las tres vueltas de la Estación el primer fragmento
       // pertenece siempre al Guía y el segundo a la Asamblea. El
       // dorado no debe alternar en la segunda vuelta.
-      if(Number.isInteger(step.stationNumber))return ['guide','assembly'];
+      if(Number.isInteger(step.stationNumber) ||
+        step.title==='Avemaría'&&step.n===10&&(step.m===1||step.m===3))
+        return ['guide','assembly'];
       const i = step.m>=0 && step.m<5 ? step.m :
         Number.isInteger(step.dedication) ? step.dedication :
         Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
@@ -156,7 +158,10 @@
       title.textContent=groups[state.group][step.m];
       title.setAttribute('aria-label','Leer meditación: '+title.textContent);
       title.onclick=()=>window.rosarioOpenMeditation?.(step.m);
-      prayer.append(label,title);
+      const frame=document.createElement('div');
+      frame.className='rosario-mystery-frame';
+      frame.append(label,title);
+      prayer.append(frame);
     }
     function specialSymbol() {
       const symbol=document.createElement('span');
@@ -251,7 +256,7 @@
             picker.type='button';
             picker.className='contrition-quick-choice';
             picker.setAttribute('aria-label','Cambiar acto de contrición');
-            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+            picker.innerHTML='<span class="contrition-notch-grooves" aria-hidden="true"></span>';
             picker.onclick=()=>window.rosarioOpenContritionChoice?.();
             heading.append(picker);
           }
@@ -265,24 +270,12 @@
           const [a,b]=voiceOrder(step);
           appendVoice(pair[0],a);
           const second=pair.slice(1).join('\n\n');
-          // Únicamente en la décima Avemaría de los misterios II y IV,
-          // añadir «Gloria» a la intervención de la Asamblea, no al
-          // fragmento definido como dorado por el tema de color.
+          // En los misterios II y IV, solamente en la décima Avemaría,
+          // la Asamblea dice «Gloria» inmediatamente ANTES de «Santa María».
+          // Se preserva el primer «Dios te salve» sin modificaciones.
           const addGloria=step.title==='Avemaría'&&step.n===10&&
             (step.m===1||step.m===3)&&state.assemblyEnabled!==false;
-          // El orden de voces puede variar por misterio.
-          const gloriaPart=text=>addGloria?'Gloria.\n'+text:text;
-          if(addGloria&&a==='assembly'){
-            const first=prayer.querySelector('.prayer-part:first-child');
-            if(first) {
-              first.replaceChildren();
-              const name=document.createElement('span');
-              name.className='voice-label';name.textContent='Asamblea';
-              first.append(name);
-              appendWithAmen(first,gloriaPart(pair[0]));
-            }
-          }
-          appendVoice(addGloria&&b==='assembly'?gloriaPart(second):second,b);
+          appendVoice(addGloria?'Gloria.\n'+second:second,b);
         }else appendWithAmen(prayer,source);
       }else{
         prayer.replaceChildren();
@@ -300,9 +293,44 @@
       return cross;
     }
     const prior=render;
+    let lastRenderedIndex=null,lastRenderedTitle=null;
     render=function(){
+      const step=steps[state.index];
+      const mode=state.textTransition;
+      const animate=lastRenderedIndex!==null&&state.index!==lastRenderedIndex&&
+        lastRenderedTitle==='Avemaría'&&step?.title==='Avemaría'&&
+        step.m>=0&&step.m<5&&['fade','slide','soft'].includes(mode);
+      let ghost=null,ghostOffset=null;
+      if(animate){
+        const previous=prayer.getBoundingClientRect();
+        const container=reading.getBoundingClientRect();
+        ghost=prayer.cloneNode(true);
+        ghost.removeAttribute('id');
+        ghost.setAttribute('aria-hidden','true');
+        ghost.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+        ghostOffset={x:previous.left-container.left,
+          y:previous.top-container.top+reading.scrollTop,
+          width:previous.width};
+      }
       prior();
       renderPrayer();
+      prayer.classList.remove('rosario-animate-in-fade',
+        'rosario-animate-in-slide','rosario-animate-in-soft');
+      if(animate){
+        if(ghost&&ghostOffset){
+          ghost.classList.add('rosario-transition-ghost',
+            'rosario-animate-out-'+mode);
+          ghost.style.left=ghostOffset.x+'px';
+          ghost.style.top=ghostOffset.y+'px';
+          ghost.style.width=ghostOffset.width+'px';
+          reading.append(ghost);
+          setTimeout(()=>ghost.remove(),540);
+        }
+        void prayer.offsetWidth;
+        prayer.classList.add('rosario-animate-in-'+mode);
+      }
+      lastRenderedIndex=state.index;
+      lastRenderedTitle=step?.title||null;
     };
     const readFull=document.getElementById('readFull');
     if(readFull)readFull.hidden=true;
