@@ -37,9 +37,8 @@
     ];
     state.rosaryViewLayout=state.rosaryViewLayout==='vertical'?'vertical':'physical';
     state.rosarySide=state.rosarySide==='right'?'right':'left';
-    state.rosarySwipeMode=state.rosarySwipeMode==='uniform'?'uniform':'follow';
-    // La cuerda cambia su caída un día nuevo sin cambiar las cuentas.
-    state.rosaryThreadDaily=state.rosaryThreadDaily!==false;
+    state.rosarySwipeMode=['follow','uniform','down'].includes(state.rosarySwipeMode)?state.rosarySwipeMode:'follow';
+    // La cuerda varía automáticamente cada día; no requiere preferencia.
     window.rosarioSetSide=side=>{
       state.rosarySide=side==='right'?'right':'left';
       persist();render();
@@ -192,17 +191,10 @@
         // Los giros completos superior e inferior no se modifican.
         if(Number.isInteger(threadIndex)&&
            Math.abs(to.x-from.x)<8&&Math.abs(to.y-from.y)>35){
-          if(state.rosaryThreadDaily){
-            c1.x+=threadNoise(threadIndex,1)*4.6;
-            c2.x+=threadNoise(threadIndex,2)*4.6;
-            c1.y+=threadNoise(threadIndex,3)*1.7;
-            c2.y+=threadNoise(threadIndex,4)*1.7;
-          }else{
-            c1.x+=Math.sin(threadIndex*1.73+.4)*4.0+
-              Math.cos(threadIndex*.63)*1.0;
-            c2.x+=Math.sin(threadIndex*2.19+1.1)*3.8+
-              Math.cos(threadIndex*.87+.7)*.8;
-          }
+          c1.x+=threadNoise(threadIndex,1)*4.6;
+          c2.x+=threadNoise(threadIndex,2)*4.6;
+          c1.y+=threadNoise(threadIndex,3)*1.7;
+          c2.y+=threadNoise(threadIndex,4)*1.7;
         }
         return'M '+at(from)+' C '+at(c1)+' '+at(c2)+' '+at(to);
       }
@@ -342,6 +334,7 @@
     // Las oraciones introductorias y los cierres de cada misterio
     // heredan la dirección de su cuenta correspondiente.
     function physicalSwipeDown(){
+      if(state.rosarySwipeMode==='down')return true;
       if(state.rosaryViewLayout!=='physical'||state.rosarySwipeMode==='uniform')return false;
       const step=steps[state.index];
       if(!step)return false;
@@ -817,37 +810,11 @@
         haloOptions.append(label);
       });
       haloField.append(haloLegend,haloOptions);
-      const threadField=document.createElement('fieldset');
-      threadField.className='physical-layout-settings physical-thread-settings';
-      const threadLegend=document.createElement('legend');
-      threadLegend.textContent='Hilo del rosario';
-      const threadOption=document.createElement('label');
-      threadOption.className='physical-thread-option';
-      const threadCopy=document.createElement('span');
-      const threadTitle=document.createElement('strong');
-      threadTitle.textContent='Variación diaria del hilo';
-      const threadHelp=document.createElement('small');
-      threadHelp.textContent='Cada día una caída ligeramente distinta del cordón, sin mover las cuentas.';
-      threadCopy.append(threadTitle,threadHelp);
-      const threadCheck=document.createElement('input');
-      threadCheck.type='checkbox';
-      threadCheck.checked=state.rosaryThreadDaily;
-      threadCheck.onchange=()=>{
-        state.rosaryThreadDaily=threadCheck.checked;
-        persist();
-        // Conservar exactamente el encuadre actual al regenerar
-        // exclusivamente las curvas del cordón, no el movimiento.
-        const scroll=viewport.scrollTop;
-        draw();paint();viewport.scrollTop=scroll;
-      };
-      threadOption.append(threadCopy,threadCheck);
-      threadField.append(threadLegend,threadOption);
       const controls=host.querySelector('.rosario-preferences-group');
       if(controls){
         host.insertBefore(field,controls);
         host.insertBefore(haloField,controls);
-        host.insertBefore(threadField,controls);
-      }else host.append(field,haloField,threadField);
+      }else host.append(field,haloField);
     };
     // Primer encuadre: después de pintar y de medir el CSS cargado.
     // Se vuelve a intentar si el navegador todavía no ha terminado
@@ -877,7 +844,7 @@
     // La caída diaria se actualiza al regresar a la aplicación después
     // de medianoche, manteniendo el scroll y la oración actuales.
     const checkDailyThread=()=>{
-      if(!state.rosaryThreadDaily||drawnThreadDate===threadDateKey())return;
+      if(drawnThreadDate===threadDateKey())return;
       const scroll=viewport.scrollTop;
       draw();paint();viewport.scrollTop=scroll;
     };
