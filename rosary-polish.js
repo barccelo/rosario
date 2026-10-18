@@ -256,7 +256,7 @@
             picker.type='button';
             picker.className='contrition-quick-choice';
             picker.setAttribute('aria-label','Cambiar acto de contrición');
-            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 2.5h4l.5 2.3c.65.18 1.27.44 1.84.77l2-1.28 2.82 2.82-1.28 2c.33.57.59 1.19.77 1.84l2.35.55v4l-2.35.5c-.18.65-.44 1.27-.77 1.84l1.28 2-2.82 2.82-2-1.28c-.57.33-1.19.59-1.84.77l-.5 2.35h-4l-.55-2.35a8.1 8.1 0 0 1-1.84-.77l-2 1.28-2.82-2.82 1.28-2a8.1 8.1 0 0 1-.77-1.84L2 15.5v-4l2.3-.55c.18-.65.44-1.27.77-1.84l-1.28-2 2.82-2.82 2 1.28c.57-.33 1.19-.59 1.84-.77L10 2.5Z"/><circle cx="12" cy="13.5" r="3.15"/></svg>';
+            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2 1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg>';
             picker.onclick=()=>window.rosarioOpenContritionChoice?.();
             heading.append(picker);
           }
