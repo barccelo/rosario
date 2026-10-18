@@ -254,3 +254,16 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - En la Salve, el encabezado es «te saludamos» con Asamblea activa y «te saludo» con Asamblea desactivada. Al concluir se añade el paso **Avemaría Purísima / Sin pecado concebida**, con marcas ℣/℟ SVG, inmediatamente antes de «El Señor nos bendiga…».
 - **Migración v7→v8**: el índice guardado en la secuencia de v0.1.23 se reasigna a la oración equivalente, incluso cuando se han eliminado Padrenuestros y Glorias de las intenciones finales, evitando perder el progreso.
 - Comprobaciones estáticas: sintaxis de los módulos, secuencia completa de 174 pasos, tres Estaciones de 4 oraciones, 63 letanías, correcciones de texto, migración de la segunda intención, editor de letanías y Cordero de Dios, recursos CSS/JS y vínculo del SVG de respuesta. Verificar visualmente en Android antes de dar por terminada la revisión.
+
+## Ajustes visuales y litúrgicos — v0.1.25
+
+- La transición entre Avemarías anima el **texto**, no las cuentas. Cuatro opciones en **Controles e interacción**: Fundido, Deslizamiento, Enfoque y Sin animación, con una oración de muestra y botón para reproducir. El modo elegido se guarda localmente y respeta el ajuste de movimiento reducido.
+- Guía y Asamblea cuentan con tres colores independientes: **blanco/color del texto**, **dorado clásico** y **acento del misterio**. Las letanías usan también el acento seleccionado para sus respuestas, títulos y marco.
+- El Acto de contrición muestra una **muesca circular discreta** para cambiar la fórmula, sin flecha desplegable.
+- Misterios II y IV: en la décima Avemaría, «Gloria.» se presenta antes de **«Santa María»** (segundo fragmento, Asamblea), nunca antes de «Dios te salve».
+- Oración final: se restituye «para que aquellos que» y se conservan «hemos conocido» / «seamos llevados». La intención conclusiva vuelve a decir «Por la persona e intenciones del señor Obispo de esta Diócesis». La respuesta a «Ave María Purísima» es «Sin pecado **original** concebida».
+- Anuncio del misterio y encabezado durante el Padrenuestro/Avemarías reciben un **contorno fino dorado** equivalente a las letanías, con interiores compactos para no desplazar el contenido.
+- Ajustes separados en secciones **Presentación / Iluminación / Controles e interacción / Oraciones / Participación / Recordatorio**. El menú de navegación (días, misterios, oraciones) conserva su función y nombre; los ajustes físicos se llaman ahora **Configurar controles**, sin duplicar «Navegación».
+- En la APK, se eliminan los títulos «Android» y «Recordatorio para rezar»: queda **Activar recordatorio**, más su hora y selección de días.
+- Los formularios dejan de heredar márgenes excesivos entre las tarjetas, como en la captura de la versión anterior.
+- La secuencia sigue en v8 y el índice de oración guardado no cambia al instalar esta actualización. Se verificaron la sintaxis de los JS, las 63 letanías y el texto del Obispo, la conclusión y la respuesta final.
