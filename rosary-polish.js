@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261017-3';
+    sheet.href = 'rosary-polish.css?v=20261018-1';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -256,7 +256,7 @@
             picker.type='button';
             picker.className='contrition-quick-choice';
             picker.setAttribute('aria-label','Cambiar acto de contrición');
-            picker.innerHTML='<span class="contrition-notch-grooves" aria-hidden="true"></span>';
+            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 2.5h4l.5 2.3c.65.18 1.27.44 1.84.77l2-1.28 2.82 2.82-1.28 2c.33.57.59 1.19.77 1.84l2.35.55v4l-2.35.5c-.18.65-.44 1.27-.77 1.84l1.28 2-2.82 2.82-2-1.28c-.57.33-1.19.59-1.84.77l-.5 2.35h-4l-.55-2.35a8.1 8.1 0 0 1-1.84-.77l-2 1.28-2.82-2.82 1.28-2a8.1 8.1 0 0 1-.77-1.84L2 15.5v-4l2.3-.55c.18-.65.44-1.27.77-1.84l-1.28-2 2.82-2.82 2 1.28c.57-.33 1.19-.59 1.84-.77L10 2.5Z"/><circle cx="12" cy="13.5" r="3.15"/></svg>';
             picker.onclick=()=>window.rosarioOpenContritionChoice?.();
             heading.append(picker);
           }
@@ -295,44 +295,62 @@
     // Se anima un único elemento real. Jamás crear una copia del
     // texto: los clones anteriores causaban superposición y negritas.
     const transitions=new WeakMap();
+    // Transiciones elegidas por el usuario. Animan el único bloque de
+    // lectura, sin clones ni dependencia de la escala de Android.
     function animateText(element,mode,swap){
-      const active=transitions.get(element);
-      if(active)active.cancel();
-      const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-      if(mode==='none'||reduced||!element.animate){
+      transitions.get(element)?.cancel();
+      if(mode==='none'||!['fade','slide','soft'].includes(mode)){
         swap();return;
       }
-      let stopped=false;
-      let running;
-      const task={
-        cancel(){
-          stopped=true;
-          if(running)running.cancel();
-          element.style.opacity='';
-          transitions.delete(element);
+      const raf=window.requestAnimationFrame?.bind(window);
+      const cancelRaf=window.cancelAnimationFrame?.bind(window);
+      if(!raf||!cancelRaf){swap();return;}
+      const durations={fade:[310,450],slide:[240,570],soft:[300,560]}[mode];
+      let stopped=false,handle=null,stage=0,start=null;
+      const clean=()=>{
+        element.style.opacity='';
+        element.style.transform='';
+        element.style.filter='';
+        element.style.willChange='';
+      };
+      const task={cancel(){
+        stopped=true;
+        if(handle!==null)cancelRaf(handle);
+        clean();
+        if(transitions.get(element)===task)transitions.delete(element);
+      }};
+      transitions.set(element,task);
+      const smooth=t=>t*t*(3-2*t);
+      const draw=(progress,arriving)=>{
+        const eased=smooth(Math.max(0,Math.min(progress,1)));
+        const opacity=arriving?eased:1-eased;
+        element.style.opacity=String(opacity);
+        if(mode==='slide'){
+          const distance=arriving?(1-eased)*20:-eased*13;
+          element.style.transform='translate3d(0,'+distance.toFixed(2)+'px,0)';
+          element.style.filter='';
+        }else if(mode==='soft'){
+          element.style.transform='';
+          element.style.filter='blur('+((1-opacity)*5.5).toFixed(2)+'px)';
+        }else{
+          element.style.transform='';element.style.filter='';
         }
       };
-      transitions.set(element,task);
-      running=element.animate([{opacity:1},{opacity:0}],
-        {duration:145,easing:'ease-in',fill:'forwards'});
-      running.onfinish=()=>{
+      const frame=now=>{
         if(stopped)return;
-        swap();
-        running.cancel();
-        const frames=mode==='slide'
-          ?[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}]
-          :mode==='soft'
-          ?[{opacity:0,filter:'blur(2px)'},{opacity:1,filter:'blur(0)'}]
-          :[{opacity:0},{opacity:1}];
-        running=element.animate(frames,{
-          duration:mode==='slide'?440:mode==='soft'?480:360,
-          easing:'cubic-bezier(.18,.65,.26,1)',fill:'both'
-        });
-        running.onfinish=()=>{
-          if(stopped)return;
-          running.cancel();transitions.delete(element);
-        };
+        if(start===null)start=now;
+        const progress=Math.min(1,(now-start)/durations[stage]);
+        draw(progress,stage===1);
+        if(progress<1){
+          handle=raf(frame);return;
+        }
+        if(stage===0){
+          swap();stage=1;start=null;draw(0,true);handle=raf(frame);
+        }else{clean();transitions.delete(element);}
       };
+      element.style.willChange='opacity,transform,filter';
+      draw(0,false);
+      handle=raf(frame);
     }
     window.rosarioAnimateText=animateText;
     const prior=render;
