@@ -234,7 +234,7 @@
           const heading=document.createElement('span');
           heading.className='reading-prayer-heading';
           heading.textContent=step.title==='Salve'
-            ? (state.voiceLabels!==false&&state.voiceColors!==false
+            ? (state.assemblyEnabled!==false
               ? 'Y ahora te saludamos con una Salve'
               : 'Y ahora te saludo con una Salve')
             : step.title==='Oración final' ? 'Oración'
@@ -252,7 +252,8 @@
           }
           prayer.append(heading);
         }
-        const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
+        const voices=state.assemblyEnabled!==false&&
+          (step.title==='Padrenuestro'||step.title==='Avemaría'||
           step.title==='Gloria'||step.kind==='jaculatory');
         const pair=step.kind==='jaculatory'?addJaculatoria(step,source):source.split(/\n\s*\n/);
         if(voices && pair.length>=2){
@@ -263,8 +264,7 @@
           // añadir «Gloria» a la intervención de la Asamblea, no al
           // fragmento definido como dorado por el tema de color.
           const addGloria=step.title==='Avemaría'&&step.n===10&&
-            (step.m===1||step.m===3)&&state.voiceLabels!==false&&
-            state.voiceColors!==false;
+            (step.m===1||step.m===3)&&state.assemblyEnabled!==false;
           // El orden de voces puede variar por misterio.
           const gloriaPart=text=>addGloria?'Gloria.\n'+text:text;
           if(addGloria&&a==='assembly'){
