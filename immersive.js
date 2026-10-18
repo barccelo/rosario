@@ -229,10 +229,8 @@ document.addEventListener('pointerup',event=>{
   }
   if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)){
     suppressClickUntil=performance.now()+800;
-    // En la vista física, el avance sigue la dirección del hilo:
-    // izquierda/colgante = swipe hacia abajo; derecha = hacia arriba.
-    const forwardDown=state.rosaryViewLayout==='physical' &&
-      window.rosarioPhysicalSwipeDown?.();
+    // El modo elegido decide si avanzar es hacia arriba o hacia abajo.
+    const forwardDown=window.rosarioPhysicalSwipeDown?.()===true;
     const forward=forwardDown?dy>0:dy<0;
     if(forward)advance();
     else if(state.index>0){state.index--;rosarioHaptic();render();}
@@ -261,8 +259,7 @@ reading.addEventListener('touchend',event=>{
   if(!back&&!next)return;
   suppressClickUntil=performance.now()+850;
   cancelGesture();
-  const forwardDown=state.rosaryViewLayout==='physical' &&
-    window.rosarioPhysicalSwipeDown?.();
+  const forwardDown=window.rosarioPhysicalSwipeDown?.()===true;
   const forward=forwardDown?back:next;
   if(forward)advance();
   else if(state.index>0){state.index--;rosarioHaptic();render();}
