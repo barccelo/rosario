@@ -4,6 +4,7 @@
   'use strict';
 
   const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const mondayFirst=[1,2,3,4,5,6,0]; // Conservar números JS para fechas.
   const dayGroups = ['Gloriosos', 'Gozosos', 'Dolorosos', 'Gloriosos', 'Luminosos', 'Dolorosos', 'Gozosos'];
   const dateKey = () => {
     const d = new Date();
@@ -79,7 +80,7 @@
     'antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.';
   prayers['Oración final'] =
     'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que aquellos que, por el anuncio del ángel, ' +
-    'han conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, sean llevados a la gloria de su resurrección. ' +
+    'hemos conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, seamos llevados a la gloria de su resurrección. ' +
     'Por Jesucristo nuestro Señor. Amén.';
 
   const litanyOpening = [
@@ -107,7 +108,7 @@
     'Torre de David', 'Torre de marfil', 'Casa de oro', 'Arca de la Alianza',
     'Puerta del cielo', 'Estrella de la mañana', 'Salud de los enfermos',
     'Refugio de los pecadores', 'Consuelo de los migrantes',
-    'Consoladora de los afligidos', 'Auxilio de los cristianos',
+    'Consuelo de los afligidos', 'Auxilio de los cristianos',
     'Reina de los Ángeles', 'Reina de los Patriarcas', 'Reina de los Profetas',
     'Reina de los Apóstoles', 'Reina de los Mártires', 'Reina de los Confesores',
     'Reina de las Vírgenes', 'Reina de todos los Santos',
@@ -119,7 +120,9 @@
     if (i < 5) return { verse: line, response: line };
     if (i < 9) {
       const separator = ', ten misericordia de nosotros.';
-      return { verse: line.slice(0, -separator.length) + ',', response: 'ten misericordia de nosotros.' };
+      return { verse: line.endsWith(separator)
+        ? line.slice(0,-separator.length)+',' : line.replace(/,?\s*ten piedad de nosotros\.$/,','),
+        response: 'ten piedad de nosotros.' };
     }
     return { verse: line.replace(/ ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
   });
@@ -137,13 +140,26 @@
   // La antigua etiqueta era incorrecta: esta fórmula corresponde a la Estación.
   delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
-    'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos.';
+    'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos. Amén.';
   // Respuestas en dos intervenciones, igual que en el Padrenuestro y el Avemaría.
   prayers.Gloria = 'Gloria al Padre, y al Hijo, y al Espíritu Santo.\n\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
   prayers['Señor mío Jesucristo'] =
     'Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío: por ser Vos quien sois y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido.\n\n' +
     'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n\n' +
     'Ofrezco, Señor, mi vida, obras y trabajos en satisfacción de todos mis pecados; y, así como lo suplico, confío en vuestra bondad y misericordia infinita que los perdonaréis por los méritos de vuestra preciosísima sangre, pasión y muerte, y me daréis gracia para enmendarme y perseverar en vuestro santo amor y servicio hasta el fin de mi vida. Amén.';
+  const contritionTraditional=prayers['Señor mío Jesucristo']; 
+  prayers['Acto de contrición (Jesús, mi Señor y Redentor)'] =
+    'Jesús, mi Señor y Redentor, yo me arrepiento de todos los pecados que he cometido hasta hoy, '+
+    'y me pesa de todo corazón porque con ellos he ofendido a un Dios tan bueno. '+
+    'Propongo firmemente no volver a pecar y confío en que por tu infinita misericordia '+
+    'me has de conceder el perdón de mis culpas y me has de llevar a la vida eterna. Amén.';
+  // Dos textos, una sola estación; cambiar de versión nunca mueve la cuenta.
+  state.contritionVersion=saved.contritionVersion==='redentor'?'redentor':'jesucristo';
+  window.rosarioContritionText=()=>{
+    return state.contritionVersion==='redentor'
+      ?prayers['Acto de contrición (Jesús, mi Señor y Redentor)']
+      :prayers['Señor mío Jesucristo'];
+  };
   prayers['Versículos iniciales'] =
     '℣. Señor, ábreme los labios.\n℟. Y mi boca proclamará tu alabanza.\n\n℣. Dios mío, ven en mi auxilio.\n℟. Señor, date prisa en socorrerme.';
   prayers['Intenciones finales'] = 'Por las necesidades de la Iglesia y del Estado; por el obispo de esta diócesis y sus intenciones; y por las benditas ánimas del purgatorio.';
@@ -337,6 +353,7 @@
   ];
   const allMysteryIntentions = Object.values(mysteryIntentions).flat(2);
   const defaultIntentions = [...initialIntentions,...allMysteryIntentions];
+  state.intentionSelectionMode=saved.intentionSelectionMode==='random'?'random':'mystery';
   const existingIntentions = Array.isArray(saved.intentionPool)
     ? [...new Set(saved.intentionPool.filter(t=>typeof t==='string').map(t=>t.trim()).filter(Boolean))]
     : [...initialIntentions];
@@ -354,7 +371,8 @@
     const relevant=mysteryIntentions[state.group]?.[m] || [];
     const custom=state.intentionPool.filter(t=>!defaultIntentions.includes(t));
     const matched=state.intentionPool.filter(t=>relevant.includes(t)||custom.includes(t));
-    const pool=matched.length?matched:state.intentionPool;
+    const pool=state.intentionSelectionMode==='random'
+      ? state.intentionPool : (matched.length?matched:state.intentionPool);
     const current=state.intentionCycle[m];
     if(current && pool.includes(current)) return current;
     const used=state.intentionCycle.filter((t,i)=>i!==m && pool.includes(t));
@@ -411,8 +429,8 @@
   ].forEach(({ invocation, occasion }, i) => {
     nextSteps.push({
       title: 'Virgen purísima y castísima', kind: 'dialogue', m: 5, dedication: i,
-      verse: 'Virgen purísima y castísima, ' + occasion + ', hacednos mansos, humildes y castos.',
-      response: 'En pensamiento, palabra y obra.'
+      verse: 'Virgen purísima y castísima, ' + occasion + ', hacednos, Señora, mansos, humildes, puros y castos.',
+      response: 'En pensamientos, palabras y obras.'
     });
     nextSteps.push({
       title: 'Avemaría', m: 5, kind: 'dedication', dedication: i,
@@ -442,16 +460,15 @@
     response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   nextSteps.push({ title: 'Oración final', m: 5 });
   [
-    { name: 'La Iglesia y el Estado', intro: 'Por las necesidades de la Iglesia y del Estado:', rest: false },
-    { name: 'El obispo', intro: 'Por la persona e intenciones del obispo de esta diócesis:', rest: false },
-    { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:', rest: true }
+    { name: 'La Iglesia', intro: 'Por las necesidades de la Iglesia:' },
+    { name: 'Las intenciones', intro: 'Por la persona e intenciones por las que rezamos:' },
+    { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:' }
   ].forEach((intention, i) => {
-    // Resaltar la intención junto a la oración siguiente, sin un swipe redundante.
-    nextSteps.push({ title: 'Padrenuestro', m: 5, intentionNumber: i, intention: intention.intro });
-    nextSteps.push({ title: 'Avemaría', m: 5, intentionNumber: i });
-    if (intention.rest) nextSteps.push({ title: 'Descansen en paz', m: 5,
-      intentionNumber: i, text: 'Descansen en paz. Amén.' });
-    else nextSteps.push({ title: 'Gloria', m: 5, intentionNumber: i });
+    // Exactamente UNA Avemaría por intención, sin Padrenuestro ni Gloria.
+    nextSteps.push({ title: 'Avemaría', m: 5, intentionNumber: i,
+      intention: intention.intro });
+    if(i===2) nextSteps.push({ title: 'Descansen en paz',m:5,intentionNumber:i,
+      text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén' });
   });
   // Última oración del Rosario: la Salve seguida de su respuesta
   // independiente, y después la bendición de la pantalla final.
@@ -461,6 +478,8 @@
       verse: 'Ruega por nosotros, Santa Madre de Dios.',
       response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   }
+  nextSteps.push({title:'Avemaría purísima',kind:'dialogue',m:5,
+    verse:'Ave María Purísima.',response:'Sin pecado concebida.'});
     return nextSteps;
   }
   steps = buildRosarySteps();
@@ -485,7 +504,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 7;
+    state.sequenceVersion = 8;
     render();
   }
 
@@ -600,7 +619,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 7;
+  state.sequenceVersion = 8;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -628,11 +647,19 @@
     return 'En el ' + ordinals[step.m] + ' misterio ' + mysterySingular[state.group] +
       ' contemplamos:\n\n' + groups[state.group][step.m] + '.';
   };
+  state.prayerEdits=(saved.prayerEdits&&typeof saved.prayerEdits==='object'&&!Array.isArray(saved.prayerEdits))?saved.prayerEdits:{};
+  const defaultPrayerText=title=>title==='Señor mío Jesucristo'
+    ?window.rosarioContritionText():prayers[title]||'';
+  window.rosarioPrayerText=(title,step)=>{
+    const key=title==='Señor mío Jesucristo'&&state.contritionVersion==='redentor'
+      ?'Acto de contrición (Jesús, mi Señor y Redentor)':title;
+    return Object.prototype.hasOwnProperty.call(state.prayerEdits,key)
+      ?state.prayerEdits[key]:(step?.text||defaultPrayerText(key));
+  };
   const stepText = step => {
     if (!step) return '';
     if (step.kind === 'mystery') return announcement(step);
-    if (step.text) return step.text;
-    return prayers[step.title] || '';
+    return window.rosarioPrayerText(step.title,step);
   };
   const rawRender = render;
   render = function () {
@@ -938,7 +965,8 @@
         list.replaceChildren();
         list.classList.toggle('align-list', selected === 'text');
         if (selected === 'days') {
-          dayNames.forEach((day, i) => {
+          mondayFirst.forEach(i => {
+            const day=dayNames[i];
             appendOption(list, day, 'Misterios ' + dayGroups[i].toLowerCase(), () => {
               state.day = i;
               state.group = dayGroups[i];
