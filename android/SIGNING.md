@@ -267,3 +267,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - En la APK, se eliminan los títulos «Android» y «Recordatorio para rezar»: queda **Activar recordatorio**, más su hora y selección de días.
 - Los formularios dejan de heredar márgenes excesivos entre las tarjetas, como en la captura de la versión anterior.
 - La secuencia sigue en v8 y el índice de oración guardado no cambia al instalar esta actualización. Se verificaron la sintaxis de los JS, las 63 letanías y el texto del Obispo, la conclusión y la respuesta final.
+
+## Interfaz unificada y animación real del texto — v0.1.26
+
+- Eliminado por completo el antiguo clon de la oración durante los cambios de Avemaría: provocaba **dos textos simultáneos**, aspecto de negrita y cruces en pantalla. Ahora sólo existe **un bloque**: salida por opacidad, sustitución del contenido y entrada con la transición elegida (fundido, deslizamiento, enfoque o instantáneo). No se anima ni altera el SVG ni la geometría del rosario.
+- **Vista previa funcional** de las transiciones: alterna entre dos frases de ejemplo distintas con exactamente el mismo motor de animación utilizado al rezar. Los ajustes se guardan y se respetan las preferencias de movimiento reducido del dispositivo.
+- **Anuncio del misterio** y nombre del misterio durante Padrenuestro/Avemarías: sustituido el borde rectangular por el **semiborde de las letanías** (sólo trazos superior e inferior, extremos suavemente redondeados), sin ampliar innecesariamente el bloque.
+- **Unificación de Ajustes**: una sola línea divisoria entre secciones de presentación, iluminación, colores, controles, oraciones, participación y recordatorios. Eliminado el segundo separador generado por el fieldset interior del recordatorio.
+- **Espaciado homogéneo**: tarjetas, controles, selectores de tonos de Guía/Asamblea y opciones de intenciones sin márgenes de formulario duplicados, con separación controlada por el contenedor y no por cada tarjeta.
+- Recursos JS/CSS versionados para evitar contenido antiguo en la WebView o caché del navegador. Progreso, cuentas, colores y lógica litúrgica conservados.
+- Verificación: sintaxis JS correcta, delimitadores CSS equilibrados, prueba de animación con contenido sustituido en el punto medio y sin clon visual, y comprobación de recursos y divisores.
