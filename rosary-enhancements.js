@@ -665,7 +665,7 @@
   state.dayDate = dateKey();
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
-  state.assemblyEnabled=saved.assemblyEnabled!==false;
+  // Una sola opción visual controla las marcas Guía/Asamblea.
   const voiceTones=['white','gold','accent'];
   state.voiceGuideTone=voiceTones.includes(saved.voiceGuideTone)?saved.voiceGuideTone:'white';
   state.voiceAssemblyTone=voiceTones.includes(saved.voiceAssemblyTone)?saved.voiceAssemblyTone:'gold';
@@ -1382,9 +1382,10 @@
           description.textContent='Personaliza las intervenciones del guía y la asamblea, independientemente del tema del rosario.';
           list.append(description);
           [
-            ['assemblyEnabled','Activar asamblea','Alternar respuestas entre guía y asamblea durante el Rosario.'],
-            ['voiceLabels','Mostrar «Guía» y «Asamblea»','Conserva las etiquetas de cada intervención.'],
-            ['voiceColors','Diferenciar las voces por color','Desactívalo para rezar en solitario con un solo color.']
+            ['voiceColors','Diferenciar las voces por color',
+              'Guía y asamblea pueden conservar colores distintos.'],
+            ['voiceLabels','Mostrar «Guía» y «Asamblea»',
+              'Muestra sus nombres; habilita el Gloria especial y «saludamos» en la Salve.']
           ].forEach(([key,title,description])=>{
             const row=document.createElement('label');
             row.className='jac-choice';
@@ -1516,6 +1517,69 @@
       check.type='checkbox';check.checked=state.screenTapNavigation===true;
       check.onchange=()=>{state.screenTapNavigation=check.checked;persist();render();};
       row.append(label,check);root.append(row);
+      const swipeSection=document.createElement('section');
+      swipeSection.className='rosario-swipe-settings';
+      const swipeTitle=document.createElement('h3');
+      swipeTitle.textContent='Sentido del deslizamiento';
+      const swipeIntro=document.createElement('p');
+      swipeIntro.textContent='Elige cómo avanzar deslizando sobre el texto. No cambia el desplazamiento manual de las cuentas.';
+      const swipeOptions=document.createElement('div');
+      swipeOptions.className='rosario-swipe-options';
+      [
+        {value:'follow',title:'Seguir el recorrido',
+         hint:'Al llegar al arco superior, se invierte el gesto de avance.',
+         arrows:['down','up']},
+        {value:'uniform',title:'Siempre hacia arriba',
+         hint:'El mismo gesto avanza durante todo el Rosario.',
+         arrows:['up','up']}
+      ].forEach(choice=>{
+        const card=document.createElement('label');
+        card.className='rosario-swipe-choice';
+        const input=document.createElement('input');
+        input.type='radio';input.name='rosarioSwipeMode';
+        input.value=choice.value;
+        input.checked=state.rosarySwipeMode===choice.value;
+        const details=document.createElement('span');
+        details.className='rosario-swipe-choice-copy';
+        const name=document.createElement('strong');
+        name.textContent=choice.title;
+        const hint=document.createElement('small');
+        hint.textContent=choice.hint;
+        details.append(name,hint);
+        const tutorial=document.createElement('div');
+        tutorial.className='rosario-swipe-tutorial';
+        tutorial.setAttribute('aria-label',
+          'Antes del arco: '+(choice.arrows[0]==='down'?'hacia abajo':'hacia arriba')+
+          '; después del arco: '+(choice.arrows[1]==='down'?'hacia abajo':'hacia arriba'));
+        choice.arrows.forEach((arrow,i)=>{
+          const phase=document.createElement('span');
+          phase.className='rosario-swipe-phase';
+          const caption=document.createElement('span');
+          caption.textContent=i===0?'Subiendo':'Tras el arco';
+          const visual=document.createElement('span');
+          visual.className='rosario-swipe-visual';
+          visual.innerHTML='<svg viewBox="0 0 68 62" aria-hidden="true" focusable="false">'+
+            '<path class="rosario-demo-thread" d="M18 4 V58 M50 4 V58"/>'+
+            '<circle class="rosario-demo-bead" cx="'+(i?50:18)+'" cy="24" r="7"/>'+
+            '<circle class="rosario-demo-bead" cx="'+(i?50:18)+'" cy="45" r="7"/>'+
+            '<path class="rosario-demo-arrow '+(arrow==='down'?'is-down':'is-up')+
+            '" d="'+(arrow==='down'?'M35 14V48 M27 40l8 8 8-8':'M35 48V14 M27 22l8-8 8 8')+'"/>'+
+            '</svg>';
+          phase.append(caption,visual);tutorial.append(phase);
+        });
+        input.onchange=()=>{
+          if(!input.checked)return;
+          state.rosarySwipeMode=choice.value;
+          persist();
+          swipeOptions.querySelectorAll('.rosario-swipe-choice').forEach(row=>
+            row.classList.toggle('selected',row.querySelector('input').checked));
+        };
+        card.classList.toggle('selected',input.checked);
+        card.append(input,details,tutorial);
+        swipeOptions.append(card);
+      });
+      swipeSection.append(swipeTitle,swipeIntro,swipeOptions);
+      root.append(swipeSection);
       const section=document.createElement('section');
       section.className='rosario-text-animation-settings';
       const heading=document.createElement('h3');
