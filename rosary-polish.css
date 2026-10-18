@@ -654,3 +654,29 @@ body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembl
 #modalContent .rosario-preferences-group .rosario-tone-setting{
  margin:0!important;
 }
+
+/* Los selectores reemplazados por botones mantienen las dimensiones
+   compactas y no reintroducen los márgenes genéricos del diálogo. */
+#modalContent .rosario-nav-dialog > .rosario-nav-setting > .rosario-choice-trigger,
+#modalContent .rosario-nav-dialog > .rosario-nav-setting > select + .rosario-choice-trigger{
+ flex:0 0 46%!important;width:46%!important;min-width:0!important;
+ max-width:46%!important;margin:0!important;align-self:center!important;
+ min-height:45px!important
+}
+#modalContent .rosario-nav-dialog > .rosario-nav-setting > span{
+ flex:1 1 auto;min-width:0
+}
+#modalContent .rosario-nav-dialog > .rosario-nav-setting:has(input[type=checkbox]){
+ min-height:68px!important
+}
+#modalContent .rosario-text-animation-settings .rosario-animation-option{
+ min-height:58px!important
+}
+/* Igual que el acento del misterio, también la estructura de la rueda. */
+body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-current{
+ border-color:var(--rc-accent)!important
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-label,
+body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-progress{
+ color:var(--rc-accent)!important
+}
