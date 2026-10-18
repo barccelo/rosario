@@ -277,3 +277,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - **Espaciado homogéneo**: tarjetas, controles, selectores de tonos de Guía/Asamblea y opciones de intenciones sin márgenes de formulario duplicados, con separación controlada por el contenedor y no por cada tarjeta.
 - Recursos JS/CSS versionados para evitar contenido antiguo en la WebView o caché del navegador. Progreso, cuentas, colores y lógica litúrgica conservados.
 - Verificación: sintaxis JS correcta, delimitadores CSS equilibrados, prueba de animación con contenido sustituido en el punto medio y sin clon visual, y comprobación de recursos y divisores.
+
+## Control de contrición y animaciones visibles — v0.1.27
+
+- Reemplazado el símbolo circular de la elección rápida del **Acto de contrición** por el **engranaje SVG clásico idéntico al del botón principal de Ajustes**, manteniendo tamaño y presencia discretos.
+- Corregida la causa por la que **Fundido, Deslizamiento y Enfoque** parecían no producir ningún movimiento en Android: la transición dependía de una API del motor de animaciones y se desactivaba automáticamente con la preferencia de movimiento reducido. Ahora la selección explícita funciona por fotogramas mediante `requestAnimationFrame`, con progresión suave y diferencias perceptibles de opacidad, desplazamiento vertical o desenfoque; **Sin animación** sigue siendo instantánea.
+- Animaciones diferenciadas: Fundido ~760 ms (opacidad), Deslizamiento ~810 ms (opacidad + desplazamiento de 20 px) y Enfoque ~860 ms (opacidad + desenfoque de 5,5 px). Se sustituye el texto una sola vez cuando desaparece, nunca se crea una copia encima de la oración ni se altera el hilo o las cuentas.
+- En configuración, las cuatro opciones de transición utilizan una **cuadrícula fija** de botón de selección a la izquierda y nombre/descripción alineados con el mismo margen izquierdo. Se anulan los márgenes y la justificación heredados de los formularios antiguos.
+- La vista previa reutiliza el mismo motor que la oración. Las opciones y el botón «Reproducir ejemplo» mantienen el texto real alternando entre dos frases.
+- Comprobaciones: sintaxis del módulo válida; simulación temporal de 4 modos, cada uno sustituye exactamente una vez el contenido; icono idéntico al engranaje general; referencias versionadas del script y los estilos; CSS equilibrado.
