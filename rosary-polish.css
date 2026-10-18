@@ -494,3 +494,163 @@ body.subtle-bead-motion .physical-path .physical-bead.active .ring{
  white-space:pre-wrap;tab-size:2}
 .rosario-prayer-editor[hidden]{display:none!important}
 .nav-entry .nav-preview-link:nth-last-child(2){right:96px}
+
+
+/* v0.1.25: el tono dorado es independiente del color de los misterios.
+   La respuesta de las letanías comparte las mismas tres opciones. */
+body:not(.voice-colors-off)[data-voice-guide-tone="gold"] :is(.prayer-part.voice-guide,.dialogue-line.voice-guide),
+body:not(.voice-colors-off)[data-voice-assembly-tone="gold"] :is(.prayer-part.voice-assembly,.dialogue-line.voice-assembly,.litany-wheel .wheel-response){
+ color:#ba975d!important;
+}
+body.dark:not(.voice-colors-off)[data-voice-guide-tone="gold"] :is(.prayer-part.voice-guide,.dialogue-line.voice-guide),
+body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] :is(.prayer-part.voice-assembly,.dialogue-line.voice-assembly,.litany-wheel .wheel-response){
+ color:#dfbf85!important;
+}
+body[data-rosary-color-mode="mystery"]:not(.voice-colors-off)[data-voice-assembly-tone="accent"] .litany-wheel .wheel-response,
+body[data-rosary-color-mode="mystery"]:not(.voice-colors-off)[data-voice-assembly-tone="accent"] .litany-wheel .wheel-response .verse-mark{
+ color:var(--rc-accent,#b58e54)!important;
+}
+body[data-rosary-color-mode="mystery"]:not(.voice-colors-off)[data-voice-guide-tone="accent"] .litany-wheel .wheel-main{
+ color:var(--rc-accent,#b58e54)!important;
+}
+body:not(.voice-colors-off)[data-voice-guide-tone="gold"] .voice-guide .voice-label,
+body:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembly .voice-label{
+ color:#ba975d!important;
+}
+body.dark:not(.voice-colors-off)[data-voice-guide-tone="gold"] .voice-guide .voice-label,
+body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembly .voice-label{
+ color:#dfbf85!important;
+}
+/* Ningún margen global heredado de «dialog label» debe separar tarjetas. */
+#modalContent .rosario-nav-dialog{display:flex;flex-direction:column;gap:10px;margin:12px 0 0}
+#modalContent .rosario-nav-dialog > .rosario-nav-setting,
+#modalContent .rosario-text-animation-settings .rosario-animation-option{
+ margin:0!important;min-height:72px;box-sizing:border-box
+}
+#modalContent .rosario-nav-dialog .rosario-nav-setting select{
+ margin:0!important;max-width:49%;width:45%;min-width:0
+}
+#modalContent .rosario-text-animation-settings{border-top:1px solid var(--ui-rule,#aa978555);padding-top:14px;margin-top:6px}
+#modalContent .rosario-text-animation-settings h3{
+ margin:0 0 4px!important;font:600 17px/1.35 Georgia,serif
+}
+#modalContent .rosario-text-animation-settings > p{
+ font:12px/1.5 system-ui;color:var(--ui-muted,#938e86);margin:0 0 10px
+}
+#modalContent .rosario-text-preview{
+ display:grid;place-items:center;min-height:104px;overflow:hidden;
+ border:1px solid var(--ui-outline,#bda88568);
+ background:var(--ui-surface,transparent);border-radius:12px;
+ padding:14px 18px
+}
+#modalContent .rosario-text-preview p{
+ margin:0;max-width:30ch;text-align:center;
+ font:20px/1.5 Georgia,serif;color:var(--ui-ink,inherit)
+}
+#modalContent .rosario-animation-choices{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+#modalContent .rosario-animation-option{
+ display:flex;align-items:center;gap:12px;
+ border:1px solid var(--ui-outline,#bda88568);border-radius:12px;
+ padding:10px 13px;
+}
+#modalContent .rosario-animation-option input{flex:0 0 auto;accent-color:var(--ui-accent,#bba36f)}
+#modalContent .rosario-animation-option span{display:block;min-width:0}
+#modalContent .rosario-animation-option strong{display:block;font:600 14px/1.4 system-ui}
+#modalContent .rosario-animation-option small{
+ display:block;font:12px/1.45 system-ui;color:var(--ui-muted,#938e86);margin-top:2px
+}
+#modalContent .rosario-preview-replay{
+ display:block;width:100%;padding:10px 14px;margin:10px 0 0;
+ min-height:43px;border:1px solid var(--ui-outline,#bda88568);
+ border-radius:11px;background:var(--ui-surface,transparent);
+ color:inherit;font:600 13px system-ui;
+}
+/* Cambio real del texto: se funde la oración anterior mientras aparece
+   la nueva. El SVG/camándula no recibe transformaciones. */
+@keyframes rosario-text-fade-in{
+ 0%,18%{opacity:0}100%{opacity:1}
+}
+@keyframes rosario-text-slide-in{
+ 0%,18%{opacity:0;transform:translateY(12px)}
+ 100%{opacity:1;transform:translateY(0)}
+}
+@keyframes rosario-text-soft-in{
+ 0%,18%{opacity:0;filter:blur(3.2px)}
+ 100%{opacity:1;filter:blur(0)}
+}
+@keyframes rosario-text-fade-out{
+ 0%{opacity:1}100%{opacity:0}
+}
+.rosario-animate-in-fade{animation:rosario-text-fade-in .52s ease both!important}
+.rosario-animate-in-slide{animation:rosario-text-slide-in .52s cubic-bezier(.2,.65,.3,1) both!important}
+.rosario-animate-in-soft{animation:rosario-text-soft-in .58s ease-out both!important}
+.rosario-transition-ghost{
+ position:absolute!important;pointer-events:none!important;z-index:2;
+ margin:0!important;height:auto!important;max-height:none!important;
+ color:inherit
+}
+.rosario-animate-out-fade,.rosario-animate-out-slide,.rosario-animate-out-soft{
+ animation:rosario-text-fade-out .21s ease-out both!important
+}
+@media(prefers-reduced-motion:reduce){
+ .rosario-animate-in-fade,.rosario-animate-in-slide,.rosario-animate-in-soft,
+ .rosario-animate-out-fade,.rosario-animate-out-slide,.rosario-animate-out-soft{
+ animation:none!important
+ }
+}
+/* Muesca discretísima, sin chevrón/flecha. */
+.reading-prayer-heading .contrition-quick-choice{
+ display:inline-grid;place-items:center;vertical-align:middle;
+ width:23px;height:23px;min-width:23px;margin-left:7px;padding:0;
+ border:1px solid #bca27580;border-radius:50%;
+ background:#bda57b0c;color:inherit;opacity:.76
+}
+.contrition-quick-choice .contrition-notch-grooves{
+ display:block;width:11px;height:11px;border-radius:50%;
+ border:1px solid currentColor;
+ background:repeating-linear-gradient(90deg,transparent 0 2px,
+ currentColor 2px 2.6px,transparent 2.6px 4.5px);
+ opacity:.7
+}
+.contrition-quick-choice:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+/* Mismo encuadre sutil que la rueda de letanías. Espacio compensado
+   para que el título no empuje el texto ni aumente la altura total. */
+.immersive-prayer .rosario-mystery-frame,
+.immersive-prayer .rosary-mystery-context:not([hidden]){
+ border:1px solid var(--ui-accent,#b89b6a)!important;
+ border-radius:12px!important;background:transparent!important;
+ padding:7px 10px!important;
+}
+.immersive-prayer .rosario-mystery-frame{
+ display:flex;flex-direction:column;align-items:center;
+ justify-content:center;width:100%;max-width:100%;
+ gap:5px;margin:0 auto!important;
+ text-align:center
+}
+.immersive-prayer .rosario-mystery-frame .mystery-announcement-label{
+ margin:0!important;padding:0!important
+}
+.immersive-prayer .rosario-mystery-frame .mystery-announcement-link{
+ margin:0!important;padding:0!important
+}
+.immersive-prayer .rosary-mystery-context:not([hidden]){
+ gap:4px!important;
+ margin:0 0 clamp(10px,2dvh,20px)!important
+}
+.immersive-prayer .rosary-mystery-context:not([hidden]) .rosary-mystery-badge{
+ width:34px!important;height:34px!important;font-size:13px!important
+}
+/* Preferencias generales, separadas de la iluminación de las cuentas. */
+#modalContent .rosario-preferences-group{
+ margin:19px 0 0!important;padding:16px 0 0!important;
+ border-top:1px solid var(--ui-rule,#bda88550)
+}
+#modalContent .rosario-preferences-group > h3{
+ margin:0 0 10px!important;font:600 17px/1.35 Georgia,serif!important
+}
+#modalContent .rosario-preferences-group .voice-settings-link{
+ display:block;width:100%;margin:0!important
+}
+#modalContent .rosario-preferences-group .rosario-tone-setting{
+ margin:0!important;
+}
