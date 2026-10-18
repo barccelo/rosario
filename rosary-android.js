@@ -60,6 +60,16 @@
     row.append(title,select);
     return row;
   }
+  window.rosarioAndroidNavigationKeys=host=>{
+    const keys=document.createElement('fieldset');
+    keys.className='rosario-navigation-volume';
+    const title=document.createElement('legend');
+    title.textContent='Botones de volumen';
+    keys.append(title,
+      createRow('Botón de subir volumen','up'),
+      createRow('Botón de bajar volumen','down'));
+    host.append(keys);
+  };
   function attachPreferences(){
     const host=document.getElementById('modalContent');
     if(!host || host.querySelector('.android-native-settings'))return;
@@ -69,14 +79,6 @@
     const title=document.createElement('h3');
     title.textContent='Android';
     root.append(title);
-
-    const keys=document.createElement('fieldset');
-    const keyTitle=document.createElement('legend');
-    keyTitle.textContent='Botones de volumen';
-    keys.append(keyTitle,
-      createRow('Botón de subir volumen','up'),
-      createRow('Botón de bajar volumen','down'));
-    root.append(keys);
 
     const reminder=document.createElement('fieldset');
     reminder.className='android-reminder';
