@@ -435,23 +435,6 @@ body.rosario-physical-view[data-rosary-side="right"] .rosary-mystery-context{
  left:auto!important;right:auto!important
 }
 
-/* Pequeño pulso de llegada a cada Avemaría, una única vez; nunca
-   cambia las posiciones ni la trayectoria del hilo. */
-@keyframes rosario-bead-arrive{
-  0%{transform:scale(1);opacity:.88}
-  48%{transform:scale(1.045);opacity:1}
-  100%{transform:scale(1);opacity:1}
-}
-body.subtle-bead-motion .physical-path .physical-bead.active .ring{
- transform-box:fill-box;transform-origin:center;
- animation:rosario-bead-arrive .55s ease-out 1;
-}
-@media(prefers-reduced-motion:reduce){
- body.subtle-bead-motion .physical-path .physical-bead.active .ring{
-  animation:none!important;
- }
-}
-
 /* Controles discretos, semejantes al resto de los ajustes. */
 .rosario-navigation-settings-button{width:100%;text-align:center}
 .rosario-nav-dialog,.rosario-contrition-choices{display:flex;flex-direction:column;gap:12px;margin:16px 0}
@@ -565,39 +548,6 @@ body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembl
  border-radius:11px;background:var(--ui-surface,transparent);
  color:inherit;font:600 13px system-ui;
 }
-/* Cambio real del texto: se funde la oración anterior mientras aparece
-   la nueva. El SVG/camándula no recibe transformaciones. */
-@keyframes rosario-text-fade-in{
- 0%,18%{opacity:0}100%{opacity:1}
-}
-@keyframes rosario-text-slide-in{
- 0%,18%{opacity:0;transform:translateY(12px)}
- 100%{opacity:1;transform:translateY(0)}
-}
-@keyframes rosario-text-soft-in{
- 0%,18%{opacity:0;filter:blur(3.2px)}
- 100%{opacity:1;filter:blur(0)}
-}
-@keyframes rosario-text-fade-out{
- 0%{opacity:1}100%{opacity:0}
-}
-.rosario-animate-in-fade{animation:rosario-text-fade-in .52s ease both!important}
-.rosario-animate-in-slide{animation:rosario-text-slide-in .52s cubic-bezier(.2,.65,.3,1) both!important}
-.rosario-animate-in-soft{animation:rosario-text-soft-in .58s ease-out both!important}
-.rosario-transition-ghost{
- position:absolute!important;pointer-events:none!important;z-index:2;
- margin:0!important;height:auto!important;max-height:none!important;
- color:inherit
-}
-.rosario-animate-out-fade,.rosario-animate-out-slide,.rosario-animate-out-soft{
- animation:rosario-text-fade-out .21s ease-out both!important
-}
-@media(prefers-reduced-motion:reduce){
- .rosario-animate-in-fade,.rosario-animate-in-slide,.rosario-animate-in-soft,
- .rosario-animate-out-fade,.rosario-animate-out-slide,.rosario-animate-out-soft{
- animation:none!important
- }
-}
 /* Muesca discretísima, sin chevrón/flecha. */
 .reading-prayer-heading .contrition-quick-choice{
  display:inline-grid;place-items:center;vertical-align:middle;
@@ -613,32 +563,37 @@ body.dark:not(.voice-colors-off)[data-voice-assembly-tone="gold"] .voice-assembl
  opacity:.7
 }
 .contrition-quick-choice:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-/* Mismo encuadre sutil que la rueda de letanías. Espacio compensado
-   para que el título no empuje el texto ni aumente la altura total. */
+/* Mismo medio borde de la rueda de letanías: sólo dos trazos
+   horizontales con remates redondeados, nunca una caja cerrada. */
 .immersive-prayer .rosario-mystery-frame,
 .immersive-prayer .rosary-mystery-context:not([hidden]){
- border:1px solid var(--ui-accent,#b89b6a)!important;
- border-radius:12px!important;background:transparent!important;
- padding:7px 10px!important;
+ border:0!important;
+ border-top:1px solid var(--ui-accent,#b89b6a)!important;
+ border-bottom:1px solid var(--ui-accent,#b89b6a)!important;
+ border-left:none!important;border-right:none!important;
+ border-radius:16px!important;
+ padding:7px 4px!important;
+ background:transparent!important;
 }
 .immersive-prayer .rosario-mystery-frame{
  display:flex;flex-direction:column;align-items:center;
  justify-content:center;width:100%;max-width:100%;
- gap:5px;margin:0 auto!important;
- text-align:center
+ gap:4px;margin:0 auto!important;text-align:center;
 }
-.immersive-prayer .rosario-mystery-frame .mystery-announcement-label{
- margin:0!important;padding:0!important
-}
+.immersive-prayer .rosario-mystery-frame .mystery-announcement-label,
 .immersive-prayer .rosario-mystery-frame .mystery-announcement-link{
- margin:0!important;padding:0!important
+ margin:0!important;padding:0!important;
 }
 .immersive-prayer .rosary-mystery-context:not([hidden]){
- gap:4px!important;
- margin:0 0 clamp(10px,2dvh,20px)!important
+ gap:3px!important;margin:0 0 clamp(9px,1.7dvh,16px)!important;
 }
 .immersive-prayer .rosary-mystery-context:not([hidden]) .rosary-mystery-badge{
  width:34px!important;height:34px!important;font-size:13px!important
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer .rosario-mystery-frame,
+body[data-rosary-color-mode="mystery"] .immersive-prayer .rosary-mystery-context:not([hidden]){
+ border-top-color:var(--rc-accent,#b89b6a)!important;
+ border-bottom-color:var(--rc-accent,#b89b6a)!important;
 }
 /* Preferencias generales, separadas de la iluminación de las cuentas. */
 #modalContent .rosario-preferences-group{
