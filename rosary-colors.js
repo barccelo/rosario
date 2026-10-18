@@ -237,7 +237,7 @@
       preview.append(previewBeads,caption);
 
       fieldset.append(legend,list,variations,preview);
-      root.insertBefore(fieldset,root.querySelector('.controls-position-setting'));
+      root.insertBefore(fieldset,root.querySelector('.rosario-preferences-group'));
 
       refreshSettings=()=>{
         if(!fieldset.isConnected)return;
