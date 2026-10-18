@@ -7,7 +7,7 @@
     if(!modal||!content)return;
     const sheetStyle=document.createElement('link');
     sheetStyle.rel='stylesheet';
-    sheetStyle.href='rosary-settings-refinement.css?v=20261016-4';
+    sheetStyle.href='rosary-settings-refinement.css?v=20261017-3';
     document.head.append(sheetStyle);
     const overlay=document.createElement('div');
     overlay.className='rosario-selection-overlay';
