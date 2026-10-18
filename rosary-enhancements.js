@@ -1529,10 +1529,20 @@
       example.append(sample);
       const options=document.createElement('div');
       options.className='rosario-animation-choices';
+      const examples=[
+        'Dios te salve, María, llena eres de gracia.',
+        'Santa María, Madre de Dios, ruega por nosotros.'
+      ];
+      let exampleIndex=0;
       const replay=mode=>{
-        sample.className='';
-        void sample.offsetWidth;
-        sample.className='rosario-animate-in-'+mode;
+        const next=(exampleIndex+1)%examples.length;
+        const replaceText=()=>{
+          sample.textContent=examples[next];
+          exampleIndex=next;
+        };
+        if(window.rosarioAnimateText)
+          window.rosarioAnimateText(sample,mode,replaceText);
+        else replaceText();
       };
       animationOptions.forEach(([value,title,description])=>{
         const item=document.createElement('label');
