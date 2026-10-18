@@ -132,6 +132,7 @@
     'Cordero de Dios, que quitas el pecado del mundo, escúchanos, Señor.',
     'Cordero de Dios, que quitas el pecado del mundo, ten misericordia de nosotros.'
   ];
+  const baseLambLines=lambLines.slice();
   const fullLitany = litanyPairs.map(pair => '℣. ' + pair.verse + '\n℟. ' + pair.response).join('\n\n') +
     '\n\n' + lambLines.join('\n\n');
   prayers['Letanías'] = fullLitany;
@@ -699,6 +700,32 @@
     });
     return true;
   }
+  function applyLambText(value){
+    const paragraphs=String(value).trim().split(/\n\s*\n/);
+    if(paragraphs.length!==3)return false;
+    const pattern=/^(Cordero de Dios,\s*que quitas (?:el|los) pecados? del mundo,)\s*([\s\S]+)$/i;
+    const parsed=paragraphs.map(t=>t.trim().match(pattern));
+    if(parsed.some(match=>!match))return false;
+    parsed.forEach((match,i)=>{
+      lambLines[i]=paragraphs[i].trim();
+      steps.filter(step=>step.title==='Cordero de Dios'&&step.part===i)
+        .forEach(step=>{
+          step.verse=match[1];step.response=match[2];step.text=lambLines[i];
+        });
+    });
+    return true;
+  }
+  function resetLambText(){
+    baseLambLines.forEach((line,i)=>{lambLines[i]=line;});
+    steps.filter(step=>step.title==='Cordero de Dios').forEach(step=>{
+      step.verse='Cordero de Dios, que quitas los pecados del mundo,';
+      step.response=['perdónanos, Señor.','escúchanos, Señor.',
+        'ten misericordia de nosotros.'][step.part];
+      step.text=baseLambLines[step.part];
+    });
+  }
+  if(state.prayerEdits['Cordero de Dios'])
+    applyLambText(state.prayerEdits['Cordero de Dios']);
   function resetLitanyPairs(){
     baseLitanyPairs.forEach((pair,i)=>{
       litanyPairs[i].verse=pair.verse;
@@ -729,6 +756,7 @@
     if(typeof text!=='string'||!title)return false;
     if(text.length>20000)return false;
     if(title==='Letanías'&&!applyLitanyText(text))return false;
+    if(title==='Cordero de Dios'&&!applyLambText(text))return false;
     state.prayerEdits[title]=text;
     // Mantener el texto elegido para las futuras lecturas.
     persist();render();
@@ -737,6 +765,7 @@
   window.rosarioRestorePrayer=title=>{
     delete state.prayerEdits[title];
     if(title==='Letanías')resetLitanyPairs();
+    if(title==='Cordero de Dios')resetLambText();
     persist();render();
   };
   window.rosarioSetContrition=key=>{
@@ -1067,6 +1096,8 @@
         const note=document.createElement('p');
         note.textContent=key==='Letanías'
           ?'Conserva cada pareja ℣. y ℟. en el mismo orden; puedes corregir su texto y añadir saltos de párrafo.'
+          :key==='Cordero de Dios'?
+           'Conserva las tres invocaciones separadas por un párrafo en blanco.'
           :'Puedes corregir palabras, puntuación y saltos de párrafo. Los cambios se guardan sólo en este dispositivo.';
         const area=document.createElement('textarea');
         area.className='rosario-prayer-editor';area.rows=10;area.value=text;
@@ -1075,7 +1106,7 @@
         const save=document.createElement('button');save.type='button';save.textContent='Guardar cambios';
         save.onclick=()=>{
           if(window.rosarioSavePrayer(editingKey,area.value))openPrayerEditor(title);
-          else alert('Comprueba el formato. Las letanías necesitan conservar todas las parejas de versículo y respuesta.');
+          else alert('Revisa el formato de las invocaciones. Las letanías deben conservar las parejas ℣. y ℟.; el Cordero de Dios necesita tres estrofas.');
         };
         const restore=document.createElement('button');restore.type='button';
         restore.textContent='Restaurar original';
@@ -1626,7 +1657,7 @@
         if(window.rosarioSavePrayer(select.value,editor.value)){
           editor.hidden=saveBtn.hidden=undoBtn.hidden=true;
           editBtn.hidden=false;showSelectedPrayer();
-        }else alert('Conserva todas las parejas ℣. y ℟. de las letanías.');
+        }else alert('Revisa el formato: conserva las parejas ℣. y ℟. de las letanías o las tres estrofas del Cordero de Dios.');
       };
       undoBtn.onclick=()=>{
         window.rosarioRestorePrayer(select.value);
