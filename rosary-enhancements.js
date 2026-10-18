@@ -663,6 +663,7 @@
   state.dayDate = dateKey();
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
+  state.assemblyEnabled=saved.assemblyEnabled!==false;
   state.voiceGuideTone=saved.voiceGuideTone==='accent'?'accent':'white';
   state.voiceAssemblyTone=saved.voiceAssemblyTone==='white'?'white':'accent';
   state.subtleBeadMotion=saved.subtleBeadMotion!==false;
@@ -1309,6 +1310,7 @@
           description.textContent='Personaliza las intervenciones del guía y la asamblea, independientemente del tema del rosario.';
           list.append(description);
           [
+            ['assemblyEnabled','Activar asamblea','Alternar respuestas entre guía y asamblea durante el Rosario.'],
             ['voiceLabels','Mostrar «Guía» y «Asamblea»','Conserva las etiquetas de cada intervención.'],
             ['voiceColors','Diferenciar las voces por color','Desactívalo para rezar en solitario con un solo color.']
           ].forEach(([key,title,description])=>{
