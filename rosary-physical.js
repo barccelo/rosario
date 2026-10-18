@@ -7,7 +7,7 @@
     if(!stage || !window.rosarioNativeScroll)return;
     const css=document.createElement('link');
     css.rel='stylesheet';
-    css.href='rosary-physical.css?v=20261016-16';
+    css.href='rosary-physical.css?v=20261017-1';
     // El visor se coloca al final después de que este CSS haya cargado.
     // Antes de ello scrollHeight/clientHeight puede dar cero y dejar
     // el rosario incorrectamente posicionado en el arco superior.
