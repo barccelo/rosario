@@ -1522,7 +1522,7 @@
       const swipeTitle=document.createElement('h3');
       swipeTitle.textContent='Sentido del deslizamiento';
       const swipeIntro=document.createElement('p');
-      swipeIntro.textContent='Elige cómo avanzar deslizando sobre el texto. No cambia el desplazamiento manual de las cuentas.';
+      swipeIntro.textContent='Elige cómo avanzar deslizando sobre el texto.';
       const swipeOptions=document.createElement('div');
       swipeOptions.className='rosario-swipe-options';
       [
@@ -1531,7 +1531,10 @@
          arrows:['down','up']},
         {value:'uniform',title:'Siempre hacia arriba',
          hint:'El mismo gesto avanza durante todo el Rosario.',
-         arrows:['up','up']}
+         arrows:['up','up']},
+        {value:'down',title:'Siempre hacia abajo',
+         hint:'El mismo gesto hacia abajo avanza durante todo el Rosario.',
+         arrows:['down','down']}
       ].forEach(choice=>{
         const card=document.createElement('label');
         card.className='rosario-swipe-choice';
@@ -1631,6 +1634,9 @@
       section.append(heading,caption,example,options,replayButton);
       root.append(section);
       window.rosarioAndroidNavigationKeys?.(root);
+      // El diálogo reutiliza un único contenedor desplazable entre pantallas.
+      // Mantener la cabecera y el primer ajuste visibles al cambiar de sección.
+      $('modal').scrollTop=0;
     }
     window.rosarioOpenNavigationPreferences=openNavigationPreferences;
     function openContritionChoice(){
