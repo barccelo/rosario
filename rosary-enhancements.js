@@ -126,6 +126,7 @@
     }
     return { verse: line.replace(/ ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
   });
+  const baseLitanyPairs=litanyPairs.map(pair=>({...pair}));
   const lambLines = [
     'Cordero de Dios, que quitas el pecado del mundo, perdónanos, Señor.',
     'Cordero de Dios, que quitas el pecado del mundo, escúchanos, Señor.',
@@ -684,13 +685,41 @@
       ' contemplamos:\n\n' + groups[state.group][step.m] + '.';
   };
   state.prayerEdits=(saved.prayerEdits&&typeof saved.prayerEdits==='object'&&!Array.isArray(saved.prayerEdits))?saved.prayerEdits:{};
+  function applyLitanyText(value){
+    const pairs=String(value).split(/\n\s*\nCordero de Dios/)[0];
+    const matches=[...pairs.matchAll(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]*?)(?=\n\s*\n℣\.|$)/g)];
+    if(matches.length!==litanyPairs.length)return false;
+    matches.forEach((m,i)=>{
+      litanyPairs[i].verse=m[1].trim();
+      litanyPairs[i].response=m[2].trim();
+    });
+    steps.filter(step=>step.kind==='litany').forEach(step=>{
+      const pair=litanyPairs[step.litanyIndex];
+      step.verse=pair.verse;step.response=pair.response;
+    });
+    return true;
+  }
+  function resetLitanyPairs(){
+    baseLitanyPairs.forEach((pair,i)=>{
+      litanyPairs[i].verse=pair.verse;
+      litanyPairs[i].response=pair.response;
+    });
+    steps.filter(step=>step.kind==='litany').forEach(step=>{
+      const pair=litanyPairs[step.litanyIndex];
+      step.verse=pair.verse;step.response=pair.response;
+    });
+  }
+  if(state.prayerEdits.Letanías)applyLitanyText(state.prayerEdits.Letanías);
   const defaultPrayerText=title=>title==='Señor mío Jesucristo'
     ?window.rosarioContritionText():prayers[title]||'';
   window.rosarioPrayerText=(title,step)=>{
     const key=title==='Señor mío Jesucristo'&&state.contritionVersion==='redentor'
       ?'Acto de contrición (Jesús, mi Señor y Redentor)':title;
     return Object.prototype.hasOwnProperty.call(state.prayerEdits,key)
-      ?state.prayerEdits[key]:(step?.text||defaultPrayerText(key));
+      ?state.prayerEdits[key]:(step?.text||
+          (step?.verse&&step?.response
+            ?'℣. '+step.verse+'\n℟. '+step.response
+            :defaultPrayerText(key)));
   };
   window.rosarioContritionChoices=[
     ['jesucristo','Señor mío Jesucristo'],
@@ -699,13 +728,16 @@
   window.rosarioSavePrayer=(title,text)=>{
     if(typeof text!=='string'||!title)return false;
     if(text.length>20000)return false;
+    if(title==='Letanías'&&!applyLitanyText(text))return false;
     state.prayerEdits[title]=text;
     // Mantener el texto elegido para las futuras lecturas.
     persist();render();
     return true;
   };
   window.rosarioRestorePrayer=title=>{
-    delete state.prayerEdits[title];persist();render();
+    delete state.prayerEdits[title];
+    if(title==='Letanías')resetLitanyPairs();
+    persist();render();
   };
   window.rosarioSetContrition=key=>{
     if(key!=='redentor'&&key!=='jesucristo')return;
@@ -1022,7 +1054,8 @@
           title==='Acto de contrición'?'Señor mío Jesucristo':title;
         const editingKey=key==='Señor mío Jesucristo'&&state.contritionVersion==='redentor'
           ?'Acto de contrición (Jesús, mi Señor y Redentor)':key;
-        const text=window.rosarioPrayerText?.(key)||prayers[key]||'';
+        const matchingStep=steps.find(step=>step.title===key);
+        const text=window.rosarioPrayerText?.(key,matchingStep)||prayers[key]||'';
         const list=$('navList'),detail=$('navDetail');
         savedScroll=list.scrollTop;
         list.hidden=true;detail.hidden=false;detail.replaceChildren();
@@ -1032,13 +1065,18 @@
         back.onclick=()=>{detail.hidden=true;list.hidden=false;list.scrollTop=savedScroll;};
         const heading=document.createElement('h3');heading.textContent=title;
         const note=document.createElement('p');
-        note.textContent='Puedes corregir palabras, puntuación y saltos de párrafo. Los cambios se guardan sólo en este dispositivo.';
+        note.textContent=key==='Letanías'
+          ?'Conserva cada pareja ℣. y ℟. en el mismo orden; puedes corregir su texto y añadir saltos de párrafo.'
+          :'Puedes corregir palabras, puntuación y saltos de párrafo. Los cambios se guardan sólo en este dispositivo.';
         const area=document.createElement('textarea');
         area.className='rosario-prayer-editor';area.rows=10;area.value=text;
         area.setAttribute('aria-label','Texto editable de '+title);
         const tools=document.createElement('div');tools.className='rosario-editor-actions';
         const save=document.createElement('button');save.type='button';save.textContent='Guardar cambios';
-        save.onclick=()=>{if(window.rosarioSavePrayer(editingKey,area.value))openPrayerEditor(title);};
+        save.onclick=()=>{
+          if(window.rosarioSavePrayer(editingKey,area.value))openPrayerEditor(title);
+          else alert('Comprueba el formato. Las letanías necesitan conservar todas las parejas de versículo y respuesta.');
+        };
         const restore=document.createElement('button');restore.type='button';
         restore.textContent='Restaurar original';
         restore.onclick=()=>{window.rosarioRestorePrayer(editingKey);openPrayerEditor(title);};
@@ -1588,7 +1626,7 @@
         if(window.rosarioSavePrayer(select.value,editor.value)){
           editor.hidden=saveBtn.hidden=undoBtn.hidden=true;
           editBtn.hidden=false;showSelectedPrayer();
-        }
+        }else alert('Conserva todas las parejas ℣. y ℟. de las letanías.');
       };
       undoBtn.onclick=()=>{
         window.rosarioRestorePrayer(select.value);
