@@ -688,3 +688,140 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
  font-weight:400!important;
  transform-origin:center center;
 }
+
+
+/* v0.1.28: primero la anunciación; intención breve inmediatamente debajo. */
+.immersive-prayer.is-mystery-announcement .mystery-random-intention{
+ display:flex!important;flex-direction:column!important;
+ width:min(94%,400px)!important;max-width:100%!important;
+ margin:11px auto 0!important;padding:9px 12px 10px!important;
+ border-radius:12px!important;gap:4px!important;
+}
+.immersive-prayer.is-mystery-announcement .mystery-intention-body{
+ font-size:clamp(15px,2vw,19px)!important;
+}
+/* Opciones de gesto con miniatura animada que enseña el cambio
+   de dirección, sin tocar en absoluto la geometría del rosario. */
+#modalContent .rosario-swipe-settings{
+ border-top:1px solid var(--ui-rule,#aa978555);
+ padding:14px 0 0;margin:4px 0 0;
+}
+#modalContent .rosario-swipe-settings h3{
+ font:600 17px/1.35 Georgia,serif!important;
+ margin:0 0 5px!important;
+}
+#modalContent .rosario-swipe-settings>p{
+ font:12px/1.5 system-ui;
+ color:var(--ui-muted,#938e86);
+ margin:0 0 11px!important;
+}
+#modalContent .rosario-swipe-options{
+ display:flex;flex-direction:column;gap:10px;margin:0;
+}
+#modalContent .rosario-swipe-choice{
+ display:grid!important;
+ grid-template-columns:20px minmax(0,1fr)!important;
+ column-gap:13px!important;
+ align-items:start!important;
+ justify-content:start!important;
+ padding:13px!important;
+ margin:0!important;
+ border:1px solid var(--ui-outline,#bda88568);
+ border-radius:13px;
+ background:transparent;min-width:0;
+}
+#modalContent .rosario-swipe-choice.selected{
+ border-color:var(--ui-accent,#b89b6a);
+ background:color-mix(in srgb,var(--ui-accent,#b89b6a) 8%,transparent);
+}
+#modalContent .rosario-swipe-choice>input{
+ grid-column:1;margin:3px 0 0!important;width:17px;height:17px;
+ accent-color:var(--ui-accent,#b89b6a);
+}
+#modalContent .rosario-swipe-choice-copy{
+ grid-column:2;display:block!important;min-width:0;
+ text-align:left!important;
+}
+#modalContent .rosario-swipe-choice-copy strong{
+ display:block;font:600 14px/1.4 system-ui;
+}
+#modalContent .rosario-swipe-choice-copy small{
+ display:block;font:12px/1.5 system-ui;margin-top:3px;
+ color:var(--ui-muted,#938e86);
+}
+#modalContent .rosario-swipe-tutorial{
+ grid-column:2;display:grid;grid-template-columns:1fr 1fr;
+ gap:12px;margin-top:9px;
+}
+#modalContent .rosario-swipe-phase{
+ display:flex;flex-direction:column;
+ align-items:center;min-width:0;gap:4px;
+}
+#modalContent .rosario-swipe-phase>span:first-child{
+ font:11px/1.4 system-ui;color:var(--ui-muted,#938e86);
+}
+#modalContent .rosario-swipe-visual{
+ display:block;width:100%;height:67px;
+ padding:2px 0;border:1px solid var(--ui-outline,#bda88535);
+ border-radius:10px;text-align:center;
+}
+#modalContent .rosario-swipe-visual svg{
+ display:block;height:100%;width:100%;
+ max-width:105px;margin:auto;overflow:visible;
+}
+#modalContent .rosario-demo-thread{
+ fill:none;stroke:var(--ui-outline,#bda885);stroke-width:1.8;
+ stroke-linecap:round;opacity:.8;
+}
+#modalContent .rosario-demo-bead{
+ stroke:var(--ui-accent,#b89b6a);fill:transparent;
+ stroke-width:2;
+}
+#modalContent .rosario-demo-arrow{
+ stroke:var(--ui-accent,#b89b6a);stroke-width:2.7;
+ stroke-linecap:round;stroke-linejoin:round;fill:none;
+ animation:rosario-swipe-demo-up 2.3s ease-in-out infinite;
+}
+#modalContent .rosario-demo-arrow.is-down{
+ animation-name:rosario-swipe-demo-down;
+}
+@keyframes rosario-swipe-demo-up{
+ 0%,15%{transform:translateY(8px);opacity:.2}
+ 45%,75%{transform:translateY(-6px);opacity:1}
+ 95%,100%{transform:translateY(-6px);opacity:.25}
+}
+@keyframes rosario-swipe-demo-down{
+ 0%,15%{transform:translateY(-7px);opacity:.2}
+ 45%,75%{transform:translateY(7px);opacity:1}
+ 95%,100%{transform:translateY(7px);opacity:.25}
+}
+@media(prefers-reduced-motion:reduce){
+ #modalContent .rosario-demo-arrow{animation:none!important;opacity:1}
+}
+/* Variación diaria: interfaz compacta y de la misma familia visual. */
+#modalContent .physical-thread-settings{
+ padding-bottom:0!important;
+}
+#modalContent .physical-thread-option{
+ display:flex!important;flex-direction:row!important;
+ justify-content:space-between!important;
+ align-items:center!important;gap:14px!important;
+ margin:0!important;padding:13px 14px!important;
+ border-radius:13px;
+ border:1px solid var(--ui-outline,#bda88568);
+ min-height:70px;
+}
+#modalContent .physical-thread-option>span{
+ flex:1 1 auto;min-width:0;
+}
+#modalContent .physical-thread-option strong{
+ display:block;font:600 14px/1.4 system-ui;
+}
+#modalContent .physical-thread-option small{
+ display:block;margin-top:3px;font:12px/1.5 system-ui;
+ color:var(--ui-muted,#938e86);
+}
+#modalContent .physical-thread-option input[type=checkbox]{
+ flex:0 0 auto;width:19px;height:19px;
+ margin:0!important;accent-color:var(--ui-accent,#b89b6a);
+}
