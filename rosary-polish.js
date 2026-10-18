@@ -208,15 +208,20 @@
       else if(step?.kind==='litany'){
         prayer.replaceChildren();
       } else if(step?.kind==='dialogue-group'){
-        addVerses(step.dialogues);
-        // addVerses sustituye los nodos: dejar la cruz sobre los dos diálogos.
+        const edited=state.prayerEdits?.[step.title];
+        const matches=edited?[...edited.matchAll(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]*?)(?=\n\s*\n℣\.|$)/g)]:[];
+        if(matches.length===step.dialogues.length)
+          addVerses(matches.map(m=>({verse:m[1].trim(),response:m[2].trim()})));
+        else if(edited){
+          prayer.replaceChildren();appendWithAmen(prayer,edited);
+        }else addVerses(step.dialogues);
         prayer.prepend(makeCross());
       } else if(step?.verse && step?.response) {
-        const edited=state.prayerEdits?.[step.title];
+        const edited=step.title==='Cordero de Dios'?null:state.prayerEdits?.[step.title];
         if(edited){
           const match=edited.match(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]+)/);
           if(match)addVerses([{verse:match[1],response:match[2]}]);
-          else appendWithAmen(prayer,edited);
+          else {prayer.replaceChildren();appendWithAmen(prayer,edited);}
         }else addVerses([step]);
       }
       else if(step){
