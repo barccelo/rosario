@@ -79,7 +79,7 @@
     'Bajo tu amparo nos acogemos, Santa Madre de Dios: no desprecies las súplicas que te dirigimos en nuestras necesidades; ' +
     'antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.';
   prayers['Oración final'] =
-    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que los que, por el anuncio del ángel, ' +
+    'Te suplicamos, Señor, que derrames tu gracia en nuestras almas, para que aquellos que, por el anuncio del ángel, ' +
     'hemos conocido la Encarnación de tu Hijo Jesucristo, por su pasión y cruz, seamos llevados a la gloria de su resurrección. ' +
     'Por Jesucristo nuestro Señor. Amén.';
 
@@ -463,7 +463,7 @@
   nextSteps.push({ title: 'Oración final', m: 5 });
   [
     { name: 'La Iglesia', intro: 'Por las necesidades de la Iglesia:' },
-    { name: 'Las intenciones', intro: 'Por la persona e intenciones por las que rezamos:' },
+    { name: 'Las intenciones', intro: 'Por la persona e intenciones del señor Obispo de esta Diócesis:' },
     { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:' }
   ].forEach((intention, i) => {
     // Exactamente UNA Avemaría por intención, sin Padrenuestro ni Gloria.
@@ -481,7 +481,7 @@
       response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   }
   nextSteps.push({title:'Avemaría purísima',kind:'dialogue',m:5,
-    verse:'Ave María Purísima.',response:'Sin pecado concebida.'});
+    verse:'Ave María Purísima.',response:'Sin pecado original concebida.'});
     return nextSteps;
   }
   steps = buildRosarySteps();
@@ -666,9 +666,12 @@
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
   state.assemblyEnabled=saved.assemblyEnabled!==false;
-  state.voiceGuideTone=saved.voiceGuideTone==='accent'?'accent':'white';
-  state.voiceAssemblyTone=saved.voiceAssemblyTone==='white'?'white':'accent';
-  state.subtleBeadMotion=saved.subtleBeadMotion!==false;
+  const voiceTones=['white','gold','accent'];
+  state.voiceGuideTone=voiceTones.includes(saved.voiceGuideTone)?saved.voiceGuideTone:'white';
+  state.voiceAssemblyTone=voiceTones.includes(saved.voiceAssemblyTone)?saved.voiceAssemblyTone:'gold';
+  const textTransitions=['fade','slide','soft','none'];
+  state.textTransition=textTransitions.includes(saved.textTransition)?saved.textTransition:
+    (saved.subtleBeadMotion===false?'none':'fade');
   // La barra y el botón compacto comparten ubicación configurada.
   state.controlsPosition = saved.controlsPosition === 'bottom' ? 'bottom' : 'top';
   function applyControlsPosition(){
@@ -782,7 +785,7 @@
     const step = steps[state.index];
     document.body.dataset.voiceGuideTone=state.voiceGuideTone;
     document.body.dataset.voiceAssemblyTone=state.voiceAssemblyTone;
-    document.body.classList.toggle('subtle-bead-motion',state.subtleBeadMotion&&step?.title==='Avemaría');
+    document.body.classList.remove('subtle-bead-motion');
     if (step) {
       if (step.kind === 'mystery') prayers['Anuncio del misterio'] = announcement(step);
       if (step.kind === 'dialogue'&&!state.prayerEdits[step.title])
@@ -1407,7 +1410,8 @@
             field.className='rosario-tone-setting';
             const title=document.createElement('span');title.textContent=label;
             const control=document.createElement('select');
-            [['white','Blanco / color del texto'],['accent','Color de acento del tema']].forEach(([value,name])=>{
+            [['white','Blanco / color del texto'],['gold','Dorado clásico'],
+              ['accent','Color de acento del tema']].forEach(([value,name])=>{
               const option=document.createElement('option');option.value=value;
               option.textContent=name;control.append(option);
             });
@@ -1474,8 +1478,14 @@
     // Menú de navegación accesible desde Preferencias sin mostrar
     // otra lista interminable en la página principal.
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
+    const animationOptions=[
+      ['fade','Fundido','El texto desaparece y aparece con suavidad.'],
+      ['slide','Deslizamiento','El nuevo texto aparece con un leve movimiento hacia arriba.'],
+      ['soft','Enfoque','El texto aparece suavemente de un ligero desenfoque.'],
+      ['none','Sin animación','Cambio inmediato de una oración a otra.']
+    ];
     function openNavigationPreferences(){
-      show('<h2>Navegación</h2><div class="rosario-nav-dialog" id="rosarioNavSettings"></div>');
+      show('<h2>Controles e interacción</h2><div class="rosario-nav-dialog" id="rosarioNavSettings"></div>');
       const root=$('rosarioNavSettings');
       const selectRow=(title,options,value,callback)=>{
         const row=document.createElement('label');row.className='rosario-nav-setting';
@@ -1496,22 +1506,56 @@
         value=>{
           state.controlsPosition=value;applyControlsPosition();persist();
         });
-      const toggleRow=(title,description,key)=>{
-        const row=document.createElement('label');row.className='rosario-nav-setting';
-        const text=document.createElement('span');
-        text.textContent=title;
-        const small=document.createElement('small');small.textContent=description;
-        text.append(small);
-        const check=document.createElement('input');
-        check.type='checkbox';check.checked=state[key]===true;
-        check.onchange=()=>{state[key]=check.checked;persist();render();};
-        row.append(text,check);root.append(row);
+      const row=document.createElement('label');row.className='rosario-nav-setting';
+      const label=document.createElement('span');
+      label.textContent='Navegar tocando el fondo';
+      const small=document.createElement('small');
+      small.textContent='Arriba: oración anterior · Abajo: siguiente.';
+      label.append(small);
+      const check=document.createElement('input');
+      check.type='checkbox';check.checked=state.screenTapNavigation===true;
+      check.onchange=()=>{state.screenTapNavigation=check.checked;persist();render();};
+      row.append(label,check);root.append(row);
+      const section=document.createElement('section');
+      section.className='rosario-text-animation-settings';
+      const heading=document.createElement('h3');
+      heading.textContent='Transición del texto';
+      const caption=document.createElement('p');
+      caption.textContent='Se aplica al pasar de una Avemaría a otra.';
+      const example=document.createElement('div');
+      example.className='rosario-text-preview';
+      const sample=document.createElement('p');
+      sample.textContent='Dios te salve, María, llena eres de gracia.';
+      example.append(sample);
+      const options=document.createElement('div');
+      options.className='rosario-animation-choices';
+      const replay=mode=>{
+        sample.className='';
+        void sample.offsetWidth;
+        sample.className='rosario-animate-in-'+mode;
       };
-      toggleRow('Navegar tocando el fondo','Arriba: oración anterior · Abajo: siguiente.',
-        'screenTapNavigation');
-      toggleRow('Animación sutil entre Avemarías',
-        'Un pulso breve en la nueva cuenta, sin mover el hilo.',
-        'subtleBeadMotion');
+      animationOptions.forEach(([value,title,description])=>{
+        const item=document.createElement('label');
+        item.className='rosario-animation-option';
+        const radio=document.createElement('input');
+        radio.type='radio';radio.name='rosarioTextTransition';
+        radio.value=value;radio.checked=state.textTransition===value;
+        const words=document.createElement('span');
+        const name=document.createElement('strong');name.textContent=title;
+        const hint=document.createElement('small');hint.textContent=description;
+        words.append(name,hint);
+        radio.onchange=()=>{
+          state.textTransition=value;persist();render();
+          replay(value);
+        };
+        item.append(radio,words);options.append(item);
+      });
+      const replayButton=document.createElement('button');
+      replayButton.type='button';replayButton.className='rosario-preview-replay';
+      replayButton.textContent='Reproducir ejemplo';
+      replayButton.onclick=()=>replay(state.textTransition);
+      section.append(heading,caption,example,options,replayButton);
+      root.append(section);
       window.rosarioAndroidNavigationKeys?.(root);
     }
     window.rosarioOpenNavigationPreferences=openNavigationPreferences;
@@ -1533,12 +1577,23 @@
     const originalSettings = $('settings').onclick;
     $('settings').onclick = () => {
       originalSettings();
-      const navigation=document.createElement('button');
-      navigation.type='button';
-      navigation.className='voice-settings-link rosario-navigation-settings-button';
-      navigation.textContent='Configurar navegación';
-      navigation.onclick=openNavigationPreferences;
-      $('modalContent').append(navigation);
+      const host=$('modalContent');
+      const group=(title,klass)=>{
+        const root=document.createElement('section');
+        root.className='rosario-preferences-group '+klass;
+        const heading=document.createElement('h3');
+        heading.textContent=title;
+        root.append(heading);host.append(root);
+        return root;
+      };
+      const interaction=group('Controles e interacción','rosario-interaction-group');
+      const controls=document.createElement('button');
+      controls.type='button';
+      controls.className='voice-settings-link rosario-navigation-settings-button';
+      controls.textContent='Configurar controles';
+      controls.onclick=openNavigationPreferences;
+      interaction.append(controls);
+      const prayersGroup=group('Oraciones','rosario-prayer-settings-group');
       const contrition=document.createElement('label');
       contrition.className='rosario-tone-setting';
       const name=document.createElement('span');name.textContent='Acto de contrición';
@@ -1549,16 +1604,14 @@
       });
       choice.value=state.contritionVersion;
       choice.onchange=()=>window.rosarioSetContrition(choice.value);
-      contrition.append(name,choice);$('modalContent').append(contrition);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'voice-settings-link';
-      btn.textContent = 'Configurar guía y asamblea';
-      btn.onclick = () => {
-        $('modal').close();
-        openNavigation('voices');
-      };
-      $('modalContent').append(btn);
+      contrition.append(name,choice);prayersGroup.append(contrition);
+      const voicesGroup=group('Participación','rosario-voice-settings-group');
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='voice-settings-link';
+      btn.textContent='Configurar guía y asamblea';
+      btn.onclick=()=>openNavigation('voices');
+      voicesGroup.append(btn);
     };
     // Acceso permanente, sin tener que revelar la barra inferior oculta.
     const quickNav = document.createElement('button');
