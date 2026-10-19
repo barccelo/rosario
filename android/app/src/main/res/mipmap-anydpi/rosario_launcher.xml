@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 24-25: misma imagen vectorial; API 26+ usa icono adaptativo. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/rosario_icon_background"/>
+    <item android:drawable="@drawable/rosario_launcher_foreground"/>
+</layer-list>

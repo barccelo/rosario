@@ -1,49 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Diseño de lanzador: dibujo directo, sin imagen de un teléfono ni márgenes duplicados.
-     Zona útil centrada y amplia para máscaras circular/cuadrada de Android. -->
+<!-- Boceto A aprobado: mismo trazado de cruz, argolla y remate de focus.js y rosary-physical.js.
+     El grupo deja margen de seguridad para mascaras circulares y squircles de Android. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Hilo del rosario -->
-    <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#BEA47F"
-        android:strokeWidth="2.1"
-        android:strokeLineCap="round"
-        android:pathData="M39,20 L39,76"/>
-    <!-- Cuentas: siluetas nítidas y visibles incluso a 48 dp. -->
-    <path
-        android:fillColor="#F1EFE6"
-        android:pathData="M39,26 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
-                          M39,37 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
-                          M39,48 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
-                          M39,59 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0"/>
-    <!-- Cuenta mayor -->
-    <path
-        android:fillColor="#E8C98E"
-        android:pathData="M39,69 m-5.4,0 a5.4,5.4 0,1 0,10.8 0 a5.4,5.4 0,1 0,-10.8 0"/>
-    <path
-        android:fillColor="#796649"
-        android:pathData="M39,69 m-3.2,0 a3.2,3.2 0,1 0,6.4 0 a3.2,3.2 0,1 0,-6.4 0"/>
-    <!-- Cruz suficientemente gruesa para conservar su forma en el lanzador. -->
-    <path
-        android:fillColor="#E9BF7A"
-        android:pathData="M37,75 L41,75 L41,78 L46,78 L46,82 L41,82 L41,86 L37,86 L37,82 L32,82 L32,78 L37,78 Z"/>
-    <!-- Monograma centrado dentro de los semibordes con márgenes ópticos equivalentes. -->
-    <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#F2DFC0"
-        android:strokeWidth="5.2"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M58,69 L58,42 L68,42 C82,42 81,57 68,57 L58,57 M68,57 L79,69"/>
-    <!-- Semibordes finos inspirados en las oraciones de la aplicación. -->
-    <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#D2AE76"
-        android:strokeWidth="1.15"
-        android:strokeLineCap="round"
-        android:pathData="M51,36 Q51,34 54,34 L82,34 Q85,34 85,36 M51,76 Q51,78 54,78 L82,78 Q85,78 85,76"/>
+    android:viewportWidth="256"
+    android:viewportHeight="256">
+    <group android:pivotX="128" android:pivotY="128" android:scaleX="0.60" android:scaleY="0.60">
+        <!-- Hilo delicadamente curvado, espaciado amplio entre tres cuentas y la cuenta grande -->
+        <path android:pathData="M62,7 Q59,30 62,66 Q64,115 62,183"
+            android:fillColor="#00000000" android:strokeColor="#AAB4AB"
+            android:strokeWidth="3.6" android:strokeLineCap="round"/>
+        <path android:pathData="M62,7 Q59,30 62,66 Q64,115 62,183"
+            android:fillColor="#00000000" android:strokeColor="#E3D6BA"
+            android:strokeWidth="0.8" android:strokeLineCap="round"/>
+        <path android:pathData="M62,24 m-18,0 a18,18 0,1 0,36 0 a18,18 0,1 0,-36 0 M62,64 m-18,0 a18,18 0,1 0,36 0 a18,18 0,1 0,-36 0 M62,104 m-18,0 a18,18 0,1 0,36 0 a18,18 0,1 0,-36 0"
+            android:fillColor="#40D6BB86"/>
+        <path android:pathData="M62,24 m-11.4,0 a11.4,11.4 0,1 0,22.8 0 a11.4,11.4 0,1 0,-22.8 0 M62,64 m-11.4,0 a11.4,11.4 0,1 0,22.8 0 a11.4,11.4 0,1 0,-22.8 0 M62,104 m-11.4,0 a11.4,11.4 0,1 0,22.8 0 a11.4,11.4 0,1 0,-22.8 0"
+            android:fillColor="#ABB6AC"/>
+        <path android:pathData="M62,24 m-8.7,0 a8.7,8.7 0,1 0,17.4 0 a8.7,8.7 0,1 0,-17.4 0 M62,64 m-8.7,0 a8.7,8.7 0,1 0,17.4 0 a8.7,8.7 0,1 0,-17.4 0 M62,104 m-8.7,0 a8.7,8.7 0,1 0,17.4 0 a8.7,8.7 0,1 0,-17.4 0"
+            android:fillColor="#DFE7E0"/>
+        <path android:pathData="M62,154 m-22,0 a22,22 0,1 0,44 0 a22,22 0,1 0,-44 0" android:fillColor="#40DDB576"/>
+        <path android:pathData="M62,154 m-15,0 a15,15 0,1 0,30 0 a15,15 0,1 0,-30 0" android:fillColor="#E8CC9B"/>
+        <path android:pathData="M62,154 m-10.6,0 a10.6,10.6 0,1 0,21.2 0 a10.6,10.6 0,1 0,-21.2 0" android:fillColor="#877959"/>
+        <!-- Lineas completas arriba y abajo, con apenas un giro curvado en los extremos -->
+        <path android:pathData="M105,67 Q105,63 109,63 H222 Q226,63 226,67 M105,178 Q105,182 109,182 H222 Q226,182 226,178" android:fillColor="#00000000"
+            android:strokeColor="#C3AD88" android:strokeWidth="0.8"
+            android:strokeLineCap="round"/>
+        <!-- R serif: dibujada como contorno, con el centro óptico alineado entre los semibordes -->
+        <path android:pathData="M129,82 L164,82 C185,82 198,90 198,104 C198,116 190,123 178,126 L194,154 Q198,159 204,159 L204,161 L179,161 L160,127 L148,127 L148,154 L153,156 L153,161 L129,161 L129,156 L134,155 L134,88 L129,87 Z M148,88 L148,120 L160,120 C177,120 184,114 184,104 C184,94 177,88 161,88 Z" android:fillType="evenOdd"
+            android:fillColor="#EAE8E0"/>
+        <!-- Hilo conectado al casquillo; a partir de aquí se copia la argolla y cruz del SVG real -->
+        <group android:translateX="62" android:translateY="187"
+            android:scaleX="0.49" android:scaleY="0.49">
+            <path android:pathData="M-2.7,-8 H2.7 V1 H-2.7 Z"
+                android:fillColor="#B89A66" android:strokeColor="#927344"
+                android:strokeWidth="0.7"/>
+            <path android:pathData="M0,-1 C-6.667,-1 -6.667,15 0,15 C6.667,15 6.667,-1 0,-1 Z"
+                android:fillColor="#00000000" android:strokeColor="#B49663"
+                android:strokeWidth="2.5"/>
+            <path android:pathData="M-7,17 Q-7,14 -4,14 H4 Q7,14 7,17 V38 H28 Q31,38 31,41 V49 Q31,52 28,52 H7 V94 Q7,97 4,97 H-4 Q-7,97 -7,94 V52 H-28 Q-31,52 -31,49 V41 Q-31,38 -28,38 H-7 Z" android:strokeColor="#927344"
+                android:strokeWidth="1.5" android:strokeLineJoin="round">
+                <aapt:attr name="android:fillColor">
+                    <gradient android:type="linear" android:startX="-31" android:startY="14"
+                        android:endX="31" android:endY="97">
+                        <item android:offset="0" android:color="#F3E3BC"/>
+                        <item android:offset="0.45" android:color="#BD9657"/>
+                        <item android:offset="0.7" android:color="#E1C58D"/>
+                        <item android:offset="1" android:color="#96713F"/>
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <path android:pathData="M-3,20 V42 H-25 M3,20 V42 H25 M-3,56 V90"
+                android:fillColor="#00000000" android:strokeColor="#FFF4D5"
+                android:strokeAlpha="0.65" android:strokeWidth="1.2"/>
+            <path android:pathData="M0,45 m-3,0 a3,3 0,1 0,6 0 a3,3 0,1 0,-6 0"
+                android:fillColor="#F8EBCE" android:strokeColor="#A6844C"
+                android:strokeWidth="1"/>
+        </group>
+    </group>
 </vector>
