@@ -31,19 +31,19 @@
     <path
         android:fillColor="#E9BF7A"
         android:pathData="M37,75 L41,75 L41,78 L46,78 L46,82 L41,82 L41,86 L37,86 L37,82 L32,82 L32,78 L37,78 Z"/>
-    <!-- Monograma simple: la letra R sustituye el texto microscópico. -->
+    <!-- Monograma centrado dentro de los semibordes con márgenes ópticos equivalentes. -->
     <path
         android:fillColor="@android:color/transparent"
         android:strokeColor="#F2DFC0"
         android:strokeWidth="5.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M60,69 L60,42 L70,42 C86,42 85,57 70,57 L60,57 M70,57 L82,69"/>
+        android:pathData="M58,69 L58,42 L68,42 C82,42 81,57 68,57 L58,57 M68,57 L79,69"/>
     <!-- Semibordes finos inspirados en las oraciones de la aplicación. -->
     <path
         android:fillColor="@android:color/transparent"
         android:strokeColor="#D2AE76"
         android:strokeWidth="1.15"
         android:strokeLineCap="round"
-        android:pathData="M55,36 Q55,34 58,34 L80,34 Q82,34 82,36 M55,76 Q55,78 58,78 L80,78 Q82,78 82,76"/>
+        android:pathData="M51,36 Q51,34 54,34 L82,34 Q85,34 85,36 M51,76 Q51,78 54,78 L82,78 Q85,78 85,76"/>
 </vector>
