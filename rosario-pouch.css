@@ -456,8 +456,8 @@
   animation:pouch-backdrop-leave 2.9s linear both!important;
 }
 @keyframes pouch-backdrop-leave{
-  0%,67%{opacity:1}
-  100%{opacity:0}
+  0%{opacity:1}
+  60%,100%{opacity:0}
 }
 .rosario-pouch-layer[data-phase=traveling-in]::before{
   opacity:1!important;
@@ -520,4 +520,18 @@
 .rosario-pouch-layer[data-phase=traveling-in].pouch-arriving .rosario-pouch-flap-unit{
   opacity:1!important;
   transition:opacity .6s ease!important;
+}
+
+/* Sin duplicados en el retorno: durante el traslado sólo se dibuja
+   la copia exacta del SVG original; la interfaz se restituye al fundir. */
+body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
+  visibility:hidden!important;
+}
+/* El desvanecimiento empieza junto al desplazamiento lateral y
+   no mientras las cuentas siguen emergiendo de la funda. */
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-flap-unit{
+  opacity:0!important;
+  transition:opacity .8s cubic-bezier(.2,.6,.2,1)!important;
 }

@@ -262,19 +262,20 @@
       return;
     }
     transfer.style.transform=atMouth(.012);
+    // Evita que la copia animada aparezca sobre el original.
+    document.body.classList.add('rosario-pouch-hide-original');
     layer.dataset.phase='opening';
     await wait(1620);
     layer.dataset.phase='extracting';
     // Desvanecer la funda durante los últimos instantes de extracción,
     // sin esperar al movimiento lateral.
-    const departure=setTimeout(()=>layer.classList.add('pouch-departing'),2050);
     await motion([
       {transform:atMouth(.012),opacity:0},
       {transform:atMouth(.12),opacity:1}
     ],2750);
-    clearTimeout(departure);
-    layer.classList.add('pouch-departing');
+    // Funda y rosario inician el desplazamiento/fundido a la vez.
     layer.dataset.phase='traveling';
+    layer.classList.add('pouch-departing');
     // La posición y la escala cambian en el MISMO movimiento.
     // El rosario llega al lateral ya con su tamaño original.
     await motion([
@@ -283,6 +284,9 @@
       {transform:atScreen(1),opacity:1}
     ],2900);
     layer.dataset.phase='handoff';
+    // Al coincidir ambas geometrías en el lateral, volver a mostrar
+    // el SVG original para que el fundido no cree un segundo rosario.
+    document.body.classList.remove('rosario-pouch-hide-original');
     await motion([
       {transform:atScreen(1),opacity:1},
       {transform:atScreen(1),opacity:0}
@@ -292,6 +296,7 @@
     layer.hidden=true;
     transfer?.remove();
     transfer=null;
+    document.body.classList.remove('rosario-pouch-hide-original');
     animating=false;
   }
 
@@ -310,13 +315,10 @@
       return;
     }
     transfer.style.transform=atScreen(1);
-    transfer.style.opacity='0';
-    layer.dataset.phase='returning';
-    // Se captura el mismo dibujo donde está la oración, sin salto.
-    await motion([
-      {transform:atScreen(1),opacity:0},
-      {transform:atScreen(1),opacity:1}
-    ],700,'linear');
+    transfer.style.opacity='1';
+    // La copia ocupa el lugar exacto del original desde el primer fotograma;
+    // no hay dos rosarios superpuestos ni una segunda sombra.
+    document.body.classList.add('rosario-pouch-hide-original');
     layer.dataset.phase='traveling-in';
     // La funda reaparece sólo cuando el rosario está cerca de su abertura.
     // La copia se mantiene por detrás del frente durante la llegada.
@@ -332,9 +334,10 @@
     await motion([
       {transform:atMouth(.12),opacity:1},
       {transform:atMouth(.012),opacity:0}
-    ],2700);
+    ],1050);
+    // Cerrar sin dejar un intervalo vacío: solapa de un segundo.
     layer.dataset.phase='sealing';
-    await wait(1000);
+    await wait(1020);
     layer.dataset.phase='finished';
     hint.textContent='Rosario de hoy completado';
     transfer?.remove();
