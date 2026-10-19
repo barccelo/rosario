@@ -32,56 +32,111 @@
   const darkBg={Gozosos:'#14242D',Dolorosos:'#211B2B',
     Luminosos:'#292316',Gloriosos:'#202629'};
 
-  // Reutiliza el SVG que dibuja rosary-physical.js: sus hilos, cuentas y cruz reales.
+  // Reutiliza los nodos SVG y el relieve reales; sólo se modifica la postura
+  // del hilo y la posición de las cuentas, como un rosario suspendido en la mano.
   function syncPhysicalRosary(){
-    const source=document.querySelector('.physical-path');
+    const source=document.querySelector('.physical-scroll-viewport .physical-path');
     const target=layer.querySelector('.rosario-pouch-chain');
     if(!source?.querySelector('.physical-loop-beads')||!target)return false;
     const NS='http://www.w3.org/2000/svg';
-    const root=document.createElementNS(NS,'svg');
-    root.setAttribute('viewBox','0 0 260 390');
+    const svg=(tag)=>document.createElementNS(NS,tag);
+    const root=svg('svg');
+    root.setAttribute('viewBox','0 0 360 430');
     root.setAttribute('preserveAspectRatio','xMidYMax meet');
-    root.classList.add('physical-path','rosario-pouch-preview');
     root.setAttribute('aria-hidden','true');
+    root.classList.add('physical-path','rosario-pouch-preview');
+    // Se conservan las variables CSS y los degradados de la interfaz.
     const computed=getComputedStyle(source);
-    ['fill','line','outline','number','metal','shadow','surface','pending',
-     'pending-stroke','complete','complete-stroke'].forEach(key=>{
+    for(const key of ['fill','line','outline','number','metal','shadow','surface',
+      'pending','pending-stroke','complete','complete-stroke']){
       const name='--physical-'+key;
       root.style.setProperty(name,computed.getPropertyValue(name).trim());
-    });
-    const group=document.createElementNS(NS,'g');
-    const bead=source.querySelector('[data-bead="0"] .ring');
-    const cx=Number(bead?.getAttribute('cx'))||76;
-    const fy=.145,fr=.30;
-    group.setAttribute('transform',
-      'translate('+(130-cx).toFixed(2)+' '+(10-54*fy).toFixed(2)+') scale(1 '+fy+')');
-    Array.from(source.children).forEach(child=>group.append(child.cloneNode(true)));
-    root.append(group);
-    // La reducción vertical no deforma las cuentas en el pequeño rosario.
-    root.querySelectorAll('circle').forEach(circle=>{
-      const r=Number(circle.getAttribute('r'));
-      if(!Number.isFinite(r)||r<=0)return;
-      const ellipse=document.createElementNS(NS,'ellipse');
-      for(const attr of Array.from(circle.attributes))
-        if(attr.name!=='r')ellipse.setAttribute(attr.name,attr.value);
-      ellipse.setAttribute('rx',(r*fr).toFixed(3));
-      ellipse.setAttribute('ry',(r*fr/fy).toFixed(3));
-      circle.replaceWith(ellipse);
-    });
-    root.querySelectorAll('text').forEach(el=>el.remove());
-    root.querySelectorAll('[tabindex]').forEach(el=>el.removeAttribute('tabindex'));
-    root.querySelectorAll('[role="button"]').forEach(el=>el.removeAttribute('role'));
-    // La cruz mantiene el mismo trazado; su escala es uniforme en pantalla.
-    const cross=root.querySelector('.physical-cross');
-    if(cross){
-      const t=cross.getAttribute('transform')||'';
-      const match=t.match(/translate\(([-\d.]+)[ ,]+([-\d.]+)\)/);
-      if(match){
-        cross.setAttribute('transform','translate('+match[1]+' '+match[2]+
-          ') scale(.28 '+(.28/fy).toFixed(4)+')');
+    }
+    source.querySelectorAll(':scope > defs').forEach(def=>root.append(def.cloneNode(true)));
+    const pts=[{x:180,y:296}];
+    for(let i=1;i<=27;i++){
+      const t=i/27;
+      pts.push({x:180-(48+13*Math.sin(Math.PI*t))+4*Math.sin(t*4),
+        y:296-238*t+5*Math.sin(Math.PI*t*.85)});
+    }
+    for(let i=28;i<55;i++){
+      const t=(i-28)/26;
+      pts.push({x:180+48+12*Math.sin(Math.PI*t)-3*Math.sin(t*5),
+        y:58+238*t-9*Math.sin(Math.PI*t)});
+    }
+    const pos=p=>p.x.toFixed(2)+' '+p.y.toFixed(2);
+    function segment(i){
+      const p=pts[i],q=pts[(i+1)%55];
+      if(i===27)return 'M '+pos(p)+' C '+p.x.toFixed(2)+' 15 '+q.x.toFixed(2)+' 15 '+pos(q);
+      if(i===54)return 'M '+pos(p)+' C 227 318 199 320 '+pos(q);
+      if(i===0)return 'M '+pos(p)+' C 158 320 135 315 '+pos(q);
+      const prev=pts[(i+54)%55],next=pts[(i+2)%55];
+      const c1={x:p.x+(q.x-prev.x)/6,y:p.y+(q.y-prev.y)/6};
+      const c2={x:q.x-(next.x-p.x)/6,y:q.y-(next.y-p.y)/6};
+      return 'M '+pos(p)+' C '+pos(c1)+' '+pos(c2)+' '+pos(q);
+    }
+    const wires=svg('g');wires.setAttribute('class','physical-loop-links');
+    const threadTemplate=source.querySelector('.physical-loop-link');
+    const grainTemplate=source.querySelector('.physical-cord-grain');
+    for(let i=0;i<55;i++){
+      const d=segment(i);
+      for(const origin of [threadTemplate,grainTemplate]){
+        if(!origin)continue;
+        const line=origin.cloneNode(true);
+        line.setAttribute('d',d);
+        line.removeAttribute('data-link');
+        wires.append(line);
       }
     }
-    // Evita IDs de degradados duplicados entre el rosario animado y la interfaz.
+    root.append(wires);
+    const pendant=[pts[0],{x:179,y:322},{x:183,y:340},{x:178,y:358},
+      {x:180,y:378},{x:180,y:381}];
+    for(let i=0;i<pendant.length-1;i++){
+      const p=pendant[i],q=pendant[i+1],d=
+        'M '+pos(p)+' Q '+(180+3*Math.sin(i)).toFixed(2)+' '+
+        ((p.y+q.y)/2).toFixed(2)+' '+pos(q);
+      for(const origin of [source.querySelector('.physical-intro-link'),grainTemplate]){
+        if(!origin)continue;
+        const link=origin.cloneNode(true);link.setAttribute('d',d);
+        link.removeAttribute('data-link');wires.append(link);
+      }
+    }
+    // Las cuentas son clones de los <g> originales, no círculos reconstruidos.
+    // El mismo halo, aro, número y color se escalan sin deformarlos.
+    function beadAt(original,targetPoint,scale){
+      if(!original)return;
+      const ring=original.querySelector('.ring');
+      const cx=Number(ring?.getAttribute('cx'));
+      const cy=Number(ring?.getAttribute('cy'));
+      if(!Number.isFinite(cx)||!Number.isFinite(cy))return;
+      const wrapper=svg('g');
+      wrapper.setAttribute('transform','translate('+pos(targetPoint)+') scale('+scale+
+        ') translate('+(-cx)+' '+(-cy)+')');
+      const clone=original.cloneNode(true);
+      clone.removeAttribute('tabindex');clone.removeAttribute('role');
+      clone.removeAttribute('aria-label');clone.removeAttribute('aria-current');
+      clone.querySelectorAll('text').forEach(t=>t.remove());
+      wrapper.append(clone);root.append(wrapper);
+    }
+    const originals=Array.from(source.querySelectorAll('[data-bead]'));
+    originals.forEach(node=>beadAt(node,pts[Number(node.dataset.bead)],.22));
+    const intro=Array.from(source.querySelectorAll('[data-intro]'));
+    intro.forEach((node,i)=>beadAt(node,pendant[i+1],.24));
+    const ferrule=source.querySelector('.physical-cross-ferrule');
+    if(ferrule){
+      const rect=ferrule.cloneNode(true);
+      rect.setAttribute('x','178');rect.setAttribute('y','374');
+      rect.setAttribute('width','4');rect.setAttribute('height','7');
+      root.append(rect);
+    }
+    const cross=source.querySelector('.physical-cross');
+    if(cross){
+      const copy=cross.cloneNode(true);
+      copy.removeAttribute('tabindex');copy.removeAttribute('role');
+      copy.removeAttribute('aria-label');copy.setAttribute('transform','translate(180 378) scale(.31)');
+      root.append(copy);
+    }
+    // En la pantalla existen los mismos nombres de filtros; la copia necesita IDs únicos.
     const ids=new Map();
     root.querySelectorAll('[id]').forEach(el=>{
       const old=el.id,next='pouch-'+old;
@@ -90,12 +145,12 @@
     root.querySelectorAll('*').forEach(el=>{
       for(const attr of Array.from(el.attributes)){
         if(attr.name==='id')continue;
-        let value=attr.value;
+        let val=attr.value;
         for(const [old,next] of ids){
-          value=value.replaceAll('url(#'+old+')','url(#'+next+')');
-          if(value==='#'+old)value='#'+next;
+          val=val.replaceAll('url(#'+old+')','url(#'+next+')');
+          if(val==='#'+old)val='#'+next;
         }
-        if(value!==attr.value)el.setAttribute(attr.name,value);
+        if(val!==attr.value)el.setAttribute(attr.name,val);
       }
     });
     target.replaceChildren(root);
@@ -151,6 +206,25 @@
   let animating=false;
   let opened=false;
   let stageTimer=0;
+  let gestureSerial=0;
+  let blessingGesture=state.index>=steps.length?0:-1;
+  let blessingTime=0;
+  let prayerGesture=false;
+  document.addEventListener('pointerdown',event=>{
+    if(!event.isPrimary||event.button!==0)return;
+    gestureSerial++;
+    prayerGesture=!!(event.target instanceof Element&&
+      event.target.closest('.immersive-prayer,#prayer')) &&
+      !event.target.closest('a,button,input,select,textarea');
+  },true);
+  if(!window.PointerEvent){
+    document.addEventListener('touchstart',event=>{
+      if(event.touches.length!==1)return;
+      gestureSerial++;
+      prayerGesture=!!(event.target instanceof Element&&
+        event.target.closest('.immersive-prayer,#prayer'));
+    },{capture:true,passive:true});
+  }
 
   function appearance(){
     const group=labels[state.group]?state.group:'Gloriosos';
@@ -178,26 +252,24 @@
   }
 
   function calculateDock(){
-    const target=document.querySelector('.physical-scroll-viewport');
-    const rect=target&&getComputedStyle(target).display!=='none'
-      ?target.getBoundingClientRect():null;
+    const sceneRect=scene.getBoundingClientRect();
     const side=state.rosarySide==='right'?'right':'left';
-    const centerX=rect&&rect.width>0?(rect.left+rect.width*.45):
-      (side==='right'?window.innerWidth*.88:window.innerWidth*.12);
-    const centerY=rect&&rect.height>0?rect.top+rect.height*.45:window.innerHeight*.43;
-    const mouth=scene.getBoundingClientRect();
-    const rosaryCenterY=mouth.top+mouth.height*.6-160;
-    const dx=centerX-(mouth.left+mouth.width/2);
-    const dy=centerY-rosaryCenterY;
-    scene.style.setProperty('--pouch-dock-x',dx.toFixed(1)+'px');
-    scene.style.setProperty('--pouch-dock-y',Math.max(-85,Math.min(85,dy)).toFixed(1)+'px');
+    const inset=Math.max(64,Math.min(115,window.innerWidth*.17));
+    const endX=side==='right'?window.innerWidth-inset:inset;
+    const dx=endX-(sceneRect.left+sceneRect.width*.5);
+    const dy=Math.max(-48,Math.min(48,window.innerHeight*.43-
+      (sceneRect.top+sceneRect.height*.34)));
+    scene.style.setProperty('--pouch-dock-x',Math.round(dx)+'px');
+    scene.style.setProperty('--pouch-dock-y',Math.round(dy)+'px');
+    layer.dataset.side=side;
   }
 
   function after(ms,fn){stageTimer=window.setTimeout(fn,ms)}
   function openPouch(){
     if(animating)return;
     animating=true;
-    if(state.index>=steps.length && state.pouchCompletedDate && state.pouchCompletedDate!==dayKey()){
+    if(state.index>=steps.length && state.pouchCompletedDate &&
+       state.pouchCompletedDate!==dayKey()){
       state.index=0;
       state.intentionCycle=[null,null,null,null,null];
       window.rosarioResetIntentionCycle?.();
@@ -210,15 +282,17 @@
     calculateDock();
     layer.hidden=false;
     layer.classList.remove('is-revealing');
-    layer.dataset.phase='opening';  // 1,5 s: solapa
+    layer.dataset.phase='opening';
     hint.textContent='';
-    after(1800,()=>{
-      layer.dataset.phase='extracting'; // 3,8 s: aro completo asciende desde la boca
-      after(4500,()=>{
-        layer.dataset.phase='docking'; // 1,8 s: rosario a su lado
-        after(1950,()=>{
+    // La extracción empieza inmediatamente después de abrir la solapa.
+    after(1660,()=>{
+      layer.dataset.phase='extracting';
+      after(3250,()=>{
+        // Las dos mitades de la funda desaparecen al mismo tiempo.
+        layer.dataset.phase='docking';
+        after(2050,()=>{
           layer.classList.add('is-revealing');
-          after(850,()=>{
+          after(600,()=>{
             layer.hidden=true;
             animating=false;
           });
@@ -235,19 +309,17 @@
     syncPhysicalRosary();
     appearance();
     calculateDock();
+    hint.textContent='';
     layer.hidden=false;
     layer.classList.remove('is-revealing');
     layer.dataset.phase='returning';
-    hint.textContent='';
-    // Dos cuadros para asegurar que el navegador pinte el origen lateral
-    // antes de animarlo al centro.
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       layer.dataset.phase='centering';
-      after(2000,()=>{
-        layer.dataset.phase='stowing'; // 3,8 s: la cruz, las cuentas y el aro entran en la boca
-        after(4500,()=>{
-          layer.dataset.phase='sealing'; // 1,5 s: solapa y bordado
-          after(1850,()=>{
+      after(1700,()=>{
+        layer.dataset.phase='stowing';
+        after(3250,()=>{
+          layer.dataset.phase='sealing';
+          after(1720,()=>{
             layer.dataset.phase='finished';
             hint.textContent='Rosario de hoy completado';
             animating=false;
@@ -261,20 +333,26 @@
   window.addEventListener('resize',()=>{if(!layer.hidden)calculateDock();},{passive:true});
   const formerRender=render;
   render=function(){
+    const previous=lastIndex;
     formerRender();
     lastIndex=state.index;
-    // Mostrar la bendición final sin cerrar automáticamente la funda.
-    // El cierre se realiza al avanzar una vez MÁS tras haberla leído.
-    if(!layer.hidden && !animating)appearance();
+    if(previous<steps.length && state.index>=steps.length){
+      // El gesto que muestra «El Señor nos bendiga» no puede cerrarlo.
+      blessingGesture=gestureSerial;
+      blessingTime=performance.now();
+    }
+    if(!layer.hidden&&!animating)appearance();
   };
 
   window.rosarioPouchFinish=()=>{
-    if(!opened||animating||!layer.hidden||state.index<steps.length)return false;
+    if(!opened||animating||!layer.hidden||
+       state.index<steps.length||completeToday())return false;
+    // Debe comenzar OTRO toque o swipe, sobre la oración final.
+    if(!prayerGesture||gestureSerial<=blessingGesture||
+       performance.now()-blessingTime<400)return false;
     closePouch();
     return true;
   };
-  // Avanzar al marcador de cierre NO equivale a terminar de rezar la
-  // bendición que aparece en la última pantalla.
   const priorAdvance=advance;
   advance=function(...args){
     if(state.index>=steps.length){
@@ -283,15 +361,16 @@
     }
     return priorAdvance(...args);
   };
-  // El toque directo sobre la oración final también guarda el rosario.
+  // Además del swipe, el toque simple en el texto final confirma el guardado.
   document.addEventListener('click',event=>{
     if(!opened||animating||!layer.hidden||state.index<steps.length)return;
     if(!(event.target instanceof Element)||
-        !event.target.closest('.immersive-prayer,#prayer'))return;
+       !event.target.closest('.immersive-prayer,#prayer'))return;
     if(event.target.closest('button,a,input,textarea,select'))return;
-    event.preventDefault();
-    event.stopPropagation();
-    window.rosarioPouchFinish();
+    if(window.rosarioPouchFinish()){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   },true);
   // El rosario físico se crea en DOMContentLoaded; esperamos su dibujo real.
   if(document.readyState==='loading'){
