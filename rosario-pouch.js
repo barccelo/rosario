@@ -273,12 +273,13 @@
       {transform:atMouth(.012),opacity:0},
       {transform:atMouth(.12),opacity:1}
     ],2750);
-    // Funda y rosario inician el desplazamiento/fundido a la vez.
-    layer.dataset.phase='traveling';
+    // El rosario ya salió: la funda empieza a disolverse ANTES
+    // de iniciar el desplazamiento lateral, sin esperar a que se mueva.
     layer.classList.add('pouch-departing');
-    // Terminar completamente el fundido de la funda antes de que
-    // el texto de la interfaz se haga visible, evitando residuos.
-    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),430);
+    await wait(180);
+    layer.dataset.phase='traveling';
+    // Terminar el desvanecimiento sin restos visibles sobre las oraciones.
+    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),230);
     // La posición y la escala cambian en el MISMO movimiento.
     // El rosario llega al lateral ya con su tamaño original.
     await motion([
@@ -339,10 +340,11 @@
     await motion([
       {transform:atMouth(.12),opacity:1},
       {transform:atMouth(.012),opacity:0}
-    ],1050);
-    // Cerrar sin dejar un intervalo vacío: solapa de un segundo.
+    ],700);
+    // Al entrar la última cuenta, la solapa cierra inmediatamente.
+    // No hay espera intermedia; giro de la solapa de 500 ms.
     layer.dataset.phase='sealing';
-    await wait(1020);
+    await wait(510);
     layer.dataset.phase='finished';
     hint.textContent='Rosario de hoy completado';
     transfer?.remove();

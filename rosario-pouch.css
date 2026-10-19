@@ -308,7 +308,7 @@
 /* El bordado exterior sólo vuelve cuando la solapa va cerrándose. */
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-upper{
   visibility:visible!important;
-  animation:pouch-brooch-close 1s linear both!important;
+  animation:pouch-brooch-close .5s linear both!important;
 }
 
 /* Solapa abierta: el reverso está limpio, sin cruz. */
@@ -419,7 +419,7 @@
   animation:pouch-title-covered .9s .2s both!important;
 }
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-title{
-  animation:pouch-title-uncovered .5s .5s both!important;
+  animation:pouch-title-uncovered .3s .2s both!important;
 }
 @keyframes pouch-title-covered{
   0%,17%{opacity:.83}
@@ -448,7 +448,7 @@
   85%,100%{opacity:1}
 }
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap{
-  animation:pouch-flap-shut 1s cubic-bezier(.2,.73,.21,1) both!important;
+  animation:pouch-flap-shut .5s cubic-bezier(.2,.73,.21,1) both!important;
 }
 /* Un solo viaje con escala progresiva; revelar la interfaz principalmente
    en el último tramo, cuando ambas copias ya coinciden geométricamente. */
