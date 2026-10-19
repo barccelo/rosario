@@ -99,6 +99,18 @@
       const height=viewport.clientHeight;
       const end=viewport.scrollHeight-height;
       if(height<=0||end<=1)return;
+      // Una sesión reanudada no debe volver a la cruz cuando termina
+      // de cargar el CSS: recalcular la cuenta activa con dimensiones reales.
+      if(launchPrayerIndex>0){
+        initialFramePending=false;
+        initialFrameAnchored=false;
+        beforeIndex=-1;
+        beforeMode='';
+        displacedManually=true;
+        autoFollowTarget=null;
+        paint();
+        return;
+      }
       viewport.scrollTop=end;
       autoFollowTarget=null;
       initialFramePending=false;
@@ -501,7 +513,7 @@
         const keepFinalFraming=atClosing||atFinalMystery;
         // Después de un desplazamiento manual el siguiente avance
         // debe volver a la cuenta activa, esté a la distancia que esté.
-        const restoreActiveBead=displacedManually;
+        let restoreActiveBead=displacedManually;
         displacedManually=false;
 
         const entering=beforeMode!=='physical';
@@ -509,6 +521,14 @@
         const goingBackward=!entering&&state.index===beforeIndex-1;
         const sequential=goingForward||goingBackward;
         const currentTop=viewport.scrollTop;
+        // Recuperar la cuenta fuera de pantalla incluso cuando no hubo
+        // pointerdown previo; no limitar el salto a 90–176 px por avance.
+        if(!restoreActiveBead &&
+           (selected.type==='loop'||selected.type==='intro')){
+          const screenY=selected.y-currentTop;
+          if(screenY< -height*.12||screenY>height*1.12)
+            restoreActiveBead=true;
+        }
         // Los avances rápidos utilizan el destino pendiente, nunca una
         // coordenada intermedia de una animación todavía en marcha.
         const previous=autoFollowTarget===null?currentTop:autoFollowTarget;
@@ -528,6 +548,7 @@
           // en el límite inferior real, igual que al terminarlo.
           // Esto cubre primer uso, recarga con progreso 0 y reinicio.
           if(initialFramePending&&state.index===launchPrayerIndex ||
+             selected.type==='cross'&&selected.phase==='opening' ||
              state.index===0&&selected.phase==='opening'){
             target=finalTop;
           }else if(atClosing||atFinalMystery||bead>=50){
