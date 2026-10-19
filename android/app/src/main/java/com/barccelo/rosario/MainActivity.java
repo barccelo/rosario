@@ -46,7 +46,7 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void vibrate(int milliseconds) {
             if (milliseconds <= 0) return;
-            final int duration = Math.min(milliseconds, 150);
+            final int duration = Math.min(milliseconds, 260);
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
@@ -66,6 +66,34 @@ public final class MainActivity extends Activity {
                     }
                 } catch (SecurityException ignored) {
                     // El sistema puede denegar vibración según sus permisos.
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void vibratePattern(int firstMs, int pauseMs, int secondMs) {
+            final int first = Math.max(1, Math.min(firstMs, 120));
+            final int pause = Math.max(20, Math.min(pauseMs, 200));
+            final int second = Math.max(1, Math.min(secondMs, 120));
+            final long[] pattern = new long[]{0, first, pause, second};
+            runOnUiThread(() -> {
+                try {
+                    Vibrator vibrator;
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        VibratorManager manager = (VibratorManager)
+                            getSystemService(VIBRATOR_MANAGER_SERVICE);
+                        vibrator = manager != null ? manager.getDefaultVibrator() : null;
+                    } else {
+                        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    }
+                    if (vibrator == null || !vibrator.hasVibrator()) return;
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+                    } else {
+                        vibrator.vibrate(pattern, -1);
+                    }
+                } catch (SecurityException ignored) {
+                    // La vibración puede estar restringida por Android.
                 }
             });
         }

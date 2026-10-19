@@ -294,9 +294,10 @@
     await motion([
       {transform:atScreen(1),opacity:1},
       {transform:atScreen(1),opacity:0}
-    ],850,'linear');
+    ],350,'linear');
+    // Texto visible en menos de un segundo desde que el rosario llega.
     layer.classList.add('is-revealing');
-    await wait(500);
+    await wait(300);
     layer.hidden=true;
     transfer?.remove();
     transfer=null;
