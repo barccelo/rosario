@@ -1,7 +1,7 @@
 /* Funda animada: rosario completo, salida desde la boca y desplazamiento a su lado. */
 (() => {
   'use strict';
-  if (window.RosarioAndroid) return;
+  // Misma animación de funda en GitHub Pages y en la WebView Android.
 
   const dayKey=()=>{
     const d=new Date();
