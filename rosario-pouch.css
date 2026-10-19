@@ -533,7 +533,7 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
 .rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-wallet,
 .rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-flap-unit{
   opacity:0!important;
-  transition:opacity .8s cubic-bezier(.2,.6,.2,1)!important;
+  transition:opacity .38s ease-out!important;
 }
 
 /* Ajuste final: eliminar restos visibles de la funda antes del texto. */
@@ -549,12 +549,13 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
 }
 /* Márgenes visuales equilibrados: textos próximos a la funda. */
 .rosario-pouch-title{
-  top:calc(50% - 121px);
+  /* Mismo espacio visual que el aviso inferior: 18px respecto a la funda. */
+  top:calc(50% - 104px);
 }
 .rosario-pouch-hint{
   top:calc(50% + 108px);
 }
 @media(max-height:620px){
-  .rosario-pouch-title{top:calc(50% - 121px)}
+  .rosario-pouch-title{top:calc(50% - 104px)}
   .rosario-pouch-hint{top:calc(50% + 108px)}
 }

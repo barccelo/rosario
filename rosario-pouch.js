@@ -278,7 +278,7 @@
     layer.classList.add('pouch-departing');
     // Terminar completamente el fundido de la funda antes de que
     // el texto de la interfaz se haga visible, evitando residuos.
-    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),650);
+    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),430);
     // La posición y la escala cambian en el MISMO movimiento.
     // El rosario llega al lateral ya con su tamaño original.
     await motion([
