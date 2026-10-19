@@ -463,3 +463,61 @@
   opacity:1!important;
   transition:opacity .7s linear!important;
 }
+
+/* Ajuste: entrada recortada, cruz del anverso y tiempos de la funda. */
+.rosario-pouch-transfer-viewport{
+  position:fixed;
+  inset:0;
+  z-index:4;
+  overflow:visible;
+  pointer-events:none;
+}
+.rosario-pouch-transfer-viewport .rosario-pouch-transfer{
+  pointer-events:none!important;
+}
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-transfer-viewport,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-transfer-viewport{
+  /* Sólo la porción situada encima de la boca permanece visible:
+     el resto ya está guardado detrás del cuerpo de la funda. */
+  clip-path:polygon(0 0,100% 0,
+    100% var(--pouch-mouth-screen-y,50vh),
+    0 var(--pouch-mouth-screen-y,50vh));
+}
+/* El reverso de la solapa no lleva bordado. Ocultar la cruz al
+   mismo ritmo que gira la superficie y nunca mostrarla por detrás. */
+.rosario-pouch-flap{
+  transform-style:preserve-3d;
+}
+.rosario-pouch-cross-upper{
+  backface-visibility:hidden!important;
+  transform:translateZ(1px);
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-cross-upper{
+  visibility:visible!important;
+  animation:pouch-brooch-early-hide 1.6s linear both!important;
+}
+@keyframes pouch-brooch-early-hide{
+  0%,15%{opacity:1}
+  44%,100%{opacity:0}
+}
+/* Cuando termina de salir el rosario, toda la funda se desvanece
+   en conjunto: solapa, cuerpo y espalda. */
+.rosario-pouch-layer.pouch-departing .rosario-pouch-rear,
+.rosario-pouch-layer.pouch-departing .rosario-pouch-wallet,
+.rosario-pouch-layer.pouch-departing .rosario-pouch-flap-unit{
+  opacity:0!important;
+  transition:opacity .48s ease!important;
+}
+/* En el retorno no revelar la funda hasta la última parte del trayecto. */
+.rosario-pouch-layer[data-phase=traveling-in]:not(.pouch-arriving) .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling-in]:not(.pouch-arriving) .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling-in]:not(.pouch-arriving) .rosario-pouch-flap-unit{
+  opacity:0!important;
+  transition:none!important;
+}
+.rosario-pouch-layer[data-phase=traveling-in].pouch-arriving .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling-in].pouch-arriving .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling-in].pouch-arriving .rosario-pouch-flap-unit{
+  opacity:1!important;
+  transition:opacity .6s ease!important;
+}

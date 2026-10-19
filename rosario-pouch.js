@@ -84,11 +84,14 @@
       transformOrigin:axis+'px 100%',willChange:'transform,opacity',
       opacity:'0'
     });
-    scene.append(transfer);
+    portal.append(transfer);
     const sceneBox=scene.getBoundingClientRect();
     const mouthX=sceneBox.left+sceneBox.width/2;
     const mouthY=sceneBox.top+sceneBox.height/2-36;
     geometry={mouthX,mouthY,originX:left+axis,originY:top+h,scale:.12};
+    // Recorta el dibujo exactamente en la abertura: lo que entra
+    // queda dentro de la funda, no superpuesto sobre el frente.
+    portal.style.setProperty('--pouch-mouth-screen-y',mouthY.toFixed(1)+'px');
     return true;
   }
 
@@ -158,6 +161,10 @@
   const title=layer.querySelector('.rosario-pouch-title');
   const hint=layer.querySelector('.rosario-pouch-hint');
   const scene=layer.querySelector('.rosario-pouch-scene');
+  const portal=document.createElement('div');
+  portal.className='rosario-pouch-transfer-viewport';
+  portal.setAttribute('aria-hidden','true');
+  scene.prepend(portal);
   const completeToday=()=>state.index>=steps.length && state.pouchCompletedDate===dayKey();
   let lastIndex=state.index;
   let animating=false;
@@ -247,7 +254,7 @@
     opened=true;
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
@@ -258,10 +265,15 @@
     layer.dataset.phase='opening';
     await wait(1620);
     layer.dataset.phase='extracting';
+    // Desvanecer la funda durante los últimos instantes de extracción,
+    // sin esperar al movimiento lateral.
+    const departure=setTimeout(()=>layer.classList.add('pouch-departing'),2050);
     await motion([
       {transform:atMouth(.012),opacity:0},
       {transform:atMouth(.12),opacity:1}
     ],2750);
+    clearTimeout(departure);
+    layer.classList.add('pouch-departing');
     layer.dataset.phase='traveling';
     // La posición y la escala cambian en el MISMO movimiento.
     // El rosario llega al lateral ya con su tamaño original.
@@ -290,7 +302,7 @@
     persist();
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
@@ -306,12 +318,16 @@
       {transform:atScreen(1),opacity:1}
     ],700,'linear');
     layer.dataset.phase='traveling-in';
-    // Al regresar, se encoge a la vez que se aproxima a la funda.
+    // La funda reaparece sólo cuando el rosario está cerca de su abertura.
+    // La copia se mantiene por detrás del frente durante la llegada.
+    const arrival=setTimeout(()=>layer.classList.add('pouch-arriving'),2150);
     await motion([
       {transform:atScreen(1),opacity:1},
       {transform:atScreen(.63),opacity:1,offset:.45},
       {transform:atMouth(.12),opacity:1}
     ],2900);
+    clearTimeout(arrival);
+    layer.classList.add('pouch-arriving');
     layer.dataset.phase='stowing';
     await motion([
       {transform:atMouth(.12),opacity:1},
