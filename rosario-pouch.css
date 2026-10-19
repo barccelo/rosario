@@ -1,0 +1,100 @@
+/* Entrada y salida del rosario: carterita de cuero, cuatro variantes litúrgicas. */
+.rosario-pouch-layer{
+  --pouch-light:#fffdfa;--pouch-mid:#eeeae3;--pouch-shadow:#cfcbc3;--pouch-stitch:#d9d0c2;
+  position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;
+  padding:calc(14px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px))
+    calc(14px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));
+  color:#ece6db;background:radial-gradient(ellipse at 50% 58%,#303639,#202628 71%);
+  opacity:1;visibility:visible;overflow:hidden;touch-action:manipulation;
+  transition:opacity .65s ease,visibility .65s;
+}
+.rosario-pouch-layer[hidden]{display:none!important}
+.rosario-pouch-layer[data-theme=Gozosos]{
+  --pouch-light:#f3fafc;--pouch-mid:#cbdfe9;--pouch-shadow:#8faebd;--pouch-stitch:#a9c4d1;
+}
+.rosario-pouch-layer[data-theme=Dolorosos]{
+  --pouch-light:#eae1f1;--pouch-mid:#b39fc5;--pouch-shadow:#817095;--pouch-stitch:#a18cae;
+}
+.rosario-pouch-layer[data-theme=Luminosos]{
+  --pouch-light:#fff6d9;--pouch-mid:#e6cb85;--pouch-shadow:#b59a54;--pouch-stitch:#c4a969;
+}
+.rosario-pouch-layer.is-revealing{opacity:0;visibility:hidden;pointer-events:none}
+.rosario-pouch-scene{position:relative;width:min(100%,390px);height:min(580px,calc(100dvh - 36px));min-height:360px;isolation:isolate}
+.rosario-pouch-title{position:absolute;left:0;top:3%;width:100%;text-align:center;color:#d7bf95;
+  font:11px system-ui,sans-serif;letter-spacing:.28em;text-transform:uppercase}
+.rosario-pouch-hint{position:absolute;bottom:1%;left:5%;right:5%;text-align:center;
+  font:12px system-ui,sans-serif;color:#ddd0bb;line-height:1.55;min-height:34px}
+.rosario-pouch-chain-window{position:absolute;left:50%;bottom:192px;width:142px;height:min(305px,calc(100% - 210px));
+  overflow:hidden;transform:translateX(-50%);z-index:2;pointer-events:none}
+.rosario-pouch-chain{display:block;position:absolute;width:142px;height:300px;bottom:0;left:0;
+  transform:translateY(310px);will-change:transform;filter:drop-shadow(0 0 7px #d3b88833)}
+.rosario-pouch-wallet{position:absolute;left:50%;bottom:43px;width:229px;height:181px;
+  transform:translateX(-50%);filter:drop-shadow(0 15px 16px #0007);
+  perspective:700px;z-index:4}
+.rosario-pouch-back{position:absolute;left:4px;right:4px;top:25px;height:115px;border-radius:17px 17px 13px 13px;
+  background:linear-gradient(110deg,var(--pouch-shadow),var(--pouch-mid) 36%,var(--pouch-light) 72%,var(--pouch-shadow));
+  border:1px solid var(--pouch-shadow);box-shadow:inset 0 3px 9px #00000017}
+.rosario-pouch-mouth{position:absolute;left:13px;right:13px;top:33px;height:30px;border-radius:50%;
+  background:#6c615e;box-shadow:0 -2px 5px #0003,inset 0 6px 8px #0004;z-index:1}
+.rosario-pouch-front{position:absolute;left:0;right:0;top:62px;bottom:0;border-radius:14px 14px 24px 24px;
+  background:linear-gradient(115deg,var(--pouch-mid),var(--pouch-light) 42%,var(--pouch-mid) 84%,var(--pouch-shadow));
+  border:1px solid var(--pouch-shadow);box-shadow:inset 0 2px #ffffff88,inset -7px -3px 11px #0000000b;z-index:3}
+.rosario-pouch-front::after{content:"";position:absolute;inset:6px;border:1px dashed var(--pouch-stitch);
+  border-radius:11px 11px 18px 18px;opacity:.85}
+.rosario-pouch-cross{position:absolute;left:50%;top:55%;width:40px;height:54px;
+  transform:translate(-50%,-10%);z-index:4;filter:drop-shadow(0 1px 1px #9a773e55)}
+.rosario-pouch-flap{position:absolute;left:1px;top:22px;width:227px;height:94px;
+  border-radius:15px 15px 90px 90px / 15px 15px 47px 47px;
+  transform-origin:50% 4px;backface-visibility:visible;
+  background:linear-gradient(120deg,var(--pouch-mid),var(--pouch-light) 47%,var(--pouch-mid) 94%);
+  border:1px solid var(--pouch-shadow);box-shadow:0 6px 8px #00000015,inset 1px 2px #ffffffac;
+  z-index:6;transform:rotateX(0)}
+.rosario-pouch-flap::after{content:"";position:absolute;inset:6px;border:1px dashed var(--pouch-stitch);
+  border-radius:10px 10px 83px 83px / 10px 10px 37px 37px}
+.rosario-pouch-snap{position:absolute;left:calc(50% - 12px);top:94px;width:24px;height:24px;
+  border-radius:50%;z-index:7;border:2px solid #997138;
+  background:radial-gradient(circle at 35% 23%,#fff0ac 0%,#e2bb57 36%,#926c29 76%,#e3bc6c);
+  box-shadow:0 2px 3px #0002,inset -2px -2px 3px #825c2670}
+.rosario-pouch-open{position:absolute;z-index:9;inset:-12px -15px -12px;border:0;
+  cursor:pointer;background:transparent;border-radius:30px;color:transparent;
+  -webkit-tap-highlight-color:transparent}
+.rosario-pouch-open:focus-visible{outline:2px solid #e7d0a2;outline-offset:3px}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-open,
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-open{pointer-events:none}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:rosario-pouch-flap-up .78s cubic-bezier(.23,.83,.24,1) forwards}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-chain{
+  animation:rosario-pouch-lift 1.55s .53s cubic-bezier(.16,.7,.21,1) forwards}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-snap{animation:rosario-pouch-snap-hide .25s .18s both}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-flap{
+  transform:rotateX(156deg);
+  animation:rosario-pouch-flap-down .85s 1.55s cubic-bezier(.2,.75,.27,1) both}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-chain{
+  transform:translateY(0);animation:rosario-pouch-stow 1.5s .2s cubic-bezier(.64,.06,.45,.98) forwards}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-snap{opacity:0;animation:rosario-pouch-snap-show .5s 2s forwards}
+.rosario-pouch-layer[data-phase=closed] .rosario-pouch-chain{transform:translateY(310px)}
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{transform:translateY(310px)}
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-flap{transform:rotateX(0)}
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-snap{opacity:1}
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-hint{color:#f0d29e}
+@keyframes rosario-pouch-flap-up{0%{transform:rotateX(0)}100%{transform:rotateX(156deg)}}
+@keyframes rosario-pouch-flap-down{0%{transform:rotateX(156deg)}100%{transform:rotateX(0)}}
+@keyframes rosario-pouch-lift{0%{transform:translateY(310px)}100%{transform:translateY(0)}}
+@keyframes rosario-pouch-stow{0%{transform:translateY(0)}100%{transform:translateY(310px)}}
+@keyframes rosario-pouch-snap-hide{to{opacity:0}}
+@keyframes rosario-pouch-snap-show{to{opacity:1}}
+@media(max-height:640px){
+  .rosario-pouch-wallet{bottom:25px;transform:translateX(-50%) scale(.84);transform-origin:50% 100%}
+  .rosario-pouch-chain-window{bottom:153px;height:min(250px,calc(100% - 169px))}
+  .rosario-pouch-chain{height:250px;transform:translateY(260px)}
+  .rosario-pouch-layer[data-phase=closing] .rosario-pouch-chain,
+  .rosario-pouch-layer[data-phase=opening] .rosario-pouch-chain{--pouch-hidden-translate:260px}
+  .rosario-pouch-layer[data-phase=closed] .rosario-pouch-chain,
+  .rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{transform:translateY(260px)}
+  .rosario-pouch-title{top:1%}
+  .rosario-pouch-hint{bottom:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .rosario-pouch-layer,.rosario-pouch-layer *{animation-duration:.01ms!important;animation-delay:0ms!important;
+    transition-duration:.01ms!important;transition-delay:0ms!important}
+}
