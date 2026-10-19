@@ -5,7 +5,7 @@ prayers['Alabanzas al Santísimo']='Alabanzas y gracias sean dadas en todo momen
 const invocations=['Santa María','Santa Madre de Dios','Santa Virgen de las vírgenes','Madre de Cristo','Madre de la Iglesia','Madre de la Misericordia','Madre de la divina gracia','Madre de la Esperanza','Madre purísima','Madre castísima','Madre virginal','Madre sin corrupción','Madre inmaculada','Madre amable','Madre admirable','Madre del Buen Consejo','Madre del Creador','Madre del Salvador','Virgen prudentísima','Virgen digna de veneración','Virgen digna de alabanza','Virgen poderosa','Virgen clemente','Virgen fiel','Espejo de justicia','Trono de sabiduría','Causa de nuestra alegría','Vaso espiritual','Vaso digno de honor','Vaso insigne de devoción','Rosa mística','Torre de David','Torre de marfil','Casa de oro','Arca de la alianza','Puerta del cielo','Estrella de la mañana','Salud de los enfermos','Refugio de los pecadores','Consuelo de los migrantes','Consuelo de los afligidos','Auxilio de los cristianos','Reina de los Ángeles','Reina de los Patriarcas','Reina de los Profetas','Reina de los Apóstoles','Reina de los Mártires','Reina de los Confesores','Reina de las Vírgenes','Reina de todos los Santos','Reina concebida sin pecado original','Reina elevada al cielo','Reina del Santísimo Rosario','Reina de la familia','Reina de la paz'];
 prayers['Letanías']='Señor, ten piedad.\nCristo, ten piedad.\nSeñor, ten piedad.\nCristo, óyenos.\nCristo, escúchanos.\n\nDios, Padre celestial, ten misericordia de nosotros.\nDios Hijo, Redentor del mundo, ten misericordia de nosotros.\nDios Espíritu Santo, ten misericordia de nosotros.\nTrinidad Santa, un solo Dios, ten misericordia de nosotros.\n\n'+invocations.map(s=>s+', ruega por nosotros.').join('\n\n')+'\n\nCordero de Dios, que quitas los pecados del mundo, perdónanos, Señor.\nCordero de Dios, que quitas los pecados del mundo, escúchanos, Señor.\nCordero de Dios, que quitas los pecados del mundo, ten misericordia de nosotros.\n\nBajo tu amparo nos acogemos, Santa Madre de Dios: no desprecies las súplicas que te dirigimos en nuestras necesidades, antes bien, líbranos siempre de todos los peligros, Virgen gloriosa y bendita.\n\nRuega por nosotros, Santa Madre de Dios.\nPara que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo.\n\nTe suplicamos, Señor, que derrames tu gracia en nuestras almas, para que los que, por el anuncio del Ángel, hemos conocido la Encarnación de tu Hijo Jesucristo, por su Pasión y Cruz, seamos llevados a la gloria de su resurrección. Por Jesucristo nuestro Señor. Amén.';
 const simpleActions=document.createElement('div');simpleActions.className='simpleActions';simpleActions.innerHTML='<button class="advance" id="simpleNext">Completar oración →</button><div class="actions"><button id="simpleBack">↶ Anterior</button><button id="simpleReset">↻ Reiniciar</button></div>';document.querySelector('section').append(simpleActions);const extraStyle=document.createElement('style');extraStyle.textContent='.simpleActions{display:none;max-width:320px;margin:0 auto 24px}.simple .simpleActions{display:block}.simpleActions .advance{margin-top:0}';document.head.append(extraStyle);$('simpleNext').onclick=()=>advance();$('simpleBack').onclick=()=>{state.index=Math.max(0,state.index-1);render()};$('simpleReset').onclick=()=>reset();
-let saved={};try{saved=JSON.parse(localStorage.getItem('rosario')||'{}')}catch{}const today=['Gloriosos','Gozosos','Dolorosos','Gloriosos','Luminosos','Dolorosos','Gozosos'][new Date().getDay()];let state={index:0,group:today,mode:'simple',haptics:true,dark:false,...saved};if(!groups[state.group])state.group=today;
+let saved={};try{saved=JSON.parse(localStorage.getItem('rosario')||'{}')}catch{}const today=['Gloriosos','Gozosos','Dolorosos','Gloriosos','Luminosos','Dolorosos','Gozosos'][new Date().getDay()];let state={index:0,group:today,mode:'simple',haptics:true,dark:false,...saved};if(!groups[state.group])state.group=today;if(!['long','double','triple'].includes(state.mysteryHapticMode))state.mysteryHapticMode='long';
 let steps=[];
 function makeSteps(){
   steps=[{title:'Señal de la cruz',m:-1}];
@@ -28,25 +28,40 @@ makeSteps();
 function persist(){try{localStorage.setItem('rosario',JSON.stringify(state))}catch{}}
 function render(){const s=steps[state.index];document.body.classList.toggle('simple',state.mode==='simple');document.body.classList.toggle('dark',state.dark);$('simple').classList.toggle('selected',state.mode==='simple');$('guided').classList.toggle('selected',state.mode==='guided');$('simple').setAttribute('aria-pressed',state.mode==='simple');$('guided').setAttribute('aria-pressed',state.mode==='guided');$('group').textContent='Misterios '+state.group.toLowerCase();$('date').textContent=new Date().toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'});$('mysteryNo').textContent=!s?'Rosario completado':s.m<0?'Comenzamos':s.m>4?'Oraciones finales':`Misterio ${s.m+1} de 5`;$('mystery').textContent=!s?'Gracias por este momento':s.m<0?'En el nombre del Padre':s.m>4?'Con María, nuestra Madre':groups[state.group][s.m];$('counter').textContent=s?(s.title+(s.n?` · ${s.n} de 10`:'')):'Que la paz te acompañe.';$('prayerTitle').textContent=s?s.title:'Oración terminada';$('prayer').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('stage').textContent=s&&s.m>=0&&s.m<5?`Misterio ${s.m+1} · ${state.group}`:'Santo Rosario';const pct=Math.round(state.index/steps.length*100);$('bar').style.width=pct+'%';$('percent').textContent=pct+'%';$('progressLabel').textContent=`${state.index} de ${steps.length} oraciones`;$('next').disabled=!s;$('next').textContent=s?'Completar oración →':'Rosario completado ✓';$('back').disabled=state.index===0;$('theme').textContent=state.dark?'Modo claro':'Modo oscuro';
 let markup='';for(let i=0;i<55;i++){const a=Math.PI/2+(i/55)*Math.PI*2,x=220+176*Math.cos(a),y=228+203*Math.sin(a);const idx=steps.findIndex(t=>t.bead===i),done=idx<state.index,current=s&&s.bead===i,r=i%11===0?7:5.2;markup+=`<g class="bead" tabindex="0" role="button" aria-label="${i%11===0?'Padrenuestro':'Avemaría '+i%11}, misterio ${Math.floor(i/11)+1}${done?', completada':''}" data-step="${idx}"><circle cx="${x}" cy="${y}" r="17" fill="transparent"/>${current?`<circle cx="${x}" cy="${y}" r="13" fill="#c5a36a" opacity=".3" filter="url(#glow)"/>`:''}<circle cx="${x}" cy="${y}" r="${r}" fill="${done?'#a78c60':current?'#ead5ad':state.dark?'#3d483d':'#f6f4ef'}" stroke="${current?'#aa8752':'#c3b79d'}" stroke-width="${current?2:1.4}"/></g>`}$('beads').innerHTML=markup;persist()}
-function rosarioHaptic(fromIndex) {
-  if (!state.haptics) return;
+// Patrones compartidos entre la web y Android; la muestra usa el mismo patrón.
+function rosarioVibrate(sequence, preview=false){
+  if(!state.haptics&&!preview)return;
+  if(typeof sequence==='number'){
+    if(window.RosarioAndroid?.vibrate)window.RosarioAndroid.vibrate(sequence);
+    else navigator.vibrate?.(sequence);
+    return;
+  }
+  if(sequence.length===3&&window.RosarioAndroid?.vibratePattern){
+    window.RosarioAndroid.vibratePattern(...sequence);
+  }else if(window.RosarioAndroid?.vibrateSequence){
+    window.RosarioAndroid.vibrateSequence(sequence.join(','));
+  }else navigator.vibrate?.(sequence);
+}
+const rosarioMysteryHapticPatterns={
+  long:1000,
+  double:[440,160,440],
+  triple:[270,120,270,120,270]
+};
+window.rosarioPreviewMysteryHaptic=mode=>{
+  rosarioVibrate(rosarioMysteryHapticPatterns[mode]||1000,true);
+};
+function rosarioHaptic(fromIndex){
+  if(!state.haptics)return;
   const current=steps[state.index];
-  const previous=Number.isInteger(fromIndex)?steps[fromIndex]:null;
-  const movedForward=Number.isInteger(fromIndex)&&state.index===fromIndex+1;
-  const announcesMystery=movedForward&&current?.kind==='mystery';
-  // El Gloria comparte cuenta grande con las jaculatorias que le siguen.
-  // Sólo se hace doble pulso al llegar a esa cuenta, no en cada jaculatoria.
-  const entersLargeBead=movedForward&&current?.title==='Gloria'&&
-    current.m>=0&&current.m<5&&previous?.title==='Avemaría'&&
-    previous.m===current.m&&previous.n===10;
-  if (entersLargeBead) {
-    if (window.RosarioAndroid?.vibratePattern) {
-      window.RosarioAndroid.vibratePattern(38,60,38);
-    } else if (navigator.vibrate) navigator.vibrate([38,60,38]);
-  } else {
-    const duration=announcesMystery?220:20;
-    if(window.RosarioAndroid?.vibrate) window.RosarioAndroid.vibrate(duration);
-    else if(navigator.vibrate) navigator.vibrate(duration);
+  const movingForward=Number.isInteger(fromIndex)&&state.index===fromIndex+1;
+  // Gloria y CADA jaculatoria sobre la cuenta grande: dos toques breves.
+  if(movingForward&&current?.m>=0&&current.m<5&&
+    (current.title==='Gloria'||current.kind==='jaculatory')){
+    rosarioVibrate([45,300,45]);
+  }else if(movingForward&&current?.kind==='mystery'){
+    rosarioVibrate(rosarioMysteryHapticPatterns[state.mysteryHapticMode]||1000);
+  }else{
+    rosarioVibrate(20);
   }
 }
 function advance(){if(state.index>=steps.length)return;const previousIndex=state.index;state.index++;rosarioHaptic(previousIndex);render()}

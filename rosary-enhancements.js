@@ -1673,6 +1673,30 @@
       controls.textContent='Configurar controles';
       controls.onclick=openNavigationPreferences;
       interaction.append(controls);
+      const hapticRow=document.createElement('label');
+      hapticRow.className='rosario-tone-setting rosario-mystery-haptics';
+      const hapticTitle=document.createElement('span');
+      hapticTitle.textContent='Vibración al anunciar el misterio';
+      const hapticChoice=document.createElement('select');
+      hapticChoice.setAttribute('aria-label','Vibración al anunciar el misterio');
+      [
+        ['long','Larga · 1 segundo'],
+        ['double','Dos vibraciones'],
+        ['triple','Tres vibraciones']
+      ].forEach(([value,name])=>{
+        const option=document.createElement('option');
+        option.value=value;
+        option.textContent=name;
+        hapticChoice.append(option);
+      });
+      hapticChoice.value=state.mysteryHapticMode||'long';
+      hapticChoice.addEventListener('change',()=>{
+        state.mysteryHapticMode=hapticChoice.value;
+        persist();
+        window.rosarioPreviewMysteryHaptic?.(hapticChoice.value);
+      });
+      hapticRow.append(hapticTitle,hapticChoice);
+      interaction.append(hapticRow);
       const prayersGroup=group('Oraciones','rosario-prayer-settings-group');
       const contrition=document.createElement('label');
       contrition.className='rosario-tone-setting';

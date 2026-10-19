@@ -80,6 +80,7 @@
     let lastPhysicalType=null;
     let lastPhysicalBead=-1;
     let autoFollowTarget=null;
+    let displacedManually=false;
     const launchPrayerIndex=state.index;
     let initialFramePending=true;
     let initialFrameAnchored=false;
@@ -109,6 +110,7 @@
     // encuadre inicial, incluso si ya está seleccionada la oración 0.
     window.rosarioPhysicalReset=()=>{
       autoFollowTarget=null;
+      displacedManually=false;
       beforeMode='';
       beforeIndex=-1;
       lastPhysicalType=null;
@@ -312,6 +314,7 @@
     // el destino de centrado automático pendiente cuando empiezan.
     function clearAutoFollow(){
       autoFollowTarget=null;
+      displacedManually=true;
       startFrameInterrupted=true;
       initialFramePending=false;
       initialFrameAnchored=false;
@@ -496,6 +499,10 @@
            lastPhysicalBead===0&&
            steps[beforeIndex]?.kind!=='mystery');
         const keepFinalFraming=atClosing||atFinalMystery;
+        // Después de un desplazamiento manual el siguiente avance
+        // debe volver a la cuenta activa, esté a la distancia que esté.
+        const restoreActiveBead=displacedManually;
+        displacedManually=false;
 
         const entering=beforeMode!=='physical';
         const goingForward=!entering&&state.index===beforeIndex+1;
@@ -592,8 +599,20 @@
           else if(screenY>lower)target=selected.y-lower;
         }
 
+        // El seguimiento progresivo sólo sirve cuando ya estamos cerca.
+        // Si el usuario dejó el rosario en otro sitio, recentrar
+        // directamente el destino litúrgico, sin el límite por paso.
+        if(restoreActiveBead){
+          if(selected.type==='cross' || selected.phase==='closing'){
+            target=finalTop;
+          }else if(selected.type==='intro'){
+            target=clamp(selected.y-height*.55);
+          }else if(selected.type==='loop'){
+            target=clamp(selected.y-height*.53);
+          }
+        }
         target=clamp(target);
-        if(sequential){
+        if(sequential&&!restoreActiveBead){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
           // entre oraciones adyacentes. No modifica el swipe manual.
           // Más corto junto a la unión inferior; suficiente margen
@@ -611,8 +630,8 @@
           // No saltar por una sucesión rápida de clics: los trayectos
           // adyacentes son SIEMPRE suaves, incluso si WebView aún está
           // interpolando el anterior. El swipe conserva su scroll nativo.
-          const distant=!sequential&&
-            Math.abs(target-currentTop)>height*1.35;
+          const distant=(!sequential||restoreActiveBead)&&
+            Math.abs(target-currentTop)>height*.95;
           if(!entering&&!distant&&typeof viewport.scrollTo==='function'){
             viewport.scrollTo({top:target,behavior:'smooth'});
           }else{

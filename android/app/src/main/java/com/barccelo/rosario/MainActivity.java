@@ -46,7 +46,7 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void vibrate(int milliseconds) {
             if (milliseconds <= 0) return;
-            final int duration = Math.min(milliseconds, 260);
+            final int duration = Math.min(milliseconds, 1100);
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
@@ -73,7 +73,7 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void vibratePattern(int firstMs, int pauseMs, int secondMs) {
             final int first = Math.max(1, Math.min(firstMs, 120));
-            final int pause = Math.max(20, Math.min(pauseMs, 200));
+            final int pause = Math.max(20, Math.min(pauseMs, 450));
             final int second = Math.max(1, Math.min(secondMs, 120));
             final long[] pattern = new long[]{0, first, pause, second};
             runOnUiThread(() -> {
@@ -94,6 +94,43 @@ public final class MainActivity extends Activity {
                     }
                 } catch (SecurityException ignored) {
                     // La vibración puede estar restringida por Android.
+                }
+            });
+        }
+
+        // Admite tres pulsos sin temporizadores de JavaScript.
+        @JavascriptInterface
+        public void vibrateSequence(String values) {
+            if (values == null || values.length() > 80) return;
+            final String[] items = values.split(",");
+            if (items.length < 1 || items.length > 9 || items.length % 2 == 0) return;
+            final long[] waveform = new long[items.length + 1];
+            waveform[0] = 0;
+            try {
+                for (int i = 0; i < items.length; i++) {
+                    int ms = Integer.parseInt(items[i].trim());
+                    if (ms < 1 || ms > 1100) return;
+                    waveform[i + 1] = ms;
+                }
+            } catch (NumberFormatException ex) {
+                return;
+            }
+            runOnUiThread(() -> {
+                try {
+                    Vibrator vibrator;
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        VibratorManager manager = (VibratorManager)
+                            getSystemService(VIBRATOR_MANAGER_SERVICE);
+                        vibrator = manager != null ? manager.getDefaultVibrator() : null;
+                    } else {
+                        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    }
+                    if (vibrator == null || !vibrator.hasVibrator()) return;
+                    if (Build.VERSION.SDK_INT >= 26)
+                        vibrator.vibrate(VibrationEffect.createWaveform(waveform, -1));
+                    else vibrator.vibrate(waveform, -1);
+                } catch (SecurityException ignored) {
+                    // Android puede restringir la vibración.
                 }
             });
         }
