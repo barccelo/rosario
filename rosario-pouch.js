@@ -163,30 +163,50 @@
   let animating=false;
   let opened=false;
   let finalPress=null;
+  let finalTouch=null;
 
-  // Únicamente un gesto que COMIENZA con la bendición ya visible la cierra.
-  // El swipe que acaba de revelar esa oración nunca puede reutilizarse.
-  document.addEventListener('pointerdown',event=>{
-    finalPress=null;
-    if(!event.isPrimary||event.button!==0||!opened||animating||
-       !layer.hidden||state.index<steps.length)return;
-    if(!(event.target instanceof Element)||
-       !event.target.closest('.immersive-prayer,#prayer')||
-       event.target.closest('button,a,input,textarea,select'))return;
-    finalPress={id:event.pointerId,x:event.clientX,y:event.clientY};
-  },true);
-  document.addEventListener('pointerup',event=>{
-    const p=finalPress;
-    finalPress=null;
-    if(!p||p.id!==event.pointerId||state.index<steps.length)return;
-    const dx=event.clientX-p.x,dy=event.clientY-p.y;
+  // Para terminar la bendición se requiere un gesto NUEVO iniciado cuando
+  // ya está visible. Admitirlo sobre toda la pantalla, en ambos lados.
+  function eligible(){
+    return opened && !animating && layer.hidden &&
+      state.index>=steps.length && !completeToday();
+  }
+  function gestureCloses(dx,dy){
+    const tap=Math.hypot(dx,dy)<34;
     const forwardDown=window.rosarioPhysicalSwipeDown?.()===true;
-    const forward=forwardDown?dy>45:dy< -45;
-    // Un toque, o un swipe de avance. Ni swipe inverso ni horizontal.
-    if(Math.abs(dx)>40||Math.abs(dy)>40&&!forward)return;
-    window.rosarioPouchFinish();
-  },true);
-  document.addEventListener('pointercancel',()=>{finalPress=null},true);
+    const advanceSwipe=Math.abs(dx)<Math.abs(dy) &&
+      (forwardDown?dy>48:dy< -48);
+    return tap||advanceSwipe;
+  }
+  if(window.PointerEvent){
+    document.addEventListener('pointerdown',event=>{
+      finalPress=event.isPrimary&&event.button===0&&eligible()
+        ?{id:event.pointerId,x:event.clientX,y:event.clientY}:null;
+    },true);
+    document.addEventListener('pointerup',event=>{
+      const previous=finalPress;
+      finalPress=null;
+      if(!previous||previous.id!==event.pointerId||!eligible())return;
+      if(gestureCloses(event.clientX-previous.x,event.clientY-previous.y))
+        window.rosarioPouchFinish();
+    },true);
+    document.addEventListener('pointercancel',()=>{finalPress=null},true);
+  }
+  // Android puede cancelar pointerup durante pan-y; touchend cubre el caso.
+  document.addEventListener('touchstart',event=>{
+    finalTouch=event.touches.length===1&&eligible()
+      ?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;
+  },{capture:true,passive:true});
+  document.addEventListener('touchend',event=>{
+    const previous=finalTouch;
+    finalTouch=null;
+    const point=event.changedTouches[0];
+    if(!previous||!point||!eligible())return;
+    if(gestureCloses(point.clientX-previous.x,point.clientY-previous.y))
+      window.rosarioPouchFinish();
+  },{capture:true,passive:true});
+  document.addEventListener('touchcancel',()=>{finalTouch=null},
+    {capture:true,passive:true});
 
   function appearance(){
     const group=labels[state.group]?state.group:'Gloriosos';
@@ -243,18 +263,13 @@
       {transform:atMouth(.12),opacity:1}
     ],2750);
     layer.dataset.phase='traveling';
+    // La posición y la escala cambian en el MISMO movimiento.
+    // El rosario llega al lateral ya con su tamaño original.
     await motion([
       {transform:atMouth(.12),opacity:1},
-      {transform:atScreen(.12),opacity:1}
-    ],1100);
-    layer.dataset.phase='expanding';
-    // La funda ya se ha desvanecido: primero crece hasta coincidir
-    // exactamente con el SVG visible, luego comienza el fundido.
-    await motion([
-      {transform:atScreen(.12),opacity:1},
-      {transform:atScreen(.63),opacity:1,offset:.63},
+      {transform:atScreen(.63),opacity:1,offset:.55},
       {transform:atScreen(1),opacity:1}
-    ],1850);
+    ],2900);
     layer.dataset.phase='handoff';
     await motion([
       {transform:atScreen(1),opacity:1},
@@ -290,23 +305,20 @@
       {transform:atScreen(1),opacity:0},
       {transform:atScreen(1),opacity:1}
     ],700,'linear');
-    layer.dataset.phase='shrinking';
+    layer.dataset.phase='traveling-in';
+    // Al regresar, se encoge a la vez que se aproxima a la funda.
     await motion([
       {transform:atScreen(1),opacity:1},
-      {transform:atScreen(.12),opacity:1}
-    ],1850);
-    layer.dataset.phase='traveling-in';
-    await motion([
-      {transform:atScreen(.12),opacity:1},
+      {transform:atScreen(.63),opacity:1,offset:.45},
       {transform:atMouth(.12),opacity:1}
-    ],1100);
+    ],2900);
     layer.dataset.phase='stowing';
     await motion([
       {transform:atMouth(.12),opacity:1},
       {transform:atMouth(.012),opacity:0}
     ],2700);
     layer.dataset.phase='sealing';
-    await wait(1650);
+    await wait(1000);
     layer.dataset.phase='finished';
     hint.textContent='Rosario de hoy completado';
     transfer?.remove();
@@ -315,6 +327,12 @@
   }
 
   action.addEventListener('click',openPouch);
+  // La funda ocupa el centro, pero cualquier zona de la pantalla sirve
+  // para abrirla. El botón conserva su uso con teclado.
+  layer.addEventListener('click',()=>{
+    if(!animating&&(layer.dataset.phase==='closed'||
+                    layer.dataset.phase==='finished'))openPouch();
+  });
   const formerRender=render;
   render=function(){
     formerRender();
@@ -336,13 +354,9 @@
     }
     return priorAdvance(...args);
   };
-  // Aun con dispositivos que no disparan pointerup, el toque puede
-  // confirmar el cierre sin interferir con el swipe de apertura final.
+  // Acceso equivalente mediante teclado y controles de accesibilidad.
   document.addEventListener('click',event=>{
-    if(event.detail!==0||!opened||animating||!layer.hidden||
-       state.index<steps.length)return;
-    if(!(event.target instanceof Element)||
-       !event.target.closest('.immersive-prayer,#prayer'))return;
+    if(event.detail!==0||!eligible())return;
     window.rosarioPouchFinish();
   },true);
 

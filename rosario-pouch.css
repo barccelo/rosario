@@ -294,7 +294,6 @@
 .rosario-pouch-transfer *{
   pointer-events:none!important;
 }
-.rosario-pouch-layer[data-phase=opening] .rosario-pouch-cross-upper,
 .rosario-pouch-layer[data-phase=extracting] .rosario-pouch-cross-upper,
 .rosario-pouch-layer[data-phase=traveling] .rosario-pouch-cross-upper,
 .rosario-pouch-layer[data-phase=expanding] .rosario-pouch-cross-upper,
@@ -309,9 +308,8 @@
 /* El bordado exterior sólo vuelve cuando la solapa va cerrándose. */
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-upper{
   visibility:visible!important;
-  animation:pouch-upper-return .7s .85s both!important;
+  animation:pouch-brooch-close 1s linear both!important;
 }
-@keyframes pouch-upper-return{from{opacity:0}to{opacity:1}}
 
 /* Solapa abierta: el reverso está limpio, sin cruz. */
 .rosario-pouch-layer[data-phase=extracting] .rosario-pouch-flap,
@@ -365,7 +363,6 @@
 }
 
 /* El fondo no revela otra geometría hasta que el clon llegue al tamaño real. */
-.rosario-pouch-layer[data-phase=traveling]::before,
 .rosario-pouch-layer[data-phase=expanding]::before{
   opacity:1!important;
 }
@@ -406,4 +403,63 @@
 .rosario-pouch-layer[data-phase=stowing] .rosario-pouch-hint,
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-hint{
   opacity:0;
+}
+
+/* v5: el título acompaña a la solapa y no aparece antes de la funda. */
+.rosario-pouch-layer[data-phase]:not([data-phase=closed]):not([data-phase=finished]):not([data-phase=opening]):not([data-phase=sealing]) .rosario-pouch-title{
+  opacity:0!important;
+  animation:none!important;
+}
+.rosario-pouch-layer[data-phase=closed] .rosario-pouch-title,
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-title{
+  opacity:.83!important;
+  animation:none!important;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-title{
+  animation:pouch-title-covered .9s .2s both!important;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-title{
+  animation:pouch-title-uncovered .5s .5s both!important;
+}
+@keyframes pouch-title-covered{
+  0%,17%{opacity:.83}
+  100%{opacity:0}
+}
+@keyframes pouch-title-uncovered{
+  0%,25%{opacity:0}
+  100%{opacity:.83}
+}
+/* Cruz anverso: el bordado superior se va ocultando a medida que gira
+   la solapa; reaparece en el mismo intervalo de giro inverso. */
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-cross-upper{
+  visibility:visible!important;
+  animation:pouch-brooch-open 1.6s linear both!important;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-upper{
+  visibility:visible!important;
+  animation:pouch-brooch-close 1s linear both!important;
+}
+@keyframes pouch-brooch-open{
+  0%,20%{opacity:1}
+  54%,100%{opacity:0}
+}
+@keyframes pouch-brooch-close{
+  0%,35%{opacity:0}
+  85%,100%{opacity:1}
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap{
+  animation:pouch-flap-shut 1s cubic-bezier(.2,.73,.21,1) both!important;
+}
+/* Un solo viaje con escala progresiva; revelar la interfaz principalmente
+   en el último tramo, cuando ambas copias ya coinciden geométricamente. */
+.rosario-pouch-layer[data-phase=traveling]::before{
+  animation:pouch-backdrop-leave 2.9s linear both!important;
+}
+@keyframes pouch-backdrop-leave{
+  0%,67%{opacity:1}
+  100%{opacity:0}
+}
+.rosario-pouch-layer[data-phase=traveling-in]::before{
+  opacity:1!important;
+  transition:opacity .7s linear!important;
 }
