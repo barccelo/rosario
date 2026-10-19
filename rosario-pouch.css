@@ -187,3 +187,172 @@
   .rosario-pouch-title{top:calc(var(--pouch-mouth-y) - 204px)}
   .rosario-pouch-hint{top:calc(var(--pouch-mouth-y) + 112px)}
 }
+
+/* Revisión de funda: composición óptica uniforme, extracción por su boca,
+   misma geometría de cuentas/cruz de .physical-path y reverso sin bordados. */
+.rosario-pouch-scene{
+  --pouch-mouth-y:50%;
+  height:min(740px,calc(100dvh - 24px));
+  min-height:320px;
+}
+.rosario-pouch-title{
+  top:calc(50% - 132px);
+  font-size:11px;
+  letter-spacing:.18em;
+  line-height:16px;
+}
+.rosario-pouch-hint{
+  top:calc(50% + 132px);
+  bottom:auto;
+  min-height:16px;
+  font-size:11px;
+  line-height:16px;
+}
+.rosario-pouch-rear,
+.rosario-pouch-wallet,
+.rosario-pouch-flap-unit{
+  top:calc(50% - 90px);
+  left:50%;
+  width:228px;
+  height:180px;
+  transform:translateX(-50%);
+}
+.rosario-pouch-rear{z-index:1}
+.rosario-pouch-wallet{
+  z-index:5;
+  filter:drop-shadow(0 12px 14px #0003);
+}
+.rosario-pouch-flap-unit{
+  position:absolute;
+  z-index:7;
+  pointer-events:none;
+  perspective:650px;
+  transform-style:preserve-3d;
+}
+.rosario-pouch-chain-window{
+  z-index:4;
+  width:260px;
+  height:min(390px,calc(50% - 29px));
+  bottom:calc(50% + 28px);
+  left:50%;
+  overflow:hidden;
+  transform:translateX(-50%);
+}
+.rosario-pouch-chain{
+  width:100%;
+  height:100%;
+  transform-origin:50% 100%;
+  filter:drop-shadow(0 0 3px var(--pouch-outline));
+}
+.rosario-pouch-chain .rosario-pouch-preview{
+  width:100%!important;height:100%!important;position:static!important;
+  display:block!important;overflow:visible!important;
+  max-width:none!important;max-height:none!important;
+  pointer-events:none!important;touch-action:none!important;
+}
+.rosario-pouch-chain .physical-path g,
+.rosario-pouch-chain .physical-path path,
+.rosario-pouch-chain .physical-path ellipse{pointer-events:none!important}
+.rosario-pouch-chain .physical-bead .number{display:none}
+.rosario-pouch-flap{
+  top:22px;
+  left:1px;
+  width:226px;
+  height:94px;
+  transform:rotateX(0deg);
+  backface-visibility:visible;
+}
+.rosario-pouch-cross-upper{
+  width:29px;
+  height:21px;
+  left:calc(50% - 14.5px);
+  top:73px;
+  transition:opacity .2s ease;
+}
+.rosario-pouch-cross-lower{
+  width:29px;
+  height:22px;
+  left:calc(50% - 14.5px);
+  top:54px;
+  transition:opacity .2s ease;
+}
+/* La cruz está bordada por fuera: desaparece al abrir la solapa. */
+.rosario-pouch-layer:not([data-phase=closed]):not([data-phase=finished])
+  .rosario-pouch-cross-upper,
+.rosario-pouch-layer:not([data-phase=closed]):not([data-phase=finished])
+  .rosario-pouch-cross-lower{
+  opacity:0;
+  visibility:hidden;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-lower{
+  visibility:visible;
+  animation:pouch-cross-appearance 1.1s .4s both;
+}
+@keyframes pouch-cross-appearance{
+  0%,55%{opacity:0}
+  100%{opacity:1}
+}
+/* La solapa, una vez levantada, pasa DETRÁS de las cuentas. */
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=docking] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=centering] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-flap-unit{
+  z-index:2;
+}
+/* Al volver a cerrar, la solapa se sitúa de nuevo por encima del frente. */
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap-unit{
+  z-index:7;
+}
+/* El aro real se despliega desde el interior, primero compacto y luego entero. */
+.rosario-pouch-layer[data-phase=closed] .rosario-pouch-chain,
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-chain,
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{
+  transform:translate3d(0,110%,0) scale(.43);
+}
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-chain{
+  animation:pouch-full-extract 4.25s cubic-bezier(.29,.07,.18,1) both;
+}
+.rosario-pouch-layer[data-phase=docking] .rosario-pouch-chain,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-chain,
+.rosario-pouch-layer[data-phase=centering] .rosario-pouch-chain{
+  transform:translate3d(0,0,0) scale(1);
+}
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-chain{
+  animation:pouch-full-stow 4.25s cubic-bezier(.63,.05,.54,.98) both;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-chain{
+  transform:translate3d(0,110%,0) scale(.43);
+}
+@keyframes pouch-full-extract{
+  from{transform:translate3d(0,110%,0) scale(.43)}
+  to{transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes pouch-full-stow{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(0,110%,0) scale(.43)}
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:pouch-open-flap 1.7s cubic-bezier(.23,.72,.19,1) both;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap{
+  animation:pouch-close-flap 1.7s cubic-bezier(.2,.73,.21,1) both;
+}
+.rosario-pouch-layer[data-phase=docking] .rosario-pouch-chain-window,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-chain-window{
+  transform:translate(calc(-50% + var(--pouch-dock-x,0px)),var(--pouch-dock-y,0px)) scale(.87);
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=docking] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=centering] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-hint{opacity:0}
+@media(max-height:640px){
+  .rosario-pouch-scene{--pouch-mouth-y:50%;min-height:310px}
+  .rosario-pouch-chain-window{height:min(390px,calc(50% - 29px))}
+  .rosario-pouch-title{top:calc(50% - 132px)}
+  .rosario-pouch-hint{top:calc(50% + 132px)}
+}

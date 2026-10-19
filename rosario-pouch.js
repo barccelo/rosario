@@ -32,51 +32,74 @@
   const darkBg={Gozosos:'#14242D',Dolorosos:'#211B2B',
     Luminosos:'#292316',Gloriosos:'#202629'};
 
-  function miniatureRosary(){
-    const ring=[];
-    const points=[{x:130,y:234}];
-    // El mismo recorrido cerrado de las cinco decenas: unión, subida,
-    // arco superior, bajada y retorno a la cuenta compartida.
-    for(let i=1;i<=27;i++)points.push({x:91,y:233-i*7.37});
-    for(let i=28;i<55;i++)points.push({x:169,y:34+(i-28)*7.65});
-    for(let i=0;i<55;i++){
-      const p=points[i],big=i%11===0,r=big?6.1:3.5;
-      ring.push('<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+
-        '" r="'+r+'" fill="var(--pouch-bead)" stroke="var(--pouch-outline)" stroke-width="'+(big?2:1.05)+'"/>');
+  // Reutiliza el SVG que dibuja rosary-physical.js: sus hilos, cuentas y cruz reales.
+  function syncPhysicalRosary(){
+    const source=document.querySelector('.physical-path');
+    const target=layer.querySelector('.rosario-pouch-chain');
+    if(!source?.querySelector('.physical-loop-beads')||!target)return false;
+    const NS='http://www.w3.org/2000/svg';
+    const root=document.createElementNS(NS,'svg');
+    root.setAttribute('viewBox','0 0 260 390');
+    root.setAttribute('preserveAspectRatio','xMidYMax meet');
+    root.classList.add('physical-path','rosario-pouch-preview');
+    root.setAttribute('aria-hidden','true');
+    const computed=getComputedStyle(source);
+    ['fill','line','outline','number','metal','shadow','surface','pending',
+     'pending-stroke','complete','complete-stroke'].forEach(key=>{
+      const name='--physical-'+key;
+      root.style.setProperty(name,computed.getPropertyValue(name).trim());
+    });
+    const group=document.createElementNS(NS,'g');
+    const bead=source.querySelector('[data-bead="0"] .ring');
+    const cx=Number(bead?.getAttribute('cx'))||76;
+    const fy=.145,fr=.30;
+    group.setAttribute('transform',
+      'translate('+(130-cx).toFixed(2)+' '+(10-54*fy).toFixed(2)+') scale(1 '+fy+')');
+    Array.from(source.children).forEach(child=>group.append(child.cloneNode(true)));
+    root.append(group);
+    // La reducción vertical no deforma las cuentas en el pequeño rosario.
+    root.querySelectorAll('circle').forEach(circle=>{
+      const r=Number(circle.getAttribute('r'));
+      if(!Number.isFinite(r)||r<=0)return;
+      const ellipse=document.createElementNS(NS,'ellipse');
+      for(const attr of Array.from(circle.attributes))
+        if(attr.name!=='r')ellipse.setAttribute(attr.name,attr.value);
+      ellipse.setAttribute('rx',(r*fr).toFixed(3));
+      ellipse.setAttribute('ry',(r*fr/fy).toFixed(3));
+      circle.replaceWith(ellipse);
+    });
+    root.querySelectorAll('text').forEach(el=>el.remove());
+    root.querySelectorAll('[tabindex]').forEach(el=>el.removeAttribute('tabindex'));
+    root.querySelectorAll('[role="button"]').forEach(el=>el.removeAttribute('role'));
+    // La cruz mantiene el mismo trazado; su escala es uniforme en pantalla.
+    const cross=root.querySelector('.physical-cross');
+    if(cross){
+      const t=cross.getAttribute('transform')||'';
+      const match=t.match(/translate\(([-\d.]+)[ ,]+([-\d.]+)\)/);
+      if(match){
+        cross.setAttribute('transform','translate('+match[1]+' '+match[2]+
+          ') scale(.28 '+(.28/fy).toFixed(4)+')');
+      }
     }
-    const small=[259,278,297].map(y=>
-      '<circle cx="130" cy="'+y+'" r="5.2" fill="var(--pouch-bead)" stroke="var(--pouch-outline)" stroke-width="1.4"/>').join('');
-    return `<svg viewBox="0 0 260 390" preserveAspectRatio="xMidYMax meet"
-      aria-label="Rosario completo, cinco decenas y cruz" role="img">
-      <defs>
-        <linearGradient id="pouch-rosary-cross-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop stop-color="#f3e3bc"/><stop offset=".45" stop-color="#bd9657"/>
-          <stop offset=".7" stop-color="#e1c58d"/><stop offset="1" stop-color="#96713f"/>
-        </linearGradient>
-      </defs>
-      <path d="M130 234 Q91 244 91 225 V40 C91 2 169 2 169 40
-        V225 Q169 244 130 234" fill="none" stroke="var(--pouch-thread)"
-        stroke-width="2.8" stroke-linecap="round"/>
-      <path d="M130 234 L130 344" fill="none" stroke="var(--pouch-thread)"
-        stroke-width="2.8" stroke-linecap="round"/>
-      <g>${ring.join('')}</g>
-      ${small}
-      <circle cx="130" cy="326" r="8.7" fill="#e4ca97"
-        stroke="#bb985d" stroke-width="1.7"/>
-      <circle cx="130" cy="326" r="5.6" fill="#847458"/>
-      <g transform="translate(130 349) scale(.4)">
-        <rect x="-2.7" y="-8" width="5.4" height="9" rx="2" fill="#b89a66"
-          stroke="#927344" stroke-width=".7"/>
-        <ellipse cy="7" rx="5" ry="8" fill="none" stroke="#b49663" stroke-width="2.5"/>
-        <path d="M-7 17 Q-7 14 -4 14 H4 Q7 14 7 17 V38 H28 Q31 38 31 41 V49
-          Q31 52 28 52 H7 V94 Q7 97 4 97 H-4 Q-7 97 -7 94 V52 H-28
-          Q-31 52 -31 49 V41 Q-31 38 -28 38 H-7Z"
-          fill="url(#pouch-rosary-cross-gold)" stroke="#927344" stroke-width="1.5"/>
-        <path d="M-3 20 V42 H-25 M3 20 V42 H25 M-3 56 V90"
-          stroke="#fff4d5" stroke-opacity=".65" stroke-width="1.2" fill="none"/>
-        <circle cy="45" r="3" fill="#f8ebce" stroke="#a6844c" stroke-width="1"/>
-      </g>
-    </svg>`;
+    // Evita IDs de degradados duplicados entre el rosario animado y la interfaz.
+    const ids=new Map();
+    root.querySelectorAll('[id]').forEach(el=>{
+      const old=el.id,next='pouch-'+old;
+      ids.set(old,next);el.id=next;
+    });
+    root.querySelectorAll('*').forEach(el=>{
+      for(const attr of Array.from(el.attributes)){
+        if(attr.name==='id')continue;
+        let value=attr.value;
+        for(const [old,next] of ids){
+          value=value.replaceAll('url(#'+old+')','url(#'+next+')');
+          if(value==='#'+old)value='#'+next;
+        }
+        if(value!==attr.value)el.setAttribute(attr.name,value);
+      }
+    });
+    target.replaceChildren(root);
+    return true;
   }
 
   // La cruz de la funda está repartida entre solapa y cuerpo.
@@ -107,12 +130,14 @@
         <div class="rosario-pouch-mouth"></div>
       </div>
       <div class="rosario-pouch-chain-window" aria-hidden="true">
-        <div class="rosario-pouch-chain">${miniatureRosary()}</div>
+        <div class="rosario-pouch-chain"></div>
       </div>
       <div class="rosario-pouch-wallet">
         <div class="rosario-pouch-front">${lowerCross}</div>
-        <div class="rosario-pouch-flap">${upperCross}</div>
         <button class="rosario-pouch-open" type="button" aria-label="Abrir el rosario"></button>
+      </div>
+      <div class="rosario-pouch-flap-unit" aria-hidden="true">
+        <div class="rosario-pouch-flap">${upperCross}</div>
       </div>
       <div class="rosario-pouch-hint" aria-live="polite"></div>
     </div>`;
@@ -172,7 +197,7 @@
   function openPouch(){
     if(animating)return;
     animating=true;
-    if(state.index>=steps.length && !completeToday()){
+    if(state.index>=steps.length && state.pouchCompletedDate && state.pouchCompletedDate!==dayKey()){
       state.index=0;
       state.intentionCycle=[null,null,null,null,null];
       window.rosarioResetIntentionCycle?.();
@@ -180,15 +205,16 @@
       render();
     }
     opened=true;
+    syncPhysicalRosary();
     appearance();
     calculateDock();
     layer.hidden=false;
     layer.classList.remove('is-revealing');
     layer.dataset.phase='opening';  // 1,5 s: solapa
     hint.textContent='';
-    after(1600,()=>{
+    after(1800,()=>{
       layer.dataset.phase='extracting'; // 3,8 s: aro completo asciende desde la boca
-      after(4000,()=>{
+      after(4500,()=>{
         layer.dataset.phase='docking'; // 1,8 s: rosario a su lado
         after(1950,()=>{
           layer.classList.add('is-revealing');
@@ -206,6 +232,7 @@
     animating=true;
     state.pouchCompletedDate=dayKey();
     persist();
+    syncPhysicalRosary();
     appearance();
     calculateDock();
     layer.hidden=false;
@@ -218,9 +245,9 @@
       layer.dataset.phase='centering';
       after(2000,()=>{
         layer.dataset.phase='stowing'; // 3,8 s: la cruz, las cuentas y el aro entran en la boca
-        after(4000,()=>{
+        after(4500,()=>{
           layer.dataset.phase='sealing'; // 1,5 s: solapa y bordado
-          after(1650,()=>{
+          after(1850,()=>{
             layer.dataset.phase='finished';
             hint.textContent='Rosario de hoy completado';
             animating=false;
@@ -234,16 +261,44 @@
   window.addEventListener('resize',()=>{if(!layer.hidden)calculateDock();},{passive:true});
   const formerRender=render;
   render=function(){
-    const previous=lastIndex;
     formerRender();
     lastIndex=state.index;
-    if(!opened||animating)return;
-    if(previous<steps.length && state.index>=steps.length)closePouch();
-    else if(!layer.hidden)appearance();
+    // Mostrar la bendición final sin cerrar automáticamente la funda.
+    // El cierre se realiza al avanzar una vez MÁS tras haberla leído.
+    if(!layer.hidden && !animating)appearance();
   };
 
-  // Evitar las interrupciones propias de «reducir movimiento» sólo para este
-  // acto deliberadamente animado; la duración es parte de la interacción.
+  window.rosarioPouchFinish=()=>{
+    if(!opened||animating||!layer.hidden||state.index<steps.length)return false;
+    closePouch();
+    return true;
+  };
+  // Avanzar al marcador de cierre NO equivale a terminar de rezar la
+  // bendición que aparece en la última pantalla.
+  const priorAdvance=advance;
+  advance=function(...args){
+    if(state.index>=steps.length){
+      window.rosarioPouchFinish();
+      return;
+    }
+    return priorAdvance(...args);
+  };
+  // El toque directo sobre la oración final también guarda el rosario.
+  document.addEventListener('click',event=>{
+    if(!opened||animating||!layer.hidden||state.index<steps.length)return;
+    if(!(event.target instanceof Element)||
+        !event.target.closest('.immersive-prayer,#prayer'))return;
+    if(event.target.closest('button,a,input,textarea,select'))return;
+    event.preventDefault();
+    event.stopPropagation();
+    window.rosarioPouchFinish();
+  },true);
+  // El rosario físico se crea en DOMContentLoaded; esperamos su dibujo real.
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(syncPhysicalRosary),{once:true});
+  }else requestAnimationFrame(syncPhysicalRosary);
+
+  // La carterita conserva sus transiciones; la bendición final exige otro toque.
   appearance();
   layer.hidden=false;
 })();
