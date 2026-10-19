@@ -275,3 +275,135 @@
   .rosario-pouch-title{top:calc(50% - 135px)}
   .rosario-pouch-hint{top:calc(50% + 132px)}
 }
+
+/* Fundido geométricamente exacto: copia SVG sin reconfigurar curvas. */
+.rosario-pouch-layer .rosario-pouch-chain-window{
+  display:none!important;
+}
+.rosario-pouch-transfer{
+  z-index:4!important;
+  display:block!important;
+  overflow:visible!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;padding:0!important;
+  touch-action:none!important;
+  pointer-events:none!important;
+  contain:none!important;
+}
+.rosario-pouch-transfer *{
+  pointer-events:none!important;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-cross-upper,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-cross-upper{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+/* El bordado exterior sólo vuelve cuando la solapa va cerrándose. */
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-cross-upper{
+  visibility:visible!important;
+  animation:pouch-upper-return .7s .85s both!important;
+}
+@keyframes pouch-upper-return{from{opacity:0}to{opacity:1}}
+
+/* Solapa abierta: el reverso está limpio, sin cruz. */
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-flap,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-flap{
+  transform:rotateX(157deg)!important;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:pouch-flap-open 1.6s cubic-bezier(.23,.72,.19,1) both;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap{
+  animation:pouch-flap-shut 1.6s cubic-bezier(.2,.73,.21,1) both;
+}
+
+/* Las tres partes físicas de la funda se desvanecen al mismo tiempo. */
+.rosario-pouch-rear,.rosario-pouch-wallet,.rosario-pouch-flap-unit{
+  transition:opacity 1.05s ease!important;
+}
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-flap-unit{
+  opacity:0!important;
+}
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap-unit{
+  opacity:1!important;
+}
+
+/* El fondo no revela otra geometría hasta que el clon llegue al tamaño real. */
+.rosario-pouch-layer[data-phase=traveling]::before,
+.rosario-pouch-layer[data-phase=expanding]::before{
+  opacity:1!important;
+}
+.rosario-pouch-layer[data-phase=handoff]::before,
+.rosario-pouch-layer[data-phase=returning]::before{
+  opacity:0!important;
+}
+.rosario-pouch-layer[data-phase=shrinking]::before,
+.rosario-pouch-layer[data-phase=traveling-in]::before,
+.rosario-pouch-layer[data-phase=stowing]::before,
+.rosario-pouch-layer[data-phase=sealing]::before{
+  opacity:1!important;
+}
+.rosario-pouch-layer::before{
+  transition:opacity .75s linear!important;
+}
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-flap-unit,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-flap-unit{
+  z-index:3!important;
+}
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-flap-unit{
+  z-index:7!important;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=extracting] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=traveling] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=expanding] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=handoff] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=returning] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=shrinking] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=traveling-in] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=stowing] .rosario-pouch-hint,
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-hint{
+  opacity:0;
+}

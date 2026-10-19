@@ -32,129 +32,86 @@
   const darkBg={Gozosos:'#14242D',Dolorosos:'#211B2B',
     Luminosos:'#292316',Gloriosos:'#202629'};
 
-  // Reutiliza los nodos SVG y el relieve reales; sólo se modifica la postura
-  // del hilo y la posición de las cuentas, como un rosario suspendido en la mano.
+  // Copia íntegra: ningún hilo, cuenta, radio, arco ni coordenada se recalcula.
+  // El último fotograma coincide píxel a píxel con el SVG de la interfaz.
+  let transfer=null;
+  let geometry=null;
   function syncPhysicalRosary(){
     const source=document.querySelector('.physical-scroll-viewport .physical-path');
-    const target=layer.querySelector('.rosario-pouch-chain');
-    if(!source?.querySelector('.physical-loop-beads')||!target)return false;
-    const NS='http://www.w3.org/2000/svg';
-    const svg=(tag)=>document.createElementNS(NS,tag);
-    const root=svg('svg');
-    root.setAttribute('viewBox','0 0 360 430');
-    root.setAttribute('preserveAspectRatio','xMidYMax meet');
-    root.setAttribute('aria-hidden','true');
-    root.classList.add('physical-path','rosario-pouch-preview');
-    // Se conservan las variables CSS y los degradados de la interfaz.
-    const computed=getComputedStyle(source);
-    for(const key of ['fill','line','outline','number','metal','shadow','surface',
-      'pending','pending-stroke','complete','complete-stroke']){
-      const name='--physical-'+key;
-      root.style.setProperty(name,computed.getPropertyValue(name).trim());
-    }
-    source.querySelectorAll(':scope > defs').forEach(def=>root.append(def.cloneNode(true)));
-    const pts=[{x:180,y:296}];
-    for(let i=1;i<=27;i++){
-      const t=i/27;
-      pts.push({x:180-(48+13*Math.sin(Math.PI*t))+4*Math.sin(t*4),
-        y:296-238*t+5*Math.sin(Math.PI*t*.85)});
-    }
-    for(let i=28;i<55;i++){
-      const t=(i-28)/26;
-      pts.push({x:180+48+12*Math.sin(Math.PI*t)-3*Math.sin(t*5),
-        y:58+238*t-9*Math.sin(Math.PI*t)});
-    }
-    const pos=p=>p.x.toFixed(2)+' '+p.y.toFixed(2);
-    function segment(i){
-      const p=pts[i],q=pts[(i+1)%55];
-      if(i===27)return 'M '+pos(p)+' C '+p.x.toFixed(2)+' 15 '+q.x.toFixed(2)+' 15 '+pos(q);
-      if(i===54)return 'M '+pos(p)+' C 227 318 199 320 '+pos(q);
-      if(i===0)return 'M '+pos(p)+' C 158 320 135 315 '+pos(q);
-      const prev=pts[(i+54)%55],next=pts[(i+2)%55];
-      const c1={x:p.x+(q.x-prev.x)/6,y:p.y+(q.y-prev.y)/6};
-      const c2={x:q.x-(next.x-p.x)/6,y:q.y-(next.y-p.y)/6};
-      return 'M '+pos(p)+' C '+pos(c1)+' '+pos(c2)+' '+pos(q);
-    }
-    const wires=svg('g');wires.setAttribute('class','physical-loop-links');
-    const threadTemplate=source.querySelector('.physical-loop-link');
-    const grainTemplate=source.querySelector('.physical-cord-grain');
-    for(let i=0;i<55;i++){
-      const d=segment(i);
-      for(const origin of [threadTemplate,grainTemplate]){
-        if(!origin)continue;
-        const line=origin.cloneNode(true);
-        line.setAttribute('d',d);
-        line.removeAttribute('data-link');
-        wires.append(line);
-      }
-    }
-    root.append(wires);
-    const pendant=[pts[0],{x:179,y:322},{x:183,y:340},{x:178,y:358},
-      {x:180,y:378},{x:180,y:381}];
-    for(let i=0;i<pendant.length-1;i++){
-      const p=pendant[i],q=pendant[i+1],d=
-        'M '+pos(p)+' Q '+(180+3*Math.sin(i)).toFixed(2)+' '+
-        ((p.y+q.y)/2).toFixed(2)+' '+pos(q);
-      for(const origin of [source.querySelector('.physical-intro-link'),grainTemplate]){
-        if(!origin)continue;
-        const link=origin.cloneNode(true);link.setAttribute('d',d);
-        link.removeAttribute('data-link');wires.append(link);
-      }
-    }
-    // Las cuentas son clones de los <g> originales, no círculos reconstruidos.
-    // El mismo halo, aro, número y color se escalan sin deformarlos.
-    function beadAt(original,targetPoint,scale){
-      if(!original)return;
-      const ring=original.querySelector('.ring');
-      const cx=Number(ring?.getAttribute('cx'));
-      const cy=Number(ring?.getAttribute('cy'));
-      if(!Number.isFinite(cx)||!Number.isFinite(cy))return;
-      const wrapper=svg('g');
-      wrapper.setAttribute('transform','translate('+pos(targetPoint)+') scale('+scale+
-        ') translate('+(-cx)+' '+(-cy)+')');
-      const clone=original.cloneNode(true);
-      clone.removeAttribute('tabindex');clone.removeAttribute('role');
-      clone.removeAttribute('aria-label');clone.removeAttribute('aria-current');
-      clone.querySelectorAll('text').forEach(t=>t.remove());
-      wrapper.append(clone);root.append(wrapper);
-    }
-    const originals=Array.from(source.querySelectorAll('[data-bead]'));
-    originals.forEach(node=>beadAt(node,pts[Number(node.dataset.bead)],.22));
-    const intro=Array.from(source.querySelectorAll('[data-intro]'));
-    intro.forEach((node,i)=>beadAt(node,pendant[i+1],.24));
-    const ferrule=source.querySelector('.physical-cross-ferrule');
-    if(ferrule){
-      const rect=ferrule.cloneNode(true);
-      rect.setAttribute('x','178');rect.setAttribute('y','374');
-      rect.setAttribute('width','4');rect.setAttribute('height','7');
-      root.append(rect);
-    }
-    const cross=source.querySelector('.physical-cross');
-    if(cross){
-      const copy=cross.cloneNode(true);
-      copy.removeAttribute('tabindex');copy.removeAttribute('role');
-      copy.removeAttribute('aria-label');copy.setAttribute('transform','translate(180 378) scale(.31)');
-      root.append(copy);
-    }
-    // En la pantalla existen los mismos nombres de filtros; la copia necesita IDs únicos.
+    if(!source?.querySelector('.physical-loop-beads'))return false;
+    const bounds=source.getBoundingClientRect();
+    const bead=source.querySelector('[data-bead="0"] .ring');
+    const axis=Number(bead?.getAttribute('cx'))||76;
+    const h=bounds.height||2670,w=bounds.width||innerWidth;
+    const left=Number.isFinite(bounds.left)?bounds.left:0;
+    const top=Number.isFinite(bounds.top)?bounds.top:0;
+    transfer?.remove();
+    transfer=source.cloneNode(true);
+    transfer.classList.add('rosario-pouch-transfer');
+    transfer.removeAttribute('role');
+    transfer.setAttribute('aria-hidden','true');
+    transfer.querySelectorAll('[tabindex]').forEach(el=>el.removeAttribute('tabindex'));
+    transfer.querySelectorAll('[role="button"]').forEach(el=>el.removeAttribute('role'));
     const ids=new Map();
-    root.querySelectorAll('[id]').forEach(el=>{
-      const old=el.id,next='pouch-'+old;
-      ids.set(old,next);el.id=next;
+    transfer.querySelectorAll('[id]').forEach(el=>{
+      const old=el.id,next='pouch-transfer-'+old;
+      ids.set(old,next);
+      el.id=next;
     });
-    root.querySelectorAll('*').forEach(el=>{
+    transfer.querySelectorAll('*').forEach(el=>{
       for(const attr of Array.from(el.attributes)){
         if(attr.name==='id')continue;
-        let val=attr.value;
+        let value=attr.value;
         for(const [old,next] of ids){
-          val=val.replaceAll('url(#'+old+')','url(#'+next+')');
-          if(val==='#'+old)val='#'+next;
+          value=value.replaceAll('url(#'+old+')','url(#'+next+')');
+          if(value==='#'+old)value='#'+next;
         }
-        if(val!==attr.value)el.setAttribute(attr.name,val);
+        if(value!==attr.value)el.setAttribute(attr.name,value);
       }
     });
-    target.replaceChildren(root);
+    const computed=getComputedStyle(source);
+    for(const name of ['--physical-fill','--physical-line','--physical-outline',
+      '--physical-number','--physical-metal','--physical-shadow',
+      '--physical-surface','--physical-pending','--physical-pending-stroke',
+      '--physical-complete','--physical-complete-stroke'])
+      transfer.style.setProperty(name,computed.getPropertyValue(name).trim());
+    // Sin un visor con scroll el SVG se posiciona de forma absoluta,
+    // exactamente en las coordenadas que ocupa su original.
+    Object.assign(transfer.style,{
+      position:'fixed',left:left+'px',top:top+'px',
+      width:w+'px',height:h+'px',maxWidth:'none',maxHeight:'none',
+      overflow:'visible',pointerEvents:'none',touchAction:'none',
+      transformOrigin:axis+'px 100%',willChange:'transform,opacity',
+      opacity:'0'
+    });
+    scene.append(transfer);
+    const sceneBox=scene.getBoundingClientRect();
+    const mouthX=sceneBox.left+sceneBox.width/2;
+    const mouthY=sceneBox.top+sceneBox.height/2-36;
+    geometry={mouthX,mouthY,originX:left+axis,originY:top+h,scale:.12};
     return true;
+  }
+
+  function transformAt(dx,dy,scale){
+    return 'translate('+Math.round(dx)+'px,'+Math.round(dy)+'px) scale('+scale+')';
+  }
+  function atMouth(scale){
+    const g=geometry;
+    return transformAt(g.mouthX-g.originX,g.mouthY-g.originY,scale);
+  }
+  function atScreen(scale){
+    return transformAt(0,0,scale);
+  }
+  function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+  async function motion(frames,duration,easing='cubic-bezier(.25,.7,.24,1)'){
+    const animation=transfer.animate(frames,{duration,easing,fill:'forwards'});
+    try{await animation.finished}catch{}
+    if(transfer){
+      const last=frames[frames.length-1];
+      if(last.transform!==undefined)transfer.style.transform=last.transform;
+      if(last.opacity!==undefined)transfer.style.opacity=String(last.opacity);
+    }
+    animation.cancel();
   }
 
   // La cruz de la funda está repartida entre solapa y cuerpo.
@@ -205,26 +162,31 @@
   let lastIndex=state.index;
   let animating=false;
   let opened=false;
-  let stageTimer=0;
-  let gestureSerial=0;
-  let blessingGesture=state.index>=steps.length?0:-1;
-  let blessingTime=0;
-  let prayerGesture=false;
+  let finalPress=null;
+
+  // Únicamente un gesto que COMIENZA con la bendición ya visible la cierra.
+  // El swipe que acaba de revelar esa oración nunca puede reutilizarse.
   document.addEventListener('pointerdown',event=>{
-    if(!event.isPrimary||event.button!==0)return;
-    gestureSerial++;
-    prayerGesture=!!(event.target instanceof Element&&
-      event.target.closest('.immersive-prayer,#prayer')) &&
-      !event.target.closest('a,button,input,select,textarea');
+    finalPress=null;
+    if(!event.isPrimary||event.button!==0||!opened||animating||
+       !layer.hidden||state.index<steps.length)return;
+    if(!(event.target instanceof Element)||
+       !event.target.closest('.immersive-prayer,#prayer')||
+       event.target.closest('button,a,input,textarea,select'))return;
+    finalPress={id:event.pointerId,x:event.clientX,y:event.clientY};
   },true);
-  if(!window.PointerEvent){
-    document.addEventListener('touchstart',event=>{
-      if(event.touches.length!==1)return;
-      gestureSerial++;
-      prayerGesture=!!(event.target instanceof Element&&
-        event.target.closest('.immersive-prayer,#prayer'));
-    },{capture:true,passive:true});
-  }
+  document.addEventListener('pointerup',event=>{
+    const p=finalPress;
+    finalPress=null;
+    if(!p||p.id!==event.pointerId||state.index<steps.length)return;
+    const dx=event.clientX-p.x,dy=event.clientY-p.y;
+    const forwardDown=window.rosarioPhysicalSwipeDown?.()===true;
+    const forward=forwardDown?dy>45:dy< -45;
+    // Un toque, o un swipe de avance. Ni swipe inverso ni horizontal.
+    if(Math.abs(dx)>40||Math.abs(dy)>40&&!forward)return;
+    window.rosarioPouchFinish();
+  },true);
+  document.addEventListener('pointercancel',()=>{finalPress=null},true);
 
   function appearance(){
     const group=labels[state.group]?state.group:'Gloriosos';
@@ -251,24 +213,10 @@
     }
   }
 
-  function calculateDock(){
-    const sceneRect=scene.getBoundingClientRect();
-    const side=state.rosarySide==='right'?'right':'left';
-    const inset=Math.max(64,Math.min(115,window.innerWidth*.17));
-    const endX=side==='right'?window.innerWidth-inset:inset;
-    const dx=endX-(sceneRect.left+sceneRect.width*.5);
-    const dy=Math.max(-48,Math.min(48,window.innerHeight*.43-
-      (sceneRect.top+sceneRect.height*.34)));
-    scene.style.setProperty('--pouch-dock-x',Math.round(dx)+'px');
-    scene.style.setProperty('--pouch-dock-y',Math.round(dy)+'px');
-    layer.dataset.side=side;
-  }
-
-  function after(ms,fn){stageTimer=window.setTimeout(fn,ms)}
-  function openPouch(){
+  async function openPouch(){
     if(animating)return;
     animating=true;
-    if(state.index>=steps.length && state.pouchCompletedDate &&
+    if(state.index>=steps.length&&state.pouchCompletedDate&&
        state.pouchCompletedDate!==dayKey()){
       state.index=0;
       state.intentionCycle=[null,null,null,null,null];
@@ -277,79 +225,106 @@
       render();
     }
     opened=true;
-    syncPhysicalRosary();
     appearance();
-    calculateDock();
     layer.hidden=false;
     layer.classList.remove('is-revealing');
-    layer.dataset.phase='opening';
     hint.textContent='';
-    // La extracción empieza inmediatamente después de abrir la solapa.
-    after(1660,()=>{
-      layer.dataset.phase='extracting';
-      after(3250,()=>{
-        // Las dos mitades de la funda desaparecen al mismo tiempo.
-        layer.dataset.phase='docking';
-        after(2050,()=>{
-          layer.classList.add('is-revealing');
-          after(600,()=>{
-            layer.hidden=true;
-            animating=false;
-          });
-        });
-      });
-    });
+    if(!syncPhysicalRosary()){
+      layer.hidden=true;
+      animating=false;
+      return;
+    }
+    transfer.style.transform=atMouth(.012);
+    layer.dataset.phase='opening';
+    await wait(1620);
+    layer.dataset.phase='extracting';
+    await motion([
+      {transform:atMouth(.012),opacity:0},
+      {transform:atMouth(.12),opacity:1}
+    ],2750);
+    layer.dataset.phase='traveling';
+    await motion([
+      {transform:atMouth(.12),opacity:1},
+      {transform:atScreen(.12),opacity:1}
+    ],1100);
+    layer.dataset.phase='expanding';
+    // La funda ya se ha desvanecido: primero crece hasta coincidir
+    // exactamente con el SVG visible, luego comienza el fundido.
+    await motion([
+      {transform:atScreen(.12),opacity:1},
+      {transform:atScreen(.63),opacity:1,offset:.63},
+      {transform:atScreen(1),opacity:1}
+    ],1850);
+    layer.dataset.phase='handoff';
+    await motion([
+      {transform:atScreen(1),opacity:1},
+      {transform:atScreen(1),opacity:0}
+    ],850,'linear');
+    layer.classList.add('is-revealing');
+    await wait(500);
+    layer.hidden=true;
+    transfer?.remove();
+    transfer=null;
+    animating=false;
   }
 
-  function closePouch(){
+  async function closePouch(){
     if(animating)return;
     animating=true;
     state.pouchCompletedDate=dayKey();
     persist();
-    syncPhysicalRosary();
     appearance();
-    calculateDock();
-    hint.textContent='';
     layer.hidden=false;
     layer.classList.remove('is-revealing');
+    hint.textContent='';
+    if(!syncPhysicalRosary()){
+      layer.hidden=true;
+      animating=false;
+      return;
+    }
+    transfer.style.transform=atScreen(1);
+    transfer.style.opacity='0';
     layer.dataset.phase='returning';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      layer.dataset.phase='centering';
-      after(1700,()=>{
-        layer.dataset.phase='stowing';
-        after(3250,()=>{
-          layer.dataset.phase='sealing';
-          after(1720,()=>{
-            layer.dataset.phase='finished';
-            hint.textContent='Rosario de hoy completado';
-            animating=false;
-          });
-        });
-      });
-    }));
+    // Se captura el mismo dibujo donde está la oración, sin salto.
+    await motion([
+      {transform:atScreen(1),opacity:0},
+      {transform:atScreen(1),opacity:1}
+    ],700,'linear');
+    layer.dataset.phase='shrinking';
+    await motion([
+      {transform:atScreen(1),opacity:1},
+      {transform:atScreen(.12),opacity:1}
+    ],1850);
+    layer.dataset.phase='traveling-in';
+    await motion([
+      {transform:atScreen(.12),opacity:1},
+      {transform:atMouth(.12),opacity:1}
+    ],1100);
+    layer.dataset.phase='stowing';
+    await motion([
+      {transform:atMouth(.12),opacity:1},
+      {transform:atMouth(.012),opacity:0}
+    ],2700);
+    layer.dataset.phase='sealing';
+    await wait(1650);
+    layer.dataset.phase='finished';
+    hint.textContent='Rosario de hoy completado';
+    transfer?.remove();
+    transfer=null;
+    animating=false;
   }
 
   action.addEventListener('click',openPouch);
-  window.addEventListener('resize',()=>{if(!layer.hidden)calculateDock();},{passive:true});
   const formerRender=render;
   render=function(){
-    const previous=lastIndex;
     formerRender();
     lastIndex=state.index;
-    if(previous<steps.length && state.index>=steps.length){
-      // El gesto que muestra «El Señor nos bendiga» no puede cerrarlo.
-      blessingGesture=gestureSerial;
-      blessingTime=performance.now();
-    }
     if(!layer.hidden&&!animating)appearance();
   };
 
   window.rosarioPouchFinish=()=>{
-    if(!opened||animating||!layer.hidden||
-       state.index<steps.length||completeToday())return false;
-    // Debe comenzar OTRO toque o swipe, sobre la oración final.
-    if(!prayerGesture||gestureSerial<=blessingGesture||
-       performance.now()-blessingTime<400)return false;
+    if(!opened||animating||!layer.hidden||state.index<steps.length)
+      return false;
     closePouch();
     return true;
   };
@@ -361,17 +336,16 @@
     }
     return priorAdvance(...args);
   };
-  // Además del swipe, el toque simple en el texto final confirma el guardado.
+  // Aun con dispositivos que no disparan pointerup, el toque puede
+  // confirmar el cierre sin interferir con el swipe de apertura final.
   document.addEventListener('click',event=>{
-    if(!opened||animating||!layer.hidden||state.index<steps.length)return;
+    if(event.detail!==0||!opened||animating||!layer.hidden||
+       state.index<steps.length)return;
     if(!(event.target instanceof Element)||
        !event.target.closest('.immersive-prayer,#prayer'))return;
-    if(event.target.closest('button,a,input,textarea,select'))return;
-    if(window.rosarioPouchFinish()){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }
+    window.rosarioPouchFinish();
   },true);
+
   // El rosario físico se crea en DOMContentLoaded; esperamos su dibujo real.
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(syncPhysicalRosary),{once:true});
