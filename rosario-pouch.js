@@ -1,4 +1,4 @@
-/* Carterita de entrada y cierre. Solo para la web hasta aprobar la experiencia en Android. */
+/* Funda de entrada y cierre. Solo para la web hasta aprobar la experiencia en Android. */
 (() => {
   'use strict';
   if (window.RosarioAndroid) return;
@@ -69,14 +69,13 @@
         ${flower}
         <div class="rosario-pouch-flap"></div>
         <div class="rosario-pouch-snap"></div>
-        <button type="button" class="rosario-pouch-open" aria-label="Abrir carterita y sacar el rosario"></button>
+        <button type="button" class="rosario-pouch-open" aria-label="Abrir funda y sacar el rosario"></button>
       </div>
       <div class="rosario-pouch-hint" aria-live="polite"></div>
     </div>`;
   document.body.append(layer);
   const action=layer.querySelector('.rosario-pouch-open');
   const hint=layer.querySelector('.rosario-pouch-hint');
-  const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const finishedToday=()=>state.index>=steps.length && state.pouchCompletedDate===todayKey();
   let lastIndex=state.index;
   let isAnimating=false;
@@ -89,10 +88,10 @@
       const complete=finishedToday();
       hint.textContent=complete?'Rosario de hoy completado · Toca para revisar':
         state.index>0&&state.index<steps.length?'Toca para continuar tu rosario':
-        'Toca la carterita para comenzar';
+        'Toca la funda para comenzar';
       action.setAttribute('aria-label',complete?'Abrir el rosario completado':
-        state.index>0&&state.index<steps.length?'Abrir la carterita y continuar el rosario':
-        'Abrir la carterita y sacar el rosario');
+        state.index>0&&state.index<steps.length?'Abrir la funda y continuar el rosario':
+        'Abrir la funda y sacar el rosario');
       layer.querySelector('.rosario-pouch-title').textContent=names[kind];
     }
   }
@@ -101,7 +100,7 @@
     if(isAnimating)return;
     isAnimating=true;
     // Se conserva cualquier oración a medio rezar. Solo el fin de un día anterior
-    // permite iniciar desde cero; nunca se reinicia por abrir la carterita.
+    // permite iniciar desde cero; nunca se reinicia por abrir la funda.
     if(state.index>=steps.length && !finishedToday()){
       state.index=0;
       state.intentionCycle=[null,null,null,null,null];
@@ -114,13 +113,13 @@
     syncAppearance();
     hint.textContent='Sacando el rosario…';
     layer.dataset.phase='opening';
-    const duration=reduced()?80:5400;
+    const duration=6550; // abrir solapa 1,65 s, extraer rosario 4,35 s, pausa perceptible
     window.setTimeout(()=>{
       layer.classList.add('is-revealing');
       window.setTimeout(()=>{
         layer.hidden=true;
         isAnimating=false;
-      },reduced()?30:1050);
+      },1100);
     },duration);
   }
 
@@ -139,8 +138,8 @@
       hint.textContent='Rosario de hoy completado · Toca para revisar';
       action.setAttribute('aria-label','Abrir el rosario completado');
       isAnimating=false;
-      // Sin foco programático: evita un recuadro sobre la carterita.
-    },reduced()?80:5600);
+      // Sin foco programático: evita un recuadro sobre la funda.
+    },7550); // ocultar tras extracción inversa y cierre completo
   }
 
   action.addEventListener('click',openPouch);

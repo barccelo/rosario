@@ -94,10 +94,7 @@
   .rosario-pouch-title{top:1%}
   .rosario-pouch-hint{bottom:0}
 }
-@media(prefers-reduced-motion:reduce){
-  .rosario-pouch-layer,.rosario-pouch-layer *{animation-duration:.01ms!important;animation-delay:0ms!important;
-    transition-duration:.01ms!important;transition-delay:0ms!important}
-}
+
 
 /* Ajustes v2: cartera centrada, sin marco de enfoque automático.
    La cadena ocupa el viewport SVG real, y se anima en fases perceptibles. */
@@ -176,4 +173,58 @@
   .rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{
     transform:translateY(110%);
   }
+}
+
+/* Transiciones deliberadas: la apertura y el cierre muestran el movimiento completo.
+   Los estilos anteriores abreviaban todo al detectar reducción de movimiento. */
+.rosario-pouch-title{
+  top:calc(54% - 144px);
+  font-size:11px;
+  letter-spacing:.23em;
+}
+.rosario-pouch-hint{
+  top:calc(54% + 112px);
+  bottom:auto;
+  margin:0;
+  padding:0 8px;
+  min-height:22px;
+}
+.rosario-pouch-chain-window{
+  overflow:hidden;
+  z-index:2;
+}
+.rosario-pouch-chain{
+  transform:translate3d(0,110%,0);
+  will-change:transform;
+  backface-visibility:hidden;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:rosario-pouch-flap-up 1.65s cubic-bezier(.23,.72,.19,1) both;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-chain{
+  animation:rosario-pouch-lift 4.35s 1.35s cubic-bezier(.22,.08,.19,.99) both;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-snap{
+  animation:rosario-pouch-snap-hide .55s .4s both;
+}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-chain{
+  animation:rosario-pouch-stow 4.45s .35s cubic-bezier(.64,.08,.49,.99) both;
+}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-flap{
+  animation:rosario-pouch-flap-down 1.65s 4.9s cubic-bezier(.19,.74,.23,1) both;
+}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-snap{
+  animation:rosario-pouch-snap-show .55s 6.45s both;
+}
+@keyframes rosario-pouch-lift{
+  from{transform:translate3d(0,110%,0)}
+  to{transform:translate3d(0,0,0)}
+}
+@keyframes rosario-pouch-stow{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(0,110%,0)}
+}
+@media(max-height:640px){
+  .rosario-pouch-title{top:calc(54% - 138px)}
+  .rosario-pouch-hint{top:calc(54% + 98px);bottom:auto}
 }
