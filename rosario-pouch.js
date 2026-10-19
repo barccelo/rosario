@@ -254,7 +254,7 @@
     opened=true;
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
@@ -276,6 +276,9 @@
     // Funda y rosario inician el desplazamiento/fundido a la vez.
     layer.dataset.phase='traveling';
     layer.classList.add('pouch-departing');
+    // Terminar completamente el fundido de la funda antes de que
+    // el texto de la interfaz se haga visible, evitando residuos.
+    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),650);
     // La posición y la escala cambian en el MISMO movimiento.
     // El rosario llega al lateral ya con su tamaño original.
     await motion([
@@ -283,6 +286,8 @@
       {transform:atScreen(.63),opacity:1,offset:.55},
       {transform:atScreen(1),opacity:1}
     ],2900);
+    clearTimeout(concealPouch);
+    layer.classList.add('pouch-gone');
     layer.dataset.phase='handoff';
     // Al coincidir ambas geometrías en el lateral, volver a mostrar
     // el SVG original para que el fundido no cree un segundo rosario.
@@ -307,7 +312,7 @@
     persist();
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
