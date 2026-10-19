@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - '*.js'
       - '*.css'
+      - 'icon.png'
       - 'android/**'
       - '.github/workflows/android.yml'
   workflow_dispatch:

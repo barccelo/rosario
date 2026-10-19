@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import java.util.Calendar;
@@ -90,9 +91,13 @@ final class ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = Build.VERSION.SDK_INT >= 26 ?
             new Notification.Builder(context, CHANNEL) : new Notification.Builder(context);
-        builder.setContentTitle("Momento de rezar el rosario")
-            .setContentText("Abre Rosario para comenzar tu oración.")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+        builder.setContentTitle("Santo Rosario")
+            .setContentText("Es un buen momento para rezar el rosario.")
+            .setSmallIcon(R.drawable.ic_rosario_notification)
+            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.rosario_launcher))
+            .setColor(0xFFD7B77E)
+            .setCategory(Notification.CATEGORY_REMINDER)
             .setContentIntent(tap)
             .setAutoCancel(true);
         manager.notify(2026, builder.build());
