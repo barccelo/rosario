@@ -559,3 +559,34 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
   .rosario-pouch-title{top:calc(50% - 104px)}
   .rosario-pouch-hint{top:calc(50% + 108px)}
 }
+
+/* Reverse closing sequence for opening: same 500 ms flap, 700 ms
+   extraction and 2900 ms movement in the opposite direction. */
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:pouch-flap-open .5s cubic-bezier(.23,.72,.19,1) both!important;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-cross-upper{
+  visibility:visible!important;
+  animation:pouch-brooch-reverse .5s linear both!important;
+}
+@keyframes pouch-brooch-reverse{
+  0%,22%{opacity:1}
+  78%,100%{opacity:0}
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-title{
+  animation:pouch-title-covered .5s linear both!important;
+}
+/* The closing pouch fades in over its last ~600 ms of travel.
+   Reverse that: the opening pouch fades out over the first ~600 ms. */
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-rear,
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-wallet,
+.rosario-pouch-layer[data-phase=traveling].pouch-departing .rosario-pouch-flap-unit{
+  opacity:0!important;
+  transition:opacity .6s ease!important;
+}
+/* Keep the backdrop over prayer text until the rosary has finished
+   moving and reached the exact dimensions of the UI rosary. */
+.rosario-pouch-layer[data-phase=traveling]::before{
+  animation:none!important;
+  opacity:1!important;
+}

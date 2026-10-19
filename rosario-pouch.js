@@ -261,27 +261,25 @@
       animating=false;
       return;
     }
+    // Apertura = cierre a la inversa: solapa, extracción breve, regreso
+    // invertido hasta el lugar original y fundido con la interfaz.
     transfer.style.transform=atMouth(.012);
-    // Evita que la copia animada aparezca sobre el original.
+    transfer.style.opacity='0';
     document.body.classList.add('rosario-pouch-hide-original');
     layer.dataset.phase='opening';
-    await wait(1620);
+    await wait(510); // Inverso del cierre de la solapa (500 ms).
+
     layer.dataset.phase='extracting';
-    // Desvanecer la funda durante los últimos instantes de extracción,
-    // sin esperar al movimiento lateral.
     await motion([
       {transform:atMouth(.012),opacity:0},
       {transform:atMouth(.12),opacity:1}
-    ],2750);
-    // El rosario ya salió: la funda empieza a disolverse ANTES
-    // de iniciar el desplazamiento lateral, sin esperar a que se mueva.
-    layer.classList.add('pouch-departing');
-    await wait(180);
+    ],700); // Inverso del último tramo de guardado (700 ms).
+
+    // Inverso de traveling-in: al empezar el movimiento, la funda
+    // empieza a desvanecerse. El rosario crece mientras se desplaza.
     layer.dataset.phase='traveling';
-    // Terminar el desvanecimiento sin restos visibles sobre las oraciones.
-    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),230);
-    // La posición y la escala cambian en el MISMO movimiento.
-    // El rosario llega al lateral ya con su tamaño original.
+    layer.classList.add('pouch-departing');
+    const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),650);
     await motion([
       {transform:atMouth(.12),opacity:1},
       {transform:atScreen(.63),opacity:1,offset:.55},
@@ -289,9 +287,9 @@
     ],2900);
     clearTimeout(concealPouch);
     layer.classList.add('pouch-gone');
+
+    // Entrega al mismo SVG original, ya exactamente superpuesto.
     layer.dataset.phase='handoff';
-    // Al coincidir ambas geometrías en el lateral, volver a mostrar
-    // el SVG original para que el fundido no cree un segundo rosario.
     document.body.classList.remove('rosario-pouch-hide-original');
     await motion([
       {transform:atScreen(1),opacity:1},
