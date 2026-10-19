@@ -706,3 +706,30 @@ html,body,button,select,input,label,[role="button"]{
   border-color:var(--ui-accent)!important;
   background:var(--ui-selected)!important;
 }
+
+/* El patrón del misterio comparte tamaño, fondo y bordes con Vibración al avanzar. */
+#modalContent > label.rosario-mystery-haptics{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  width:100%;min-height:62px;
+  margin:12px 0!important;
+  padding:12px 15px!important;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:13px!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  font:14px/1.4 system-ui!important;
+}
+#modalContent > label.rosario-mystery-haptics > span{
+  flex:1 1 auto;
+  min-width:0;
+}
+#modalContent > label.rosario-mystery-haptics > select{
+  flex:0 1 174px;
+  min-width:110px;
+  max-width:52%;
+  margin:0!important;
+  font:13px/1.3 system-ui!important;
+}

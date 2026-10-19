@@ -590,3 +590,11 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
   animation:none!important;
   opacity:1!important;
 }
+
+/* La lectura aparece antes de que termine el crecimiento del rosario.
+   No modifica duración ni trayectoria de la animación de salida. */
+.rosario-pouch-layer[data-phase=traveling].pouch-reveal-text::before{
+  animation:none!important;
+  opacity:0!important;
+  transition:opacity .28s ease-out!important;
+}

@@ -1674,7 +1674,7 @@
       controls.onclick=openNavigationPreferences;
       interaction.append(controls);
       const hapticRow=document.createElement('label');
-      hapticRow.className='rosario-tone-setting rosario-mystery-haptics';
+      hapticRow.className='rosario-mystery-haptics';
       const hapticTitle=document.createElement('span');
       hapticTitle.textContent='Vibración al anunciar el misterio';
       const hapticChoice=document.createElement('select');
@@ -1696,7 +1696,8 @@
         window.rosarioPreviewMysteryHaptic?.(hapticChoice.value);
       });
       hapticRow.append(hapticTitle,hapticChoice);
-      interaction.append(hapticRow);
+      // La tarjeta se sitúa inmediatamente después de «Vibración al avanzar».
+      $('vibration')?.closest('label')?.after(hapticRow);
       const prayersGroup=group('Oraciones','rosario-prayer-settings-group');
       const contrition=document.createElement('label');
       contrition.className='rosario-tone-setting';

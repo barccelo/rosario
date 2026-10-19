@@ -254,7 +254,7 @@
     opened=true;
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone','pouch-reveal-text');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
@@ -280,13 +280,17 @@
     layer.dataset.phase='traveling';
     layer.classList.add('pouch-departing');
     const concealPouch=setTimeout(()=>layer.classList.add('pouch-gone'),650);
+    // Mostrar la lectura durante los últimos instantes del traslado,
+    // antes de que la copia alcance el tamaño final.
+    const revealText=setTimeout(()=>layer.classList.add('pouch-reveal-text'),1550);
     await motion([
       {transform:atMouth(.12),opacity:1},
       {transform:atScreen(.63),opacity:1,offset:.55},
       {transform:atScreen(1),opacity:1}
     ],2900);
     clearTimeout(concealPouch);
-    layer.classList.add('pouch-gone');
+    clearTimeout(revealText);
+    layer.classList.add('pouch-gone','pouch-reveal-text');
 
     // Entrega al mismo SVG original, ya exactamente superpuesto.
     layer.dataset.phase='handoff';
@@ -312,7 +316,7 @@
     persist();
     appearance();
     layer.hidden=false;
-    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone','pouch-reveal-text');
     hint.textContent='';
     if(!syncPhysicalRosary()){
       layer.hidden=true;
