@@ -54,14 +54,16 @@ function rosarioHaptic(fromIndex){
   if(!state.haptics)return;
   const current=steps[state.index];
   const movingForward=Number.isInteger(fromIndex)&&state.index===fromIndex+1;
-  // Gloria y CADA jaculatoria sobre la cuenta grande: dos toques breves.
-  if(movingForward&&current?.m>=0&&current.m<5&&
-    (current.title==='Gloria'||current.kind==='jaculatory')){
-    rosarioVibrate([45,300,45]);
+  // Glorias y oraciones de la cuenta grande: el mismo patrón que
+  // «Dos vibraciones» al anunciar el misterio.
+  if(movingForward&&
+    (current?.title==='Gloria'||current?.kind==='jaculatory'||
+     current?.kind==='praise')){
+    rosarioVibrate(rosarioMysteryHapticPatterns.double);
   }else if(movingForward&&current?.kind==='mystery'){
     rosarioVibrate(rosarioMysteryHapticPatterns[state.mysteryHapticMode]||1000);
   }else{
-    rosarioVibrate(20);
+    rosarioVibrate(440);
   }
 }
 function advance(){if(window.rosarioPhysicalResumeFromCross?.())return;if(state.index>=steps.length)return;const previousIndex=state.index;state.index++;rosarioHaptic(previousIndex);render()}

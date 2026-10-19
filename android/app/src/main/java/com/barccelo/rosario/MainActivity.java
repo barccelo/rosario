@@ -72,9 +72,9 @@ public final class MainActivity extends Activity {
 
         @JavascriptInterface
         public void vibratePattern(int firstMs, int pauseMs, int secondMs) {
-            final int first = Math.max(1, Math.min(firstMs, 120));
+            final int first = Math.max(1, Math.min(firstMs, 1100));
             final int pause = Math.max(20, Math.min(pauseMs, 450));
-            final int second = Math.max(1, Math.min(secondMs, 120));
+            final int second = Math.max(1, Math.min(secondMs, 1100));
             final long[] pattern = new long[]{0, first, pause, second};
             runOnUiThread(() -> {
                 try {
