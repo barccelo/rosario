@@ -1,8 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mantener las letras, la cruz y las cuentas dentro de la zona segura de máscaras adaptativas. -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/rosario_launcher"
-    android:insetLeft="18dp"
-    android:insetTop="18dp"
-    android:insetRight="18dp"
-    android:insetBottom="18dp"/>
+<!-- Diseño de lanzador: dibujo directo, sin imagen de un teléfono ni márgenes duplicados.
+     Zona útil centrada y amplia para máscaras circular/cuadrada de Android. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Hilo del rosario -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#BEA47F"
+        android:strokeWidth="2.1"
+        android:strokeLineCap="round"
+        android:pathData="M39,20 L39,76"/>
+    <!-- Cuentas: siluetas nítidas y visibles incluso a 48 dp. -->
+    <path
+        android:fillColor="#F1EFE6"
+        android:pathData="M39,26 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
+                          M39,37 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
+                          M39,48 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0
+                          M39,59 m-4.6,0 a4.6,4.6 0,1 0,9.2 0 a4.6,4.6 0,1 0,-9.2 0"/>
+    <!-- Cuenta mayor -->
+    <path
+        android:fillColor="#E8C98E"
+        android:pathData="M39,69 m-5.4,0 a5.4,5.4 0,1 0,10.8 0 a5.4,5.4 0,1 0,-10.8 0"/>
+    <path
+        android:fillColor="#796649"
+        android:pathData="M39,69 m-3.2,0 a3.2,3.2 0,1 0,6.4 0 a3.2,3.2 0,1 0,-6.4 0"/>
+    <!-- Cruz suficientemente gruesa para conservar su forma en el lanzador. -->
+    <path
+        android:fillColor="#E9BF7A"
+        android:pathData="M37,75 L41,75 L41,78 L46,78 L46,82 L41,82 L41,86 L37,86 L37,82 L32,82 L32,78 L37,78 Z"/>
+    <!-- Monograma simple: la letra R sustituye el texto microscópico. -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#F2DFC0"
+        android:strokeWidth="5.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M60,69 L60,42 L70,42 C86,42 85,57 70,57 L60,57 M70,57 L82,69"/>
+    <!-- Semibordes finos inspirados en las oraciones de la aplicación. -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#D2AE76"
+        android:strokeWidth="1.15"
+        android:strokeLineCap="round"
+        android:pathData="M55,36 Q55,34 58,34 L80,34 Q82,34 82,36 M55,76 Q55,78 58,78 L80,78 Q82,78 82,76"/>
+</vector>

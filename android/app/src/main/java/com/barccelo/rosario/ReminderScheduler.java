@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import java.util.Calendar;
@@ -94,8 +93,6 @@ final class ReminderScheduler {
         builder.setContentTitle("Santo Rosario")
             .setContentText("Es un buen momento para rezar el rosario.")
             .setSmallIcon(R.drawable.ic_rosario_notification)
-            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.rosario_launcher))
             .setColor(0xFFD7B77E)
             .setCategory(Notification.CATEGORY_REMINDER)
             .setContentIntent(tap)
