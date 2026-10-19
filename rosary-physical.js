@@ -82,6 +82,10 @@
     let autoFollowTarget=null;
     let displacedManually=false;
     const launchPrayerIndex=state.index;
+    // Con progreso guardado, la animación empieza SIEMPRE desde la cruz.
+    // La primera orden de avance sólo enfoca la cuenta de la oración actual.
+    let resumeAtCrossPending=launchPrayerIndex>0&&launchPrayerIndex<steps.length;
+    let animateResumeFollow=false;
     let initialFramePending=true;
     let initialFrameAnchored=false;
     let startFrameInterrupted=false;
@@ -99,16 +103,13 @@
       const height=viewport.clientHeight;
       const end=viewport.scrollHeight-height;
       if(height<=0||end<=1)return;
-      // Una sesión reanudada no debe volver a la cruz cuando termina
-      // de cargar el CSS: recalcular la cuenta activa con dimensiones reales.
-      if(launchPrayerIndex>0){
-        initialFramePending=false;
-        initialFrameAnchored=false;
-        beforeIndex=-1;
-        beforeMode='';
-        displacedManually=true;
+      // Mantener la cruz durante la extracción de la funda.
+      // El progreso se conserva, pero todavía no se encuadra su cuenta.
+      if(resumeAtCrossPending){
+        viewport.scrollTop=end;
         autoFollowTarget=null;
-        paint();
+        initialFramePending=false;
+        initialFrameAnchored=true;
         return;
       }
       viewport.scrollTop=end;
@@ -121,6 +122,8 @@
     // La opción «Reiniciar progreso» debe restaurar también el
     // encuadre inicial, incluso si ya está seleccionada la oración 0.
     window.rosarioPhysicalReset=()=>{
+      resumeAtCrossPending=false;
+      animateResumeFollow=false;
       autoFollowTarget=null;
       displacedManually=false;
       beforeMode='';
@@ -429,7 +432,28 @@
       }
       return{type:'cross',phase:'opening',y:CROSS_Y,completed:0};
     }
+    // Se llama desde advance() antes de cambiar el índice guardado.
+    // El primer toque enfoca la oración actual; el siguiente ya avanza.
+    window.rosarioPhysicalResumeFromCross=()=>{
+      if(!resumeAtCrossPending||state.rosaryViewLayout!=='physical')
+        return false;
+      resumeAtCrossPending=false;
+      initialFramePending=false;
+      initialFrameAnchored=false;
+      startFrameInterrupted=true;
+      autoFollowTarget=null;
+      displacedManually=true;
+      animateResumeFollow=true;
+      beforeMode='';
+      beforeIndex=-1;
+      paint();
+      return true;
+    };
     function paint(){
+      if(resumeAtCrossPending&&state.index!==launchPrayerIndex){
+        resumeAtCrossPending=false;
+        initialFrameAnchored=false;
+      }
       // El CSS controla solamente el brillo, nunca la geometría ni la
       // navegación. Cambiar de modo no afecta el progreso del rosario.
       document.body.dataset.rosaryHaloMode=state.rosaryHaloMode;
@@ -514,6 +538,8 @@
         // Después de un desplazamiento manual el siguiente avance
         // debe volver a la cuenta activa, esté a la distancia que esté.
         let restoreActiveBead=displacedManually;
+        const smoothResumedFocus=animateResumeFollow;
+        animateResumeFollow=false;
         displacedManually=false;
 
         const entering=beforeMode!=='physical';
@@ -544,6 +570,11 @@
         let target=previous;
 
         if(entering){
+          // Al abrir con progreso guardado, mantener la cruz hasta el
+          // siguiente toque, sin desplazar el SVG durante la extracción.
+          if(resumeAtCrossPending){
+            target=finalTop;
+          }else{
           // Al iniciar un rosario nuevo, la cruz debe quedar completa
           // en el límite inferior real, igual que al terminarlo.
           // Esto cubre primer uso, recarga con progreso 0 y reinicio.
@@ -557,6 +588,7 @@
             target=Math.min(firstFiveTop,clamp(selected.y-height*.64));
           }else{
             target=selected.y-height*.64;
+          }
           }
         }else if(keepFinalFraming&&priorInFinalSection){
           // Una vez que la séptima cuenta de la última decena ha
@@ -653,7 +685,8 @@
           // interpolando el anterior. El swipe conserva su scroll nativo.
           const distant=(!sequential||restoreActiveBead)&&
             Math.abs(target-currentTop)>height*.95;
-          if(!entering&&!distant&&typeof viewport.scrollTo==='function'){
+          if((smoothResumedFocus||!entering&&!distant)&&
+             typeof viewport.scrollTo==='function'){
             viewport.scrollTo({top:target,behavior:'smooth'});
           }else{
             viewport.scrollTop=target;
