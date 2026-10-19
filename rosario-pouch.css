@@ -98,3 +98,82 @@
   .rosario-pouch-layer,.rosario-pouch-layer *{animation-duration:.01ms!important;animation-delay:0ms!important;
     transition-duration:.01ms!important;transition-delay:0ms!important}
 }
+
+/* Ajustes v2: cartera centrada, sin marco de enfoque automático.
+   La cadena ocupa el viewport SVG real, y se anima en fases perceptibles. */
+.rosario-pouch-wallet{
+  left:50%;top:54%;bottom:auto;
+  transform:translate(-50%,-50%);
+  transform-origin:50% 50%;
+}
+.rosario-pouch-chain-window{
+  left:50%;bottom:calc(46% + 57px);
+  width:142px;height:min(270px,calc(54% - 52px));
+  transform:translateX(-50%);
+}
+.rosario-pouch-chain{
+  width:100%;height:100%;bottom:0;left:0;
+  transform:translateY(110%);
+}
+.rosario-pouch-chain svg{
+  display:block;width:100%;height:100%;
+}
+/* El borde de selección anterior era visible en el móvil al enfocar por código. */
+.rosario-pouch-open:focus{outline:none}
+@media (hover:hover) and (pointer:fine){
+  .rosario-pouch-open:focus-visible{
+    outline:1px solid rgba(242,238,230,.55);
+    outline-offset:1px;
+  }
+}
+/* Primero se abre la solapa, después sale el rosario de verdad. */
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-flap{
+  animation:rosario-pouch-flap-up 1.25s cubic-bezier(.25,.7,.22,1) both;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-chain{
+  animation:rosario-pouch-lift 3.1s 1.1s cubic-bezier(.28,.08,.18,.98) both;
+}
+.rosario-pouch-layer[data-phase=opening] .rosario-pouch-snap{
+  animation:rosario-pouch-snap-hide .45s .25s both;
+}
+/* Al cerrar, la cadena entra entera antes de bajar la solapa. */
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-chain{
+  transform:translateY(0);
+  animation:rosario-pouch-stow 3.1s .65s cubic-bezier(.65,.08,.54,.96) both;
+}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-flap{
+  transform:rotateX(156deg);
+  animation:rosario-pouch-flap-down 1.2s 3.8s cubic-bezier(.26,.65,.23,1) both;
+}
+.rosario-pouch-layer[data-phase=closing] .rosario-pouch-snap{
+  opacity:0;
+  animation:rosario-pouch-snap-show .55s 4.72s both;
+}
+.rosario-pouch-layer[data-phase=closed] .rosario-pouch-chain,
+.rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{
+  transform:translateY(110%);
+}
+@keyframes rosario-pouch-lift{
+  0%{transform:translateY(110%)}
+  100%{transform:translateY(0)}
+}
+@keyframes rosario-pouch-stow{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(110%)}
+}
+@media(max-height:640px){
+  .rosario-pouch-wallet{
+    left:50%;top:54%;bottom:auto;
+    transform:translate(-50%,-50%) scale(.87);
+    transform-origin:center center;
+  }
+  .rosario-pouch-chain-window{
+    bottom:calc(46% + 50px);
+    height:min(250px,calc(54% - 48px));
+  }
+  .rosario-pouch-chain{height:100%;transform:translateY(110%)}
+  .rosario-pouch-layer[data-phase=closed] .rosario-pouch-chain,
+  .rosario-pouch-layer[data-phase=finished] .rosario-pouch-chain{
+    transform:translateY(110%);
+  }
+}

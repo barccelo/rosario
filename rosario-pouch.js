@@ -114,13 +114,13 @@
     syncAppearance();
     hint.textContent='Sacando el rosario…';
     layer.dataset.phase='opening';
-    const duration=reduced()?80:2270;
+    const duration=reduced()?80:5400;
     window.setTimeout(()=>{
       layer.classList.add('is-revealing');
       window.setTimeout(()=>{
         layer.hidden=true;
         isAnimating=false;
-      },reduced()?30:670);
+      },reduced()?30:1050);
     },duration);
   }
 
@@ -139,8 +139,8 @@
       hint.textContent='Rosario de hoy completado · Toca para revisar';
       action.setAttribute('aria-label','Abrir el rosario completado');
       isAnimating=false;
-      action.focus({preventScroll:true});
-    },reduced()?80:2540);
+      // Sin foco programático: evita un recuadro sobre la carterita.
+    },reduced()?80:5600);
   }
 
   action.addEventListener('click',openPouch);
@@ -163,5 +163,5 @@
 
   layer.hidden=false;
   syncAppearance();
-  window.requestAnimationFrame(()=>action.focus({preventScroll:true}));
+  // El botón mantiene enfoque por teclado cuando el usuario lo solicite.
 })();
