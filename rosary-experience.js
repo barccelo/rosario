@@ -132,17 +132,13 @@
         ['path',{d:'M18.2 12a1.55 1.55 0 0 1 2.7 1.1v2.3c0 4-2.2 6.1-5.9 6.1h-1.3c-2.1 0-3.7-.9-4.9-2.6l-2.7-3.6a1.55 1.55 0 0 1 2.5-1.8l.6.8'}],
         ['path',{d:'M5.5 8.7 3.9 7.1M7.5 5.9V3.7M5.4 11.1H3.3'}]
       ],
-      // Cuentas de un rosario: anillo y cuentas discretas.
+      // Paleta de contorno, con la misma línea y proporción de los demás.
       appearance:[
-        ['path',{d:'M7.4 5.6A8.1 8.1 0 0 1 16.6 5.6'}],
-        ['path',{d:'M18.9 8.5A8.1 8.1 0 0 1 18.9 15.5'}],
-        ['path',{d:'M16.6 18.4A8.1 8.1 0 0 1 7.4 18.4'}],
-        ['path',{d:'M5.1 15.5A8.1 8.1 0 0 1 5.1 8.5'}],
-        ['circle',{cx:'12',cy:'4',r:'1.7'}],
-        ['circle',{cx:'20',cy:'12',r:'1.7'}],
-        ['circle',{cx:'12',cy:'20',r:'1.7'}],
-        ['circle',{cx:'4',cy:'12',r:'1.7'}],
-        ['circle',{cx:'12',cy:'12',r:'2.8'}]
+        ['path',{d:'M12 3a9 9 0 0 0 0 18h1.1a2 2 0 0 0 1.5-3.3 1.8 1.8 0 0 1 1.35-3H18a3 3 0 0 0 3-3A9 9 0 0 0 12 3Z'}],
+        ['circle',{cx:'8.6',cy:'8.1',r:'1'}],
+        ['circle',{cx:'13.3',cy:'7.2',r:'1'}],
+        ['circle',{cx:'7.5',cy:'13',r:'1'}],
+        ['circle',{cx:'12.6',cy:'12.6',r:'1'}]
       ],
       // Cuadrícula ordenada, equivalente visual a square.grid.2x2.
       navigation:[
