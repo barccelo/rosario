@@ -680,6 +680,9 @@
   state.dayDate = dateKey();
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
+  // Dos presentaciones excluyentes, manteniendo la secuencia de oraciones.
+  state.finalIntentionsDisplay = saved.finalIntentionsDisplay === 'checklist'
+    ? 'checklist' : 'prayers';
   // Una sola opción visual controla las marcas Guía/Asamblea.
   const voiceTones=['white','gold','accent'];
   state.voiceGuideTone=voiceTones.includes(saved.voiceGuideTone)?saved.voiceGuideTone:'white';
@@ -982,54 +985,23 @@
       immersiveRender();
       updateEnhancements();
     };
-    // Progreso visible de las tres oraciones de cada intención final.
-    // Los checks se colorean con el acento del misterio/tema vigente.
+    // El encabezado permanece en ambos modos. La tarjeta dorada y su
+    // contenido se dibujan juntos en #immersiveText, nunca en un panel encima.
     const finalIntentionPanel=document.createElement('section');
     finalIntentionPanel.className='rosario-final-intention';
     finalIntentionPanel.hidden=true;
-    finalIntentionPanel.setAttribute('aria-label','Oraciones de la intención');
+    finalIntentionPanel.setAttribute('aria-label','Intención final actual');
     const finalHeading=document.createElement('h2');
     finalHeading.className='rosario-final-intention-title';
     finalIntentionPanel.append(finalHeading);
-    const finalChecklist=document.createElement('div');
-    finalChecklist.className='rosario-final-intention-list';
-    finalIntentionPanel.append(finalChecklist);
-    const intentionRows=['Padrenuestro','Avemaría','Gloria'].map(name=>{
-      const row=document.createElement('div');
-      row.className='rosario-final-intention-row';
-      const title=document.createElement('span');
-      title.textContent=name;
-      const symbol=document.createElement('span');
-      symbol.className='rosario-final-intention-check';
-      symbol.setAttribute('aria-hidden','true');
-      symbol.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
-      row.append(title,symbol);
-      finalChecklist.append(row);
-      return row;
-    });
     reading.insertBefore(finalIntentionPanel,$('immersiveText'));
-    const intentionCheckNames=['Padrenuestro','Avemaría','Gloria'];
+    const intentionPrayerNames=['Padrenuestro','Avemaría','Gloria'];
     function updateFinalIntentions(step){
       const visible=Number.isInteger(step?.intentionNumber)&&
-        (step.kind==='final-intention'||intentionCheckNames.includes(step.title));
+        (step.kind==='final-intention'||intentionPrayerNames.includes(step.title));
       finalIntentionPanel.hidden=!visible;
       reading.classList.toggle('is-final-intention',visible);
-      if(!visible)return;
-      finalHeading.textContent=step.intention.replace(/:\s*$/, '');
-      // La pantalla introductoria empieza en blanco. Cada nuevo paso
-      // añade exactamente una marca; el ciclo se reinicia al cambiar intención.
-      const completed=step.kind==='final-intention'?0:
-        intentionCheckNames.indexOf(step.title)+1;
-      intentionRows.forEach((row,i)=>{
-        const marked=i<completed;
-        row.classList.toggle('is-checked',marked);
-        row.setAttribute('aria-label',intentionCheckNames[i]+
-          (marked?', marcada':', pendiente'));
-      });
-      if(step.kind==='final-intention'){
-        $('immersiveText').textContent='';
-        $('immersiveCount').textContent='';
-      }
+      if(visible) finalHeading.textContent=step.intention.replace(/:\s*$/, '');
     }
     function updateEnhancements() {
       const step = steps[state.index];
@@ -1819,6 +1791,24 @@
       choice.value=state.contritionVersion;
       choice.onchange=()=>window.rosarioSetContrition(choice.value);
       contrition.append(name,choice);prayersGroup.append(contrition);
+      const intentionsDisplay=document.createElement('label');
+      intentionsDisplay.className='rosario-tone-setting';
+      const intentionsDisplayTitle=document.createElement('span');
+      intentionsDisplayTitle.textContent='Intenciones finales';
+      const intentionsDisplayChoice=document.createElement('select');
+      intentionsDisplayChoice.setAttribute('aria-label','Formato de las intenciones finales');
+      [['prayers','Oraciones completas'],['checklist','Lista con marcas']].forEach(([value,label])=>{
+        const option=document.createElement('option');
+        option.value=value;option.textContent=label;
+        intentionsDisplayChoice.append(option);
+      });
+      intentionsDisplayChoice.value=state.finalIntentionsDisplay;
+      intentionsDisplayChoice.onchange=()=>{
+        state.finalIntentionsDisplay=intentionsDisplayChoice.value;
+        persist();render();
+      };
+      intentionsDisplay.append(intentionsDisplayTitle,intentionsDisplayChoice);
+      prayersGroup.append(intentionsDisplay);
       const voicesGroup=group('Participación','rosario-voice-settings-group');
       const btn=document.createElement('button');
       btn.type='button';
