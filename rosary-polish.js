@@ -195,6 +195,32 @@
       if(split<0)split=source.lastIndexOf(',',offset);
       return split>0?[source.slice(0,split+1),source.slice(split+1).trim()]:[source,''];
     }
+    function appendFinalIntentionChecklist(step) {
+      const list=document.createElement('div');
+      list.className='rosario-final-intention-list';
+      list.setAttribute('role','list');
+      const names=['Padrenuestro','Avemaría','Gloria'];
+      // La presentación inicial no marca ninguna oración; cada avance
+      // incorpora una marca, y retroceder la retira naturalmente.
+      const completed=step.kind==='final-intention'?0:names.indexOf(step.title)+1;
+      names.forEach((name,i)=>{
+        const marked=i<completed;
+        const row=document.createElement('div');
+        row.className='rosario-final-intention-row';
+        row.classList.toggle('is-checked',marked);
+        row.setAttribute('role','listitem');
+        row.setAttribute('aria-label',name+(marked?', completada':', pendiente'));
+        const title=document.createElement('span');
+        title.textContent=name;
+        const symbol=document.createElement('span');
+        symbol.className='rosario-final-intention-check';
+        symbol.setAttribute('aria-hidden','true');
+        symbol.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+        row.append(title,symbol);
+        list.append(row);
+      });
+      prayer.append(list);
+    }
     function renderPrayer() {
       const step=steps[state.index];
       applyPrefs();
@@ -211,6 +237,8 @@
         context.setAttribute('aria-label','Leer meditación: '+groups[state.group][step.m]);
       }
       const intro=step?.intention;
+      const isFinalIntention=Number.isInteger(step?.intentionNumber)&&
+        (step.kind==='final-intention'||['Padrenuestro','Avemaría','Gloria'].includes(step.title));
       if(announced)announce(step);
       else if(step?.kind==='litany'){
         prayer.replaceChildren();
@@ -240,6 +268,9 @@
           label.textContent=intro;
           prayer.append(label);
         }
+        if(isFinalIntention && (state.finalIntentionsDisplay==='checklist'||step.kind==='final-intention')){
+          if(state.finalIntentionsDisplay==='checklist') appendFinalIntentionChecklist(step);
+        }else{
         const source=prayerSource(step);
         if (step.title==='Comunión espiritual' || step.title==='Salve' ||
             step.title==='Oración final'||step.title==='Señor mío Jesucristo') {
@@ -278,6 +309,7 @@
             (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
         }else appendWithAmen(prayer,source);
+        }
       }else{
         prayer.replaceChildren();
         specialSymbol();
