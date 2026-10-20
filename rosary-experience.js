@@ -108,13 +108,70 @@
     };
   }
 
+  // Símbolos monocromáticos de trazo uniforme, inspirados en el lenguaje
+  // visual de SF Symbols. SVG propios, sin recursos ni fuentes externas.
+  function settingsLineIcon(name){
+    const ns='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('width','21');
+    svg.setAttribute('height','21');
+    svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');
+    svg.setAttribute('stroke-width','1.65');
+    svg.setAttribute('stroke-linecap','round');
+    svg.setAttribute('stroke-linejoin','round');
+    svg.setAttribute('aria-hidden','true');
+    svg.setAttribute('focusable','false');
+    const definitions={
+      // Mano con gesto de toque.
+      interaction:[
+        ['path',{d:'M9.2 11.5V6.1a1.5 1.5 0 0 1 3 0v5'}],
+        ['path',{d:'M12.2 10.2a1.55 1.55 0 0 1 3 .6v1'}],
+        ['path',{d:'M15.2 11a1.55 1.55 0 0 1 3 .6v1'}],
+        ['path',{d:'M18.2 12a1.55 1.55 0 0 1 2.7 1.1v2.3c0 4-2.2 6.1-5.9 6.1h-1.3c-2.1 0-3.7-.9-4.9-2.6l-2.7-3.6a1.55 1.55 0 0 1 2.5-1.8l.6.8'}],
+        ['path',{d:'M5.5 8.7 3.9 7.1M7.5 5.9V3.7M5.4 11.1H3.3'}]
+      ],
+      // Cuentas de un rosario: anillo y cuentas discretas.
+      appearance:[
+        ['path',{d:'M7.4 5.6A8.1 8.1 0 0 1 16.6 5.6'}],
+        ['path',{d:'M18.9 8.5A8.1 8.1 0 0 1 18.9 15.5'}],
+        ['path',{d:'M16.6 18.4A8.1 8.1 0 0 1 7.4 18.4'}],
+        ['path',{d:'M5.1 15.5A8.1 8.1 0 0 1 5.1 8.5'}],
+        ['circle',{cx:'12',cy:'4',r:'1.7'}],
+        ['circle',{cx:'20',cy:'12',r:'1.7'}],
+        ['circle',{cx:'12',cy:'20',r:'1.7'}],
+        ['circle',{cx:'4',cy:'12',r:'1.7'}],
+        ['circle',{cx:'12',cy:'12',r:'2.8'}]
+      ],
+      // Cuadrícula ordenada, equivalente visual a square.grid.2x2.
+      navigation:[
+        ['rect',{x:'3.8',y:'3.8',width:'7.1',height:'7.1',rx:'1.6'}],
+        ['rect',{x:'13.1',y:'3.8',width:'7.1',height:'7.1',rx:'1.6'}],
+        ['rect',{x:'3.8',y:'13.1',width:'7.1',height:'7.1',rx:'1.6'}],
+        ['rect',{x:'13.1',y:'13.1',width:'7.1',height:'7.1',rx:'1.6'}]
+      ],
+      android:[
+        ['path',{d:'M8 18h8M7 18h10c-1.2-1.4-1.8-2.5-1.8-4.4v-3a3.2 3.2 0 0 0-6.4 0v3C8.8 15.5 8.2 16.6 7 18Z'}],
+        ['path',{d:'M10.3 20a1.9 1.9 0 0 0 3.4 0'}],
+        ['path',{d:'M12 5.8V4'}]
+      ]
+    };
+    for(const [tag,attrs] of definitions[name]||definitions.navigation){
+      const node=document.createElementNS(ns,tag);
+      for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);
+      svg.append(node);
+    }
+    return svg;
+  }
+
   function renderSettingsHome(host,allNodes){
     const modal=byId('modal');
     const sections=[
-      {id:'interaction',title:'Controles e interacción',caption:'Toques, deslizamientos y vibración',symbol:'✥'},
-      {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita',symbol:'◉'},
-      {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones',symbol:'☷'},
-      {id:'android',title:'Android',caption:'Recordatorios',symbol:'◷'}
+      {id:'interaction',title:'Controles e interacción',caption:'Toques, deslizamientos y vibración'},
+      {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita'},
+      {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones'},
+      {id:'android',title:'Android',caption:'Recordatorios'}
     ];
     const buckets={interaction:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
     // Reunir el selector original de misterios con su botón personalizado.
@@ -202,7 +259,7 @@
         const button=document.createElement('button');
         button.type='button';button.className='rosario-settings-section';
         const icon=document.createElement('span');icon.className='rosario-settings-symbol';
-        icon.textContent=section.symbol;
+        icon.append(settingsLineIcon(section.id));
         const copy=document.createElement('span');copy.className='rosario-settings-copy';
         const label=document.createElement('strong');label.textContent=section.title;
         const sub=document.createElement('small');sub.textContent=section.caption;

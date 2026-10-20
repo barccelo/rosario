@@ -159,3 +159,13 @@
 #modalContent>label.rosario-mystery-haptics{
   margin:7px 0 12px!important;
 }
+
+/* Íconos de ajustes: trazos SF-like, sin modificar el tema. */
+#modalContent .rosario-settings-symbol svg{
+  display:block;
+  width:21px;
+  height:21px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+}
