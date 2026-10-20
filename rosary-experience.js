@@ -118,7 +118,7 @@
     const buckets={interaction:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
     const groupFor=node=>{
       const cls=node.classList;
-      if(node.matches?.('#groupSelect, label[for="groupSelect"],.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
+      if(node.matches?.('#groupSelect, label[for="groupSelect"],.rosario-choice-trigger--full,.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
         return 'appearance';
       if(cls.contains('physical-tap-settings')||cls.contains('rosario-interaction-group')||
          cls.contains('rosario-mystery-haptics')||cls.contains('rosario-haptic-compatibility')||

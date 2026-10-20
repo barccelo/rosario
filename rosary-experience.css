@@ -96,3 +96,40 @@
 #modalContent.rosario-settings-dashboard>.rosario-settings-inline + .rosario-settings-inline{
   margin-top:22px
 }
+
+/* Los controles ahora son hijos de un grupo visible: conservar las tarjetas. */
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label:has(>input[type="checkbox"]),
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label.rosario-mystery-haptics,
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label.rosario-tone-setting{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  width:100%!important;min-height:58px!important;box-sizing:border-box!important;
+  gap:13px!important;padding:11px 14px!important;margin:0!important;
+  border:1px solid var(--ui-outline)!important;border-radius:13px!important;
+  background:var(--ui-surface)!important;color:var(--ui-ink)!important;
+  font:14px/1.4 system-ui!important;
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label>input[type="checkbox"]{
+  appearance:none!important;-webkit-appearance:none!important;
+  display:inline-block!important;flex:0 0 45px!important;
+  width:45px!important;height:27px!important;position:relative!important;
+  border-radius:16px!important;border:1px solid var(--ui-outline)!important;
+  background:var(--ui-rule)!important;box-shadow:none!important;cursor:pointer;
+  transition:background .16s;
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label>input[type="checkbox"]::before{
+  content:"";position:absolute;width:21px;height:21px;left:2px;top:2px;
+  border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;
+  transition:transform .17s;pointer-events:none
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label>input[type="checkbox"]:checked{
+  background:var(--ui-accent)!important;border-color:var(--ui-accent)!important
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label>input[type="checkbox"]:checked::before{
+  transform:translateX(18px)
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label.rosario-mystery-haptics>span{
+  flex:1 1 auto;min-width:0
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label.rosario-mystery-haptics>select{
+  min-width:110px;max-width:52%;flex:0 1 174px;margin:0!important
+}
