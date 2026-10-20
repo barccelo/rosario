@@ -950,12 +950,17 @@
     function openMeditation(m) {
       if (m < 0 || m > 4) return;
       const complete = window.rosaryFullMeditations?.[state.group]?.[m];
-      const text = complete || meditations[state.group]?.[m] || '';
+      const text = window.rosarioMeditationText?.(state.group,m) ?? complete ?? meditations[state.group]?.[m] ?? '';
       show('<div class="meditation-dialog"><div class="meditation-kicker">Meditación · Misterio ' +
         (m+1) + '</div><h2 id="meditationTitle"></h2><div class="meditation-full" id="meditationFull"></div></div>');
       $('meditationTitle').textContent = groups[state.group][m];
-      if (window.rosaryFormatAmens) window.rosaryFormatAmens($('meditationFull'),text);
+      if (window.rosarioRenderMeditation) window.rosarioRenderMeditation($('meditationFull'),text);
       else $('meditationFull').textContent=text;
+      const edit=document.createElement('button');
+      edit.type='button';edit.className='nav-preview-link rosario-meditation-edit';
+      edit.textContent='Editar meditación';
+      edit.onclick=()=>window.rosarioOpenMeditationEditor?.(state.group,m);
+      $('meditationFull').after(edit);
       $('modal').scrollTop=0;
     }
     window.rosarioOpenMeditation=openMeditation;
@@ -1067,7 +1072,7 @@
         $('modal').scrollTop=0;
         detail.scrollTop=0;
       }
-      function addPreviewRow(list,label,subtitle,go,active,previewTitle,previewContent,previewLabel='Leer'){
+      function addPreviewRow(list,label,subtitle,go,active,previewTitle,previewContent,previewLabel='Leer',meditationIndex=null){
         const wrapper=document.createElement('div');
         wrapper.className='nav-entry';
         appendOption(wrapper,label,subtitle,go,active);
@@ -1076,12 +1081,15 @@
         look.className='nav-preview-link';
         look.textContent=previewLabel+' ↗';
         look.setAttribute('aria-label',previewLabel+': '+previewTitle);
-        look.onclick=()=>openPreview(previewTitle,previewContent);
+        look.onclick=()=>meditationIndex!==null?
+          openMeditation(meditationIndex):openPreview(previewTitle,previewContent);
         const edit=document.createElement('button');
         edit.type='button';edit.className='nav-preview-link';
         edit.textContent='Editar';
         edit.setAttribute('aria-label','Editar oración: '+previewTitle);
-        edit.onclick=()=>openPrayerEditor(previewTitle);
+        edit.onclick=()=>meditationIndex!==null?
+          window.rosarioOpenMeditationEditor?.(state.group,meditationIndex):
+          openPrayerEditor(previewTitle);
         wrapper.append(look,edit);
         list.append(wrapper);
       }
@@ -1156,7 +1164,7 @@
               meditations[state.group]?.[i] || '';
             addPreviewRow(list,(i+1)+'. '+name,state.group,()=>{
               goTo(steps.findIndex(item=>item.kind==='mystery'&&item.m===i));
-            },steps[state.index]?.m===i,name,full,'Meditación');
+            },steps[state.index]?.m===i,name,full,'Meditación',i);
           });
         } else if (selected === 'prayers') {
           const titles = [
@@ -1482,6 +1490,7 @@
 
     // Menú de navegación accesible desde Preferencias sin mostrar
     // otra lista interminable en la página principal.
+    window.rosarioOpenNavigation=openNavigation;
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
     const animationOptions=[
       ['fade','Fundido','El texto desaparece y aparece con suavidad.'],

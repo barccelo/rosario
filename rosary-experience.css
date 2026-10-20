@@ -1,0 +1,60 @@
+/* Pantallas de configuración por secciones y edición de meditaciones. */
+#modalContent .rosario-settings-home{display:flex;flex-direction:column;gap:9px;margin:17px 0 12px}
+#modalContent button.rosario-settings-section{
+  width:100%;min-height:76px;display:flex!important;align-items:center;gap:13px;
+  border:1px solid var(--ui-outline,#ddd)!important;border-radius:15px!important;
+  padding:13px 15px!important;background:var(--ui-surface,#fff)!important;
+  color:var(--ui-ink,inherit)!important;text-align:left!important;
+  box-shadow:none!important
+}
+#modalContent .rosario-settings-symbol{width:35px;height:35px;min-width:35px;
+  display:grid;place-items:center;border-radius:11px;
+  background:var(--ui-selected,rgba(150,130,85,.1));color:var(--ui-accent,#9b7e54);
+  font:500 18px/1 system-ui}
+#modalContent .rosario-settings-copy{display:flex;flex:1;min-width:0;
+  flex-direction:column;gap:4px}
+#modalContent .rosario-settings-copy strong{font:600 14px/1.3 system-ui}
+#modalContent .rosario-settings-copy small{font:12px/1.35 system-ui;
+  color:var(--ui-muted,#8d8d88);opacity:.95}
+#modalContent .rosario-settings-arrow{color:var(--ui-muted,#8d8d88);
+  font:300 27px/1 system-ui}
+#modalContent button.rosario-settings-back{display:flex;align-items:center;
+  border:0!important;background:none!important;color:var(--ui-accent,#987547)!important;
+  padding:8px 1px!important;margin:0 0 4px!important;min-height:38px;
+  font:500 14px/1.3 system-ui!important}
+#modalContent .rosario-setup-welcome h2{margin:7px 0 8px!important}
+#modalContent .rosario-setup-eyebrow{font:600 11px system-ui;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ui-accent,#987547)}
+#modalContent .rosario-setup-welcome>p,.rosario-med-editor-note{
+  color:var(--ui-muted,#818783);font:13px/1.55 system-ui;margin:0 0 19px}
+#modalContent .rosario-setup-choice{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;border:1px solid var(--ui-outline,#ddd)!important;
+  border-radius:13px!important;background:var(--ui-surface,#fff)!important;
+  padding:14px 15px!important;margin:0 0 9px!important;min-height:56px;
+  color:var(--ui-ink,inherit)!important;font:14px/1.4 system-ui!important
+}
+#modalContent .rosario-setup-choice>span{flex:1}
+#modalContent .rosario-setup-choice>input{width:21px;height:21px;margin:0;
+  accent-color:var(--ui-accent,#ac8a54);flex:0 0 auto}
+#modalContent .rosario-setup-swipes{border:0!important;padding:9px 0 0!important;
+  margin:0 0 9px!important;min-width:0}
+#modalContent .rosario-setup-swipes legend{margin:0 0 9px!important;
+  padding:0!important;font:600 15px/1.4 system-ui!important}
+#modalContent .rosario-setup-finish{margin-top:12px!important}
+#modalContent label.rosario-pouch-settings-toggle{width:100%}
+#modalContent .rosario-meditation-edit{display:flex;margin-top:14px}
+#modalContent .rosario-editor-screen{width:100%;max-width:100%}
+#modalContent .rosario-editor-screen textarea{
+  width:100%!important;min-height:240px;max-height:58dvh!important;
+  white-space:pre-wrap!important;box-sizing:border-box!important;
+  font:14px/1.6 system-ui!important;resize:vertical
+}
+#modalContent .meditation-full p,
+#modalContent .nav-preview-reading p{
+  margin:0 0 1.3em;font:inherit;line-height:1.68
+}
+#modalContent .meditation-full p:last-child,
+#modalContent .nav-preview-reading p:last-child{margin-bottom:0}
+#modalContent .meditation-full em,
+#modalContent .nav-preview-reading em{font-style:italic}

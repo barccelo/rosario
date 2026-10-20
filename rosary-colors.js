@@ -31,9 +31,9 @@
     },
     Luminosos: {
       gold: {
-        label:'Dorado',sample:'#BC922D',
-        light:{bg:'#FCF7E9',surface:'#FFFBF0',text:'#413927',subtle:'#F8ECCB',bead:'#BC922D',outline:'#A58025',beadLabel:'#29210F',active:'#866111',activeFill:'#EDD18A',link:'#B49B63'},
-        dark:{bg:'#292316',surface:'#36301F',text:'#F5EEDB',subtle:'#433820',bead:'#D3AA49',outline:'#E9CB7D',beadLabel:'#30240D',active:'#FFE5A3',activeFill:'#775D29',link:'#897241'}
+        label:'Dorado',sample:'#EAC451',
+        light:{bg:'#FFFAEE',surface:'#FFFDF8',text:'#423821',subtle:'#F9EECF',bead:'#DAB039',outline:'#B98C22',beadLabel:'#3A2B0D',active:'#AE7C16',activeFill:'#FFE6A1',link:'#C9A048'},
+        dark:{bg:'#17212B',surface:'#222E39',text:'#F8F1DE',subtle:'#30404D',bead:'#F2D16D',outline:'#FFE5A0',beadLabel:'#382706',active:'#FFE49A',activeFill:'#937027',link:'#E1BD68'}
       },
       yellow: {
         label:'Amarillo',sample:'#E0BB4C',
@@ -178,7 +178,7 @@
       const classic=addMode('classic','Clásico',['#B79355'],list);
       const mission=addMode('missionary','Misionero',missionary.map(item=>item.color),list);
       const myst=addMode('mystery','Según los misterios',
-        ['#76579B','#BC922D','#70B9DE','#F7F6F1'],list);
+        ['#76579B','#EAC451','#70B9DE','#F7F6F1'],list);
 
       const variations=document.createElement('div');
       variations.className='rosary-colors-variants';

@@ -22,7 +22,7 @@
       red:['#FAF0F2','#FFF9FA','#B54D61','#A63F55','#AF7B83','#EFCBD5','#C58C9B']
     },
     Luminosos:{
-      gold:['#FCF7E9','#FFFBF0','#BC922D','#A58025','#B49B63','#F4E5B7','#C9B06E'],
+      gold:['#FFFAEE','#FFFDF8','#DAB039','#B98C22','#C9A048','#F9EABE','#E3C46F'],
       yellow:['#FFFAEB','#FFFDF5','#E0BB4C','#C9A232','#B9A05C','#F6E8B4','#D5BB72']
     },
     Gloriosos:{
@@ -30,7 +30,7 @@
     }
   };
   const darkBg={Gozosos:'#14242D',Dolorosos:'#211B2B',
-    Luminosos:'#292316',Gloriosos:'#202629'};
+    Luminosos:'#17212B',Gloriosos:'#202629'};
 
   // Copia íntegra: ningún hilo, cuenta, radio, arco ni coordenada se recalcula.
   // El último fotograma coincide píxel a píxel con el SVG de la interfaz.
@@ -241,7 +241,7 @@
   }
 
   async function openPouch(){
-    if(animating)return;
+    if(animating||state.pouchEnabled===false)return;
     animating=true;
     if(state.index>=steps.length&&state.pouchCompletedDate&&
        state.pouchCompletedDate!==dayKey()){
@@ -370,7 +370,7 @@
   };
 
   window.rosarioPouchFinish=()=>{
-    if(!opened||animating||!layer.hidden||state.index<steps.length)
+    if(state.pouchEnabled===false||!opened||animating||!layer.hidden||state.index<steps.length)
       return false;
     closePouch();
     return true;
@@ -394,7 +394,26 @@
     document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(syncPhysicalRosary),{once:true});
   }else requestAnimationFrame(syncPhysicalRosary);
 
+  // La preferencia conserva la vista directa sin forzar una animación
+  // y no modifica el progreso ni la función del botón de avance.
+  window.rosarioSetPouchEnabled=enabled=>{
+    state.pouchEnabled=Boolean(enabled);
+    persist();
+    if(!state.pouchEnabled){
+      layer.hidden=true;
+      opened=true;
+      transfer?.remove();
+      transfer=null;
+      document.body.classList.remove('rosario-pouch-hide-original');
+    }
+    // Si se habilita durante la oración, se verá en la próxima apertura.
+  };
   // La carterita conserva sus transiciones; la bendición final exige otro toque.
-  appearance();
-  layer.hidden=false;
+  if(state.pouchEnabled!==false){
+    appearance();
+    layer.hidden=false;
+  }else{
+    opened=true;
+    layer.hidden=true;
+  }
 })();
