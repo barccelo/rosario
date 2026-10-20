@@ -219,6 +219,17 @@
     pouchToggle.classList.add('rosario-pouch-settings-toggle');
     buckets.appearance.unshift(pouchToggle);
 
+    // Extraer una sola vez las opciones de los grupos originales.
+    // Sus nodos se reutilizan al entrar y volver de otras pantallas,
+    // en lugar de vaciar un contenedor distinto en cada apertura.
+    for(const key of ['prayers','voices','other']){
+      buckets[key]=buckets[key].flatMap(node=>{
+        if(!node.classList?.contains('rosario-preferences-group'))
+          return [node];
+        return [...node.children].filter(child=>!child.matches?.('h3'));
+      });
+    }
+
     // Las secciones sencillas quedan desplegadas en el panel principal.
     function addInline(title,items){
       if(!items.length)return;
@@ -226,20 +237,19 @@
       group.className='rosario-settings-inline';
       const head=document.createElement('h3');head.textContent=title;
       group.append(head);
-      for(const node of items){
-        if(node.classList?.contains('rosario-preferences-group')){
-          while(node.firstChild){
-            const child=node.firstChild;
-            if(child.matches?.('h3'))child.remove();
-            else group.append(child);
-          }
-        }else group.append(node);
-      }
+      // Se trasladan los mismos elementos, con sus eventos intactos.
+      // La lista persistente nunca se vacía al reconstruir Ajustes.
+      for(const node of items)group.append(node);
       // El botón de controles abre otra pantalla: su regreso es a Ajustes.
       group.querySelectorAll('.rosario-navigation-settings-button,.voice-settings-link')
-        .forEach(button=>button.addEventListener('click',()=>{
-          modal.dataset.rosarioSettingsLevel='subpage';
-        },true));
+        .forEach(button=>{
+          if(button.dataset.rosarioSettingsBackWired)return;
+          button.dataset.rosarioSettingsBackWired='true';
+          button.addEventListener('click',()=>{
+            modal.dataset.rosarioSettingsLevel='subpage';
+            window.rosarioUpdateBackLabel?.();
+          },true);
+        });
       return group;
     }
     function openHome(){
