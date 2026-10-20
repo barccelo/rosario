@@ -107,6 +107,10 @@
     function applyColors() {
       const mode = validMode(state.rosaryColorMode);
       const colors = selection(state.group,state.rosaryColorVariants,Boolean(state.dark));
+      // La vista previa muestra el color real de la cuenta. En el rosario
+      // físico, la cuenta activa de los luminosos debe usar ese mismo
+      // tono y no el relleno tenue reservado antes para el resaltado.
+      const activeFill=state.group==='Luminosos'?colors.bead:colors.activeFill;
       document.body.dataset.rosaryColorMode=mode;
       if(mode==='mystery'){
         const cssMap = {
@@ -114,7 +118,7 @@
           '--rc-text':colors.text,'--rc-subtle':colors.subtle,
           '--rc-bead':colors.bead,'--rc-outline':colors.outline,
           '--rc-bead-label':colors.beadLabel,
-          '--rc-active-fill':colors.activeFill,
+          '--rc-active-fill':activeFill,
           '--rc-accent':colors.active,'--rc-link':colors.link
         };
         Object.entries(cssMap).forEach(([key,value])=>
