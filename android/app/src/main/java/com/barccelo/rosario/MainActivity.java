@@ -135,6 +135,51 @@ public final class MainActivity extends Activity {
             });
         }
 
+        // Control de amplitud real (API 26+); comparte el mismo patrón
+        // de tiempos con el modo predeterminado y respeta Android antiguo.
+        @JavascriptInterface
+        public void vibrateWithAmplitude(String values, int amplitude) {
+            if (values == null || values.length() > 80) return;
+            if (amplitude < 1 || amplitude > 255) return;
+            final String[] items = values.split(",");
+            if (items.length < 1 || items.length > 9 || items.length % 2 == 0) return;
+            final long[] timings = new long[items.length + 1];
+            final int[] strengths = new int[items.length + 1];
+            timings[0] = 0;
+            strengths[0] = 0;
+            try {
+                for (int i = 0; i < items.length; i++) {
+                    int duration = Integer.parseInt(items[i].trim());
+                    if (duration < 1 || duration > 1100) return;
+                    timings[i + 1] = duration;
+                    strengths[i + 1] = (i % 2 == 0) ? amplitude : 0;
+                }
+            } catch (NumberFormatException ex) {
+                return;
+            }
+            runOnUiThread(() -> {
+                try {
+                    Vibrator vibrator;
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        VibratorManager manager = (VibratorManager)
+                            getSystemService(VIBRATOR_MANAGER_SERVICE);
+                        vibrator = manager != null ? manager.getDefaultVibrator() : null;
+                    } else {
+                        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    }
+                    if (vibrator == null || !vibrator.hasVibrator()) return;
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        vibrator.vibrate(VibrationEffect.createWaveform(timings,
+                            strengths, -1));
+                    } else {
+                        vibrator.vibrate(timings, -1);
+                    }
+                } catch (SecurityException ignored) {
+                    // El dispositivo puede limitar las vibraciones.
+                }
+            });
+        }
+
         @JavascriptInterface
         public void setFullscreen(boolean enabled) {
             runOnUiThread(() -> applyFullscreen(enabled));

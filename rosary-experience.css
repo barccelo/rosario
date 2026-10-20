@@ -232,3 +232,58 @@
 #modalContent label.rosary-colors-mode:last-child:nth-child(odd){
   grid-column:auto!important;
 }
+
+/* Intenciones finales · progreso Padrenuestro, Avemaría y Gloria. */
+.immersive-prayer .rosario-final-intention[hidden]{display:none!important}
+.immersive-prayer .rosario-final-intention{
+  display:flex;flex-direction:column;gap:13px;
+  width:100%;max-width:100%;
+  margin:0 0 21px;
+  padding:0;
+  color:var(--rc-text,inherit);
+}
+.immersive-prayer .rosario-final-intention-title{
+  color:var(--rc-text,inherit);
+  font:600 clamp(17px,2.1vw,23px)/1.4 Georgia,serif;
+  text-align:left;margin:0;
+}
+.immersive-prayer .rosario-final-intention-list{
+  display:flex;flex-direction:column;
+  padding:4px 0 0;gap:0;
+}
+.immersive-prayer .rosario-final-intention-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;min-height:42px;
+  border-bottom:1px solid color-mix(in srgb, currentColor 17%, transparent);
+  color:var(--rc-text,inherit);
+  font:500 14px/1.35 system-ui;
+}
+.immersive-prayer .rosario-final-intention-row:last-child{
+  border-bottom:0;
+}
+.immersive-prayer .rosario-final-intention-check{
+  display:grid;place-items:center;
+  width:24px;height:24px;flex:none;
+  border:1.5px solid color-mix(in srgb,currentColor 35%,transparent);
+  border-radius:50%;
+  opacity:.35;
+  color:var(--rc-accent,#b79764);
+}
+.immersive-prayer .rosario-final-intention-check svg{
+  display:block;width:16px;height:16px;fill:none;
+  stroke:currentColor;stroke-width:2.15;
+  stroke-linecap:round;stroke-linejoin:round;
+  opacity:0;
+}
+.immersive-prayer .rosario-final-intention-row.is-checked
+.rosario-final-intention-check{
+  opacity:1;
+  background:color-mix(in srgb,var(--rc-accent,#b79764) 14%,transparent);
+  border-color:var(--rc-accent,#b79764);
+}
+.immersive-prayer .rosario-final-intention-row.is-checked
+.rosario-final-intention-check svg{opacity:1}
+@media(max-height:660px){
+  .immersive-prayer .rosario-final-intention{gap:8px;margin-bottom:10px}
+  .immersive-prayer .rosario-final-intention-row{min-height:35px}
+}

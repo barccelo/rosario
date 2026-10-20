@@ -246,12 +246,15 @@
     if(state.index>=steps.length&&state.pouchCompletedDate&&
        state.pouchCompletedDate!==dayKey()){
       state.index=0;
+      state.pouchSessionStarted=false;
       state.intentionCycle=[null,null,null,null,null];
       window.rosarioResetIntentionCycle?.();
       window.rosarioPhysicalReset?.();
       render();
     }
     opened=true;
+    state.pouchSessionStarted=true;
+    persist();
     appearance();
     layer.hidden=false;
     layer.classList.remove('is-revealing','pouch-departing','pouch-arriving','pouch-gone','pouch-reveal-text');
@@ -408,8 +411,11 @@
     }
     // Si se habilita durante la oración, se verá en la próxima apertura.
   };
-  // La carterita conserva sus transiciones; la bendición final exige otro toque.
-  if(state.pouchEnabled!==false){
+  // La carterita aparece al inicio de una sesión nueva y al terminar;
+  // al volver a abrir una oración en curso no se repite su entrada.
+  const resumedPrayer=state.index<steps.length &&
+    (state.index>0||state.pouchSessionStarted===true);
+  if(state.pouchEnabled!==false&&!resumedPrayer){
     appearance();
     layer.hidden=false;
   }else{

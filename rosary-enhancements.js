@@ -92,7 +92,7 @@
     'Dios, Padre celestial, ten piedad de nosotros.',
     'Dios Hijo, Redentor del mundo, ten piedad de nosotros.',
     'Dios Espíritu Santo, ten piedad de nosotros.',
-    'Santísima Trinidad, un solo Dios, ten piedad de nosotros.'
+    'Trinidad Santa, un solo Dios, ten piedad de nosotros.'
   ];
   const litanyInvocations = [
     'Santa María', 'Santa Madre de Dios', 'Santa Virgen de las vírgenes',
@@ -462,12 +462,15 @@
     response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
   nextSteps.push({ title: 'Oración final', m: 5 });
   [
-    { name: 'La Iglesia', intro: 'Por las necesidades de la Iglesia:' },
+    { name: 'La Iglesia y el Estado', intro: 'Por las necesidades de la Iglesia y el Estado:' },
     { name: 'Las intenciones', intro: 'Por la persona e intenciones del señor Obispo de esta Diócesis:' },
     { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:' }
   ].forEach((intention, i) => {
-    // Cada intención final contiene un Padrenuestro, un Avemaría y un Gloria.
-    // Mantener la intención identificada durante las tres oraciones.
+    // Pantalla con el título y la lista inicialmente sin marcar.
+    nextSteps.push({ title:'Intenciones finales',kind:'final-intention',m:5,
+      intentionNumber:i,intention:intention.intro,text:intention.intro });
+    // Cada avance marca la oración alcanzada, sin repetir su título
+    // en el encabezado principal de la lectura.
     for (const title of ['Padrenuestro','Avemaría','Gloria']) {
       nextSteps.push({ title, m: 5, intentionNumber: i,
         intention: intention.intro });
@@ -509,7 +512,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 9;
+    state.sequenceVersion = 10;
     render();
   }
 
@@ -562,8 +565,16 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 9) {
+  if (Number(saved.sequenceVersion) >= 10) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 9) {
+    // V9 no incluía pantallas de presentación de las intenciones.
+    // Mapear por identidad de paso y no por índice para no desplazar
+    // una oración guardada al insertar las tres nuevas pantallas.
+    const oldSteps=steps.filter(item=>item.kind!=='final-intention');
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    restoredIndex=oldIndex===oldSteps.length?steps.length:
+      steps.indexOf(oldSteps[oldIndex]);
   } else if (Number(saved.sequenceVersion) === 8) {
     // V8 contenía una sola Avemaría por intención. Reconstruir ese
     // orden para conservar la oración actual sin desplazar el progreso.
@@ -657,7 +668,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 9;
+  state.sequenceVersion = 10;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -797,6 +808,7 @@
       if (step.kind === 'dialogue-group') prayers[step.title] = step.dialogues
         .map(part => '℣. ' + part.verse + '\n℟. ' + part.response).join('\n\n');
       if (step.title === 'Avemaría' && step.kind !== 'dedication') prayers.Avemaría = originalAvemaria;
+      if (step.kind === 'final-intention') prayers[step.title]=step.intention;
       if ((step.kind === 'dedication' || step.kind === 'intention') &&
           !state.prayerEdits[step.title]) prayers[step.title] = step.text;
       if (step.title === 'Descansen en paz'&&!state.prayerEdits[step.title]) prayers[step.title] = step.text;
@@ -970,8 +982,58 @@
       immersiveRender();
       updateEnhancements();
     };
+    // Progreso visible de las tres oraciones de cada intención final.
+    // Los checks se colorean con el acento del misterio/tema vigente.
+    const finalIntentionPanel=document.createElement('section');
+    finalIntentionPanel.className='rosario-final-intention';
+    finalIntentionPanel.hidden=true;
+    finalIntentionPanel.setAttribute('aria-label','Oraciones de la intención');
+    const finalHeading=document.createElement('h2');
+    finalHeading.className='rosario-final-intention-title';
+    finalIntentionPanel.append(finalHeading);
+    const finalChecklist=document.createElement('div');
+    finalChecklist.className='rosario-final-intention-list';
+    finalIntentionPanel.append(finalChecklist);
+    const intentionRows=['Padrenuestro','Avemaría','Gloria'].map(name=>{
+      const row=document.createElement('div');
+      row.className='rosario-final-intention-row';
+      const title=document.createElement('span');
+      title.textContent=name;
+      const symbol=document.createElement('span');
+      symbol.className='rosario-final-intention-check';
+      symbol.setAttribute('aria-hidden','true');
+      symbol.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+      row.append(title,symbol);
+      finalChecklist.append(row);
+      return row;
+    });
+    reading.insertBefore(finalIntentionPanel,$('immersiveText'));
+    const intentionCheckNames=['Padrenuestro','Avemaría','Gloria'];
+    function updateFinalIntentions(step){
+      const visible=Number.isInteger(step?.intentionNumber)&&
+        (step.kind==='final-intention'||intentionCheckNames.includes(step.title));
+      finalIntentionPanel.hidden=!visible;
+      reading.classList.toggle('is-final-intention',visible);
+      if(!visible)return;
+      finalHeading.textContent=step.intention.replace(/:\s*$/, '');
+      // La pantalla introductoria empieza en blanco. Cada nuevo paso
+      // añade exactamente una marca; el ciclo se reinicia al cambiar intención.
+      const completed=step.kind==='final-intention'?0:
+        intentionCheckNames.indexOf(step.title)+1;
+      intentionRows.forEach((row,i)=>{
+        const marked=i<completed;
+        row.classList.toggle('is-checked',marked);
+        row.setAttribute('aria-label',intentionCheckNames[i]+
+          (marked?', marcada':', pendiente'));
+      });
+      if(step.kind==='final-intention'){
+        $('immersiveText').textContent='';
+        $('immersiveCount').textContent='';
+      }
+    }
     function updateEnhancements() {
       const step = steps[state.index];
+      updateFinalIntentions(step);
       const isLitany = step?.kind === 'litany';
       const isAnnouncement = step?.kind === 'mystery';
       reading.classList.toggle('is-litany', isLitany);
@@ -985,9 +1047,11 @@
         $('litanyCurrent').textContent = pair.verse;
         $('litanyResponse').textContent = pair.response;
         $('litanyProgress').textContent = (i + 1) + ' / ' + litanyLines.length;
-        $('litanyPrevious').textContent = i > 0 ? litanyPairs[i - 1].verse : '';
+        $('litanyPrevious').textContent = i > 0 ?
+          litanyPairs[i - 1].verse.replace(/,\s*$/,'') : '';
         $('litanyPrevious').disabled = i === 0;
-        $('litanyNext').textContent = i < litanyLines.length - 1 ? litanyPairs[i + 1].verse : '';
+        $('litanyNext').textContent = i < litanyLines.length - 1 ?
+          litanyPairs[i + 1].verse.replace(/,\s*$/,'') : '';
         $('litanyNext').disabled = i === litanyLines.length - 1;
       }
       if (isAnnouncement) $('meditationToggle').setAttribute('aria-label', 'Leer meditación completa del misterio');
@@ -1709,8 +1773,31 @@
         window.rosarioPreviewMysteryHaptic?.(hapticChoice.value);
       });
       hapticRow.append(hapticTitle,hapticChoice);
-      // La tarjeta se sitúa inmediatamente después de «Vibración al avanzar».
-      $('vibration')?.closest('label')?.after(hapticRow);
+      // Intensidad de todos los patrones, con muestra háptica al cambiar.
+      const intensityRow=document.createElement('label');
+      intensityRow.className='rosario-haptic-intensity rosario-mystery-haptics';
+      const intensityTitle=document.createElement('span');
+      intensityTitle.textContent='Intensidad de la vibración';
+      const intensityChoice=document.createElement('select');
+      intensityChoice.setAttribute('aria-label','Intensidad de las vibraciones');
+      [
+        ['system','Del dispositivo'],
+        ['soft','Suave'],
+        ['medium','Media'],
+        ['strong','Fuerte']
+      ].forEach(([value,name])=>{
+        const option=document.createElement('option');
+        option.value=value;option.textContent=name;intensityChoice.append(option);
+      });
+      intensityChoice.value=state.hapticIntensity||'system';
+      intensityChoice.onchange=()=>{
+        state.hapticIntensity=intensityChoice.value;
+        persist();
+        rosarioVibrate(440,true);
+      };
+      intensityRow.append(intensityTitle,intensityChoice);
+      // Orden común: interruptor, intensidad y patrón del misterio.
+      $('vibration')?.closest('label')?.after(intensityRow,hapticRow);
       if ((/iPad|iPhone|iPod/.test(navigator.userAgent)||
            (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))&&
           !window.RosarioAndroid) {
