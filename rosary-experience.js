@@ -111,14 +111,21 @@
   function renderSettingsHome(host,allNodes){
     const modal=byId('modal');
     const sections=[
+      {id:'interaction',title:'Controles e interacción',caption:'Toques, deslizamientos y vibración',symbol:'✥'},
       {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita',symbol:'◉'},
       {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones',symbol:'☷'},
       {id:'android',title:'Android',caption:'Recordatorios',symbol:'◷'}
     ];
     const buckets={interaction:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
+    // Reunir el selector original de misterios con su botón personalizado.
+    // Mover ambos nodos conserva los listeners y la opción seleccionada.
+    const mysterySelect=byId('groupSelect');
+    const mysteryLabel=allNodes.find(node=>node.matches?.('label[for="groupSelect"]'));
+    const mysteryTrigger=mysterySelect?.nextElementSibling?.classList.contains('rosario-choice-trigger')
+      ?mysterySelect.nextElementSibling:null;
     const groupFor=node=>{
       const cls=node.classList;
-      if(node.matches?.('#groupSelect, label[for="groupSelect"],.rosario-choice-trigger--full,.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
+      if(node.matches?.('.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
         return 'appearance';
       if(cls.contains('physical-tap-settings')||cls.contains('rosario-interaction-group')||
          cls.contains('rosario-mystery-haptics')||cls.contains('rosario-haptic-compatibility')||
@@ -132,7 +139,24 @@
     };
     for(const node of allNodes){
       if(node.matches?.('h2')&&node.textContent.trim()==='Preferencias')continue;
+      if(node===mysterySelect||node===mysteryLabel||node===mysteryTrigger)continue;
       buckets[groupFor(node)].push(node);
+    }
+    if(mysterySelect){
+      const mysteryRow=document.createElement('div');
+      mysteryRow.className='rosario-settings-mystery-picker';
+      const title=document.createElement('span');
+      title.textContent='Misterios del día';
+      mysteryRow.append(title,mysterySelect);
+      if(mysteryTrigger)mysteryRow.append(mysteryTrigger);
+      // Si el select ya figuraba mejorado sin botón, permitir que el
+      // actualizador de selectores vuelva a crear el disparador.
+      else if(mysterySelect.classList.contains('rosario-native-select')){
+        mysterySelect.classList.remove('rosario-native-select');
+        mysterySelect.removeAttribute('tabindex');
+      }
+      mysteryLabel?.remove();
+      buckets.other.unshift(mysteryRow);
     }
     const pouchToggle=makeToggle('Mostrar la carterita al abrir',
       state.pouchEnabled!==false,value=>{
@@ -142,7 +166,7 @@
     pouchToggle.classList.add('rosario-pouch-settings-toggle');
     buckets.appearance.unshift(pouchToggle);
 
-    // Los grupos de un solo ajuste y Controles permanecen desplegados.
+    // Las secciones sencillas quedan desplegadas en el panel principal.
     function addInline(title,items){
       if(!items.length)return;
       const group=document.createElement('section');
@@ -171,8 +195,6 @@
       host.classList.add('rosario-settings-dashboard');
       const header=document.createElement('h2');header.textContent='Ajustes';
       host.append(header);
-      const controls=addInline('Controles e interacción',buckets.interaction);
-      if(controls)host.append(controls);
       const menu=document.createElement('div');
       menu.className='rosario-settings-home';
       for(const section of sections){
@@ -212,7 +234,17 @@
       host.classList.remove('rosario-settings-dashboard');
       host.replaceChildren();
       const title=document.createElement('h2');title.textContent=section.title;
-      host.append(title,...buckets[section.id]);
+      host.append(title);
+      if(section.id==='interaction'){
+        for(const node of buckets.interaction){
+          if(node.classList?.contains('rosario-interaction-group'))continue;
+          host.append(node);
+        }
+        // Incluir los controles completos aquí, sin el botón intermedio.
+        window.rosarioRenderNavigationPreferences?.(host);
+      }else{
+        host.append(...buckets[section.id]);
+      }
       modal.scrollTop=0;
     }
     openHome();

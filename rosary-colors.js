@@ -31,14 +31,14 @@
     },
     Luminosos: {
       gold: {
-        label:'Dorado',sample:'#EFBF04',
-        light:{bg:'#FFFCF0',surface:'#FFFDF8',text:'#403415',subtle:'#FFF2BE',bead:'#EFBF04',outline:'#CAA007',beadLabel:'#292009',active:'#D8A900',activeFill:'#FFE172',link:'#D4A70C'},
-        dark:{bg:'#241F14',surface:'#31291A',text:'#FCF2D3',subtle:'#40351E',bead:'#EFBF04',outline:'#FBD64E',beadLabel:'#241B04',active:'#EFBF04',activeFill:'#FFE57A',link:'#E0B409'}
+        label:'Dorado',sample:'#BC922D',
+        light:{bg:'#FCF7E9',surface:'#FFFBF0',text:'#413927',subtle:'#F8ECCB',bead:'#EFBF04',outline:'#A58025',beadLabel:'#29210F',active:'#866111',activeFill:'#EDD18A',link:'#B49B63'},
+        dark:{bg:'#292316',surface:'#36301F',text:'#F5EEDB',subtle:'#433820',bead:'#EFBF04',outline:'#E9CB7D',beadLabel:'#30240D',active:'#FFE5A3',activeFill:'#775D29',link:'#897241'}
       },
       yellow: {
-        label:'Amarillo',sample:'#FFE23A',
-        light:{bg:'#FFFCED',surface:'#FFFDF5',text:'#453B17',subtle:'#FFF5CA',bead:'#FFE23A',outline:'#D5AF19',beadLabel:'#322909',active:'#D8AB16',activeFill:'#FFED98',link:'#D7B12B'},
-        dark:{bg:'#242114',surface:'#302D1E',text:'#FFF6D6',subtle:'#3E3926',bead:'#FFE23A',outline:'#FFED80',beadLabel:'#2B260B',active:'#FFE23A',activeFill:'#FFF4A8',link:'#F2CD3D'}
+        label:'Amarillo',sample:'#E0BB4C',
+        light:{bg:'#FFFAEB',surface:'#FFFDF5',text:'#473D26',subtle:'#F7EDC6',bead:'#E0BB4C',outline:'#C9A232',beadLabel:'#3C3218',active:'#937218',activeFill:'#F5DE97',link:'#B9A05C'},
+        dark:{bg:'#2D2819',surface:'#393323',text:'#F7EED4',subtle:'#4C4125',bead:'#EDCC70',outline:'#FFE29A',beadLabel:'#3E2F0E',active:'#FFEABB',activeFill:'#907130',link:'#8D7845'}
       }
     },
     Gozosos: {
@@ -178,7 +178,7 @@
       const classic=addMode('classic','Clásico',['#B79355'],list);
       const mission=addMode('missionary','Misionero',missionary.map(item=>item.color),list);
       const myst=addMode('mystery','Según los misterios',
-        ['#76579B','#EFBF04','#70B9DE','#F7F6F1'],list);
+        ['#76579B','#BC922D','#70B9DE','#F7F6F1'],list);
 
       const variations=document.createElement('div');
       variations.className='rosary-colors-variants';

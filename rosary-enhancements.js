@@ -1494,9 +1494,17 @@
       ['soft','Enfoque','El texto aparece suavemente de un ligero desenfoque.'],
       ['none','Sin animación','Cambio inmediato de una oración a otra.']
     ];
-    function openNavigationPreferences(){
-      show('<h2>Controles e interacción</h2><div class="rosario-nav-dialog" id="rosarioNavSettings"></div>');
-      const root=$('rosarioNavSettings');
+    function openNavigationPreferences(container){
+      const embedded=container?.nodeType===1;
+      let root;
+      if(embedded){
+        root=document.createElement('div');
+        root.className='rosario-nav-dialog';
+        container.append(root);
+      }else{
+        show('<h2>Controles e interacción</h2><div class="rosario-nav-dialog" id="rosarioNavSettings"></div>');
+        root=$('rosarioNavSettings');
+      }
       const selectRow=(title,options,value,callback)=>{
         const row=document.createElement('label');row.className='rosario-nav-setting';
         const name=document.createElement('span');name.textContent=title;
@@ -1645,8 +1653,9 @@
       window.rosarioAndroidNavigationKeys?.(root);
       // El diálogo reutiliza un único contenedor desplazable entre pantallas.
       // Mantener la cabecera y el primer ajuste visibles al cambiar de sección.
-      $('modal').scrollTop=0;
+      if(!embedded)$('modal').scrollTop=0;
     }
+    window.rosarioRenderNavigationPreferences=host=>openNavigationPreferences(host);
     window.rosarioOpenNavigationPreferences=openNavigationPreferences;
     function openContritionChoice(){
       show('<h2>Acto de contrición</h2><div class="rosario-contrition-choices" id="contritionOptions"></div>');
@@ -1676,12 +1685,7 @@
         return root;
       };
       const interaction=group('Controles e interacción','rosario-interaction-group');
-      const controls=document.createElement('button');
-      controls.type='button';
-      controls.className='voice-settings-link rosario-navigation-settings-button';
-      controls.textContent='Configurar controles';
-      controls.onclick=openNavigationPreferences;
-      interaction.append(controls);
+      // Los controles se muestran directamente dentro de su sección.
       const hapticRow=document.createElement('label');
       hapticRow.className='rosario-mystery-haptics';
       const hapticTitle=document.createElement('span');

@@ -22,15 +22,15 @@
       red:['#FAF0F2','#FFF9FA','#B54D61','#A63F55','#AF7B83','#EFCBD5','#C58C9B']
     },
     Luminosos:{
-      gold:['#FFFCF0','#FFFDF8','#EFBF04','#CAA007','#D4A70C','#FFF2BE','#E5BA1A'],
-      yellow:['#FFFCED','#FFFDF5','#FFE23A','#D5AF19','#D7B12B','#FFF2C2','#E6C840']
+      gold:['#FCF7E9','#FFFBF0','#BC922D','#A58025','#B49B63','#F4E5B7','#C9B06E'],
+      yellow:['#FFFAEB','#FFFDF5','#E0BB4C','#C9A232','#B9A05C','#F6E8B4','#D5BB72']
     },
     Gloriosos:{
       pearl:['#F4F4F0','#FFFFFF','#DADFD9','#929D99','#ADB3AD','#F4F2EC','#C8C8BF']
     }
   };
   const darkBg={Gozosos:'#14242D',Dolorosos:'#211B2B',
-    Luminosos:'#241F14',Gloriosos:'#202629'};
+    Luminosos:'#292316',Gloriosos:'#202629'};
 
   // Copia íntegra: ningún hilo, cuenta, radio, arco ni coordenada se recalcula.
   // El último fotograma coincide píxel a píxel con el SVG de la interfaz.
