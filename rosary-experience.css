@@ -250,13 +250,14 @@
 .immersive-prayer .rosario-final-intention-list{
   display:flex;flex-direction:column;
   padding:4px 0 0;gap:0;
+  width:100%;
 }
 .immersive-prayer .rosario-final-intention-row{
   display:flex;align-items:center;justify-content:space-between;
-  gap:16px;min-height:42px;
+  gap:16px;min-height:58px;
   border-bottom:1px solid color-mix(in srgb, currentColor 17%, transparent);
   color:var(--rc-text,inherit);
-  font:500 14px/1.35 system-ui;
+  font:500 var(--rosary-secondary-font,19px)/1.45 system-ui;
 }
 .immersive-prayer .rosario-final-intention-row:last-child{
   border-bottom:0;
