@@ -244,6 +244,7 @@
     }
     function openHome(){
       modal.dataset.rosarioSettingsLevel='home';
+      window.rosarioUpdateBackLabel?.();
       host.replaceChildren();
       host.classList.add('rosario-settings-dashboard');
       const header=document.createElement('h2');header.textContent='Ajustes';
@@ -266,6 +267,7 @@
         button.onclick=()=>{
           if(section.id==='navigation'){
             modal.dataset.rosarioSettingsLevel='subpage';
+            window.rosarioUpdateBackLabel?.();
             window.rosarioOpenNavigation?.('days');
           }else openSection(section);
         };
@@ -282,8 +284,21 @@
       }
       modal.scrollTop=0;
     }
+    // Un solo mecanismo de regreso para flecha, Escape y Atrás de Android.
+    window.rosarioSettingsGoHome=openHome;
+    window.rosarioOpenSettingsSection=id=>{
+      const section=sections.find(item=>item.id===id);
+      if(!section)return false;
+      if(section.id==='navigation'){
+        modal.dataset.rosarioSettingsLevel='subpage';
+        window.rosarioUpdateBackLabel?.();
+        window.rosarioOpenNavigation?.('days');
+      }else openSection(section);
+      return true;
+    };
     function openSection(section){
       modal.dataset.rosarioSettingsLevel='section';
+      window.rosarioUpdateBackLabel?.();
       host.classList.remove('rosario-settings-dashboard');
       host.replaceChildren();
       const title=document.createElement('h2');title.textContent=section.title;
@@ -307,22 +322,51 @@
     const settings=byId('settings');
     if(!settings)return;
     const previous=settings.onclick;
-    // La flecha única del encabezado retrocede a Ajustes desde
-    // cualquier subsección; sólo el nivel principal vuelve al rosario.
     const modal=byId('modal');
     const close=modal?.querySelector('.close');
-    close?.addEventListener('click',event=>{
+    window.rosarioUpdateBackLabel=()=>{
+      if(!close)return;
+      const nested=['section','subpage'].includes(modal.dataset.rosarioSettingsLevel);
+      const name=nested?'Volver a Ajustes':'Volver al rosario';
+      close.setAttribute('aria-label',name);
+      close.title=name;
+    };
+    // Vuelve a la lista desde una oración abierta, o a Ajustes desde
+    // una sección. Nunca cierra el diálogo mientras quede un nivel.
+    window.rosarioNavigateBack=()=>{
+      if(!modal?.open)return false;
+      if(window.rosarioCloseChoiceSheet?.())return true;
       if(!['section','subpage'].includes(modal.dataset.rosarioSettingsLevel))
-        return;
+        return false;
+      const editor=byId('rosarioMedBack');
+      if(editor){editor.click();return true;}
+      const detail=byId('navDetail');
+      if(detail&&!detail.hidden){
+        const back=detail.querySelector('.nav-preview-back');
+        if(back){back.click();return true;}
+      }
+      window.rosarioSettingsGoHome?.();
+      return true;
+    };
+    close?.addEventListener('click',event=>{
+      if(!window.rosarioNavigateBack?.())return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      settings.onclick();
     },true);
+    // Escape (incluido el gesto Atrás del navegador) sigue la misma ruta.
+    modal?.addEventListener('cancel',event=>{
+      if(!window.rosarioNavigateBack?.())return;
+      event.preventDefault();
+    });
     modal?.addEventListener('close',()=>{
       delete modal.dataset.rosarioSettingsLevel;
+      window.rosarioUpdateBackLabel?.();
+      window.rosarioSettingsGoHome=null;
+      window.rosarioOpenSettingsSection=null;
     });
     byId('iNavigate')?.addEventListener('click',()=>{
       delete modal.dataset.rosarioSettingsLevel;
+      window.rosarioUpdateBackLabel?.();
     },true);
     const previousSettings=previous;
     settings.onclick=function(event){
@@ -331,6 +375,44 @@
       if(!host?.querySelector('#groupSelect'))return;
       renderSettingsHome(host,[...host.children]);
     };
+    // El botón superior de tema abre Apariencia con pulsación larga.
+    // El toque corto sigue alternando entre claro y oscuro.
+    const theme=byId('iTheme');
+    if(theme){
+      let timer=null,held=false;
+      const cancelHold=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+      theme.addEventListener('pointerdown',event=>{
+        if(event.button!==0||modal.open)return;
+        cancelHold();held=false;
+        timer=setTimeout(()=>{
+          timer=null;held=true;
+          settings.click();
+          window.rosarioOpenSettingsSection?.('appearance');
+        },530);
+      });
+      ['pointerup','pointercancel','pointerleave'].forEach(event=>
+        theme.addEventListener(event,cancelHold));
+      theme.addEventListener('click',event=>{
+        if(!held)return;
+        held=false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      },true);
+      theme.addEventListener('contextmenu',event=>{
+        event.preventDefault();
+        if(held||modal.open)return;
+        cancelHold();held=true;
+        settings.click();
+        window.rosarioOpenSettingsSection?.('appearance');
+      });
+      const normalTitle=theme.title;
+      theme.title=normalTitle+' · Mantener pulsado: Rosario y apariencia';
+    }
+    // Estilos unificados, cargados después de las hojas de componentes.
+    const unified=document.createElement('link');
+    unified.rel='stylesheet';
+    unified.href='rosary-design-system.css?v=20261020-10';
+    document.head.append(unified);
     if(window.rosarioHadSavedStateAtLoad===false){
       requestAnimationFrame(()=>setTimeout(showFirstRun,80));
     }

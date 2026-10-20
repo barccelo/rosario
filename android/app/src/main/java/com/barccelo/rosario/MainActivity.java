@@ -304,8 +304,8 @@ public final class MainActivity extends Activity {
             return;
         }
         webView.evaluateJavascript(
-                "(function(){if(window.rosarioCloseChoiceSheet&&" +
-                "window.rosarioCloseChoiceSheet())return true;" +
+                "(function(){if(window.rosarioNavigateBack&&" +
+                "window.rosarioNavigateBack())return true;" +
                 "const m=document.getElementById('modal');" +
                 "if(m&&m.open){m.close();return true;}return false;})()",
                 result -> {

@@ -1,0 +1,201 @@
+/* Rosario · sistema visual unificado: SF-like, sin cambiar la paleta. */
+#modalContent{
+  --rosario-choice-radius:13px;
+  --rosario-choice-border:var(--ui-outline);
+}
+/* Superficies compartidas para opciones, pestañas y tarjetas de control. */
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-contrition-option,
+  .rosario-nav-setting,label.physical-tap-option,
+  .rosario-tone-setting,.rosario-settings-mystery-picker,
+  .rosario-settings-section
+){
+  border:1px solid var(--rosario-choice-border)!important;
+  border-radius:var(--rosario-choice-radius)!important;
+  background:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  box-sizing:border-box!important;
+  -webkit-tap-highlight-color:transparent;
+}
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label
+){
+  position:relative!important;
+  cursor:pointer!important;
+  min-width:0!important;
+  min-height:52px!important;
+  margin:0!important;
+  padding:11px 43px 11px 14px!important;
+  gap:9px!important;
+}
+#modalContent :is(
+  .physical-layout-options,.rosary-colors-mode-list,
+  .rosario-swipe-options,.rosario-animation-choices,
+  .rosario-inline-options
+){
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:8px!important;
+}
+@media(min-width:850px){
+  #modalContent .rosary-colors-mode:last-child:nth-child(odd){
+    grid-column:auto!important;
+  }
+}
+/* Radios operables, visualmente ocultos: el check reemplaza al círculo nativo. */
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-setup-swipes label
+)>input[type=radio]{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  margin:0!important;padding:0!important;
+  opacity:0!important;overflow:hidden!important;
+  pointer-events:none!important;
+  appearance:none!important;
+}
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-setup-swipes label
+):has(>input[type=radio]:checked){
+  background:var(--ui-selected)!important;
+  border-color:var(--ui-accent)!important;
+}
+/* Un check discreto a la derecha, sin iconos distintos entre secciones. */
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-setup-swipes label
+)::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;right:19px!important;top:50%!important;
+  width:7px!important;height:12px!important;
+  margin:-8px 0 0!important;
+  border:solid currentColor!important;
+  border-width:0 2px 2px 0!important;
+  transform:rotate(45deg)!important;
+  opacity:0!important;pointer-events:none!important;
+  color:var(--ui-accent)!important;
+}
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-setup-swipes label
+):has(>input[type=radio]:checked)::after{
+  opacity:1!important;
+}
+#modalContent :is(
+  label.physical-layout-option,label.rosary-colors-mode,
+  label.rosario-swipe-choice,label.rosario-animation-option,
+  .rosario-inline-options>label,.rosario-setup-swipes label
+):focus-within{
+  outline:2px solid var(--ui-accent)!important;
+  outline-offset:2px!important;
+}
+/* Mantener tutoriales e indicaciones visuales, con escala tipográfica uniforme. */
+#modalContent :is(.rosario-swipe-choice-copy,.rosario-animation-option>span){
+  min-width:0!important;
+}
+#modalContent :is(
+  .physical-layout-option,.rosario-swipe-choice,.rosario-animation-option
+) strong{
+  font:600 14px/1.4 system-ui!important;
+}
+#modalContent :is(
+  .rosario-swipe-choice,.rosario-animation-option
+) small{
+  color:var(--ui-muted)!important;
+  font:12px/1.45 system-ui!important;
+}
+#modalContent .physical-halo-option small{display:none!important;}
+#modalContent .rosario-swipe-choice .rosario-swipe-tutorial{
+  max-width:100%!important;
+}
+/* Interruptores siempre ovalados: activación (checkbox) ≠ elección (check). */
+#modalContent :is(
+  .rosario-nav-setting,.physical-tap-option,.rosario-setup-choice,
+  .rosario-tone-setting,.android-setting-row,.rosario-pouch-settings-toggle
+)>input[type=checkbox],
+#modalContent>label>input[type=checkbox],
+#modalContent .rosario-settings-inline>label>input[type=checkbox],
+#modalContent .nav-list label>input[type=checkbox]{
+  position:relative!important;
+  appearance:none!important;-webkit-appearance:none!important;
+  display:block!important;flex:0 0 45px!important;
+  width:45px!important;height:27px!important;
+  padding:0!important;margin:0!important;
+  border:1px solid var(--ui-outline)!important;
+  border-radius:999px!important;
+  background:var(--ui-rule)!important;
+  box-shadow:none!important;
+  cursor:pointer!important;
+  transition:background .18s,border-color .18s!important;
+}
+#modalContent :is(
+  .rosario-nav-setting,.physical-tap-option,.rosario-setup-choice,
+  .rosario-tone-setting,.android-setting-row,.rosario-pouch-settings-toggle
+)>input[type=checkbox]::before,
+#modalContent>label>input[type=checkbox]::before,
+#modalContent .rosario-settings-inline>label>input[type=checkbox]::before,
+#modalContent .nav-list label>input[type=checkbox]::before{
+  content:""!important;position:absolute!important;
+  width:21px!important;height:21px!important;left:2px!important;top:2px!important;
+  border:0!important;border-radius:50%!important;
+  background:#fff!important;box-shadow:0 1px 3px #0003!important;
+  transition:transform .18s!important;
+  pointer-events:none!important;
+}
+#modalContent :is(
+  .rosario-nav-setting,.physical-tap-option,.rosario-setup-choice,
+  .rosario-tone-setting,.android-setting-row,.rosario-pouch-settings-toggle
+)>input[type=checkbox]:checked,
+#modalContent>label>input[type=checkbox]:checked,
+#modalContent .rosario-settings-inline>label>input[type=checkbox]:checked,
+#modalContent .nav-list label>input[type=checkbox]:checked{
+  background:var(--ui-accent)!important;
+  border-color:var(--ui-accent)!important;
+}
+#modalContent :is(
+  .rosario-nav-setting,.physical-tap-option,.rosario-setup-choice,
+  .rosario-tone-setting,.android-setting-row,.rosario-pouch-settings-toggle
+)>input[type=checkbox]:checked::before,
+#modalContent>label>input[type=checkbox]:checked::before,
+#modalContent .rosario-settings-inline>label>input[type=checkbox]:checked::before,
+#modalContent .nav-list label>input[type=checkbox]:checked::before{
+  transform:translateX(18px)!important;
+}
+/* Menús desplegables: flecha uniforme; ningún select nativo sobresale. */
+#modalContent :is(.rosario-choice-trigger,select:not(.rosario-native-select)){
+  border:1px solid var(--ui-outline)!important;
+  border-radius:12px!important;
+  background-color:var(--ui-surface)!important;
+  color:var(--ui-ink)!important;
+  font:500 14px/1.4 system-ui!important;
+  min-height:44px!important;
+}
+#modalContent .rosario-choice-trigger svg,
+#modalContent .rosario-choice-chevron svg{
+  fill:none;stroke:currentColor;stroke-width:1.75;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+#modalContent .rosario-settings-section .rosario-settings-arrow{
+  font:400 22px/1 system-ui!important;
+  color:var(--ui-muted)!important;
+}
+/* Foco de teclado y gestos siguen disponibles. */
+#modalContent :is(
+  .rosario-choice-trigger,select,button,input[type=checkbox]
+):focus-visible{
+  outline:2px solid var(--ui-accent)!important;
+  outline-offset:2px!important;
+}
+#modalContent .rosario-selection-option svg{
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}

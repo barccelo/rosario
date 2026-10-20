@@ -91,7 +91,7 @@ function updateTopControls(){
   $('iTheme').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+topIcons[state.dark?'sun':'moon']+'</svg>';
   $('iFullscreen').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+topIcons[full?'collapse':'expand']+'</svg>';
   $('iTheme').setAttribute('aria-label',themeLabel);
-  $('iTheme').title=themeLabel;
+  $('iTheme').title=themeLabel+' · Mantener pulsado: Rosario y apariencia';
   $('iFullscreen').setAttribute('aria-label',fullLabel);
   $('iFullscreen').title=fullLabel;
   $('iFullscreen').setAttribute('aria-pressed',String(full));
