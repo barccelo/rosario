@@ -58,3 +58,41 @@
 #modalContent .nav-preview-reading p:last-child{margin-bottom:0}
 #modalContent .meditation-full em,
 #modalContent .nav-preview-reading em{font-style:italic}
+
+/* Las meditaciones tienen un único salto de párrafo; las cursivas se mantienen. */
+#modalContent .meditation-full{white-space:normal!important}
+#modalContent .meditation-full p,
+#modalContent .nav-preview-reading p{
+  white-space:normal!important;margin:0 0 .72em!important;line-height:1.68!important
+}
+#modalContent .meditation-full p:last-child,
+#modalContent .nav-preview-reading p:last-child{margin-bottom:0!important}
+
+/* Ajustes: los grupos simples se muestran completos en el nivel principal. */
+#modalContent.rosario-settings-dashboard>.rosario-settings-inline{
+  display:flex;flex-direction:column;gap:10px;
+  margin:20px 0 0;padding:0;
+  border:0;background:none;
+}
+#modalContent.rosario-settings-dashboard>.rosario-settings-inline>h3{
+  margin:0 0 3px!important;padding:0!important;
+  font:600 17px/1.35 Georgia,serif!important;
+  color:var(--ui-ink,inherit)!important
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-home{
+  margin:18px 0!important;gap:10px!important
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>label,
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>button,
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>.rosario-mystery-haptics{
+  margin:0!important
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline .voice-settings-link{
+  min-height:54px!important;width:100%!important
+}
+#modalContent.rosario-settings-dashboard .rosario-settings-inline>button.advance{
+  width:100%;min-height:54px
+}
+#modalContent.rosario-settings-dashboard>.rosario-settings-inline + .rosario-settings-inline{
+  margin-top:22px
+}

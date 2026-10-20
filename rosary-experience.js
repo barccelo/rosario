@@ -109,16 +109,13 @@
   }
 
   function renderSettingsHome(host,allNodes){
-    const categories=[
-      {id:'interaction',title:'Controles y gestos',caption:'Toques, desplazamiento y vibraciones',symbol:'hand'},
-      {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita',symbol:'circle'},
-      {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones',symbol:'book'},
-      {id:'prayers',title:'Lectura y oraciones',caption:'Textos y acto de contrición',symbol:'type'},
-      {id:'voices',title:'Guía y asamblea',caption:'Participación y respuestas',symbol:'users'},
-      {id:'android',title:'Android',caption:'Recordatorios',symbol:'bell'},
-      {id:'other',title:'Otros ajustes',caption:'Progreso y opciones adicionales',symbol:'sliders'}
+    const modal=byId('modal');
+    const sections=[
+      {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita',symbol:'◉'},
+      {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones',symbol:'☷'},
+      {id:'android',title:'Android',caption:'Recordatorios',symbol:'◷'}
     ];
-    const buckets=Object.fromEntries(categories.map(category=>[category.id,[]]));
+    const buckets={interaction:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
     const groupFor=node=>{
       const cls=node.classList;
       if(node.matches?.('#groupSelect, label[for="groupSelect"],.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
@@ -133,49 +130,90 @@
       if(cls.contains('rosario-reading-settings')||cls.contains('rosario-text-settings'))return 'prayers';
       return 'other';
     };
-    allNodes.forEach(node=>{
-      if(node.matches?.('h2')&&node.textContent.trim()==='Preferencias')return;
+    for(const node of allNodes){
+      if(node.matches?.('h2')&&node.textContent.trim()==='Preferencias')continue;
       buckets[groupFor(node)].push(node);
-    });
-    const row=makeToggle('Mostrar la carterita al abrir',state.pouchEnabled!==false,value=>{
-      window.rosarioSetPouchEnabled?.(value);state.pouchEnabled=value;persist();
-    });
-    row.classList.add('rosario-pouch-settings-toggle');
-    buckets.appearance.unshift(row);
-    function openHome(){
-      host.replaceChildren();
-      const header=document.createElement('h2');header.textContent='Ajustes';
-      const menu=document.createElement('div');menu.className='rosario-settings-home';
-      for(const section of categories){
-        if(section.id!=='navigation'&&!buckets[section.id].length)continue;
-        const btn=document.createElement('button');
-        btn.type='button';btn.className='rosario-settings-section';
-        const ico=document.createElement('span');ico.className='rosario-settings-symbol';
-        const symbols={hand:'✥',circle:'◉',book:'☷',type:'Aa',users:'℣',bell:'◷',sliders:'⚙'};
-        ico.textContent=symbols[section.symbol]||'◦';
-        const copy=document.createElement('span');copy.className='rosario-settings-copy';
-        const name=document.createElement('strong');name.textContent=section.title;
-        const sub=document.createElement('small');sub.textContent=section.caption;
-        copy.append(name,sub);
-        const chevron=document.createElement('span');chevron.className='rosario-settings-arrow';
-        chevron.textContent='›';
-        btn.append(ico,copy,chevron);
-        btn.onclick=()=>section.id==='navigation'?
-          window.rosarioOpenNavigation?.('days'):openSection(section);
-        menu.append(btn);
+    }
+    const pouchToggle=makeToggle('Mostrar la carterita al abrir',
+      state.pouchEnabled!==false,value=>{
+        window.rosarioSetPouchEnabled?.(value);
+        state.pouchEnabled=value;persist();
+      });
+    pouchToggle.classList.add('rosario-pouch-settings-toggle');
+    buckets.appearance.unshift(pouchToggle);
+
+    // Los grupos de un solo ajuste y Controles permanecen desplegados.
+    function addInline(title,items){
+      if(!items.length)return;
+      const group=document.createElement('section');
+      group.className='rosario-settings-inline';
+      const head=document.createElement('h3');head.textContent=title;
+      group.append(head);
+      for(const node of items){
+        if(node.classList?.contains('rosario-preferences-group')){
+          while(node.firstChild){
+            const child=node.firstChild;
+            if(child.matches?.('h3'))child.remove();
+            else group.append(child);
+          }
+        }else group.append(node);
       }
-      host.append(header,menu);
-      byId('modal').scrollTop=0;
+      // El botón de controles abre otra pantalla: su regreso es a Ajustes.
+      group.querySelectorAll('.rosario-navigation-settings-button,.voice-settings-link')
+        .forEach(button=>button.addEventListener('click',()=>{
+          modal.dataset.rosarioSettingsLevel='subpage';
+        },true));
+      return group;
+    }
+    function openHome(){
+      modal.dataset.rosarioSettingsLevel='home';
+      host.replaceChildren();
+      host.classList.add('rosario-settings-dashboard');
+      const header=document.createElement('h2');header.textContent='Ajustes';
+      host.append(header);
+      const controls=addInline('Controles e interacción',buckets.interaction);
+      if(controls)host.append(controls);
+      const menu=document.createElement('div');
+      menu.className='rosario-settings-home';
+      for(const section of sections){
+        if(section.id!=='navigation'&&!buckets[section.id]?.length)continue;
+        const button=document.createElement('button');
+        button.type='button';button.className='rosario-settings-section';
+        const icon=document.createElement('span');icon.className='rosario-settings-symbol';
+        icon.textContent=section.symbol;
+        const copy=document.createElement('span');copy.className='rosario-settings-copy';
+        const label=document.createElement('strong');label.textContent=section.title;
+        const sub=document.createElement('small');sub.textContent=section.caption;
+        copy.append(label,sub);
+        const arrow=document.createElement('span');arrow.className='rosario-settings-arrow';
+        arrow.textContent='›';
+        button.append(icon,copy,arrow);
+        button.onclick=()=>{
+          if(section.id==='navigation'){
+            modal.dataset.rosarioSettingsLevel='subpage';
+            window.rosarioOpenNavigation?.('days');
+          }else openSection(section);
+        };
+        menu.append(button);
+      }
+      host.append(menu);
+      for(const [title,items] of [
+        ['Lectura y oraciones',buckets.prayers],
+        ['Guía y asamblea',buckets.voices],
+        ['Otros ajustes',buckets.other]
+      ]){
+        const inline=addInline(title,items);
+        if(inline)host.append(inline);
+      }
+      modal.scrollTop=0;
     }
     function openSection(section){
+      modal.dataset.rosarioSettingsLevel='section';
+      host.classList.remove('rosario-settings-dashboard');
       host.replaceChildren();
-      const back=document.createElement('button');
-      back.className='rosario-settings-back';back.type='button';
-      back.textContent='‹ Ajustes';
-      back.onclick=openHome;
       const title=document.createElement('h2');title.textContent=section.title;
-      host.append(back,title,...buckets[section.id]);
-      byId('modal').scrollTop=0;
+      host.append(title,...buckets[section.id]);
+      modal.scrollTop=0;
     }
     openHome();
   }
@@ -184,8 +222,26 @@
     const settings=byId('settings');
     if(!settings)return;
     const previous=settings.onclick;
+    // La flecha única del encabezado retrocede a Ajustes desde
+    // cualquier subsección; sólo el nivel principal vuelve al rosario.
+    const modal=byId('modal');
+    const close=modal?.querySelector('.close');
+    close?.addEventListener('click',event=>{
+      if(!['section','subpage'].includes(modal.dataset.rosarioSettingsLevel))
+        return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      settings.onclick();
+    },true);
+    modal?.addEventListener('close',()=>{
+      delete modal.dataset.rosarioSettingsLevel;
+    });
+    byId('iNavigate')?.addEventListener('click',()=>{
+      delete modal.dataset.rosarioSettingsLevel;
+    },true);
+    const previousSettings=previous;
     settings.onclick=function(event){
-      previous?.call(this,event);
+      previousSettings?.call(this,event);
       const host=byId('modalContent');
       if(!host?.querySelector('#groupSelect'))return;
       renderSettingsHome(host,[...host.children]);

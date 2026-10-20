@@ -956,11 +956,7 @@
       $('meditationTitle').textContent = groups[state.group][m];
       if (window.rosarioRenderMeditation) window.rosarioRenderMeditation($('meditationFull'),text);
       else $('meditationFull').textContent=text;
-      const edit=document.createElement('button');
-      edit.type='button';edit.className='nav-preview-link rosario-meditation-edit';
-      edit.textContent='Editar meditación';
-      edit.onclick=()=>window.rosarioOpenMeditationEditor?.(state.group,m);
-      $('meditationFull').after(edit);
+      // La edición está en Navegación > Misterios, no en la lectura.
       $('modal').scrollTop=0;
     }
     window.rosarioOpenMeditation=openMeditation;
