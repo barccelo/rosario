@@ -43,7 +43,13 @@ compactStyle.textContent=`
 document.head.append(compactStyle);
 let controlsTimer;
 let androidFullscreen=false;
-const isRosarioFullscreen=()=>Boolean(document.fullscreenElement)||androidFullscreen;
+const iosBrowser=/iPad|iPhone|iPod/.test(navigator.userAgent)||
+  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isHomeScreenApp=()=>Boolean(navigator.standalone)||
+  Boolean(window.matchMedia?.('(display-mode: standalone)').matches)||
+  Boolean(window.matchMedia?.('(display-mode: fullscreen)').matches);
+const isRosarioFullscreen=()=>Boolean(document.fullscreenElement)||
+  androidFullscreen||isHomeScreenApp();
 function collapseTopControls(){
   clearTimeout(controlsTimer);
   const full=isRosarioFullscreen();
@@ -107,6 +113,14 @@ function notice(message) {
 async function fullscreen() {
   if (window.RosarioAndroid?.setFullscreen) {
     window.RosarioAndroid.setFullscreen(!androidFullscreen);
+    return;
+  }
+  // En iPhone la Fullscreen API para interfaces web no está disponible;
+  // Apple sí permite ejecutar el sitio sin barras desde su icono instalado.
+  if (iosBrowser) {
+    notice(isHomeScreenApp()
+      ? 'Rosario ya está abierto como aplicación, sin las barras del navegador.'
+      : 'En iPhone, Safari y Chrome no permiten pantalla completa desde una pestaña. Abre Rosario en Safari, pulsa Compartir, elige Añadir a pantalla de inicio y abre el icono Santo Rosario.');
     return;
   }
   try {

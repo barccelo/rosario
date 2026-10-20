@@ -44,7 +44,7 @@ android {
 // segunda versión de las oraciones ni del diseño que mantener.
 tasks.register('syncWebAssets', Sync) {
     from(rootProject.projectDir.parentFile) {
-        include 'index.html', '*.js', '*.css', 'icon.png'
+        include 'index.html', '*.js', '*.css', '*.webmanifest', 'icon.png'
     }
     into layout.projectDirectory.dir('src/main/assets/www')
 }

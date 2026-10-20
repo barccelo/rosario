@@ -466,9 +466,12 @@
     { name: 'Las intenciones', intro: 'Por la persona e intenciones del señor Obispo de esta Diócesis:' },
     { name: 'Las almas del purgatorio', intro: 'Por las benditas ánimas del purgatorio:' }
   ].forEach((intention, i) => {
-    // Exactamente UNA Avemaría por intención, sin Padrenuestro ni Gloria.
-    nextSteps.push({ title: 'Avemaría', m: 5, intentionNumber: i,
-      intention: intention.intro });
+    // Cada intención final contiene un Padrenuestro, un Avemaría y un Gloria.
+    // Mantener la intención identificada durante las tres oraciones.
+    for (const title of ['Padrenuestro','Avemaría','Gloria']) {
+      nextSteps.push({ title, m: 5, intentionNumber: i,
+        intention: intention.intro });
+    }
     if(i===2) nextSteps.push({ title: 'Descansen en paz',m:5,intentionNumber:i,
       text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén' });
   });
@@ -506,7 +509,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 8;
+    state.sequenceVersion = 9;
     render();
   }
 
@@ -559,21 +562,22 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 8) {
+  if (Number(saved.sequenceVersion) >= 9) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 8) {
+    // V8 contenía una sola Avemaría por intención. Reconstruir ese
+    // orden para conservar la oración actual sin desplazar el progreso.
+    const oldSteps=steps.filter(item=>!
+      (item.m===5&&Number.isInteger(item.intentionNumber)&&
+       (item.title==='Padrenuestro'||item.title==='Gloria')));
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    restoredIndex=oldIndex===oldSteps.length?steps.length:
+      steps.indexOf(oldSteps[oldIndex]);
   } else if (Number(saved.sequenceVersion) === 7) {
-    // Antes había Padrenuestro + Avemaría + Gloria en cada intención.
-    // Reproducir esos índices sólo para la migración; sin perder progreso.
-    const oldSteps=steps.flatMap(item=>{
-      if(item.title==='Avemaría purísima')return [];
-      if(item.title==='Avemaría'&&item.m===5&&
-         Number.isInteger(item.intentionNumber)){
-        const number=item.intentionNumber;
-        return [{...item,title:'Padrenuestro'},item,
-          ...(number<2?[{...item,title:'Gloria'}]:[])];
-      }
-      return [item];
-    });
+    // V7 contenía los tríos de oraciones salvo el último Gloria.
+    // Conservar esa misma secuencia anterior para remapear su índice.
+    const oldSteps=steps.filter(item=>item.title!=='Avemaría purísima'&&
+      !(item.m===5&&item.intentionNumber===2&&item.title==='Gloria'));
     const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
     const previous=oldSteps[oldIndex];
     if(!previous)restoredIndex=steps.length;
@@ -653,7 +657,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 8;
+  state.sequenceVersion = 9;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -1698,6 +1702,15 @@
       hapticRow.append(hapticTitle,hapticChoice);
       // La tarjeta se sitúa inmediatamente después de «Vibración al avanzar».
       $('vibration')?.closest('label')?.after(hapticRow);
+      if ((/iPad|iPhone|iPod/.test(navigator.userAgent)||
+           (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))&&
+          !window.RosarioAndroid) {
+        const iosNotice=document.createElement('p');
+        iosNotice.className='rosario-haptic-compatibility';
+        iosNotice.textContent='En iPhone, Safari y Chrome no ofrecen vibraciones web compatibles. Los patrones hápticos están disponibles en Android.';
+        iosNotice.style.cssText='font:12px/1.55 system-ui;color:var(--ui-muted,#999);padding:0 12px 10px;margin:0';
+        hapticRow.after(iosNotice);
+      }
       const prayersGroup=group('Oraciones','rosario-prayer-settings-group');
       const contrition=document.createElement('label');
       contrition.className='rosario-tone-setting';
