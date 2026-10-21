@@ -699,47 +699,49 @@
     }
     function goToNode(el){
       let destination=-1;
+      // La cuenta compartida y el colgante se usan al entrar y al
+      // regresar. Al terminar la décima Avemaría del quinto misterio,
+      // sus toques deben corresponder al recorrido de cierre, aunque
+      // todavía estemos en el Gloria o las jaculatorias (m === 4).
+      const lastFifthAvemaria=steps.findIndex(s=>
+        s.m===4 && s.title==='Avemaría' && s.n===10 && s.bead===54);
+      const closing=lastFifthAvemaria>=0 && state.index>lastFifthAvemaria;
       if(el.hasAttribute('data-cross')){
-        // Misma cruz: Estación al empezar y Salve al finalizar.
-        const current=steps[state.index];
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
-        destination=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
+        destination=closing && finalSalve>=0 ? finalSalve : 0;
       }else if(el.hasAttribute('data-bead')){
         const touched=Number(el.dataset.bead);
         const active=positionFor(steps[state.index]);
-        // La cuenta grande puede contener Gloria y varias jaculatorias:
-        // cada toque sucesivo sobre la misma cuenta avanza una oración.
+        // Los toques sucesivos sobre la cuenta activa siguen avanzando
+        // una oración, incluidos el quinto Gloria y sus jaculatorias.
         if(active.type==='loop'&&active.bead===touched){
           advance();return;
         }
-        const index=steps.findIndex(s=>s.bead===touched);
-        if(index<0)return;
-        destination=index;
+        // La grande compartida (cuenta 0) es el comienzo del primer
+        // misterio y también el cierre del quinto: no volver al primero.
+        destination=closing && touched===0
+          ? steps.findIndex(s=>s.m===4 && s.title==='Gloria')
+          : steps.findIndex(s=>s.bead===touched);
       }else if(el.hasAttribute('data-intro')){
         const item=Number(el.dataset.intro);
-        const closing=steps[state.index]?.m>=5;
         if(closing){
           if(item<3){
-            const dedication=steps.findIndex(s=>s.m===5 &&
+            destination=steps.findIndex(s=>s.m===5 &&
               s.dedication===item);
-            if(dedication<0)return;
-            destination=dedication;
           }else{
-            const afterDedications=steps.findIndex((s,i)=>
-              s.m===5 && !Number.isInteger(s.dedication));
-            if(afterDedications<0)return;
-            destination=afterDedications;
+            // La grande inferior retoma las letanías, después de
+            // las tres Avemarías finales del colgante.
+            destination=steps.findIndex(s=>s.m===5 &&
+              s.kind==='litany' && s.litanyIndex===0);
           }
         }else{
           const title=['Versículos iniciales','Señor mío Jesucristo',
             'Señal de la cruz','Comunión espiritual'][item];
-          const index=steps.findIndex(s=>s.m===-1 && s.title===title);
-          if(index<0)return;
-          destination=index;
+          destination=steps.findIndex(s=>s.m===-1 && s.title===title);
         }
       }
-      // Igual que en la vista vertical: confirmar cualquier salto a
-      // otra cuenta antes de modificar el progreso del rosario.
+      // Conserva la confirmación de saltos grandes y el comportamiento
+      // de retroceso habitual para todas las cuentas del aro.
       if(destination>=0)pick(destination);
     }
     svg.addEventListener('click',event=>{
