@@ -188,6 +188,9 @@
   prayers['Jaculatoria de Fátima'] =
     'Oh Jesús mío, perdona nuestras culpas, presérvanos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.';
   const originalAvemaria = prayers.Avemaría;
+  // La Salve permanece al final salvo elección expresa del usuario.
+  state.salvePosition=saved.salvePosition==='after-dedication'
+    ?'after-dedication':'final';
 
   // Catálogo de intenciones del Rosario, vinculado al apartado ya existente.
   // Las intenciones personales continúan siendo editables en Navegación > Intenciones.
@@ -392,9 +395,16 @@
   window.rosarioIntentionFor = intentionFor;
   window.rosarioResetIntentionCycle = resetIntentionCycle;
 
-  function buildRosarySteps(legacy = false, legacySalvePosition = false) {
+  function buildRosarySteps(legacy = false, legacySalvePosition = false,
+                            salvePlacement = state.salvePosition) {
   // Estación, comunión espiritual y oraciones introductorias.
   const nextSteps = [];
+  const addSalvePair=()=>{
+    nextSteps.push({ title: 'Salve', m: 5 });
+    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+      verse: 'Ruega por nosotros, Santa Madre de Dios.',
+      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  };
   // Estación completa tres veces: invocación, Padrenuestro, Avemaría y Gloria.
   for (let i = 0; i < 3; i++) {
     nextSteps.push({ ...stationPair, stationNumber: i + 1 });
@@ -439,14 +449,10 @@
       text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
     });
   });
-  // Sólo para migrar el progreso de la versión 6: la Salve estaba
-  // antes de las letanías, ahora se reserva para el cierre del Rosario.
-  if (legacySalvePosition) {
-    nextSteps.push({ title: 'Salve', m: 5 });
-    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
-      verse: 'Ruega por nosotros, Santa Madre de Dios.',
-      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
-  }
+  // Alternativa: inmediatamente después de las tres Avemarías de
+  // «Virgen purísima y castísima». Incluye su respuesta independiente.
+  if (legacySalvePosition || salvePlacement==='after-dedication')
+    addSalvePair();
   litanyLines.forEach((line, i) => nextSteps.push({
     title: 'Letanías', kind: 'litany', m: 5, text: line,
     verse: litanyPairs[i].verse, response: litanyPairs[i].response, litanyIndex: i
@@ -478,14 +484,9 @@
     if(i===2) nextSteps.push({ title: 'Descansen en paz',m:5,intentionNumber:i,
       text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén' });
   });
-  // Última oración del Rosario: la Salve seguida de su respuesta
-  // independiente, y después la bendición de la pantalla final.
-  if (!legacySalvePosition) {
-    nextSteps.push({ title: 'Salve', m: 5 });
-    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
-      verse: 'Ruega por nosotros, Santa Madre de Dios.',
-      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
-  }
+  // Posición tradicional de esta aplicación (predeterminada).
+  if (!legacySalvePosition && salvePlacement!=='after-dedication')
+    addSalvePair();
   nextSteps.push({title:'Avemaría purísima',kind:'dialogue',m:5,
     verse:'Ave María Purísima.',response:'Sin pecado original concebida.'});
     return nextSteps;
@@ -499,6 +500,29 @@
     a.part === b.part && a.verse === b.verse &&
     a.intentionNumber === b.intentionNumber;
   const findStep = previous => steps.findIndex(step => sameStep(step, previous));
+  // La misma respuesta «Ruega por nosotros» también aparece tras
+  // «Bajo tu amparo»: preservar exactamente la que se estaba rezando.
+  function remapCurrentStep(previous,oldSteps,oldIndex){
+    if(!previous)return steps.length;
+    if(previous.title==='Ruega por nosotros'&&previous.m===5){
+      const afterSalve=oldSteps[oldIndex-1]?.title==='Salve';
+      return steps.findIndex((item,i)=>sameStep(item,previous)&&
+        (steps[i-1]?.title==='Salve')===afterSalve);
+    }
+    return findStep(previous);
+  }
+  window.rosarioSetSalvePosition=value=>{
+    if(!['final','after-dedication'].includes(value)||value===state.salvePosition)return;
+    const oldSteps=steps;
+    const oldIndex=state.index;
+    const previous=oldSteps[oldIndex];
+    state.salvePosition=value;
+    steps=buildRosarySteps();
+    const mapped=remapCurrentStep(previous,oldSteps,oldIndex);
+    state.index=mapped>=0?mapped:Math.min(oldIndex,steps.length);
+    state.sequenceVersion=12;
+    persist();render();
+  };
   function updateJaculatorias(ids) {
     const current = steps[state.index];
     const oldIndex = state.index;
@@ -512,7 +536,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 10;
+    state.sequenceVersion = 12;
     render();
   }
 
@@ -565,7 +589,9 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) === 11) {
+  if (Number(saved.sequenceVersion) >= 12) {
+    restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 11) {
     // La v0.1.54 trasladó la Salve al quinto Gloria. Al regresar a
     // la secuencia anterior, conservar la oración concreta y distinguir
     // las dos respuestas «Ruega por nosotros».
@@ -585,7 +611,12 @@
         (steps[i-1]?.title==='Salve')===afterSalve);
     }else restoredIndex=findStep(previous);
   } else if (Number(saved.sequenceVersion) >= 10) {
-    restoredIndex = Number(saved.index);
+    // Si llegó de la secuencia original, conservar su oración concreta.
+    // Sólo cambia el índice cuando se haya elegido la Salve alternativa.
+    const oldSteps=buildRosarySteps(false,false,'final');
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    restoredIndex=state.salvePosition==='final'?oldIndex:
+      remapCurrentStep(oldSteps[oldIndex],oldSteps,oldIndex);
   } else if (Number(saved.sequenceVersion) === 9) {
     // V9 no incluía pantallas de presentación de las intenciones.
     // Mapear por identidad de paso y no por índice para no desplazar
@@ -687,7 +718,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 10;
+  state.sequenceVersion = 12;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -1800,6 +1831,20 @@
       choice.value=state.contritionVersion;
       choice.onchange=()=>window.rosarioSetContrition(choice.value);
       contrition.append(name,choice);prayersGroup.append(contrition);
+      const salveRow=document.createElement('label');
+      salveRow.className='rosario-tone-setting';
+      const salveName=document.createElement('span');
+      salveName.textContent='Ubicación de la Salve';
+      const salveChoice=document.createElement('select');
+      salveChoice.setAttribute('aria-label','Ubicación de la Salve');
+      [['final','Al finalizar las intenciones'],
+       ['after-dedication','Después de las tres Avemarías']].forEach(([value,label])=>{
+        const option=document.createElement('option');
+        option.value=value;option.textContent=label;salveChoice.append(option);
+      });
+      salveChoice.value=state.salvePosition;
+      salveChoice.onchange=()=>window.rosarioSetSalvePosition(salveChoice.value);
+      salveRow.append(salveName,salveChoice);prayersGroup.append(salveRow);
       const intentionsDisplay=document.createElement('label');
       intentionsDisplay.className='rosario-tone-setting';
       const intentionsDisplayTitle=document.createElement('span');
