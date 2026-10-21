@@ -53,13 +53,49 @@ function rosarioVibrate(sequence, preview=false){
     window.RosarioAndroid.vibrateSequence(sequence.join(','));
   }else navigator.vibrate?.(sequence);
 }
-const rosarioMysteryHapticPatterns={
+// Patrones editables, con el mismo formato temporal para la web y Android.
+// Las alternativas guardadas no alteran la forma (1, 2 o 3 pulsos).
+const rosarioHapticDefaults={
+  normal:440,
   long:1000,
   double:[300,80,300],
   triple:[270,120,270,120,270]
 };
+if(!state.hapticPatternEdits||typeof state.hapticPatternEdits!=='object'||
+   Array.isArray(state.hapticPatternEdits))state.hapticPatternEdits={};
+function rosarioValidHapticParts(parts,length){
+  return Array.isArray(parts)&&parts.length===length&&
+    parts.every((n,i)=>Number.isInteger(n)&&n>=20&&n<=1100);
+}
+window.rosarioGetHapticPattern=key=>{
+  const base=rosarioHapticDefaults[key];
+  if(base===undefined)return null;
+  const saved=state.hapticPatternEdits[key];
+  const length=Array.isArray(base)?base.length:1;
+  const pieces=Array.isArray(saved)?saved:[saved];
+  const value=rosarioValidHapticParts(pieces,length)?saved:base;
+  return Array.isArray(value)?[...value]:value;
+};
+window.rosarioSetHapticPattern=(key,values)=>{
+  const base=rosarioHapticDefaults[key];
+  if(base===undefined)return false;
+  const pieces=Array.isArray(values)?values:[values];
+  if(!rosarioValidHapticParts(pieces,Array.isArray(base)?base.length:1))return false;
+  state.hapticPatternEdits[key]=pieces.length===1?pieces[0]:[...pieces];
+  persist();
+  return true;
+};
+window.rosarioResetHapticPattern=key=>{
+  if(!(key in rosarioHapticDefaults))return;
+  delete state.hapticPatternEdits[key];
+  persist();
+};
+window.rosarioPreviewHapticPattern=key=>{
+  const pattern=window.rosarioGetHapticPattern(key);
+  if(pattern!==null)rosarioVibrate(pattern,true);
+};
 window.rosarioPreviewMysteryHaptic=mode=>{
-  rosarioVibrate(rosarioMysteryHapticPatterns[mode]||1000,true);
+  window.rosarioPreviewHapticPattern(mode in rosarioHapticDefaults?mode:'long');
 };
 function rosarioHaptic(fromIndex){
   if(!state.haptics)return;
@@ -70,11 +106,11 @@ function rosarioHaptic(fromIndex){
   if(movingForward&&
     (current?.title==='Gloria'||current?.kind==='jaculatory'||
      current?.kind==='praise')){
-    rosarioVibrate(rosarioMysteryHapticPatterns.double);
+    rosarioVibrate(window.rosarioGetHapticPattern('double'));
   }else if(movingForward&&current?.kind==='mystery'){
-    rosarioVibrate(rosarioMysteryHapticPatterns[state.mysteryHapticMode]||1000);
+    rosarioVibrate(window.rosarioGetHapticPattern(state.mysteryHapticMode)||1000);
   }else{
-    rosarioVibrate(440);
+    rosarioVibrate(window.rosarioGetHapticPattern('normal'));
   }
 }
 function advance(){if(window.rosarioPhysicalResumeFromCross?.())return;if(state.index>=steps.length)return;const previousIndex=state.index;state.index++;rosarioHaptic(previousIndex);render()}
