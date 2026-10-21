@@ -425,7 +425,14 @@
         }
         if(step.title==='Salve' ||
           (step.title==='Ruega por nosotros' &&
-           steps[state.index-1]?.title==='Salve'))
+           steps[state.index-1]?.title==='Salve')){
+          if(state.salvePosition==='after-dedication')
+            return{type:'intro',phase:'closing',intro:3,
+              y:introPoints[3].y,completed:55};
+          return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
+        }
+        if(step.title==='Avemaría purísima' &&
+           state.salvePosition==='after-dedication')
           return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
         return{type:'intro',phase:'closing',intro:3,
           y:introPoints[3].y,completed:55};
@@ -708,7 +715,10 @@
       const closing=lastFifthAvemaria>=0 && state.index>=lastFifthAvemaria;
       if(el.hasAttribute('data-cross')){
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
-        destination=closing && finalSalve>=0 ? finalSalve : 0;
+        const closingCross=state.salvePosition==='after-dedication'
+          ?steps.findIndex(s=>s.title==='Avemaría purísima'&&s.m===5)
+          :finalSalve;
+        destination=closing && closingCross>=0 ? closingCross : 0;
       }else if(el.hasAttribute('data-bead')){
         const touched=Number(el.dataset.bead);
         const active=positionFor(steps[state.index]);
