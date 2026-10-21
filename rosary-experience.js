@@ -147,6 +147,9 @@
         ['rect',{x:'3.8',y:'13.1',width:'7.1',height:'7.1',rx:'1.6'}],
         ['rect',{x:'13.1',y:'13.1',width:'7.1',height:'7.1',rx:'1.6'}]
       ],
+      haptics:[
+        ['path',{d:'M6 10v4M9 6v12M12 3v18M15 6v12M18 10v4'}]
+      ],
       android:[
         ['path',{d:'M8 18h8M7 18h10c-1.2-1.4-1.8-2.5-1.8-4.4v-3a3.2 3.2 0 0 0-6.4 0v3C8.8 15.5 8.2 16.6 7 18Z'}],
         ['path',{d:'M10.3 20a1.9 1.9 0 0 0 3.4 0'}],
@@ -164,12 +167,13 @@
   function renderSettingsHome(host,allNodes){
     const modal=byId('modal');
     const sections=[
-      {id:'interaction',title:'Controles e interacción',caption:'Toques, deslizamientos y vibración'},
+      {id:'interaction',title:'Controles e interacción',caption:'Toques, gestos y desplazamiento'},
+      {id:'haptics',title:'Vibración',caption:'Intensidad, avisos y patrones personalizados'},
       {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita'},
       {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones'},
       {id:'android',title:'Android',caption:'Recordatorios'}
     ];
-    const buckets={interaction:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
+    const buckets={interaction:[],haptics:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
     // Reunir el selector original de misterios con su botón personalizado.
     // Mover ambos nodos conserva los listeners y la opción seleccionada.
     const mysterySelect=byId('groupSelect');
@@ -180,9 +184,11 @@
       const cls=node.classList;
       if(node.matches?.('.rosary-colors-settings,.physical-layout-settings,.physical-halo-settings'))
         return 'appearance';
-      if(cls.contains('physical-tap-settings')||cls.contains('rosario-interaction-group')||
-         cls.contains('rosario-mystery-haptics')||cls.contains('rosario-haptic-compatibility')||
-         node.querySelector?.('#vibration'))return 'interaction';
+      if(cls.contains('rosario-mystery-haptics')||
+         cls.contains('rosario-haptic-compatibility')||
+         node.querySelector?.('#vibration'))return 'haptics';
+      if(cls.contains('physical-tap-settings')||
+         cls.contains('rosario-interaction-group'))return 'interaction';
       if(cls.contains('rosario-prayer-settings-group'))return 'prayers';
       if(cls.contains('rosario-voice-settings-group'))return 'voices';
       if(cls.contains('android-native-settings'))return 'android';
@@ -306,6 +312,107 @@
       }else openSection(section);
       return true;
     };
+    function openHapticEditor(section){
+      modal.dataset.rosarioSettingsLevel='subpage';
+      window.rosarioUpdateBackLabel?.();
+      host.replaceChildren();
+      host.classList.remove('rosario-settings-dashboard');
+      const wrapper=document.createElement('section');
+      wrapper.id='rosarioHapticEditor';
+      wrapper.className='rosario-haptic-editor';
+      const back=document.createElement('button');
+      back.id='rosarioHapticBack';
+      back.type='button';
+      back.className='rosario-haptic-editor-back';
+      back.textContent='← Volver a Vibración';
+      back.onclick=()=>openSection(section);
+      const heading=document.createElement('h2');
+      heading.textContent='Patrones de vibración';
+      const help=document.createElement('p');
+      help.className='rosario-haptic-editor-help';
+      help.textContent='Personaliza los pulsos y las pausas en milisegundos. Cada patrón conserva su número de toques.';
+      wrapper.append(back,heading,help);
+      const patterns=[
+        {key:'normal',name:'Corta',hint:'Avance normal · 1 pulso'},
+        {key:'long',name:'Larga',hint:'Anuncio del misterio · 1 pulso'},
+        {key:'double',name:'Doble',hint:'Gloria y jaculatorias · 2 pulsos'},
+        {key:'triple',name:'Triple',hint:'Anuncio del misterio · 3 pulsos'}
+      ];
+      const appendPattern=spec=>{
+        const card=document.createElement('section');
+        card.className='rosario-haptic-pattern';
+        const header=document.createElement('div');
+        header.className='rosario-haptic-pattern-header';
+        const info=document.createElement('div');
+        const title=document.createElement('h3');title.textContent=spec.name;
+        const hint=document.createElement('p');hint.textContent=spec.hint;
+        info.append(title,hint);
+        const test=document.createElement('button');
+        test.type='button';test.className='rosario-haptic-test';
+        test.textContent='Probar';
+        test.onclick=()=>window.rosarioPreviewHapticPattern?.(spec.key);
+        header.append(info,test);card.append(header);
+        const fields=document.createElement('div');
+        fields.className='rosario-haptic-pattern-fields';
+        const original=window.rosarioGetHapticPattern?.(spec.key);
+        const segments=Array.isArray(original)?original:[original||440];
+        const inputs=[];
+        const total=document.createElement('p');
+        total.className='rosario-haptic-total';
+        const update=()=>{
+          const values=inputs.map(input=>Number(input.value));
+          if(values.some(value=>!Number.isInteger(value)||value<20||value>1100))return;
+          if(!window.rosarioSetHapticPattern?.(spec.key,values))return;
+          total.textContent='Duración total: '+values.reduce((a,b)=>a+b,0)+' ms';
+          window.rosarioPreviewHapticPattern?.(spec.key);
+        };
+        segments.forEach((duration,i)=>{
+          const row=document.createElement('label');
+          row.className='rosario-haptic-duration';
+          const name=document.createElement('span');
+          name.textContent=i%2===0?(segments.length===1?'Duración':'Pulso '+(Math.floor(i/2)+1)):'Pausa '+(Math.floor(i/2)+1);
+          const control=document.createElement('span');
+          control.className='rosario-haptic-duration-input';
+          const input=document.createElement('input');
+          input.type='number';
+          input.min='20';input.max='1100';input.step='10';
+          input.value=duration;input.inputMode='numeric';
+          input.setAttribute('aria-label',spec.name+': '+name.textContent+' en milisegundos');
+          const unit=document.createElement('span');unit.textContent='ms';
+          control.append(input,unit);
+          row.append(name,control);
+          fields.append(row);
+          inputs.push(input);
+          input.addEventListener('change',()=>{
+            const value=Number(input.value);
+            if(!Number.isInteger(value)||value<20||value>1100){
+              const last=window.rosarioGetHapticPattern?.(spec.key);
+              input.value=Array.isArray(last)?last[i]:last;
+              return;
+            }
+            update();
+          });
+        });
+        total.textContent='Duración total: '+segments.reduce((a,b)=>a+b,0)+' ms';
+        const restore=document.createElement('button');
+        restore.className='rosario-haptic-restore';
+        restore.type='button';
+        restore.textContent='Restaurar este patrón';
+        restore.onclick=()=>{
+          window.rosarioResetHapticPattern?.(spec.key);
+          const defaults=window.rosarioGetHapticPattern?.(spec.key);
+          const parts=Array.isArray(defaults)?defaults:[defaults];
+          inputs.forEach((input,i)=>{input.value=parts[i];});
+          total.textContent='Duración total: '+parts.reduce((a,b)=>a+b,0)+' ms';
+          window.rosarioPreviewHapticPattern?.(spec.key);
+        };
+        card.append(fields,total,restore);
+        wrapper.append(card);
+      };
+      patterns.forEach(appendPattern);
+      host.append(wrapper);
+      modal.scrollTop=0;
+    }
     function openSection(section){
       modal.dataset.rosarioSettingsLevel='section';
       window.rosarioUpdateBackLabel?.();
@@ -313,7 +420,21 @@
       host.replaceChildren();
       const title=document.createElement('h2');title.textContent=section.title;
       host.append(title);
-      if(section.id==='interaction'){
+      if(section.id==='haptics'){
+        const top=document.createElement('div');
+        top.className='rosario-haptic-section-heading';
+        top.append(title);
+        const gear=document.createElement('button');
+        gear.className='rosario-haptic-gear';
+        gear.type='button';
+        gear.setAttribute('aria-label','Editar patrones y duraciones de vibración');
+        gear.title='Editar patrones';
+        gear.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.3 2.8h3.4l.5 2a7.6 7.6 0 0 1 1.7 1l2-.6 1.7 2.9-1.4 1.5a7.8 7.8 0 0 1 0 2l1.4 1.5-1.7 2.9-2-.6a7.6 7.6 0 0 1-1.7 1l-.5 2h-3.4l-.5-2a7.6 7.6 0 0 1-1.7-1l-2 .6-1.7-2.9 1.4-1.5a7.8 7.8 0 0 1 0-2L4.4 8.1l1.7-2.9 2 .6a7.6 7.6 0 0 1 1.7-1z" transform="translate(0 1.8)"/><circle cx="12" cy="12.3" r="2.6"/></svg>';
+        gear.onclick=()=>openHapticEditor(section);
+        top.append(gear);
+        host.prepend(top);
+        host.append(...buckets.haptics);
+      }else if(section.id==='interaction'){
         for(const node of buckets.interaction){
           if(node.classList?.contains('rosario-interaction-group'))continue;
           host.append(node);
@@ -348,6 +469,8 @@
       if(window.rosarioCloseChoiceSheet?.())return true;
       if(!['section','subpage'].includes(modal.dataset.rosarioSettingsLevel))
         return false;
+      const hapticBack=byId('rosarioHapticBack');
+      if(hapticBack){hapticBack.click();return true;}
       const editor=byId('rosarioMedBack');
       if(editor){editor.click();return true;}
       const detail=byId('navDetail');
