@@ -413,9 +413,14 @@
         return{type:'loop',bead,y:positions[bead].y,
           strand:positions[bead].strand,completed:bead+1};
       }
-      // De vuelta al colgante, las tres pequeñas reciben las tres
-      // Avemarías de dedicación. El resto de las oraciones finales
-      // permanece en la grande inferior hasta la Salve, en la cruz.
+      // La Salve va después del quinto Gloria: permanecer en la cuenta
+      // compartida del aro para no saltar a la cruz y regresar.
+      if(step.m===5 && (step.title==='Salve' ||
+         (step.title==='Ruega por nosotros' &&
+          steps[state.index-1]?.title==='Salve')))
+        return{type:'loop',bead:0,y:positions[0].y,
+          strand:'junction',completed:55};
+      // Las tres Avemarías de dedicación se rezan en el colgante.
       if(step.m>=5){
         if(Number.isInteger(step.dedication) && step.dedication>=0 &&
            step.dedication<3){
@@ -423,9 +428,7 @@
           return{type:'intro',phase:'closing',intro:introIndex,
             y:introPoints[introIndex].y,completed:55};
         }
-        if(step.title==='Salve' ||
-          (step.title==='Ruega por nosotros' &&
-           steps[state.index-1]?.title==='Salve'))
+        if(step.title==='Avemaría purísima')
           return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
         return{type:'intro',phase:'closing',intro:3,
           y:introPoints[3].y,completed:55};
@@ -700,10 +703,10 @@
     function goToNode(el){
       let destination=-1;
       if(el.hasAttribute('data-cross')){
-        // Misma cruz: Estación al empezar y Salve al finalizar.
+        // La cruz corresponde a la Estación o a la conclusión del Rosario.
         const current=steps[state.index];
-        const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
-        destination=current?.m>=5 && finalSalve>=0 ? finalSalve : 0;
+        const finalBlessing=steps.findIndex(s=>s.title==='Avemaría purísima' && s.m===5);
+        destination=current?.m>=5 && finalBlessing>=0 ? finalBlessing : 0;
       }else if(el.hasAttribute('data-bead')){
         const touched=Number(el.dataset.bead);
         const active=positionFor(steps[state.index]);
@@ -725,8 +728,8 @@
             if(dedication<0)return;
             destination=dedication;
           }else{
-            const afterDedications=steps.findIndex((s,i)=>
-              s.m===5 && !Number.isInteger(s.dedication));
+            const afterDedications=steps.findIndex(s=>
+              s.m===5 && s.kind==='litany' && s.litanyIndex===0);
             if(afterDedications<0)return;
             destination=afterDedications;
           }
