@@ -598,3 +598,9 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
   opacity:0!important;
   transition:opacity .28s ease-out!important;
 }
+
+/* El nombre del misterio pertenece a la carterita cerrada: no debe
+   flotar mientras ésta se está guardando o cerrando. */
+.rosario-pouch-layer[data-phase=sealing] .rosario-pouch-title{
+  opacity:0!important;animation:none!important;
+}
