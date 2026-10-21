@@ -257,7 +257,7 @@
   gap:16px;min-height:58px;
   border-bottom:1px solid color-mix(in srgb, currentColor 17%, transparent);
   color:var(--rc-text,inherit);
-  font:500 var(--rosary-secondary-font,19px)/1.45 system-ui;
+  font:500 var(--rosary-secondary-font,19px)/1.45 Georgia,serif;
 }
 .immersive-prayer .rosario-final-intention-row:last-child{
   border-bottom:0;
