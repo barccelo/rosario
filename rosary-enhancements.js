@@ -681,8 +681,8 @@
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
   // Dos presentaciones excluyentes, manteniendo la secuencia de oraciones.
-  state.finalIntentionsDisplay = saved.finalIntentionsDisplay === 'checklist'
-    ? 'checklist' : 'prayers';
+  state.finalIntentionsDisplay = saved.finalIntentionsDisplay === 'prayers'
+    ? 'prayers' : 'checklist';
   // Una sola opción visual controla las marcas Guía/Asamblea.
   const voiceTones=['white','gold','accent'];
   state.voiceGuideTone=voiceTones.includes(saved.voiceGuideTone)?saved.voiceGuideTone:'white';
@@ -985,23 +985,13 @@
       immersiveRender();
       updateEnhancements();
     };
-    // El encabezado permanece en ambos modos. La tarjeta dorada y su
-    // contenido se dibujan juntos en #immersiveText, nunca en un panel encima.
-    const finalIntentionPanel=document.createElement('section');
-    finalIntentionPanel.className='rosario-final-intention';
-    finalIntentionPanel.hidden=true;
-    finalIntentionPanel.setAttribute('aria-label','Intención final actual');
-    const finalHeading=document.createElement('h2');
-    finalHeading.className='rosario-final-intention-title';
-    finalIntentionPanel.append(finalHeading);
-    reading.insertBefore(finalIntentionPanel,$('immersiveText'));
+    // La tarjeta dorada de la intención se crea dentro de #immersiveText.
+    // No insertar un encabezado adicional que duplique esa tarjeta.
     const intentionPrayerNames=['Padrenuestro','Avemaría','Gloria'];
     function updateFinalIntentions(step){
       const visible=Number.isInteger(step?.intentionNumber)&&
         (step.kind==='final-intention'||intentionPrayerNames.includes(step.title));
-      finalIntentionPanel.hidden=!visible;
       reading.classList.toggle('is-final-intention',visible);
-      if(visible) finalHeading.textContent=step.intention.replace(/:\s*$/, '');
     }
     function updateEnhancements() {
       const step = steps[state.index];
