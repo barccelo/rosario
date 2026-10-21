@@ -55,7 +55,7 @@ function rosarioVibrate(sequence, preview=false){
 }
 const rosarioMysteryHapticPatterns={
   long:1000,
-  double:[440,160,440],
+  double:[300,80,300],
   triple:[270,120,270,120,270]
 };
 window.rosarioPreviewMysteryHaptic=mode=>{
