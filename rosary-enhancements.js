@@ -392,15 +392,9 @@
   window.rosarioIntentionFor = intentionFor;
   window.rosarioResetIntentionCycle = resetIntentionCycle;
 
-  function buildRosarySteps(legacy = false, legacySalvePosition = false, legacyClosingSalve = false) {
+  function buildRosarySteps(legacy = false, legacySalvePosition = false) {
   // Estación, comunión espiritual y oraciones introductorias.
   const nextSteps = [];
-  const addSalvePair = () => {
-    nextSteps.push({ title: 'Salve', m: 5 });
-    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
-      verse: 'Ruega por nosotros, Santa Madre de Dios.',
-      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
-  };
   // Estación completa tres veces: invocación, Padrenuestro, Avemaría y Gloria.
   for (let i = 0; i < 3; i++) {
     nextSteps.push({ ...stationPair, stationNumber: i + 1 });
@@ -422,8 +416,6 @@
     nextSteps.push({ title: 'Padrenuestro', m, bead: m * 11 });
     for (let n = 1; n <= 10; n++) nextSteps.push({ title: 'Avemaría', m, n, bead: m * 11 + n });
     nextSteps.push({ title: 'Gloria', m });
-    // La Salve y su respuesta se rezan inmediatamente tras el quinto Gloria.
-    if (m === 4 && !legacySalvePosition && !legacyClosingSalve) addSalvePair();
     const selected = legacy ? ['maria', 'alabanzas'] : state.jaculatorias;
     for (const id of selected) {
       if (id === 'maria') nextSteps.push({ title: 'Jaculatoria', m, kind: 'jaculatory' });
@@ -447,8 +439,14 @@
       text: originalAvemaria.replace('Dios te salve, María,', 'Dios te salve, María, ' + invocation + ',')
     });
   });
-  // Versiones antiguas: Salve después de las Avemarías de dedicación.
-  if (legacySalvePosition) addSalvePair();
+  // Sólo para migrar el progreso de la versión 6: la Salve estaba
+  // antes de las letanías, ahora se reserva para el cierre del Rosario.
+  if (legacySalvePosition) {
+    nextSteps.push({ title: 'Salve', m: 5 });
+    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+      verse: 'Ruega por nosotros, Santa Madre de Dios.',
+      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  }
   litanyLines.forEach((line, i) => nextSteps.push({
     title: 'Letanías', kind: 'litany', m: 5, text: line,
     verse: litanyPairs[i].verse, response: litanyPairs[i].response, litanyIndex: i
@@ -480,8 +478,14 @@
     if(i===2) nextSteps.push({ title: 'Descansen en paz',m:5,intentionNumber:i,
       text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén' });
   });
-  // Conservar la ubicación anterior sólo al migrar progreso (v7–v10).
-  if (legacyClosingSalve && !legacySalvePosition) addSalvePair();
+  // Última oración del Rosario: la Salve seguida de su respuesta
+  // independiente, y después la bendición de la pantalla final.
+  if (!legacySalvePosition) {
+    nextSteps.push({ title: 'Salve', m: 5 });
+    nextSteps.push({ title: 'Ruega por nosotros', m: 5, kind: 'dialogue',
+      verse: 'Ruega por nosotros, Santa Madre de Dios.',
+      response: 'Para que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.' });
+  }
   nextSteps.push({title:'Avemaría purísima',kind:'dialogue',m:5,
     verse:'Ave María Purísima.',response:'Sin pecado original concebida.'});
     return nextSteps;
@@ -495,20 +499,6 @@
     a.part === b.part && a.verse === b.verse &&
     a.intentionNumber === b.intentionNumber;
   const findStep = previous => steps.findIndex(step => sameStep(step, previous));
-  // Recuperar una oración guardada cuando cambia su posición. Las dos
-  // «Ruega por nosotros» se distinguen por la oración que las precede.
-  const restorePriorIndex = (oldSteps, oldIndex) => {
-    const index = Math.max(0, Math.min(Number(oldIndex)||0, oldSteps.length));
-    if (index === oldSteps.length) return steps.length;
-    const previous = oldSteps[index];
-    if (!previous) return -1;
-    if (previous.title === 'Ruega por nosotros' && previous.m === 5) {
-      const precededBySalve = oldSteps[index-1]?.title === 'Salve';
-      return steps.findIndex((step,i) => sameStep(step,previous) &&
-        steps[i-1]?.title === (precededBySalve ? 'Salve' : 'Bajo tu amparo'));
-    }
-    return findStep(previous);
-  };
   function updateJaculatorias(ids) {
     const current = steps[state.index];
     const oldIndex = state.index;
@@ -522,7 +512,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 11;
+    state.sequenceVersion = 10;
     render();
   }
 
@@ -575,38 +565,60 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 11) {
+  if (Number(saved.sequenceVersion) === 11) {
+    // La v0.1.54 trasladó la Salve al quinto Gloria. Al regresar a
+    // la secuencia anterior, conservar la oración concreta y distinguir
+    // las dos respuestas «Ruega por nosotros».
+    const priorSteps=[...steps];
+    const salveIndex=priorSteps.findIndex(s=>s.title==='Salve'&&s.m===5);
+    if(salveIndex>=0){
+      const salvePair=priorSteps.splice(salveIndex,2);
+      const gloriaIndex=priorSteps.findIndex(s=>s.title==='Gloria'&&s.m===4);
+      if(gloriaIndex>=0)priorSteps.splice(gloriaIndex+1,0,...salvePair);
+    }
+    const priorIndex=Math.max(0,Math.min(Number(saved.index)||0,priorSteps.length));
+    const previous=priorSteps[priorIndex];
+    if(!previous)restoredIndex=steps.length;
+    else if(previous.title==='Ruega por nosotros'&&previous.m===5){
+      const afterSalve=priorSteps[priorIndex-1]?.title==='Salve';
+      restoredIndex=steps.findIndex((step,i)=>sameStep(step,previous)&&
+        (steps[i-1]?.title==='Salve')===afterSalve);
+    }else restoredIndex=findStep(previous);
+  } else if (Number(saved.sequenceVersion) >= 10) {
     restoredIndex = Number(saved.index);
-  } else if (Number(saved.sequenceVersion) === 10) {
-    // Antes, la Salve venía tras las intenciones finales: trasladar el
-    // índice por identidad de oración sin perder el progreso guardado.
-    const oldSteps=buildRosarySteps(false,false,true);
-    restoredIndex=restorePriorIndex(oldSteps,saved.index);
   } else if (Number(saved.sequenceVersion) === 9) {
     // V9 no incluía pantallas de presentación de las intenciones.
     // Mapear por identidad de paso y no por índice para no desplazar
     // una oración guardada al insertar las tres nuevas pantallas.
-    const oldSteps=buildRosarySteps(false,false,true)
-      .filter(item=>item.kind!=='final-intention');
-    restoredIndex=restorePriorIndex(oldSteps,saved.index);
+    const oldSteps=steps.filter(item=>item.kind!=='final-intention');
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    restoredIndex=oldIndex===oldSteps.length?steps.length:
+      steps.indexOf(oldSteps[oldIndex]);
   } else if (Number(saved.sequenceVersion) === 8) {
     // V8 contenía una sola Avemaría por intención. Reconstruir ese
     // orden para conservar la oración actual sin desplazar el progreso.
-    const oldSteps=buildRosarySteps(false,false,true).filter(item=>!
+    const oldSteps=steps.filter(item=>!
       (item.m===5&&Number.isInteger(item.intentionNumber)&&
        (item.title==='Padrenuestro'||item.title==='Gloria')));
-    restoredIndex=restorePriorIndex(oldSteps,saved.index);
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    restoredIndex=oldIndex===oldSteps.length?steps.length:
+      steps.indexOf(oldSteps[oldIndex]);
   } else if (Number(saved.sequenceVersion) === 7) {
     // V7 contenía los tríos de oraciones salvo el último Gloria.
     // Conservar esa misma secuencia anterior para remapear su índice.
-    const oldSteps=buildRosarySteps(false,false,true)
-      .filter(item=>item.title!=='Avemaría purísima'&&
+    const oldSteps=steps.filter(item=>item.title!=='Avemaría purísima'&&
       !(item.m===5&&item.intentionNumber===2&&item.title==='Gloria'));
     const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
     const previous=oldSteps[oldIndex];
     if(!previous)restoredIndex=steps.length;
     else {
-      restoredIndex=restorePriorIndex(oldSteps,oldIndex);
+      restoredIndex=steps.findIndex(next=>
+        next.title===previous.title&&next.m===previous.m&&
+        next.n===previous.n&&next.kind===previous.kind&&
+        next.stationNumber===previous.stationNumber&&
+        next.dedication===previous.dedication&&
+        next.litanyIndex===previous.litanyIndex&&
+        next.intentionNumber===previous.intentionNumber);
       // Si estaba en un Padrenuestro o Gloria ahora eliminado,
       // continuar en la Avemaría de la intención correspondiente.
       if(restoredIndex<0&&Number.isInteger(previous.intentionNumber))
@@ -616,9 +628,27 @@
       if(restoredIndex<0)restoredIndex=Math.min(oldIndex,steps.length);
     }
   } else if (Number(saved.sequenceVersion) === 6) {
-    const oldSteps=buildRosarySteps(false,true);
-    restoredIndex=restorePriorIndex(oldSteps,saved.index);
-    if(restoredIndex<0)restoredIndex=Math.min(Number(saved.index)||0,steps.length);
+    // Las mismas oraciones cambian de posición; conservar la oración
+    // concreta y también distinguir las dos respuestas «Ruega».
+    const old = buildRosarySteps(false, true);
+    const index = Math.max(0,Math.min(Number(saved.index)||0,old.length));
+    const previous = old[index];
+    if (!previous) restoredIndex = steps.length;
+    else {
+      const occurrence = old.slice(0,index+1).filter(s=>sameStep(s,previous)).length;
+      const isRuega = previous.title==='Ruega por nosotros' && previous.m===5;
+      // La antigua respuesta posterior a la Salve era la primera;
+      // ahora, tras trasladar el bloque al final, es la segunda.
+      // La respuesta tras «Bajo tu amparo» realiza el movimiento inverso.
+      const intendedOccurrence=isRuega?(occurrence===1?2:1):occurrence;
+      let seen=0;
+      restoredIndex=steps.findIndex(s=>{
+        if(!sameStep(s,previous))return false;
+        return ++seen===intendedOccurrence;
+      });
+      if(restoredIndex<0)restoredIndex=findStep(previous);
+      if(restoredIndex<0)restoredIndex=Math.min(index,steps.length);
+    }
   } else if (Number(saved.sequenceVersion) === 5) {
     // El índice guardado se refiere a la secuencia anterior.
     const old = buildLegacyVersionFive();
@@ -657,7 +687,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 11;
+  state.sequenceVersion = 10;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
