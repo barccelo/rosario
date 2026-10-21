@@ -700,12 +700,12 @@
     function goToNode(el){
       let destination=-1;
       // La cuenta compartida y el colgante se usan al entrar y al
-      // regresar. Al terminar la décima Avemaría del quinto misterio,
-      // sus toques deben corresponder al recorrido de cierre, aunque
-      // todavía estemos en el Gloria o las jaculatorias (m === 4).
+      // regresar. Al seleccionar la décima Avemaría del quinto misterio,
+      // sus toques deben corresponder al recorrido de cierre desde
+      // que se selecciona la cuenta 10, sin esperar al siguiente avance.
       const lastFifthAvemaria=steps.findIndex(s=>
         s.m===4 && s.title==='Avemaría' && s.n===10 && s.bead===54);
-      const closing=lastFifthAvemaria>=0 && state.index>lastFifthAvemaria;
+      const closing=lastFifthAvemaria>=0 && state.index>=lastFifthAvemaria;
       if(el.hasAttribute('data-cross')){
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
         destination=closing && finalSalve>=0 ? finalSalve : 0;
