@@ -51,6 +51,9 @@
       state.rosaryHaloMode='continuous';
     // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
     state.screenTapNavigation=state.screenTapNavigation===true;
+    // De manera predeterminada el texto también acepta toques. Esta
+    // protección es voluntaria y no altera las cuentas ni los gestos.
+    state.accidentalTouchProtection=state.accidentalTouchProtection===true;
 
     const viewport=document.createElement('div');
     viewport.className='physical-scroll-viewport';
@@ -765,58 +768,124 @@
         event.preventDefault();goToNode(bead);
       }
     });
-    // Navegación por mitades. No intercepta deslizamientos, pulsaciones
-    // sobre cuentas, lectura, botones, menús ni el scroll cinético.
-    // Se instala sobre el documento, pero sólo actúa dentro del rosario.
+    // El tap por mitades también funciona sobre el texto de la oración.
+    // Las cuentas, controles y títulos que abren meditaciones conservan
+    // sus acciones específicas. Arrastres y selección de texto no navegan.
     let tapStart=null,lastChainScroll=0;
     for(const pane of [viewport,window.rosarioNativeScroll]){
       pane?.addEventListener('scroll',()=>{
         lastChainScroll=performance.now();
       },{passive:true});
     }
-    function isFreeBackground(target){
+    let pendingTextAdvance=null;
+    let recentCorrections=[];
+    let lastObservedIndex=state.index;
+    const prompt=document.createElement('section');
+    prompt.className='rosario-accidental-tip';
+    prompt.hidden=true;
+    prompt.setAttribute('role','dialog');
+    prompt.setAttribute('aria-label','Protección contra toques accidentales');
+    const tipCopy=document.createElement('div');
+    tipCopy.className='rosario-accidental-tip-copy';
+    const tipHeading=document.createElement('strong');
+    tipHeading.textContent='¿Activar protección contra toques accidentales?';
+    const tipDesc=document.createElement('p');
+    tipDesc.textContent='Has deshecho varios avances hechos tocando el texto. Puedes impedir esos toques y seguir navegando por el fondo.';
+    tipCopy.append(tipHeading,tipDesc);
+    const tipActions=document.createElement('div');
+    tipActions.className='rosario-accidental-tip-actions';
+    const tipEnable=document.createElement('button');
+    tipEnable.type='button';
+    tipEnable.textContent='Activar';
+    const tipLater=document.createElement('button');
+    tipLater.type='button';
+    tipLater.textContent='Ahora no';
+    tipActions.append(tipLater,tipEnable);
+    prompt.append(tipCopy,tipActions);
+    document.body.append(prompt);
+    const dismissTip=()=>{
+      prompt.hidden=true;
+      recentCorrections=[];
+      pendingTextAdvance=null;
+    };
+    tipEnable.onclick=()=>{
+      state.accidentalTouchProtection=true;
+      persist();
+      dismissTip();
+    };
+    tipLater.onclick=()=>{
+      // Evitar insistencia ante un uso voluntario del texto.
+      state.accidentalTipSnoozedUntil=Date.now()+7*24*60*60*1000;
+      persist();
+      dismissTip();
+    };
+    window.rosarioHideAccidentalTip=dismissTip;
+    function observeAccidentalCorrection(){
+      const previous=lastObservedIndex;
+      const current=state.index;
+      lastObservedIndex=current;
+      if(previous===current)return;
+      const now=performance.now();
+      const candidate=pendingTextAdvance;
+      pendingTextAdvance=null;
+      if(state.accidentalTouchProtection||!state.screenTapNavigation||
+         !candidate||previous!==candidate.to||
+         current!==candidate.from||now-candidate.at>4000)return;
+      recentCorrections=recentCorrections.filter(time=>now-time<30000);
+      recentCorrections.push(now);
+      if(recentCorrections.length<2||!prompt.hidden||$('modal').open||
+         Date.now()<Number(state.accidentalTipSnoozedUntil||0))return;
+      prompt.hidden=false;
+    }
+    function isTapSurface(target){
       if(!(target instanceof Element)||!target.closest('.rosary'))return false;
+      // Los controles y cuentas mantienen su navegación especializada.
       if(target.closest('button,a,input,select,textarea,[contenteditable],'+
         '[role="button"],[role="link"],.physical-bead,.physical-cross,'+
         '.focus-bead,.rosary-cross,.chain-bead,.top-controls,'+
         '.controls-dot,.meditation-tools,.rosary-mystery-context,'+
         '.mystery-announcement-link'))return false;
-      // La zona vacía alrededor del texto sí admite toques; el texto,
-      // sus renglones y las ayudas de lectura nunca los activan.
-      const reader=target.closest('.immersive-prayer');
-      if(reader && target!==reader)return false;
-      if(target.closest('.reading-prayer-heading,'+
-        '.rosary-mystery-context,.meditation-full'))return false;
+      // Sólo la protección opcional excluye el texto. El resto de la
+      // pantalla siempre admite toques si la navegación está habilitada.
+      if(state.accidentalTouchProtection&&target.closest('.immersive-prayer'))
+        return false;
       return true;
     }
     document.addEventListener('pointerdown',event=>{
       tapStart=null;
-      if(!state.screenTapNavigation||$('modal').open ||
+      if(!state.screenTapNavigation||$('modal').open||!prompt.hidden||
          event.button!==0||!event.isPrimary||
-         !isFreeBackground(event.target))return;
+         !isTapSurface(event.target))return;
       tapStart={pointer:event.pointerId,x:event.clientX,y:event.clientY,
-        started:performance.now()};
+        started:performance.now(),
+        text:!!event.target.closest('.immersive-prayer')};
     },true);
     document.addEventListener('pointerup',event=>{
       const data=tapStart;
       tapStart=null;
-      if(!data||!state.screenTapNavigation||
+      if(!data||!state.screenTapNavigation||!prompt.hidden||
          event.pointerId!==data.pointer||$('modal').open||
-         !isFreeBackground(event.target))return;
+         !isTapSurface(event.target))return;
       if(Math.hypot(event.clientX-data.x,event.clientY-data.y)>12||
          performance.now()-data.started>650||
          performance.now()-lastChainScroll<250||
          window.getSelection?.()?.toString())return;
-      // Se divide la ventana real, no el documento desplazable.
-      if(event.clientY<window.innerHeight/2)
-        state.index=Math.max(0,state.index-1),render();
-      else advance();
+      if(event.clientY<window.innerHeight/2){
+        if(state.index>0){state.index--;rosarioHaptic();render();}
+        return;
+      }
+      const from=state.index;
+      advance();
+      // Registrar únicamente avances reales hechos tocando la lectura.
+      // Si la cruz sólo estaba enfocando una sesión guardada, no cuenta.
+      if(data.text&&state.index===from+1)
+        pendingTextAdvance={from,to:state.index,at:performance.now()};
     },true);
-    for(const cancel of ['pointercancel','lostpointercapture'])
-      document.addEventListener(cancel,()=>{tapStart=null;},true);
+    for(const name of ['pointercancel','lostpointercapture'])
+      document.addEventListener(name,()=>{tapStart=null;},true);
 
     const originalRender=render;
-    render=function(){originalRender();paint();};
+    render=function(){originalRender();observeAccidentalCorrection();paint();};
     const originalSettings=$('settings').onclick;
     $('settings').onclick=function(event){
       originalSettings.call(this,event);
