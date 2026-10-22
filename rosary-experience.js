@@ -68,44 +68,7 @@
   }
 
   function showFirstRun(){
-    show('<div class="rosario-setup-welcome"><div class="rosario-setup-eyebrow">Primer uso</div><h2>Configura tu rosario</h2><p>Escoge cómo quieres avanzar. Podrás modificarlo en Ajustes.</p><div id="rosarioSetupChoices"></div><button class="advance rosario-setup-finish" type="button" id="rosarioSetupDone">Comenzar el rosario</button></div>');
-    const host=byId('rosarioSetupChoices');
-    host.append(makeToggle('Vibración al avanzar',state.haptics!==false,value=>{
-      state.haptics=value;persist();
-      if(value)window.rosarioPreviewMysteryHaptic?.('double');
-    }));
-    host.append(makeToggle('Avanzar tocando la pantalla',state.screenTapNavigation===true,value=>{
-      state.screenTapNavigation=value;persist();render();
-    }));
-    const field=document.createElement('fieldset');
-    field.className='rosario-setup-swipes';
-    const legend=document.createElement('legend');legend.textContent='Dirección de los gestos';field.append(legend);
-    const items=[
-      ['follow','Según el recorrido del rosario'],
-      ['uniform','Siempre hacia arriba'],
-      ['down','Siempre hacia abajo']
-    ];
-    items.forEach(([id,label])=>{
-      const row=document.createElement('label');row.className='rosario-setup-choice';
-      const text=document.createElement('span');text.textContent=label;
-      const radio=document.createElement('input');radio.type='radio';
-      radio.name='rosarioWelcomeSwipe';radio.value=id;
-      radio.checked=(state.rosarySwipeMode||'follow')===id;
-      radio.addEventListener('change',()=>{
-        if(!radio.checked)return;
-        state.rosarySwipeMode=id;persist();
-      });
-      row.append(text,radio);field.append(row);
-    });
-    host.append(field);
-    host.append(makeToggle('Mostrar la carterita al abrir',state.pouchEnabled!==false,value=>{
-      window.rosarioSetPouchEnabled?.(value);
-      state.pouchEnabled=value;persist();
-    }));
-    byId('rosarioSetupDone').onclick=()=>{
-      state.rosarioFirstRunDone=true;persist();
-      byId('modal').close();
-    };
+    window.rosarioShowOnboarding?.();
   }
 
   // Símbolos monocromáticos de trazo uniforme, inspirados en el lenguaje
@@ -441,6 +404,15 @@
         }
         // Incluir los controles completos aquí, sin el botón intermedio.
         window.rosarioRenderNavigationPreferences?.(host);
+        const guide=document.createElement('button');
+        guide.className='rosario-onboarding-launch';
+        guide.type='button';
+        guide.innerHTML='<span class="rosario-onboarding-launch-mark" aria-hidden="true">✧</span>'+
+          '<span><strong>Ver guía interactiva</strong>'+
+          '<small>Repasa temas, gestos y controles sin borrar tus preferencias</small></span>'+
+          '<span aria-hidden="true">›</span>';
+        guide.onclick=()=>window.rosarioShowOnboarding?.();
+        host.append(guide);
       }else{
         host.append(...buckets[section.id]);
       }
@@ -546,7 +518,7 @@
     unified.rel='stylesheet';
     unified.href='rosary-design-system.css?v=20261020-10';
     document.head.append(unified);
-    if(window.rosarioHadSavedStateAtLoad===false){
+    if(window.rosarioHadSavedStateAtLoad===false&&state.rosarioFirstRunDone!==true){
       requestAnimationFrame(()=>setTimeout(showFirstRun,80));
     }
   });
