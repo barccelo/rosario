@@ -871,7 +871,7 @@
          performance.now()-lastChainScroll<250||
          window.getSelection?.()?.toString())return;
       if(event.clientY<window.innerHeight/2){
-        if(state.index>0){state.index--;rosarioHaptic();render();}
+        if(state.index>0){state.index--;render();}
         return;
       }
       const from=state.index;
