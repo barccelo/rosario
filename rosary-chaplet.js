@@ -15,12 +15,14 @@ for(let m=0;m<5;m++){
 }
 for(let n=1;n<=3;n++)chaplet.push({title:'Santo Dios',m:5,kind:'chaplet-holy',chapletClosing:'invocation',n});
 chaplet.push({title:'Oración final de la Misericordia',m:5,kind:'chaplet-optional',chapletClosing:'cross'});
+chaplet.push({title:'Coronilla completada',m:5,kind:'chaplet-end',chapletClosing:'cross'});
 Object.assign(prayers,{
  'Credo':'Creo en Dios, Padre todopoderoso, creador del cielo y de la tierra. Creo en Jesucristo, su único Hijo, nuestro Señor, que fue concebido por obra y gracia del Espíritu Santo; nació de Santa María Virgen; padeció bajo el poder de Poncio Pilato; fue crucificado, muerto y sepultado; descendió a los infiernos; al tercer día resucitó de entre los muertos; subió a los cielos y está sentado a la derecha de Dios, Padre todopoderoso. Desde allí ha de venir a juzgar a vivos y muertos. Creo en el Espíritu Santo, la santa Iglesia católica, la comunión de los santos, el perdón de los pecados, la resurrección de la carne y la vida eterna. Amén.',
  'Padre Eterno':'Padre Eterno, te ofrezco el Cuerpo, la Sangre, el Alma y la Divinidad de tu amadísimo Hijo, nuestro Señor Jesucristo, como propiciación de nuestros pecados y los del mundo entero.',
  'Por su dolorosa Pasión':'Por su dolorosa Pasión, ten misericordia de nosotros y del mundo entero.',
  'Santo Dios':'Santo Dios, Santo Fuerte, Santo Inmortal, ten misericordia de nosotros y del mundo entero.',
- 'Oración final de la Misericordia':'Oh Dios Eterno, en quien la misericordia es infinita y el tesoro de compasión inagotable, vuelve a nosotros tu mirada bondadosa y aumenta tu misericordia en nosotros, para que en momentos difíciles no nos desesperemos ni nos desalentemos, sino que, con gran confianza, nos sometamos a tu santa voluntad, que es el Amor y la Misericordia mismos. Amén.'
+ 'Oración final de la Misericordia':'Oh Dios Eterno, en quien la misericordia es infinita y el tesoro de compasión inagotable, vuelve a nosotros tu mirada bondadosa y aumenta tu misericordia en nosotros, para que en momentos difíciles no nos desesperemos ni nos desalentemos, sino que, con gran confianza, nos sometamos a tu santa voluntad, que es el Amor y la Misericordia mismos. Amén.',
+ 'Coronilla completada':'Jesús, en Ti confío.'
 });
 const days=[['Lun',1],['Mar',2],['Mié',3],['Jue',4],['Vie',5],['Sáb',6],['Dom',0]];
 let rosarySteps=steps;
@@ -63,6 +65,13 @@ function activate(mode,manual=false){
  persist();render();
 }
 window.rosarioChapletCurrent=()=>state.chapletActive;
+const originalAdvance=advance;
+advance=function(...args){
+ if(state.chapletActive && steps[state.index]?.kind==='chaplet-end'){
+   window.rosarioChapletReturn();return;
+ }
+ return originalAdvance(...args);
+};
 window.rosarioChapletStart=()=>{document.getElementById('modal')?.close();activate('chaplet',true)};
 window.rosarioChapletReturn=()=>{document.getElementById('modal')?.close();activate('rosary',true)};
 window.rosarioChapletSkipOptional=()=>{
