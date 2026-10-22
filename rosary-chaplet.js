@@ -24,10 +24,14 @@ Object.assign(prayers,{
 });
 const days=[['Lun',1],['Mar',2],['Mié',3],['Jue',4],['Vie',5],['Sáb',6],['Dom',0]];
 let rosarySteps=steps;
+// En una reapertura, app.js ya restauró el último índice visible.
+// Si éste era de la Coronilla, no debe sobrescribir el progreso del Rosario.
+const returningFromChaplet=saved.chapletActive===true;
+let initialSwitch=true;
 state.chapletRule=['off','ask','days'].includes(state.chapletRule)?state.chapletRule:'off';
 state.chapletDays=Array.isArray(state.chapletDays)?state.chapletDays.filter(n=>Number.isInteger(n)&&n>=0&&n<=6):[];
 state.chapletIndex=compact(state.chapletIndex,chaplet.length);
-state.rosaryIndex=compact(state.rosaryIndex??state.index,steps.length);
+state.rosaryIndex=compact(state.rosaryIndex??(returningFromChaplet?0:state.index),steps.length);
 state.chapletActive=false;
 const previousPersist=persist;
 persist=function(){
@@ -38,15 +42,24 @@ persist=function(){
 function activate(mode,manual=false){
  const use=mode==='chaplet';
  if(manual){state.chapletChoiceDate=key();state.chapletChoice=mode;}
+ if(initialSwitch && returningFromChaplet && !use){
+  // Restaurar el índice del Rosario antes del primer render.
+  state.index=state.rosaryIndex;
+ }
  if(state.chapletActive!==use){
   if(state.chapletActive)state.chapletIndex=compact(state.index,chaplet.length);
-  else{state.rosaryIndex=compact(state.index,rosarySteps.length);rosarySteps=steps;}
+  else{
+   if(!(initialSwitch&&returningFromChaplet))
+    state.rosaryIndex=compact(state.index,rosarySteps.length);
+   rosarySteps=steps;
+  }
   state.chapletActive=use;
   steps=use?chaplet:rosarySteps;
   state.index=compact(use?state.chapletIndex:state.rosaryIndex,steps.length);
   document.body.classList.toggle('chaplet-active',use);
   window.rosarioPhysicalReset?.();
  }
+ initialSwitch=false;
  persist();render();
 }
 window.rosarioChapletCurrent=()=>state.chapletActive;
