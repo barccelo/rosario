@@ -5,15 +5,15 @@ const key=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1)
 const compact=(n,max)=>Math.max(0,Math.min(max,Number.isInteger(n)?n:0));
 const chaplet=[
  {title:'Señal de la cruz',m:-1,chapletIntro:'cross'},
- {title:'Padrenuestro',m:-1,chapletIntro:0},
- {title:'Avemaría',m:-1,chapletIntro:1},
- {title:'Credo',m:-1,chapletIntro:3}
+ {title:'Padrenuestro',m:-1,chapletIntro:3},
+ {title:'Avemaría',m:-1,chapletIntro:2},
+ {title:'Credo',m:-1,chapletIntro:1}
 ];
 for(let m=0;m<5;m++){
  chaplet.push({title:'Padre Eterno',m,bead:m*11,kind:'chaplet-major'});
  for(let n=1;n<=10;n++)chaplet.push({title:'Por su dolorosa Pasión',m,n,bead:m*11+n,kind:'chaplet-minor'});
 }
-for(let n=1;n<=3;n++)chaplet.push({title:'Santo Dios',m:5,kind:'chaplet-holy',chapletClosing:'invocation',n});
+for(let repetition=1;repetition<=3;repetition++)chaplet.push({title:'Santo Dios',m:5,kind:'chaplet-holy',chapletClosing:'invocation',repetition});
 chaplet.push({title:'Oración final de la Misericordia',m:5,kind:'chaplet-optional',chapletClosing:'cross'});
 chaplet.push({title:'Coronilla completada',m:5,kind:'chaplet-end',chapletClosing:'cross'});
 Object.assign(prayers,{
