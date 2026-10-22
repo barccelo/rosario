@@ -221,13 +221,24 @@
         });
       return group;
     }
+    function quickConfigurationButton(){
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='rosario-onboarding-launch rosario-quick-configuration';
+      button.innerHTML='<span class="rosario-onboarding-launch-mark" aria-hidden="true">✧</span>'+
+        '<span><strong>Configuración rápida</strong>'+
+        '<small>Reiniciar guía visual de temas, gestos y controles</small></span>'+
+        '<span aria-hidden="true">›</span>';
+      button.onclick=()=>window.rosarioShowOnboarding?.();
+      return button;
+    }
     function openHome(){
       modal.dataset.rosarioSettingsLevel='home';
       window.rosarioUpdateBackLabel?.();
       host.replaceChildren();
       host.classList.add('rosario-settings-dashboard');
       const header=document.createElement('h2');header.textContent='Ajustes';
-      host.append(header);
+      host.append(header,quickConfigurationButton());
       const menu=document.createElement('div');
       menu.className='rosario-settings-home';
       for(const section of sections){
@@ -404,15 +415,7 @@
         }
         // Incluir los controles completos aquí, sin el botón intermedio.
         window.rosarioRenderNavigationPreferences?.(host);
-        const guide=document.createElement('button');
-        guide.className='rosario-onboarding-launch';
-        guide.type='button';
-        guide.innerHTML='<span class="rosario-onboarding-launch-mark" aria-hidden="true">✧</span>'+
-          '<span><strong>Ver guía interactiva</strong>'+
-          '<small>Repasa temas, gestos y controles sin borrar tus preferencias</small></span>'+
-          '<span aria-hidden="true">›</span>';
-        guide.onclick=()=>window.rosarioShowOnboarding?.();
-        host.append(guide);
+
       }else{
         host.append(...buckets[section.id]);
       }
