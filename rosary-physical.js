@@ -378,6 +378,25 @@
     function positionFor(step){
       const firstMystery=steps.findIndex(item=>item.kind==='mystery');
       if(!step)return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
+      // La Coronilla usa las MISMAS 55 cuentas, colgante y cruz.
+      // Sólo cambia la correspondencia entre cada oración y su cuenta.
+      if(state.chapletActive){
+        if(step.chapletIntro==='cross')
+          return{type:'cross',phase:'opening',y:CROSS_Y,completed:0};
+        if(Number.isInteger(step.chapletIntro))
+          return{type:'intro',phase:'opening',intro:step.chapletIntro,
+            y:introPoints[step.chapletIntro].y,completed:0};
+        if(step.chapletClosing==='invocation')
+          return{type:'intro',phase:'closing',intro:3,
+            y:introPoints[3].y,completed:55};
+        if(step.chapletClosing==='cross')
+          return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
+        if(Number.isInteger(step.bead))
+          return{type:'loop',bead:step.bead,
+            y:positions[step.bead].y,
+            strand:positions[step.bead].strand,
+            completed:step.bead+1};
+      }
       // Mapeo litúrgico exacto: la Estación COMPLETA (tres ciclos con
       // sus invocaciones, padrenuestros, avemarías y glorias) permanece
       // en la cruz. El resto llega al aro sin inventar cuentas.
@@ -709,6 +728,24 @@
     }
     function goToNode(el){
       let destination=-1;
+      if(state.chapletActive){
+        if(el.hasAttribute('data-bead')){
+          const bead=Number(el.dataset.bead);
+          if(positionFor(steps[state.index]).bead===bead){advance();return;}
+          destination=steps.findIndex(step=>step.bead===bead);
+        }else if(el.hasAttribute('data-intro')){
+          const intro=Number(el.dataset.intro);
+          destination=steps.findIndex(step=>step.chapletIntro===intro);
+          if(intro===3 && state.index>55)
+            destination=steps.findIndex(step=>step.chapletClosing==='invocation');
+        }else if(el.hasAttribute('data-cross')){
+          const nearEnd=steps.findIndex(step=>step.chapletClosing==='invocation');
+          destination=state.index>=nearEnd?
+            steps.findIndex(step=>step.chapletClosing==='cross'):0;
+        }
+        if(destination>=0)pick(destination);
+        return;
+      }
       // La cuenta compartida y el colgante se usan al entrar y al
       // regresar. Al seleccionar la décima Avemaría del quinto misterio,
       // sus toques deben corresponder al recorrido de cierre desde
