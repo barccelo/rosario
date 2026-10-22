@@ -202,6 +202,12 @@
     const start=el('button','chaplet-start-button','Rezar la Coronilla ahora');
     start.type='button';
     start.onclick=window.rosarioChapletStart;
+    const restart=el('button','chaplet-restart-button','Comenzar la Coronilla desde el principio');
+    restart.type='button';restart.hidden=state.chapletIndex===0;
+    restart.onclick=()=>{
+      state.chapletIndex=0;currentPosition=-1;persist();
+      window.rosarioChapletStart();
+    };
     const options=el('fieldset','chaplet-settings-rules');
     const legend=el('legend',null,'Inicio del día');
     options.append(legend);
@@ -252,7 +258,7 @@
       const visible=state.chapletRule==='days';
       title.hidden=!visible;days.hidden=!visible;
     }
-    screen.append(back,heading,description,start,options,title,days);
+    screen.append(back,heading,description,start,restart,options,title,days);
     const sourceLink=el('a','chaplet-source','Texto de referencia · Vatican News ↗');
     sourceLink.href=source;sourceLink.target='_blank';sourceLink.rel='noopener noreferrer';
     screen.append(sourceLink);
@@ -284,6 +290,17 @@
   }
   function resolveNewDay(){
     const today=dateKey();
+    // Una WebView que permanece abierta puede cruzar la medianoche
+    // sin recargar. Actualizar también el misterio del Rosario habitual.
+    if(state.dayDate!==today){
+      const day=new Date().getDay();
+      state.day=day;
+      state.group=['Gloriosos','Gozosos','Dolorosos','Gloriosos',
+        'Luminosos','Dolorosos','Gozosos'][day];
+      state.dayDate=today;
+      state.intentionCycle=[null,null,null,null,null];
+      render();persist();
+    }
     const fresh=state.chapletChoiceDate!==today;
     if(state.chapletProgressDate!==today){
       state.chapletProgressDate=today;
@@ -323,6 +340,7 @@
     subtitle=el('div','chaplet-decade');
     heading=el('h2','chaplet-heading');
     reading=el('p','chaplet-prayer');
+    reading.setAttribute('aria-live','polite');
     count=el('div','chaplet-count');
     const footer=el('div','chaplet-navigation');
     previous=el('button','chaplet-previous','← Anterior');
