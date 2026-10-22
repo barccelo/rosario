@@ -176,6 +176,7 @@
   // ya está visible. Admitirlo sobre toda la pantalla, en ambos lados.
   function eligible(){
     return opened && !animating && layer.hidden &&
+      !document.body.classList.contains('chaplet-active') &&
       state.index>=steps.length && !completeToday();
   }
   function gestureCloses(dx,dy){
@@ -373,7 +374,8 @@
   };
 
   window.rosarioPouchFinish=()=>{
-    if(state.pouchEnabled===false||!opened||animating||!layer.hidden||state.index<steps.length)
+    if(state.pouchEnabled===false||!opened||animating||!layer.hidden||
+       document.body.classList.contains('chaplet-active')||state.index<steps.length)
       return false;
     closePouch();
     return true;
