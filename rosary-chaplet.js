@@ -76,7 +76,7 @@ window.rosarioChapletStart=()=>{document.getElementById('modal')?.close();activa
 window.rosarioChapletReturn=()=>{document.getElementById('modal')?.close();activate('rosary',true)};
 window.rosarioChapletSkipOptional=()=>{
  if(state.chapletActive&&steps[state.index]?.kind==='chaplet-optional'){
-  state.index=steps.length;persist();render();
+  state.index=steps.length-1;persist();render();
  }
 };
 const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el};
