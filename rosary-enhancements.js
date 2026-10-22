@@ -745,6 +745,12 @@
   function applyControlsPosition(){
     document.body.classList.toggle('controls-bottom',state.controlsPosition==='bottom');
   }
+  window.rosarioSetControlsPosition=value=>{
+    if(value!=='top'&&value!=='bottom')return;
+    state.controlsPosition=value;
+    applyControlsPosition();
+    persist();
+  };
   applyControlsPosition();
 
   const mysterySingular = {
@@ -1597,9 +1603,7 @@
         value=>window.rosarioSetSide?.(value));
       selectRow('Posición de los controles',
         [['top','Arriba'],['bottom','Abajo']],state.controlsPosition,
-        value=>{
-          state.controlsPosition=value;applyControlsPosition();persist();
-        });
+        value=>window.rosarioSetControlsPosition?.(value));
       const row=document.createElement('label');row.className='rosario-nav-setting';
       const label=document.createElement('span');
       label.textContent='Navegar tocando la pantalla';
