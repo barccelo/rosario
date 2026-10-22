@@ -410,3 +410,8 @@
 .rosario-accidental-tip-actions button:focus-visible{
   outline:2px solid var(--ui-accent,#c3a471);outline-offset:3px;
 }
+
+.dark .rosario-accidental-tip{
+  background:#2c3233;color:#e8e9e2;border-color:#89928e;
+  --ui-muted:#b1b8b1;--ui-accent:#dfc38d;--ui-outline:#707c75;
+}
