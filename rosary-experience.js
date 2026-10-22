@@ -239,6 +239,15 @@
       host.classList.add('rosario-settings-dashboard');
       const header=document.createElement('h2');header.textContent='Ajustes';
       host.append(header,quickConfigurationButton());
+      const coronilla=document.createElement('button');
+      coronilla.type='button';
+      coronilla.className='rosario-chaplet-entry';
+      coronilla.innerHTML='<span class="rosario-chaplet-entry-symbol" aria-hidden="true">✝</span>'+
+        '<span class="rosario-chaplet-entry-copy"><strong>Coronilla de la Divina Misericordia</strong>'+
+        '<small>Rezar ahora o configurar los días</small></span>'+
+        '<span class="rosario-chaplet-entry-arrow" aria-hidden="true">›</span>';
+      coronilla.onclick=()=>window.rosarioOpenChapletSettings?.();
+      host.append(coronilla);
       const menu=document.createElement('div');
       menu.className='rosario-settings-home';
       for(const section of sections){
@@ -444,6 +453,8 @@
       if(window.rosarioCloseChoiceSheet?.())return true;
       if(!['section','subpage'].includes(modal.dataset.rosarioSettingsLevel))
         return false;
+      const chapletBack=byId('chapletSettingsBack');
+      if(chapletBack){chapletBack.click();return true;}
       const hapticBack=byId('rosarioHapticBack');
       if(hapticBack){hapticBack.click();return true;}
       const editor=byId('rosarioMedBack');
