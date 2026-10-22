@@ -387,8 +387,8 @@
           return{type:'intro',phase:'opening',intro:step.chapletIntro,
             y:introPoints[step.chapletIntro].y,completed:0};
         if(step.chapletClosing==='invocation')
-          return{type:'intro',phase:'closing',intro:3,
-            y:introPoints[3].y,completed:55};
+          return{type:'loop',bead:0,phase:'closing',
+            y:positions[0].y,strand:'junction',completed:55};
         if(step.chapletClosing==='cross')
           return{type:'cross',phase:'closing',y:CROSS_Y,completed:55};
         if(Number.isInteger(step.bead))
@@ -732,7 +732,10 @@
         if(el.hasAttribute('data-bead')){
           const bead=Number(el.dataset.bead);
           if(positionFor(steps[state.index]).bead===bead){advance();return;}
-          destination=steps.findIndex(step=>step.bead===bead);
+          const fifthEnd=steps.findIndex(step=>step.m===4&&step.n===10);
+          destination=bead===0&&state.index>=fifthEnd
+            ?steps.findIndex(step=>step.chapletClosing==='invocation')
+            :steps.findIndex(step=>step.bead===bead);
         }else if(el.hasAttribute('data-intro')){
           const intro=Number(el.dataset.intro);
           destination=steps.findIndex(step=>step.chapletIntro===intro);
