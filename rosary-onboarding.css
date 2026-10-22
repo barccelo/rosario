@@ -304,3 +304,85 @@
 #modalContent .rosario-onboarding-launch>span:last-child{
   font:25px/1 Georgia,serif;color:var(--ui-accent,#b39566)
 }
+
+/* Tarjeta interactiva: posición superior o inferior de la barra. */
+#modalContent .onb-position-choices{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+#modalContent .onb-position-choices .onb-choice{
+  align-items:center!important;min-height:245px;
+}
+#modalContent .onb-position-choices .onb-choice-visual{
+  min-height:176px;
+}
+#modalContent .onb-position-choices .onb-choice-copy{
+  width:100%;
+}
+#modalContent .onb-position-phone{
+  position:relative;display:block;
+  width:min(100%,155px);height:168px;flex-shrink:0;
+  border:2px solid #7e827d;border-radius:21px;
+  background:#f5f4ee;box-shadow:0 4px 15px #00000010;
+  overflow:hidden;color:#555e57;
+}
+.dark #modalContent .onb-position-phone{
+  background:#22272a;border-color:#777f7c;color:#e0e3dc;
+}
+#modalContent .onb-position-status{
+  position:absolute;top:1px;left:0;right:0;
+  text-align:center;letter-spacing:4px;opacity:.38;
+  font:8px/1.5 system-ui;
+}
+#modalContent .onb-position-beads{
+  position:absolute;left:10px;top:17px;bottom:13px;width:28px;
+  opacity:.85;
+}
+#modalContent .onb-position-beads .onb-chain{
+  height:100%;width:28px;
+}
+#modalContent .onb-position-beads .onb-chain span{
+  width:10px;height:10px;border-width:2px;
+}
+#modalContent .onb-position-beads .onb-chain span:nth-child(3){
+  width:17px;height:17px;
+}
+#modalContent .onb-position-copy{
+  position:absolute;top:60px;left:47px;right:9px;
+  display:flex;flex-direction:column;gap:7px;
+}
+#modalContent .onb-position-copy i{
+  height:4px;background:currentColor;opacity:.44;border-radius:5px;
+}
+#modalContent .onb-position-copy i:nth-child(2){width:80%}
+#modalContent .onb-position-copy i:nth-child(3){width:67%}
+#modalContent .onb-position-bar{
+  position:absolute;left:46px;right:7px;z-index:2;
+  height:32px;display:flex;align-items:center;justify-content:center;
+  gap:4px;padding:3px 4px;
+  border:1px solid #ad9d7e73;border-radius:11px;
+  background:#ece8dc;box-shadow:0 2px 12px #00000018;
+  color:#766246;
+}
+.dark #modalContent .onb-position-bar{
+  background:#333a3b;color:#dbc293;border-color:#c5b38355;
+}
+#modalContent .onb-position-bar.at-top{top:18px}
+#modalContent .onb-position-bar.at-bottom{bottom:13px}
+#modalContent .onb-position-bar>span{
+  display:grid;place-items:center;flex:1;height:24px;
+}
+#modalContent .onb-position-bar svg{
+  width:16px;height:16px;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+}
+#modalContent .rosario-quick-configuration{
+  margin:14px 0 6px!important;
+  border-color:var(--ui-accent,#b39566)!important;
+}
+@media(max-width:390px){
+  #modalContent .onb-position-choices .onb-choice{
+    padding:9px!important;
+  }
+  #modalContent .onb-position-phone{width:118px;height:158px;}
+  #modalContent .onb-position-choices .onb-choice-visual{min-height:168px;}
+}
