@@ -7,6 +7,7 @@
     {title:'Sentido del deslizamiento',detail:'Mira cómo se mueve el dedo en cada lado del Rosario. Elige el recorrido que te resulte natural.'},
     {title:'Vibración al avanzar',detail:'Una señal táctil confirma cada avance. También puedes rezar sin vibración.'},
     {title:'Avanzar tocando la pantalla',detail:'Elige si quieres navegar con un toque, además de los gestos y las cuentas.'},
+    {title:'¿Dónde quieres la barra?',detail:'Los controles del Rosario pueden colocarse arriba o abajo. Mira cómo queda en cada posición.'},
     {title:'Acto de contrición',detail:'Escoge la oración que prefieres utilizar. Las dos se pueden cambiar después.'},
     {title:'Conoce los controles',detail:'Toca los botones de esta demostración para descubrir su función.'}
   ];
@@ -41,6 +42,10 @@
     if(page===3)state.haptics=value==='yes';
     if(page===4)state.screenTapNavigation=value==='yes';
     if(page===5){
+      window.rosarioSetControlsPosition?.(value);
+      return;
+    }
+    if(page===6){
       window.rosarioSetContrition?.(value);
       return;
     }
@@ -55,6 +60,7 @@
       state.rosarySwipeMode||'follow',
       state.haptics!==false?'yes':'no',
       state.screenTapNavigation===true?'yes':'no',
+      state.controlsPosition==='bottom'?'bottom':'top',
       state.contritionVersion||'jesucristo'
     ][page];
   }
@@ -97,6 +103,20 @@
         choice('no','Solo gestos y cuentas',svg('<path d="M5 12h14M12 5l7 7-7 7"/>'),'El toque no cambia de oración',selected==='no')+'</div>';
     }
     if(page===5){
+      const preview=position=>'<span class="onb-position-phone">'+
+        '<span class="onb-position-status" aria-hidden="true">•••</span>'+
+        '<span class="onb-position-beads" aria-hidden="true">'+rosary()+'</span>'+
+        '<span class="onb-position-copy" aria-hidden="true"><i></i><i></i><i></i></span>'+
+        '<span class="onb-position-bar at-'+position+'" aria-hidden="true">'+
+        '<span>'+svg(icon.nav)+'</span><span>'+svg(icon.settings)+'</span>'+
+        '<span>'+svg(icon.full)+'</span></span>'+
+        '</span>';
+      return '<div class="onb-choices onb-position-choices">'+
+        choice('top','Arriba',preview('top'),'Controles cerca del borde superior',selected==='top')+
+        choice('bottom','Abajo',preview('bottom'),'Controles cerca del borde inferior',selected==='bottom')+
+        '</div>';
+    }
+    if(page===6){
       const sources=[
         ['jesucristo','Señor mío Jesucristo','Señor mío Jesucristo, Dios y hombre verdadero…'],
         ['redentor','Jesús, mi Señor y Redentor','Jesús, mi Señor y Redentor, yo me arrepiento…']
