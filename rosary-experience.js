@@ -113,6 +113,7 @@
       haptics:[
         ['path',{d:'M6 10v4M9 6v12M12 3v18M15 6v12M18 10v4'}]
       ],
+      chaplet:[['path',{d:'M12 3v18M6 10h12'}]],
       android:[
         ['path',{d:'M8 18h8M7 18h10c-1.2-1.4-1.8-2.5-1.8-4.4v-3a3.2 3.2 0 0 0-6.4 0v3C8.8 15.5 8.2 16.6 7 18Z'}],
         ['path',{d:'M10.3 20a1.9 1.9 0 0 0 3.4 0'}],
@@ -134,6 +135,7 @@
       {id:'haptics',title:'Vibración',caption:'Intensidad, avisos y patrones personalizados'},
       {id:'appearance',title:'Rosario y apariencia',caption:'Presentación, colores y carterita'},
       {id:'navigation',title:'Navegación y contenido',caption:'Días, misterios, meditaciones y oraciones'},
+      {id:'chaplet',title:'Coronilla de la Divina Misericordia',caption:'Rezar o programar días'},
       {id:'android',title:'Android',caption:'Recordatorios'}
     ];
     const buckets={interaction:[],haptics:[],appearance:[],prayers:[],voices:[],android:[],other:[]};
@@ -239,19 +241,11 @@
       host.classList.add('rosario-settings-dashboard');
       const header=document.createElement('h2');header.textContent='Ajustes';
       host.append(header,quickConfigurationButton());
-      const coronilla=document.createElement('button');
-      coronilla.type='button';
-      coronilla.className='rosario-chaplet-entry';
-      coronilla.innerHTML='<span class="rosario-chaplet-entry-symbol" aria-hidden="true">✝</span>'+
-        '<span class="rosario-chaplet-entry-copy"><strong>Coronilla de la Divina Misericordia</strong>'+
-        '<small>Rezar ahora o configurar los días</small></span>'+
-        '<span class="rosario-chaplet-entry-arrow" aria-hidden="true">›</span>';
-      coronilla.onclick=()=>window.rosarioOpenChapletSettings?.();
-      host.append(coronilla);
       const menu=document.createElement('div');
       menu.className='rosario-settings-home';
       for(const section of sections){
-        if(section.id!=='navigation'&&!buckets[section.id]?.length)continue;
+        if(!['navigation','chaplet'].includes(section.id)&&
+           !buckets[section.id]?.length)continue;
         const button=document.createElement('button');
         button.type='button';button.className='rosario-settings-section';
         const icon=document.createElement('span');icon.className='rosario-settings-symbol';
@@ -264,7 +258,9 @@
         arrow.textContent='›';
         button.append(icon,copy,arrow);
         button.onclick=()=>{
-          if(section.id==='navigation'){
+          if(section.id==='chaplet'){
+            window.rosarioOpenChapletSettings?.();
+          }else if(section.id==='navigation'){
             modal.dataset.rosarioSettingsLevel='subpage';
             window.rosarioUpdateBackLabel?.();
             window.rosarioOpenNavigation?.('days');
@@ -288,7 +284,9 @@
     window.rosarioOpenSettingsSection=id=>{
       const section=sections.find(item=>item.id===id);
       if(!section)return false;
-      if(section.id==='navigation'){
+      if(section.id==='chaplet'){
+        window.rosarioOpenChapletSettings?.();
+      }else if(section.id==='navigation'){
         modal.dataset.rosarioSettingsLevel='subpage';
         window.rosarioUpdateBackLabel?.();
         window.rosarioOpenNavigation?.('days');
