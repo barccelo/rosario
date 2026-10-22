@@ -1,177 +1,9 @@
-/* Coronilla de la Divina Misericordia: rosario físico alternativo. */
-.chaplet-stage[hidden]{display:none!important}
-.chaplet-stage{
-  position:fixed;inset:0;z-index:8500;
-  display:flex;flex-direction:column;
-  background:var(--rc-bg,#f6f4ef);color:var(--rc-text,#343c36);
-  font-family:system-ui,-apple-system,sans-serif;
-  overflow:hidden;isolation:isolate;
-}
-.dark .chaplet-stage{background:var(--rc-bg,#202629);color:var(--rc-text,#e6e7e3)}
-body:not([data-rosary-color-mode="mystery"]) .chaplet-stage{
-  --chaplet-ink:#343c36;--chaplet-gold:#c09e65;--chaplet-bead:#ddc59b;
-  --chaplet-border:#a88b62;--chaplet-thread:#a99b84;
-  background:#f6f4ef;color:var(--chaplet-ink);
-}
-body.dark:not([data-rosary-color-mode="mystery"]) .chaplet-stage{
-  --chaplet-ink:#e7e9e5;--chaplet-gold:#dfc591;--chaplet-bead:#dccfae;
-  --chaplet-border:#b99d72;--chaplet-thread:#9c8d80;
-  background:#202629;color:var(--chaplet-ink);
-}
-body[data-rosary-color-mode="mystery"] .chaplet-stage{
-  --chaplet-ink:var(--rc-text);--chaplet-gold:var(--rc-accent);
-  --chaplet-bead:var(--rc-bead);--chaplet-border:var(--rc-outline);
-  --chaplet-thread:var(--rc-link);
-}
-.chaplet-toolbar{
-  display:flex;align-items:center;gap:9px;
-  padding:calc(10px + env(safe-area-inset-top,0px))
-    calc(16px + env(safe-area-inset-right,0px)) 10px
-    calc(16px + env(safe-area-inset-left,0px));
-  z-index:2;min-height:59px;
-}
-.chaplet-brand{
-  margin-right:auto;min-width:0;
-  font:600 clamp(17px,4vw,25px)/1.25 Georgia,serif;
-}
-.chaplet-toolbar button{
-  border:1px solid color-mix(in srgb,currentColor 22%,transparent);
-  background:color-mix(in srgb,currentColor 4%,transparent);
-  color:inherit;border-radius:12px;
-  min-height:38px;padding:7px 12px;
-  font:600 12px/1.2 system-ui;
-}
-.chaplet-toolbar button:focus-visible,
-.chaplet-navigation button:focus-visible,
-.chaplet-settings button:focus-visible{
-  outline:2px solid var(--chaplet-gold,#c09e65);outline-offset:3px;
-}
-.chaplet-main{
-  display:grid;grid-template-columns:minmax(115px,34%) minmax(0,1fr);
-  flex:1;min-height:0;width:100%;
-}
-.chaplet-rail{
-  position:relative;overflow-y:auto;overflow-x:hidden;
-  overscroll-behavior:contain;scrollbar-width:none;
-  scroll-behavior:smooth;
-}
-.chaplet-rail::-webkit-scrollbar{display:none}
-.chaplet-chain-svg{
-  display:block;width:100%;min-width:115px;height:auto;
-  overflow:visible;min-height:550px;
-  filter:drop-shadow(0 2px 8px #0000001a);
-}
-.chaplet-thread{
-  fill:none;stroke:var(--chaplet-thread,#a99b84);
-  stroke-width:3.4;stroke-linecap:round;
-}
-.chaplet-bead-node{cursor:pointer;outline:none}
-.chaplet-bead{
-  fill:var(--chaplet-bead,#ddc59b);
-  stroke:var(--chaplet-border,#a88b62);
-  stroke-width:3.4;
-  transition:fill .18s,stroke-width .18s;
-}
-.chaplet-bead-node.is-complete .chaplet-bead{
-  fill:var(--chaplet-border,#b2935f)
-}
-.chaplet-bead-node.is-current .chaplet-bead,
-.chaplet-chain-svg [data-intro].is-current .chaplet-bead{
-  stroke:var(--chaplet-gold,#d7b983);stroke-width:7;
-  filter:drop-shadow(0 0 9px var(--chaplet-gold,#d7b983))
-}
-.chaplet-bead-node:focus-visible .chaplet-bead{
-  stroke-width:7
-}
-.chaplet-number{
-  font:9px/1 system-ui;fill:var(--chaplet-ink,#29302d);
-  pointer-events:none;
-}
-.chaplet-cross-shadow{
-  stroke:#7a613c;fill:none;
-  stroke-linecap:round;stroke-linejoin:round;
-}
-.chaplet-cross{
-  stroke:var(--chaplet-gold,#d8be8b);fill:none;
-  stroke-linecap:round;stroke-linejoin:round;
-}
-.chaplet-chain-svg [data-cross].is-current .chaplet-cross{
-  filter:drop-shadow(0 0 12px var(--chaplet-gold,#d8be8b));
-}
-.chaplet-reader{
-  display:flex;flex-direction:column;
-  padding:clamp(10px,2.5vw,24px) clamp(16px,5.1vw,48px)
-    calc(20px + env(safe-area-inset-bottom,0px)) 8px;
-  overflow-y:auto;min-height:0;overscroll-behavior:contain;
-}
-.chaplet-prayer-content{
-  margin:auto 0;min-height:0;display:flex;flex-direction:column;
-  justify-content:center;gap:20px;
-  padding:16px 0;
-}
-.chaplet-kicker{
-  color:var(--chaplet-gold,#ba935e);
-  font:600 10px/1.5 system-ui;letter-spacing:.11em;
-}
-.chaplet-decade{
-  font:600 13px/1.5 system-ui;
-  color:var(--chaplet-gold,#b99a65);
-}
-.chaplet-heading{
-  margin:0;font:600 clamp(23px,3.5vw,35px)/1.25 Georgia,serif;
-}
-.chaplet-prayer{
-  white-space:pre-line;margin:0;
-  font:clamp(17px,2.4vw,28px)/1.7 Georgia,serif;
-  text-align:var(--rosary-text-align,center);
-  hyphens:auto;overflow-wrap:break-word;
-}
-.chaplet-count{
-  font:500 13px/1.4 system-ui;color:var(--chaplet-gold,#b99a65);
-}
-.chaplet-progress{
-  flex-shrink:0;height:3px;position:relative;
-  background:color-mix(in srgb,currentColor 12%,transparent);
-  border-radius:5px;overflow:hidden;
-}
-.chaplet-progress-fill{
-  display:block;height:100%;width:0;background:var(--chaplet-gold,#c09e65);
-  transition:width .17s ease;
-}
-.chaplet-navigation{
-  display:flex;gap:10px;margin-top:16px;
-}
-.chaplet-navigation button,
-.chaplet-skip-final{
-  min-height:48px;border-radius:13px;border:1px solid var(--chaplet-gold,#c09e65);
-  padding:10px 16px;color:inherit;
-  font:600 14px/1.3 system-ui;cursor:pointer;
-}
-.chaplet-previous{background:transparent}
-.chaplet-previous:disabled{opacity:.4}
-.chaplet-next{
-  flex:1;background:var(--chaplet-gold,#c09e65);color:#24272a!important;
-}
-.chaplet-skip-final{
-  border-color:transparent;background:transparent;
-  font-size:12px;align-self:flex-start;padding:6px 0;
-}
-.chaplet-skip-final[hidden]{display:none!important}
-/* La Coronilla reemplaza la superficie habitual sin modificar su estado. */
-body.chaplet-active .rosario-pouch-layer,
-body.chaplet-active .top-controls,
-body.chaplet-active .controls-dot,
-body.chaplet-active .nav-quick{
-  display:none!important;
-}
-/* La carterita: sólo el pequeño punto retraído, no la barra expandida. */
-body:not(.chaplet-active):has(.rosario-pouch-layer:not([hidden])) .top-controls,
-body:not(.chaplet-active):has(.rosario-pouch-layer:not([hidden])) .nav-quick{
-  display:none!important;
-}
-body:not(.chaplet-active):has(.rosario-pouch-layer:not([hidden])) .controls-dot{
-  display:grid!important;position:fixed!important;
-  z-index:10003!important;pointer-events:none!important;
+/* Coronilla: reutiliza íntegra la apariencia del Santo Rosario. */
+body.chaplet-active .rosario-pouch-layer{display:none!important}
+body:has(.rosario-pouch-layer:not([hidden])):not(.chaplet-active) .top-controls,
+body:has(.rosario-pouch-layer:not([hidden])):not(.chaplet-active) .nav-quick{display:none!important}
+body:has(.rosario-pouch-layer:not([hidden])):not(.chaplet-active) .controls-dot{
+ display:grid!important;z-index:10003!important;pointer-events:none!important
 }
 /* Preferencias en tarjetas iguales a las del resto de Ajustes. */
 #modalContent .chaplet-settings{display:flex;flex-direction:column;gap:15px}
@@ -320,3 +152,48 @@ body:not(.chaplet-active):has(.rosario-pouch-layer:not([hidden])) .controls-dot{
   font:500 12px/1.4 system-ui!important;
 }
 #modalContent .chaplet-restart-button[hidden]{display:none!important}
+
+/* El diseño principal de Ajustes usa filas compactas, no tarjetas altas. */
+#modalContent .chaplet-settings{
+  display:flex!important;flex-direction:column!important;gap:10px!important;
+  padding:0!important
+}
+#modalContent .chaplet-settings h2{margin:2px 0 5px!important}
+#modalContent .chaplet-settings-rules{
+  display:flex!important;flex-direction:column!important;
+  padding:0!important;gap:8px!important;margin:0!important;
+}
+#modalContent .chaplet-settings-rules legend{margin:5px 0 10px!important}
+#modalContent label.chaplet-setting-mode{
+  display:flex!important;align-items:center!important;gap:12px!important;
+  width:100%!important;min-height:65px!important;height:auto!important;
+  margin:0!important;padding:12px 14px!important;position:relative!important;
+  border:1px solid var(--ui-outline,#989c95)!important;border-radius:14px!important;
+}
+#modalContent .chaplet-setting-mode input{
+  position:static!important;flex:0 0 auto!important;width:19px!important;
+  height:19px!important;opacity:1!important;margin:0!important
+}
+#modalContent .chaplet-setting-mode-copy{
+  display:flex!important;flex-direction:column!important;gap:3px!important;
+  min-width:0!important;flex:1!important
+}
+#modalContent .chaplet-setting-mode-copy strong{
+  font:600 14px/1.3 system-ui!important
+}
+#modalContent .chaplet-setting-mode-copy small{
+  font:12px/1.3 system-ui!important;color:var(--ui-muted,#999)!important
+}
+#modalContent .chaplet-settings-days-title{margin:8px 0 3px!important}
+#modalContent .chaplet-schedule-days{margin:0!important;gap:5px!important}
+#modalContent .chaplet-schedule-day{
+  min-height:43px!important;height:43px!important;margin:0!important;
+  padding:0!important
+}
+#modalContent .chaplet-source{display:none!important}
+#modalContent .chaplet-return-button{
+  width:100%!important;min-height:42px!important;padding:8px 12px!important;
+  border:1px solid var(--ui-outline,#989c95)!important;border-radius:12px!important;
+  background:transparent!important;color:var(--ui-ink,inherit)!important
+}
+#modalContent .chaplet-return-button[hidden]{display:none!important}
