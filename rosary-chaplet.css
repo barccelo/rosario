@@ -309,3 +309,14 @@ body:not(.chaplet-active):has(.rosario-pouch-layer:not([hidden])) .controls-dot{
   #modalContent .chaplet-schedule-days{gap:3px}
   #modalContent .chaplet-schedule-day span{font-size:10px}
 }
+
+#modalContent .chaplet-restart-button{
+  display:block!important;
+  min-height:42px;margin:-8px 0 4px!important;padding:8px 11px!important;
+  border:1px solid var(--ui-outline,#989c95)!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:var(--ui-ink,inherit)!important;
+  font:500 12px/1.4 system-ui!important;
+}
+#modalContent .chaplet-restart-button[hidden]{display:none!important}
