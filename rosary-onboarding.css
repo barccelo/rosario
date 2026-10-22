@@ -280,3 +280,27 @@
 @media(prefers-reduced-motion:reduce){
   #modalContent .onb-swipe-arrow,#modalContent .onb-pulse-ring{animation:none!important}
 }
+#modalContent button.rosario-onboarding-launch{
+  display:flex!important;align-items:center!important;gap:12px!important;
+  width:100%!important;min-height:68px!important;padding:11px 15px!important;
+  margin:16px 0 0!important;text-align:left!important;
+  border:1px solid var(--ui-outline,#888)!important;border-radius:15px!important;
+  background:var(--ui-surface,transparent)!important;
+  color:var(--ui-ink,inherit)!important;
+}
+#modalContent .rosario-onboarding-launch-mark{
+  display:grid;place-items:center;flex:0 0 32px;
+  width:32px;height:32px;border-radius:10px;
+  background:color-mix(in srgb,var(--ui-accent,#b39566) 16%,transparent);
+  color:var(--ui-accent,#b39566);font-size:18px;
+}
+#modalContent .rosario-onboarding-launch>span:nth-child(2){
+  display:flex;flex:1;min-width:0;flex-direction:column;gap:3px;
+}
+#modalContent .rosario-onboarding-launch strong{font:600 14px/1.3 system-ui}
+#modalContent .rosario-onboarding-launch small{
+  font:12px/1.35 system-ui;color:var(--ui-muted,#888)
+}
+#modalContent .rosario-onboarding-launch>span:last-child{
+  font:25px/1 Georgia,serif;color:var(--ui-accent,#b39566)
+}
