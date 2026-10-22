@@ -151,14 +151,13 @@
         '<div class="onb-step-number">PASO '+(page+1)+' DE '+pages.length+'</div>'+
         '<h2>'+data.title+'</h2><p class="onb-description">'+data.detail+'</p>'+
         '<div class="onb-content">'+contentFor(page)+'</div>'+
-        '<div class="onb-actions"><button type="button" class="onb-back" id="onbBack">'+(page?'← Anterior':'Omitir')+'</button>'+
+        '<div class="onb-actions">'+
+        (page>0?'<button type="button" class="onb-back" id="onbBack">← Anterior</button>':'')+
         '<button type="button" class="onb-skip" id="onbSkip">Omitir este paso</button>'+
         '<button type="button" class="onb-next" id="onbNext">'+(page===pages.length-1?'Comenzar':'Continuar →')+'</button></div>';
       host.querySelector('#onbSkipAll').onclick=finish;
-      host.querySelector('#onbBack').onclick=()=>{
-        if(page===0){finish();return;}
-        page--;draw();
-      };
+      const back=host.querySelector('#onbBack');
+      if(back)back.onclick=()=>{page--;draw();};
       host.querySelector('#onbSkip').onclick=()=>{
         if(page===pages.length-1)finish();
         else{page++;draw();}
