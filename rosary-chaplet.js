@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const source='https://www.vaticannews.va/es/oraciones/coronilla-de-la-divina-misericordia.html';
-  const dayNames=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const dayNames=[['Lunes',1],['Martes',2],['Miércoles',3],['Jueves',4],['Viernes',5],['Sábado',6],['Domingo',0]];
   const dateKey=()=>{
     const now=new Date();
     return [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),
@@ -124,7 +124,7 @@
     const current=steps[state.chapletIndex];
     const complete=!current;
     heading.textContent=complete?'Coronilla completada':current.title;
-    reading.textContent=complete?'Por su dolorosa Pasión, ten misericordia de nosotros y del mundo entero.':(
+    reading.textContent=complete?'Has terminado la Coronilla. Jesús, en Ti confío.':(
       typeof current.text==='function'?current.text():current.text);
     if(!complete&&Number.isInteger(current.decade)){
       subtitle.textContent='Decena '+(current.decade+1)+' de 5';
@@ -212,7 +212,7 @@
     ];
     const days=el('div','chaplet-schedule-days');
     const title=el('p','chaplet-settings-days-title','Días para la Coronilla');
-    dayNames.forEach((name,index)=>{
+    dayNames.forEach(([name,index])=>{
       const label=el('label','chaplet-schedule-day');
       const check=document.createElement('input');
       check.type='checkbox';check.value=String(index);
@@ -267,6 +267,13 @@
       '<h2>¿Qué quieres rezar hoy?</h2><p>Escoge tu oración para este día.</p>'+
       '<div class="chaplet-prompt-actions"><button type="button" id="chapletChooseRosary">Santo Rosario</button>'+
       '<button type="button" id="chapletChooseMercy">Divina Misericordia</button></div></section>');
+    // Cerrar el aviso equivale a elegir Rosario sólo para ese día.
+    // No se repetirá hasta que comience otro día.
+    modal.addEventListener('close',()=>{
+      if(state.chapletChoiceDate===dateKey())return;
+      state.chapletChoiceDate=dateKey();
+      state.chapletChoice='rosary';persist();setMode('rosary');
+    },{once:true});
     const choose=mode=>{
       state.chapletChoiceDate=dateKey();
       state.chapletChoice=mode;persist();
