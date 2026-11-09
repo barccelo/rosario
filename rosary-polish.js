@@ -125,15 +125,15 @@
             cue.className='rosario-lamb-gesture';
             cue.setAttribute('role','img');
             cue.setAttribute('aria-label','Golpearse el pecho con el puño derecho');
-            // La ilustración aprobada se emplea como máscara alfa.
-            // El color de la figura procede del tema del Rosario,
-            // sin hornear un dorado distinto para cada modalidad.
-            const silhouette=document.createElement('span');
-            silhouette.className='rosario-lamb-silhouette';
-            silhouette.setAttribute('aria-hidden','true');
-            silhouette.style.setProperty('--rosario-chest-mask',
-              'url("'+window.rosarioChestGestureData+'")');
-            cue.append(silhouette);
+            // Restaurar íntegra la ilustración aprobada: la máscara
+            // monocromática hacía ilegibles la mano y el gesto.
+            const image=document.createElement('img');
+            image.src=window.rosarioChestGestureData;
+            image.alt='';
+            image.width=96;image.height=96;
+            image.decoding='async';
+            image.draggable=false;
+            cue.append(image);
             prayer.append(cue);
           }
           const line=document.createElement('span');
@@ -309,7 +309,8 @@
             picker.setAttribute('aria-label','Configurar formato de intenciones finales');
             picker.innerHTML=quickSettingsSvg;
             picker.onclick=()=>window.rosarioOpenFinalIntentionChoice?.();
-            heading.append(picker);
+            // La muesca está ENCIMA y FUERA de la tarjeta.
+            group.append(picker);
           }
           group.append(heading);
           if(step.kind==='final-intention' &&
@@ -380,11 +381,11 @@
       const cross=document.createElement('span');
       cross.className='prayer-symbol';
       cross.setAttribute('aria-hidden','true');
-      // Contorno vectorial de la cruz latina tradicional (✝):
-      // extremos ligeramente abiertos, como el glifo usado antes.
-      // Sigue siendo SVG, así que no depende del catálogo emoji.
-      cross.innerHTML='<svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">'+
-        '<path d="M28 3Q32 5 36 3L35 22H49Q53 22 56 18L56 35Q52 31 49 31H35V57Q35 61 38 62H26Q29 61 29 57V31H15Q11 31 8 35V18Q11 22 15 22H29Z" '+
+      // Cruz de la referencia aprobada: dos trazos rectos y
+      // cuadrados, mismos brazos y proporciones. SVG independiente
+      // de la tipografía o biblioteca de emojis del dispositivo.
+      cross.innerHTML='<svg viewBox="0 0 43 52" focusable="false" aria-hidden="true">'+
+        '<path d="M21 6h3v11h9v3h-9v20h-3V20h-9v-3h9Z" '+
         'fill="currentColor"/></svg>';
       return cross;
     }
@@ -518,7 +519,7 @@
       cancelHold();
       holdFired=false;
       origin={x:e.clientX,y:e.clientY,id:e.pointerId};
-      hold=setTimeout(openVoiceSettings,510);
+      hold=setTimeout(openVoiceSettings,1100);
     },true);
     reading.addEventListener('pointermove',e=>{
       if(origin && e.pointerId===origin.id &&
@@ -534,7 +535,7 @@
       touchOrigin={x:e.touches[0].clientX,y:e.touches[0].clientY};
       holdFired=false;
       clearTimeout(touchTimer);
-      touchTimer=setTimeout(openVoiceSettings,530);
+      touchTimer=setTimeout(openVoiceSettings,1100);
     },{passive:true,capture:true});
     reading.addEventListener('touchmove',e=>{
       if(touchOrigin && Math.hypot(e.touches[0].clientX-touchOrigin.x,
