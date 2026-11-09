@@ -938,3 +938,117 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer
   image-rendering:auto;
   filter:none!important;
 }
+
+/* Cordero de Dios: maqueta horizontal aprobada. La cadena física,
+   las cuentas, los gestos y los demás textos no se alteran. */
+.immersive-prayer.is-lamb-layout{
+  left:31%!important;
+  right:4%!important;
+}
+.immersive-prayer.is-lamb-layout #immersiveText{
+  width:100%!important;
+  max-width:100%!important;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-layout{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(9px,2vw,23px);
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  white-space:normal;
+  text-align:inherit;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
+  display:block!important;
+  position:relative!important;
+  flex:0 0 clamp(88px,28%,175px);
+  width:clamp(88px,28%,175px);
+  max-width:38%;
+  aspect-ratio:229/348;
+  height:auto;
+  margin:0!important;
+  padding:0!important;
+  align-self:center;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture img{
+  width:100%;height:100%;
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  image-rendering:auto;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-outline{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  -webkit-mask-image:var(--rosario-lamb-ink-mask);
+  mask-image:var(--rosario-lamb-ink-mask);
+  -webkit-mask-size:100% 100%;
+  mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-divider{
+  align-self:stretch;
+  flex:0 0 1px;
+  width:1px;
+  min-height:100px;
+  background:var(--rc-outline,#b79a67);
+  opacity:.48;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-copy{
+  display:flex;
+  flex:1 1 0;
+  flex-direction:column;
+  justify-content:center;
+  align-items:stretch;
+  min-width:0;
+  white-space:normal;
+  text-align:inherit;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line{
+  display:block!important;
+  width:100%;
+  margin:0!important;
+  line-height:1.48!important;
+  font-size:clamp(16px,calc(var(--rosary-font-size,23px) * .94),37px)!important;
+  white-space:normal;
+  overflow-wrap:break-word;
+  text-align:inherit;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line.voice-assembly{
+  margin-top:clamp(12px,1.55em,34px)!important;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-copy .verse-mark{
+  font-size:1em!important;
+  line-height:1!important;
+  margin-right:.22em!important;
+}
+body:not([data-rosary-color-mode="mystery"]) .immersive-prayer.is-lamb-layout .rosario-lamb-outline{
+  display:none;
+}
+@media(max-width:430px){
+  .immersive-prayer.is-lamb-layout{
+    left:31%!important;
+    right:2.5%!important;
+  }
+  .immersive-prayer.is-lamb-layout .rosario-lamb-layout{
+    gap:8px;
+  }
+  .immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
+    flex-basis:clamp(75px,29%,114px);
+    width:clamp(75px,29%,114px);
+  }
+  .immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line{
+    font-size:clamp(15px,calc(var(--rosary-font-size,23px) * .86),27px)!important;
+    line-height:1.43!important;
+  }
+  .immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line.voice-assembly{
+    margin-top:.95em!important;
+  }
+}
