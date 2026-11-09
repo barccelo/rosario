@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-6';
+    sheet.href = 'rosary-polish.css?v=20261109-7';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -134,6 +134,17 @@
             image.decoding='async';
             image.draggable=false;
             cue.append(image);
+            // Capa de trazos sobre la misma ilustración: la imagen
+            // original conserva piel, cabello, ropa, expresión y mano.
+            // Sólo los píxeles de línea toman --rc-outline del misterio.
+            if(window.rosarioChestOutlineMask){
+              const ink=document.createElement('span');
+              ink.className='rosario-lamb-outline';
+              ink.setAttribute('aria-hidden','true');
+              ink.style.setProperty('--rosario-lamb-ink-mask',
+                'url("'+window.rosarioChestOutlineMask+'")');
+              cue.append(ink);
+            }
             prayer.append(cue);
           }
           const line=document.createElement('span');
