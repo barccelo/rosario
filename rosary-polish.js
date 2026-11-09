@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-7';
+    sheet.href = 'rosary-polish.css?v=20261109-8';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -120,7 +120,7 @@
       prayer.replaceChildren();
       parts.forEach(part=>{
         [['℣.',part.verse,'guide'],['℟.',part.response,'assembly']].forEach(([glyph,text,role])=>{
-          if(role==='assembly'&&includeChestIcon&&window.rosarioChestGestureData){
+          if(role==='assembly'&&includeChestIcon){
             const cue=document.createElement('span');
             cue.className='rosario-lamb-gesture';
             cue.setAttribute('role','img');
@@ -128,22 +128,27 @@
             // Restaurar íntegra la ilustración aprobada: la máscara
             // monocromática hacía ilegibles la mano y el gesto.
             const image=document.createElement('img');
-            image.src=window.rosarioChestGestureData;
+            image.src='assets/rosary-lamb-256.png';
             image.alt='';
-            image.width=96;image.height=96;
+            image.width=256;image.height=256;
             image.decoding='async';
             image.draggable=false;
             cue.append(image);
             // Capa de trazos sobre la misma ilustración: la imagen
             // original conserva piel, cabello, ropa, expresión y mano.
             // Sólo los píxeles de línea toman --rc-outline del misterio.
-            if(window.rosarioChestOutlineMask){
+            {
               const ink=document.createElement('span');
               ink.className='rosario-lamb-outline';
               ink.setAttribute('aria-hidden','true');
               ink.style.setProperty('--rosario-lamb-ink-mask',
-                'url("'+window.rosarioChestOutlineMask+'")');
+                'url("assets/rosary-lamb-outline-256.png")');
               cue.append(ink);
+              image.onerror=()=>{
+                image.onerror=null;
+                ink.remove();
+                if(window.rosarioChestGestureData)image.src=window.rosarioChestGestureData;
+              };
             }
             prayer.append(cue);
           }

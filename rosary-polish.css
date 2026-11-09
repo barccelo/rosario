@@ -889,7 +889,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
    íntegros; nada de máscaras que pierdan la expresión del gesto. */
 .immersive-prayer .rosario-lamb-gesture{
   display:block!important;position:relative!important;
-  width:clamp(92px,5em,160px);
+  width:clamp(110px,5.7em,170px);
   height:auto;aspect-ratio:1/1;
   max-width:100%;margin:.18em auto .22em!important;
   padding:0!important;flex-shrink:0;clear:both;
@@ -928,4 +928,11 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer
 .rosario-lamb-gesture .rosario-lamb-outline{
   display:block;
   background-color:var(--rc-outline,#a38b65);
+}
+
+/* La base y el contorno usan exactamente las mismas coordenadas (256 px). */
+.immersive-prayer .rosario-lamb-gesture img,
+.immersive-prayer .rosario-lamb-gesture .rosario-lamb-outline{
+  image-rendering:auto;
+  filter:none!important;
 }
