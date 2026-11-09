@@ -116,12 +116,18 @@
         Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
     }
-    function addVerses(parts) {
+    function addVerses(parts,showVoiceLabels=false) {
       prayer.replaceChildren();
       parts.forEach(part=>{
         [['℣.',part.verse,'guide'],['℟.',part.response,'assembly']].forEach(([glyph,text,role])=>{
           const line=document.createElement('span');
           line.className='dialogue-line voice-'+role;
+          if(showVoiceLabels){
+            const label=document.createElement('span');
+            label.className='voice-label';
+            label.textContent=role==='guide'?'Guía':'Asamblea';
+            line.append(label);
+          }
           const mark=document.createElement('span');
           mark.className='verse-mark';
           mark.textContent=glyph;
@@ -199,7 +205,9 @@
       const list=document.createElement('div');
       list.className='rosario-final-intention-list';
       list.setAttribute('role','list');
-      const names=['Padrenuestro','Avemaría','Gloria'];
+      const names=step.intentionNumber===2
+        ?['Padrenuestro','Avemaría','Descansen en paz']
+        :['Padrenuestro','Avemaría','Gloria'];
       // La presentación inicial no marca ninguna oración; cada avance
       // incorpora una marca, y retroceder la retira naturalmente.
       const completed=step.kind==='final-intention'?0:names.indexOf(step.title)+1;
@@ -238,7 +246,8 @@
       }
       const intro=step?.intention;
       const isFinalIntention=Number.isInteger(step?.intentionNumber)&&
-        (step.kind==='final-intention'||['Padrenuestro','Avemaría','Gloria'].includes(step.title));
+        (step.kind==='final-intention'||
+         ['Padrenuestro','Avemaría','Gloria','Descansen en paz'].includes(step.title));
       if(announced)announce(step);
       else if(step?.kind==='litany'){
         prayer.replaceChildren();
@@ -246,10 +255,10 @@
         const edited=state.prayerEdits?.[step.title];
         const matches=edited?[...edited.matchAll(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]*?)(?=\n\s*\n℣\.|$)/g)]:[];
         if(matches.length===step.dialogues.length)
-          addVerses(matches.map(m=>({verse:m[1].trim(),response:m[2].trim()})));
+          addVerses(matches.map(m=>({verse:m[1].trim(),response:m[2].trim()})),true);
         else if(edited){
           prayer.replaceChildren();appendWithAmen(prayer,edited);
-        }else addVerses(step.dialogues);
+        }else addVerses(step.dialogues,true);
         prayer.prepend(makeCross());
       } else if(step?.verse && step?.response) {
         const edited=step.title==='Cordero de Dios'?null:state.prayerEdits?.[step.title];
@@ -257,12 +266,15 @@
           const match=edited.match(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]+)/);
           if(match)addVerses([{verse:match[1],response:match[2]}]);
           else {prayer.replaceChildren();appendWithAmen(prayer,edited);}
-        }else addVerses([step]);
+        }else addVerses([step],step.title==='Estación al Santísimo Sacramento');
       }
       else if(step){
         prayer.replaceChildren();
         if(step.title==='Señal de la cruz') specialSymbol();
-        if(intro){
+        // En «oraciones completas», la tarjeta dorada se muestra
+        // sólo al presentar cada intención, nunca sobre cada oración.
+        if(intro&&(step.kind==='final-intention'||
+                   state.finalIntentionsDisplay==='checklist')){
           const label=document.createElement('span');
           label.className='intention-heading';
           label.textContent=intro;
@@ -273,7 +285,8 @@
         }else{
         const source=prayerSource(step);
         if (step.title==='Comunión espiritual' || step.title==='Salve' ||
-            step.title==='Oración final'||step.title==='Señor mío Jesucristo') {
+            step.title==='Oración final'||step.title==='Señor mío Jesucristo'||
+            step.title==='Bajo tu amparo') {
           const heading=document.createElement('span');
           heading.className='reading-prayer-heading';
           heading.textContent=step.title==='Salve'
@@ -282,6 +295,7 @@
               : 'Y ahora te saludo con una Salve')
             : step.title==='Oración final' ? 'Oración'
             : step.title==='Señor mío Jesucristo'?'Acto de contrición'
+            : step.title==='Bajo tu amparo'?'Bajo tu amparo'
             : 'Comunión espiritual';
           if(step.title==='Señor mío Jesucristo'){
             // El selector sólo aparece al rezar esta oración.
