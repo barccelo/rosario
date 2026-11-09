@@ -620,12 +620,11 @@
           }
           }
         }else if(keepFinalFraming&&priorInFinalSection){
-          // Una vez que la séptima cuenta de la última decena ha
-          // alcanzado el encuadre final, mantenerlo también al rezar
-          // en la cuenta grande compartida, el colgante y todas las
-          // oraciones de cierre (incluidas las letanías). No importa
-          // que sus coordenadas y crucifijo estén más abajo en el SVG.
-          target=previous;
+          // Desde las últimas cuentas del quinto misterio debe llegar
+          // al scroll máximo real. Conservar la posición anterior aquí
+          // impedía que se revelaran el colgante y la cruz al avanzar.
+          // El encuadre queda anclado también durante las letanías.
+          target=finalTop;
         }else if(!sequential&&keepFinalFraming){
           // Navegación deliberada a una oración final desde otro punto.
           target=finalTop;
@@ -694,7 +693,7 @@
           }
         }
         target=clamp(target);
-        if(sequential&&!restoreActiveBead){
+        if(sequential&&!restoreActiveBead&&!keepFinalFraming){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
           // entre oraciones adyacentes. No modifica el swipe manual.
           // Más corto junto a la unión inferior; suficiente margen
