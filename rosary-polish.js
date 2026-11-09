@@ -125,13 +125,15 @@
             cue.className='rosario-lamb-gesture';
             cue.setAttribute('role','img');
             cue.setAttribute('aria-label','Golpearse el pecho con el puño derecho');
-            const image=document.createElement('img');
-            image.src=window.rosarioChestGestureData;
-            image.alt='';
-            image.width=96;image.height=96;
-            image.decoding='async';
-            image.draggable=false;
-            cue.append(image);
+            // La ilustración aprobada se emplea como máscara alfa.
+            // El color de la figura procede del tema del Rosario,
+            // sin hornear un dorado distinto para cada modalidad.
+            const silhouette=document.createElement('span');
+            silhouette.className='rosario-lamb-silhouette';
+            silhouette.setAttribute('aria-hidden','true');
+            silhouette.style.setProperty('--rosario-chest-mask',
+              'url("'+window.rosarioChestGestureData+'")');
+            cue.append(silhouette);
             prayer.append(cue);
           }
           const line=document.createElement('span');
@@ -239,6 +241,12 @@
       });
       prayer.append(list);
     }
+    // Un único SVG para ambos selectores: idéntico al engranaje
+    // original del acto de contrición, evitando variantes torcidas.
+    const quickSettingsSvg='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+
+      '<circle cx="12" cy="12" r="3"/>'+
+      '<path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2 1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/>'+
+      '</svg>';
     function renderPrayer() {
       const step=steps[state.index];
       applyPrefs();
@@ -286,32 +294,35 @@
         // sólo al presentar cada intención, nunca sobre cada oración.
         if(intro&&(step.kind==='final-intention'||
                    state.finalIntentionsDisplay==='checklist')){
-          const label=document.createElement('span');
-          label.className='intention-heading';
+          const group=document.createElement('div');
+          group.className='intention-heading-group';
+          const heading=document.createElement('span');
+          heading.className='intention-heading';
           const words=document.createElement('span');
           words.className='intention-heading-words';
           words.textContent=intro;
-          label.append(words);
-          // El título es una estación de paso cuando se muestran
-          // las oraciones completas: la flecha indica avanzar.
-          if(step.kind==='final-intention' &&
-             state.finalIntentionsDisplay==='prayers'){
-            const arrow=document.createElement('span');
-            arrow.className='intention-heading-next';
-            arrow.setAttribute('aria-hidden','true');
-            arrow.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
-            label.append(arrow);
-          }
+          heading.append(words);
           if(isFinalIntention){
             const picker=document.createElement('button');
             picker.type='button';
-            picker.className='intention-heading-settings';
+            picker.className='contrition-quick-choice intention-heading-settings';
             picker.setAttribute('aria-label','Configurar formato de intenciones finales');
-            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2-1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg>';
+            picker.innerHTML=quickSettingsSvg;
             picker.onclick=()=>window.rosarioOpenFinalIntentionChoice?.();
-            label.append(picker);
+            heading.append(picker);
           }
-          prayer.append(label);
+          group.append(heading);
+          if(step.kind==='final-intention' &&
+             state.finalIntentionsDisplay==='prayers'){
+            // Indicador independiente: debajo y fuera de la tarjeta.
+            const arrow=document.createElement('span');
+            arrow.className='intention-heading-next';
+            arrow.setAttribute('aria-hidden','true');
+            arrow.innerHTML='<svg viewBox="0 0 24 24" focusable="false">'+
+              '<path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
+            group.append(arrow);
+          }
+          prayer.append(group);
         }
         if(isFinalIntention && (state.finalIntentionsDisplay==='checklist'||step.kind==='final-intention')){
           if(state.finalIntentionsDisplay==='checklist') appendFinalIntentionChecklist(step);
@@ -336,7 +347,7 @@
             picker.type='button';
             picker.className='contrition-quick-choice';
             picker.setAttribute('aria-label','Cambiar acto de contrición');
-            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2 1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg>';
+            picker.innerHTML=quickSettingsSvg;
             picker.onclick=()=>window.rosarioOpenContritionChoice?.();
             heading.append(picker);
           }
@@ -369,10 +380,11 @@
       const cross=document.createElement('span');
       cross.className='prayer-symbol';
       cross.setAttribute('aria-hidden','true');
-      // Recupera la silueta de la cruz latina anterior, ahora con un
-      // único contorno SVG sólido; ninguna fuente del sistema interviene.
+      // Contorno vectorial de la cruz latina tradicional (✝):
+      // extremos ligeramente abiertos, como el glifo usado antes.
+      // Sigue siendo SVG, así que no depende del catálogo emoji.
       cross.innerHTML='<svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">'+
-        '<path d="M29 5Q32 3 35 5V22H49Q52 22 53 20H56V33H53Q52 30 49 30H35V58Q35 61 32 61Q29 61 29 58V30H15Q12 30 11 33H8V20H11Q12 22 15 22H29Z" '+
+        '<path d="M28 3Q32 5 36 3L35 22H49Q53 22 56 18L56 35Q52 31 49 31H35V57Q35 61 38 62H26Q29 61 29 57V31H15Q11 31 8 35V18Q11 22 15 22H29Z" '+
         'fill="currentColor"/></svg>';
       return cross;
     }
@@ -459,6 +471,22 @@
     };
     const readFull=document.getElementById('readFull');
     if(readFull)readFull.hidden=true;
+    // Copiar sólo la selección real de oraciones. Así las
+    // descripciones automáticas de gráficos nunca se agregan al texto.
+    document.addEventListener('copy',event=>{
+      const selection=window.getSelection?.();
+      if(!selection||selection.isCollapsed||!event.clipboardData)return;
+      const parent=node=>node?.nodeType===1?node:node?.parentElement;
+      const anchor=parent(selection.anchorNode),focus=parent(selection.focusNode);
+      const containers=[reading,document.getElementById('prayer'),
+        document.getElementById('fullPrayerText')].filter(Boolean);
+      if(!containers.some(root=>root.contains(anchor)||root.contains(focus)))return;
+      const selected=selection.toString().replace(
+        /\s*Un solo rosario:\s*cinco decenas en un lazo y un colgante con una cruz\.?\s*$/i,'');
+      if(!selected.trim())return;
+      event.clipboardData.setData('text/plain',selected);
+      event.preventDefault();
+    },true);
 
     // Pulsación prolongada sobre dorado, compatible con touch y ratón.
     // Prevenir el menú nativo del navegador (seleccionar/copiar texto).
