@@ -227,7 +227,8 @@
       const button=document.createElement('button');
       button.type='button';
       button.className='rosario-onboarding-launch rosario-quick-configuration';
-      button.innerHTML='<span class="rosario-onboarding-launch-mark" aria-hidden="true">✧</span>'+
+      button.innerHTML='<span class="rosario-onboarding-launch-mark" aria-hidden="true">'+
+        '<svg viewBox="0 0 24 24" focusable="false"><path d="M12 2 14.6 9.4 22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>'+
         '<span><strong>Configuración rápida</strong>'+
         '<small>Reiniciar guía visual de temas, gestos y controles</small></span>'+
         '<span aria-hidden="true">›</span>';
