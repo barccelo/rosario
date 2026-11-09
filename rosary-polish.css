@@ -826,67 +826,85 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
  margin:0!important;accent-color:var(--ui-accent,#b89b6a);
 }
 
-/* Intenciones finales: título dorado, avance y ajuste rápido. */
+/* La intención se lee sola dentro de la tarjeta.
+   Su indicación de avance va debajo, en un círculo independiente. */
+.immersive-prayer .intention-heading-group{
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;max-width:100%;margin:0 0 24px;
+}
 .immersive-prayer .intention-heading{
-  position:relative;
-  display:flex!important;align-items:center;justify-content:center;
-  min-height:66px;
-  padding:13px 63px 13px 21px!important;
-  gap:6px;isolation:isolate;
+  position:relative;display:flex!important;align-items:center;
+  justify-content:center;width:100%;
+  min-height:67px;margin:0!important;
+  padding:16px 43px!important;
+  isolation:isolate;
 }
 .immersive-prayer .intention-heading-words{
-  display:block;min-width:0;flex:1;
+  display:block;flex:1;min-width:0;
   text-align:center;overflow-wrap:break-word;
 }
 .immersive-prayer .intention-heading-next{
-  position:absolute;right:42px;top:50%;
-  transform:translateY(-50%);
   display:grid;place-items:center;
-  width:22px;height:22px;color:inherit;
-  opacity:.85;pointer-events:none;
+  position:static;transform:none;
+  width:48px;height:48px;flex:0 0 48px;
+  margin:13px auto 2px;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--rc-accent,#b79a67) 55%,transparent);
+  background:color-mix(in srgb,var(--rc-accent,#b79a67) 13%,transparent);
+  color:var(--rc-accent,#b79a67);
+  pointer-events:none;
 }
 .immersive-prayer .intention-heading-next svg{
-  display:block;width:21px;height:21px;
-  fill:none;stroke:currentColor;stroke-width:1.8;
+  display:block;width:29px;height:29px;
+  fill:none;stroke:currentColor;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;
 }
-.immersive-prayer .intention-heading-settings{
-  position:absolute;right:5px;top:50%;
-  transform:translateY(-50%);
-  display:grid;place-items:center;
-  width:35px;height:35px;
-  border:0;border-radius:11px;background:transparent;
-  color:inherit;cursor:pointer;
+/* Se usa exactamente el mismo engranaje, borde y escala que el
+   selector de acto de contrición. Sólo cambia su ubicación. */
+.immersive-prayer .intention-heading .contrition-quick-choice.intention-heading-settings{
+  position:absolute;top:8px;right:8px;transform:none;
+  display:inline-grid;place-items:center;vertical-align:middle;
+  width:25px;height:25px;min-width:25px;padding:0;margin:0;
+  border:1px solid #bca27580;border-radius:50%;
+  background:transparent;color:inherit;opacity:.85;
 }
-.immersive-prayer .intention-heading-settings svg{
-  width:19px;height:19px;display:block;
-  stroke:currentColor;stroke-width:1.7;fill:none;
-  stroke-linecap:round;stroke-linejoin:round;
+.immersive-prayer .intention-heading .contrition-quick-choice.intention-heading-settings svg{
+  display:block;width:16px;height:16px;fill:none;
+  stroke:currentColor;stroke-width:1.65;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.92;
 }
 .immersive-prayer .intention-heading-settings:focus-visible{
-  outline:2px solid currentColor;outline-offset:1px;
+  outline:2px solid currentColor;outline-offset:2px;
 }
 /* Las cruces son ilustraciones SVG propias, nunca glifos o emojis. */
 .immersive-prayer .prayer-symbol svg{
   display:block;width:1em;height:1em;margin:0 auto;
   color:inherit;overflow:visible;
 }
-/* La ilustración del golpe de pecho está entre el versículo y la
-   respuesta; escala con la tipografía y reserva espacio real. */
+/* El dibujo aprobado funciona como máscara. Sólo se ve el color
+   activo del tema (claro, oscuro, misionero o misterios), sin color fijo. */
 .immersive-prayer .rosario-lamb-gesture{
   display:block!important;position:relative!important;
-  width:clamp(92px,5em,160px);
-  height:auto;aspect-ratio:1/1;
-  max-width:100%;margin:.18em auto .22em!important;
+  width:clamp(120px,7.4em,220px);
+  height:auto;aspect-ratio:1/1;max-width:100%;
+  margin:.1em auto .24em!important;
   padding:0!important;flex-shrink:0;clear:both;
   pointer-events:none;
 }
-.immersive-prayer .rosario-lamb-gesture img{
+.immersive-prayer .rosario-lamb-silhouette{
   display:block;width:100%;height:100%;
-  object-fit:contain;object-position:center;
+  background-color:var(--rc-accent,var(--ui-accent,#b99a65));
+  -webkit-mask-image:var(--rosario-chest-mask);
+  mask-image:var(--rosario-chest-mask);
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  mask-position:center;
+  -webkit-mask-size:119% 119%;
+  mask-size:119% 119%;
 }
 .immersive-prayer .dialogue-line.voice-guide:has(+ .rosario-lamb-gesture){
-  margin-bottom:.22em!important;
+  margin-bottom:.14em!important;
 }
 .immersive-prayer .rosario-lamb-gesture + .dialogue-line{
   margin-top:0!important;
