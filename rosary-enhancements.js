@@ -808,6 +808,15 @@
       ' contemplamos:\n\n' + groups[state.group][step.m] + '.';
   };
   state.prayerEdits=(saved.prayerEdits&&typeof saved.prayerEdits==='object'&&!Array.isArray(saved.prayerEdits))?saved.prayerEdits:{};
+  // Varios usuarios conservan la Salve antigua en la edición local,
+  // que tiene prioridad sobre prayers.Salve y explica que el cambio
+  // textual no se refleje en el teléfono. Migrar UNA SOLA VEZ al texto
+  // solicitado, sin alterar las demás oraciones personalizadas.
+  if(state.salveCanonicalTextVersion!==2){
+    delete state.prayerEdits.Salve;
+    state.salveCanonicalTextVersion=2;
+    persist();
+  }
   function applyLitanyText(value){
     const pairs=String(value).split(/\n\s*\nCordero de Dios/)[0];
     const matches=[...pairs.matchAll(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]*?)(?=\n\s*\n℣\.|$)/g)];
