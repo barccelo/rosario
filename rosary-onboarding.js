@@ -122,7 +122,9 @@
         ['redentor','Jesús, mi Señor y Redentor','Jesús, mi Señor y Redentor, yo me arrepiento…']
       ];
       return '<div class="onb-choices">'+sources.map(a=>choice(a[0],a[1],
-        '<span class="onb-prayer-paper"><span class="onb-prayer-cross">✝</span><em>'+a[2]+'</em></span>',
+        '<span class="onb-prayer-paper"><span class="onb-prayer-cross">'+
+          svg('<path d="M12 3v18M5 9h14"/>')+
+          '</span><em>'+a[2]+'</em></span>',
         a[0]==='jesucristo'?'Fórmula tradicional':'Fórmula alternativa',selected===a[0])).join('')+'</div>';
     }
     const buttons = [
