@@ -188,9 +188,11 @@
   prayers['Jaculatoria de Fátima'] =
     'Oh Jesús mío, perdona nuestras culpas, presérvanos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.';
   const originalAvemaria = prayers.Avemaría;
-  // La Salve permanece al final salvo elección expresa del usuario.
-  state.salvePosition=saved.salvePosition==='after-dedication'
-    ?'after-dedication':'final';
+  // Predeterminado: tras las tres Avemarías de Virgen purísima y
+  // castísima. Se respeta «al final» si fue elegido expresamente.
+  state.salvePositionUserSelected=saved.salvePositionUserSelected===true;
+  state.salvePosition=saved.salvePosition==='final'&&
+    state.salvePositionUserSelected?'final':'after-dedication';
 
   // Catálogo de intenciones del Rosario, vinculado al apartado ya existente.
   // Las intenciones personales continúan siendo editables en Navegación > Intenciones.
@@ -519,10 +521,11 @@
     const oldIndex=state.index;
     const previous=oldSteps[oldIndex];
     state.salvePosition=value;
+    state.salvePositionUserSelected=true;
     steps=buildRosarySteps();
     const mapped=remapCurrentStep(previous,oldSteps,oldIndex);
     state.index=mapped>=0?mapped:Math.min(oldIndex,steps.length);
-    state.sequenceVersion=13;
+    state.sequenceVersion=14;
     persist();render();
   };
   function updateJaculatorias(ids) {
@@ -538,7 +541,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 13;
+    state.sequenceVersion = 14;
     render();
   }
 
@@ -591,8 +594,23 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 13) {
+  if (Number(saved.sequenceVersion) >= 14) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 13) {
+    // El antiguo valor predeterminado era al finalizar intenciones.
+    // Conservar la oración concreta al cambiar el orden.
+    const oldPlacement=saved.salvePosition==='after-dedication'
+      ?'after-dedication':'final';
+    const oldSteps=buildRosarySteps(false,false,oldPlacement);
+    const mapIndex=value=>{
+      const i=Math.max(0,Math.min(Number(value)||0,oldSteps.length));
+      return i===oldSteps.length?steps.length:
+        remapCurrentStep(oldSteps[i],oldSteps,i);
+    };
+    restoredIndex=saved.chapletActive===true
+      ?Number(saved.index):mapIndex(saved.index);
+    if(Number.isInteger(saved.rosaryIndex))
+      state.rosaryIndex=mapIndex(saved.rosaryIndex);
   } else if (Number(saved.sequenceVersion) === 12) {
     // Remapear la oración guardada al insertar una letanía y retirar
     // el último Gloria, manteniendo también el progreso del cierre.
@@ -746,7 +764,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 13;
+  state.sequenceVersion = 14;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
@@ -1804,6 +1822,28 @@
       });
     }
     window.rosarioOpenContritionChoice=openContritionChoice;
+    function openFinalIntentionChoice(){
+      show('<h2>Intenciones finales</h2>'+
+        '<div class="rosario-contrition-choices" id="finalIntentionChoices"></div>');
+      const root=$('finalIntentionChoices');
+      [
+        ['checklist','Lista con marcas'],
+        ['prayers','Oraciones completas']
+      ].forEach(([value,name])=>{
+        const button=document.createElement('button');
+        button.type='button';button.className='rosario-contrition-option';
+        button.textContent=name;
+        button.setAttribute('aria-pressed',
+          String(state.finalIntentionsDisplay===value));
+        button.onclick=()=>{
+          state.finalIntentionsDisplay=value;
+          persist();render();
+          $('modal').close();
+        };
+        root.append(button);
+      });
+    }
+    window.rosarioOpenFinalIntentionChoice=openFinalIntentionChoice;
     const originalSettings = $('settings').onclick;
     $('settings').onclick = () => {
       originalSettings();
