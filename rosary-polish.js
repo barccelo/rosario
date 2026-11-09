@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-13';
+    sheet.href = 'rosary-polish.css?v=20261109-14';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -253,7 +253,7 @@
       if(split<0)split=source.lastIndexOf(',',offset);
       return split>0?[source.slice(0,split+1),source.slice(split+1).trim()]:[source,''];
     }
-    function appendFinalIntentionChecklist(step) {
+    function appendFinalIntentionChecklist(step,target=prayer) {
       const list=document.createElement('div');
       list.className='rosario-final-intention-list';
       list.setAttribute('role','list');
@@ -279,7 +279,7 @@
         row.append(title,symbol);
         list.append(row);
       });
-      prayer.append(list);
+      target.append(list);
     }
     // Un único SVG para ambos selectores: idéntico al engranaje
     // original del acto de contrición, evitando variantes torcidas.
@@ -303,10 +303,16 @@
         document.getElementById('rosaryMysteryName').textContent=groups[state.group][step.m];
         context.setAttribute('aria-label','Leer meditación: '+groups[state.group][step.m]);
       }
-      const intro=step?.intention;
       const isFinalIntention=Number.isInteger(step?.intentionNumber)&&
         (step.kind==='final-intention'||
          ['Padrenuestro','Avemaría','Gloria','Descansen en paz'].includes(step.title));
+      // La intención de cada paso de la lista debe conservar su propio
+      // encabezado. Se deriva del paso introductorio para evitar que
+      // desaparezca al marcar/desmarcar oraciones.
+      const intro=step?.intention||(isFinalIntention
+        ?steps.find(item=>item.kind==='final-intention'&&
+          item.intentionNumber===step.intentionNumber)?.intention
+        :null);
       if(announced)announce(step);
       else if(step?.kind==='litany'){
         prayer.replaceChildren();
@@ -330,6 +336,15 @@
       }
       else if(step){
         prayer.replaceChildren();
+        const listMode=isFinalIntention&&state.finalIntentionsDisplay==='checklist';
+        // Mantener la tarjeta y las tres filas en el mismo bloque visual
+        // durante todos los avances, sin desplazar ni ocultar el título.
+        const contentHost=listMode?document.createElement('section'):prayer;
+        if(listMode){
+          contentHost.className='rosario-final-intention-section';
+          contentHost.setAttribute('aria-label',intro||'Intención final');
+          prayer.append(contentHost);
+        }
         if(step.title==='Señal de la cruz') specialSymbol();
         // En «oraciones completas», la tarjeta dorada se muestra
         // sólo al presentar cada intención, nunca sobre cada oración.
@@ -364,10 +379,10 @@
               '<path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
             group.append(arrow);
           }
-          prayer.append(group);
+          contentHost.append(group);
         }
         if(isFinalIntention && (state.finalIntentionsDisplay==='checklist'||step.kind==='final-intention')){
-          if(state.finalIntentionsDisplay==='checklist') appendFinalIntentionChecklist(step);
+          if(listMode) appendFinalIntentionChecklist(step,contentHost);
         }else{
         const source=prayerSource(step);
         if (step.title==='Comunión espiritual' || step.title==='Salve' ||
