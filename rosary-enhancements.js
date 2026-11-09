@@ -65,8 +65,8 @@
 
   prayers.Jaculatoria = 'María, Madre de gracia, Madre de misericordia, en la vida y en la muerte ampáranos, gran Señora.';
   prayers['Alabanzas al Santísimo'] =
-    'Alabanzas y gracias sean dadas en todo momento al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
-    'Y bendita sea por siempre la Santa e Inmaculada Concepción de la Bienaventurada siempre Virgen María, Madre de Dios y Madre nuestra.';
+    'Alabanzas y gracias sean dadas en todo momento, al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
+    'Y bendita sea por siempre, la Santa e Inmaculada Concepción, de la Bienaventurada, siempre Virgen María, Madre de Dios y Madre nuestra.';
   prayers.Salve =
     'Dios te salve, Reina y Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve. ' +
     'A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas. ' +
@@ -89,17 +89,17 @@
     'Señor, ten piedad.',
     'Cristo, óyenos.',
     'Cristo, escúchanos.',
-    'Dios, Padre celestial, ten piedad de nosotros.',
-    'Dios Hijo, Redentor del mundo, ten piedad de nosotros.',
-    'Dios Espíritu Santo, ten piedad de nosotros.',
-    'Trinidad Santa, un solo Dios, ten piedad de nosotros.'
+    'Dios, Padre celestial, ten misericordia de nosotros.',
+    'Dios Hijo, Redentor del mundo, ten misericordia de nosotros.',
+    'Dios Espíritu Santo, ten misericordia de nosotros.',
+    'Trinidad Santa, un solo Dios, ten misericordia de nosotros.'
   ];
   const litanyInvocations = [
     'Santa María', 'Santa Madre de Dios', 'Santa Virgen de las vírgenes',
-    'Madre de Cristo', 'Madre de la Iglesia', 'Madre de la misericordia',
-    'Madre de la divina gracia', 'Madre de la esperanza', 'Madre purísima',
-    'Madre castísima', 'Madre siempre virgen', 'Madre inmaculada',
-    'Madre amable', 'Madre admirable', 'Madre del buen consejo',
+    'Madre de Cristo', 'Madre de la Iglesia', 'Madre de la Misericordia',
+    'Madre de la divina gracia', 'Madre de la Esperanza', 'Madre purísima',
+    'Madre castísima', 'Madre siempre virgen', 'Madre sin corrupción', 'Madre inmaculada',
+    'Madre amable', 'Madre admirable', 'Madre del Buen Consejo',
     'Madre del Creador', 'Madre del Salvador', 'Virgen prudentísima',
     'Virgen digna de veneración', 'Virgen digna de alabanza',
     'Virgen poderosa', 'Virgen clemente', 'Virgen fiel', 'Espejo de justicia',
@@ -112,7 +112,7 @@
     'Reina de los Ángeles', 'Reina de los Patriarcas', 'Reina de los Profetas',
     'Reina de los Apóstoles', 'Reina de los Mártires', 'Reina de los Confesores',
     'Reina de las Vírgenes', 'Reina de todos los Santos',
-    'Reina concebida sin pecado original', 'Reina asunta a los cielos',
+    'Reina concebida sin pecado original', 'Reina elevada al cielo',
     'Reina del Santísimo Rosario', 'Reina de la familia', 'Reina de la paz'
   ];
   const litanyLines = litanyOpening.concat(litanyInvocations.map(name => name + ', ruega por nosotros.'));
@@ -122,7 +122,7 @@
       const separator = ', ten misericordia de nosotros.';
       return { verse: line.endsWith(separator)
         ? line.slice(0,-separator.length)+',' : line.replace(/,?\s*ten piedad de nosotros\.$/,','),
-        response: 'ten piedad de nosotros.' };
+        response: 'ten misericordia de nosotros.' };
     }
     return { verse: line.replace(/ ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
   });
@@ -142,7 +142,7 @@
   // La antigua etiqueta era incorrecta: esta fórmula corresponde a la Estación.
   delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
-    'Yo quisiera, Señor, recibiros con aquella pureza, humildad y devoción con que os recibió vuestra Santísima Madre, con el espíritu y fervor de los santos. Amén.';
+    'Yo quisiera, Señor, recibirte con aquella pureza, humildad y devoción con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos.';
   // Respuestas en dos intervenciones, igual que en el Padrenuestro y el Avemaría.
   prayers.Gloria = 'Gloria al Padre, y al Hijo, y al Espíritu Santo.\n\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
   prayers['Señor mío Jesucristo'] =
@@ -183,8 +183,8 @@
       !previouslySelected.includes('alabanzas')) previouslySelected.push('alabanzas');
   state.jaculatorias = validJaculatorias.filter(id => previouslySelected.includes(id));
   prayers['Alabanzas y gracias'] =
-    'Alabanzas y gracias sean dadas en todo momento al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
-    'Y bendita sea por siempre la Santa e Inmaculada Concepción de la Bienaventurada siempre Virgen María, Madre de Dios y Madre nuestra.';
+    'Alabanzas y gracias sean dadas en todo momento, al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
+    'Y bendita sea por siempre, la Santa e Inmaculada Concepción, de la Bienaventurada, siempre Virgen María, Madre de Dios y Madre nuestra.';
   prayers['Jaculatoria de Fátima'] =
     'Oh Jesús mío, perdona nuestras culpas, presérvanos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia. Amén.';
   const originalAvemaria = prayers.Avemaría;
@@ -477,12 +477,14 @@
       intentionNumber:i,intention:intention.intro,text:intention.intro });
     // Cada avance marca la oración alcanzada, sin repetir su título
     // en el encabezado principal de la lectura.
-    for (const title of ['Padrenuestro','Avemaría','Gloria']) {
+    // Por las ánimas del purgatorio la última oración es «Descansen en paz».
+    for (const title of (i===2?['Padrenuestro','Avemaría']:
+                                      ['Padrenuestro','Avemaría','Gloria'])) {
       nextSteps.push({ title, m: 5, intentionNumber: i,
         intention: intention.intro });
     }
     if(i===2) nextSteps.push({ title: 'Descansen en paz',m:5,intentionNumber:i,
-      text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén' });
+      text:'Las almas de todos los fieles difuntos, por la misericordia de Dios descansen en paz. Amén.' });
   });
   // Posición tradicional de esta aplicación (predeterminada).
   if (!legacySalvePosition && salvePlacement!=='after-dedication')
@@ -520,7 +522,7 @@
     steps=buildRosarySteps();
     const mapped=remapCurrentStep(previous,oldSteps,oldIndex);
     state.index=mapped>=0?mapped:Math.min(oldIndex,steps.length);
-    state.sequenceVersion=12;
+    state.sequenceVersion=13;
     persist();render();
   };
   function updateJaculatorias(ids) {
@@ -536,7 +538,7 @@
     }
     if (next < 0) next = Math.min(oldIndex, steps.length);
     state.index = next;
-    state.sequenceVersion = 12;
+    state.sequenceVersion = 13;
     render();
   }
 
@@ -589,8 +591,26 @@
   }
 
   let restoredIndex;
-  if (Number(saved.sequenceVersion) >= 12) {
+  if (Number(saved.sequenceVersion) >= 13) {
     restoredIndex = Number(saved.index);
+  } else if (Number(saved.sequenceVersion) === 12) {
+    // Remapear la oración guardada al insertar una letanía y retirar
+    // el último Gloria, manteniendo también el progreso del cierre.
+    const oldSteps=steps.filter(item=>!(
+      item.kind==='litany' &&
+      item.verse?.replace(/,$/,'')==='Madre sin corrupción'
+    ));
+    const lastPrayerIndex=oldSteps.findIndex(item=>
+      item.title==='Descansen en paz'&&item.intentionNumber===2);
+    if(lastPrayerIndex>=0)oldSteps.splice(lastPrayerIndex,0,{
+      title:'Gloria',m:5,intentionNumber:2
+    });
+    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
+    const prior=oldSteps[oldIndex];
+    restoredIndex=!prior?steps.length:
+      prior.title==='Gloria'&&prior.intentionNumber===2
+        ?steps.findIndex(item=>item.title==='Descansen en paz'&&item.intentionNumber===2)
+        :steps.indexOf(prior);
   } else if (Number(saved.sequenceVersion) === 11) {
     // La v0.1.54 trasladó la Salve al quinto Gloria. Al regresar a
     // la secuencia anterior, conservar la oración concreta y distinguir
@@ -718,7 +738,7 @@
   }
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
-  state.sequenceVersion = 12;
+  state.sequenceVersion = 13;
   if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
