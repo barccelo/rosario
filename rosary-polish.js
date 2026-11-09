@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-11';
+    sheet.href = 'rosary-polish.css?v=20261109-12';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -118,34 +118,47 @@
     }
     function addVerses(parts,showVoiceLabels=false,includeChestIcon=false) {
       prayer.replaceChildren();
+      // Únicamente los tres Cordero de Dios usan el diseño horizontal:
+      // figura a la izquierda, versículo y respuesta a la derecha.
+      // Los otros diálogos conservan el diseño y la navegación originales.
+      let output=prayer;
+      if(includeChestIcon){
+        const layout=document.createElement('span');
+        layout.className='rosario-lamb-layout';
+        const visual=document.createElement('span');
+        visual.className='rosario-lamb-gesture';
+        visual.setAttribute('role','img');
+        visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
+        const image=document.createElement('img');
+        image.src='assets/rosary-lamb-approved.webp';
+        image.alt='';
+        image.width=229;
+        image.height=348;
+        image.decoding='async';
+        image.draggable=false;
+        visual.append(image);
+        const ink=document.createElement('span');
+        ink.className='rosario-lamb-outline';
+        ink.setAttribute('aria-hidden','true');
+        ink.style.setProperty('--rosario-lamb-ink-mask',
+          'url("assets/rosary-lamb-approved-outline.png")');
+        visual.append(ink);
+        image.onerror=()=>{
+          image.onerror=null;
+          ink.remove();
+          image.src='assets/rosary-lamb-256.png';
+        };
+        const divider=document.createElement('span');
+        divider.className='rosario-lamb-divider';
+        divider.setAttribute('aria-hidden','true');
+        const words=document.createElement('span');
+        words.className='rosario-lamb-copy';
+        layout.append(visual,divider,words);
+        prayer.append(layout);
+        output=words;
+      }
       parts.forEach(part=>{
         [['℣.',part.verse,'guide'],['℟.',part.response,'assembly']].forEach(([glyph,text,role])=>{
-          if(role==='assembly'&&includeChestIcon){
-            const cue=document.createElement('span');
-            cue.className='rosario-lamb-gesture';
-            cue.setAttribute('role','img');
-            cue.setAttribute('aria-label','Golpearse el pecho con el puño derecho');
-            // Restaurar íntegra la ilustración aprobada: la máscara
-            // monocromática hacía ilegibles la mano y el gesto.
-            const image=document.createElement('img');
-            // Nueva fuente HD local (320px) y máscara SVG completa.
-            // Misma ilustración aprobada; sin cambiar el diseño del Rosario.
-            image.src=window.rosarioChestGestureData||'assets/rosary-lamb-256.png';
-            image.alt='';
-            image.width=320;image.height=320;
-            image.decoding='async';
-            image.draggable=false;
-            cue.append(image);
-            if(window.rosarioChestOutlineMask){
-              const ink=document.createElement('span');
-              ink.className='rosario-lamb-outline';
-              ink.setAttribute('aria-hidden','true');
-              ink.style.setProperty('--rosario-lamb-ink-mask',
-                'url("'+window.rosarioChestOutlineMask+'")');
-              cue.append(ink);
-            }
-            prayer.append(cue);
-          }
           const line=document.createElement('span');
           line.className='dialogue-line voice-'+role;
           if(showVoiceLabels){
@@ -160,7 +173,7 @@
           mark.setAttribute('aria-label',role==='guide'?'Versículo':'Respuesta');
           line.append(mark);
           appendWithAmen(line,text);
-          prayer.append(line);
+          output.append(line);
         });
       });
     }
@@ -265,6 +278,7 @@
       const showMystery=decade && !announced &&
         (step.title==='Padrenuestro'||step.title==='Avemaría');
       reading.classList.toggle('is-mystery-announcement',!!announced);
+      reading.classList.toggle('is-lamb-layout',step?.title==='Cordero de Dios'&&!!step.verse&&!!step.response);
       reading.classList.toggle('has-decade-context',!!showMystery);
       context.hidden=!showMystery;
       if(showMystery){
