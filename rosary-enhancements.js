@@ -605,12 +605,20 @@
     if(lastPrayerIndex>=0)oldSteps.splice(lastPrayerIndex,0,{
       title:'Gloria',m:5,intentionNumber:2
     });
-    const oldIndex=Math.max(0,Math.min(Number(saved.index)||0,oldSteps.length));
-    const prior=oldSteps[oldIndex];
-    restoredIndex=!prior?steps.length:
-      prior.title==='Gloria'&&prior.intentionNumber===2
-        ?steps.findIndex(item=>item.title==='Descansen en paz'&&item.intentionNumber===2)
-        :steps.indexOf(prior);
+    const mapOldIndex=raw=>{
+      const oldIndex=Math.max(0,Math.min(Number(raw)||0,oldSteps.length));
+      const prior=oldSteps[oldIndex];
+      return !prior?steps.length:
+        prior.title==='Gloria'&&prior.intentionNumber===2
+          ?steps.findIndex(item=>item.title==='Descansen en paz'&&item.intentionNumber===2)
+          :steps.indexOf(prior);
+    };
+    // La Coronilla conserva otro contador; no remapearlo con oraciones
+    // del Santo Rosario, pero sí actualizar su progreso independiente.
+    restoredIndex=saved.chapletActive===true
+      ?Number(saved.index):mapOldIndex(saved.index);
+    if(Number.isInteger(saved.rosaryIndex))
+      state.rosaryIndex=mapOldIndex(saved.rosaryIndex);
   } else if (Number(saved.sequenceVersion) === 11) {
     // La v0.1.54 trasladó la Salve al quinto Gloria. Al regresar a
     // la secuencia anterior, conservar la oración concreta y distinguir
