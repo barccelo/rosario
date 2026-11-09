@@ -1063,3 +1063,21 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer.is-lamb-layout
 }
 /* Las dos pequeñas marcas del golpe forman parte del mismo contorno
    y reciben el tratamiento menos intenso, sin introducir otro color. */
+
+/* Intenciones finales en lista: tarjeta y filas forman un solo bloque.
+   El encabezado conserva el mismo lugar durante los tres avances. */
+.immersive-prayer .rosario-final-intention-section{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  gap:0;
+}
+.immersive-prayer .rosario-final-intention-section .intention-heading-group{
+  flex:0 0 auto;
+}
+.immersive-prayer .rosario-final-intention-section .rosario-final-intention-list{
+  width:100%;
+  flex:0 0 auto;
+}
