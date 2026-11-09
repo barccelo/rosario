@@ -825,3 +825,69 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
  flex:0 0 auto;width:19px;height:19px;
  margin:0!important;accent-color:var(--ui-accent,#b89b6a);
 }
+
+/* Intenciones finales: título dorado, avance y ajuste rápido. */
+.immersive-prayer .intention-heading{
+  position:relative;
+  display:flex!important;align-items:center;justify-content:center;
+  min-height:66px;
+  padding:13px 63px 13px 21px!important;
+  gap:6px;isolation:isolate;
+}
+.immersive-prayer .intention-heading-words{
+  display:block;min-width:0;flex:1;
+  text-align:center;overflow-wrap:break-word;
+}
+.immersive-prayer .intention-heading-next{
+  position:absolute;right:42px;top:50%;
+  transform:translateY(-50%);
+  display:grid;place-items:center;
+  width:22px;height:22px;color:inherit;
+  opacity:.85;pointer-events:none;
+}
+.immersive-prayer .intention-heading-next svg{
+  display:block;width:21px;height:21px;
+  fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.immersive-prayer .intention-heading-settings{
+  position:absolute;right:5px;top:50%;
+  transform:translateY(-50%);
+  display:grid;place-items:center;
+  width:35px;height:35px;
+  border:0;border-radius:11px;background:transparent;
+  color:inherit;cursor:pointer;
+}
+.immersive-prayer .intention-heading-settings svg{
+  width:19px;height:19px;display:block;
+  stroke:currentColor;stroke-width:1.7;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.immersive-prayer .intention-heading-settings:focus-visible{
+  outline:2px solid currentColor;outline-offset:1px;
+}
+/* Las cruces son ilustraciones SVG propias, nunca glifos o emojis. */
+.immersive-prayer .prayer-symbol svg{
+  display:block;width:1em;height:1em;margin:0 auto;
+  color:inherit;overflow:visible;
+}
+/* La ilustración del golpe de pecho está entre el versículo y la
+   respuesta; escala con la tipografía y reserva espacio real. */
+.immersive-prayer .rosario-lamb-gesture{
+  display:block!important;position:relative!important;
+  width:clamp(45px,2.6em,88px);
+  height:auto;aspect-ratio:1/1;
+  max-width:100%;margin:.18em auto .22em!important;
+  padding:0!important;flex-shrink:0;clear:both;
+  pointer-events:none;
+}
+.immersive-prayer .rosario-lamb-gesture img{
+  display:block;width:100%;height:100%;
+  object-fit:contain;object-position:center;
+}
+.immersive-prayer .dialogue-line.voice-guide:has(+ .rosario-lamb-gesture){
+  margin-bottom:.22em!important;
+}
+.immersive-prayer .rosario-lamb-gesture + .dialogue-line{
+  margin-top:0!important;
+}
