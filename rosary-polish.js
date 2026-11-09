@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-9';
+    sheet.href = 'rosary-polish.css?v=20261109-11';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -128,27 +128,21 @@
             // Restaurar íntegra la ilustración aprobada: la máscara
             // monocromática hacía ilegibles la mano y el gesto.
             const image=document.createElement('img');
-            image.src='assets/rosary-lamb-256.png';
+            // Nueva fuente HD local (320px) y máscara SVG completa.
+            // Misma ilustración aprobada; sin cambiar el diseño del Rosario.
+            image.src=window.rosarioChestGestureData||'assets/rosary-lamb-256.png';
             image.alt='';
-            image.width=256;image.height=256;
+            image.width=320;image.height=320;
             image.decoding='async';
             image.draggable=false;
             cue.append(image);
-            // Capa de trazos sobre la misma ilustración: la imagen
-            // original conserva piel, cabello, ropa, expresión y mano.
-            // Sólo los píxeles de línea toman --rc-outline del misterio.
-            {
+            if(window.rosarioChestOutlineMask){
               const ink=document.createElement('span');
               ink.className='rosario-lamb-outline';
               ink.setAttribute('aria-hidden','true');
               ink.style.setProperty('--rosario-lamb-ink-mask',
-                'url("assets/rosary-lamb-outline-256.png")');
+                'url("'+window.rosarioChestOutlineMask+'")');
               cue.append(ink);
-              image.onerror=()=>{
-                image.onerror=null;
-                ink.remove();
-                if(window.rosarioChestGestureData)image.src=window.rosarioChestGestureData;
-              };
             }
             prayer.append(cue);
           }
