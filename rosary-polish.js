@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-12';
+    sheet.href = 'rosary-polish.css?v=20261109-13';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -123,6 +123,23 @@
       // Los otros diálogos conservan el diseño y la navegación originales.
       let output=prayer;
       if(includeChestIcon){
+        // El contorno del personaje se afina sin tocar la ilustración
+        // ni alterar las dos líneas del golpe, el rostro o el cabello.
+        // El filtro actúa únicamente sobre la capa coloreada del misterio.
+        if(!document.getElementById('rosario-lamb-stroke-soften')){
+          const ns='http://www.w3.org/2000/svg';
+          const svg=document.createElementNS(ns,'svg');
+          svg.id='rosario-lamb-stroke-soften-defs';
+          svg.setAttribute('aria-hidden','true');
+          svg.setAttribute('width','0');
+          svg.setAttribute('height','0');
+          svg.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+          svg.innerHTML='<defs><filter id="rosario-lamb-stroke-soften" x="-5%" y="-5%" width="110%" height="110%">'+
+            '<feMorphology in="SourceAlpha" operator="erode" radius="0.45" result="fine"/>'+
+            '<feComposite in="SourceGraphic" in2="fine" operator="in"/>'+
+            '</filter></defs>';
+          document.body.append(svg);
+        }
         const layout=document.createElement('span');
         layout.className='rosario-lamb-layout';
         const visual=document.createElement('span');
