@@ -905,3 +905,27 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
 .immersive-prayer .rosario-lamb-gesture + .dialogue-line{
   margin-top:0!important;
 }
+
+/* Cordero de Dios: únicamente las líneas cambian con el misterio.
+   La imagen base conserva los rellenos, rostro y gesto aprobados.
+   El color se toma de la variante clara/oscura actual del Rosario. */
+.immersive-prayer .rosario-lamb-gesture .rosario-lamb-outline{
+  display:none;
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  -webkit-mask-image:var(--rosario-lamb-ink-mask);
+  mask-image:var(--rosario-lamb-ink-mask);
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-size:100% 100%;
+  mask-size:100% 100%;
+  -webkit-mask-position:center;
+  mask-position:center;
+}
+body[data-rosary-color-mode="mystery"] .immersive-prayer
+.rosario-lamb-gesture .rosario-lamb-outline{
+  display:block;
+  background-color:var(--rc-outline,#a38b65);
+}
