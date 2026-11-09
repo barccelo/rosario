@@ -932,7 +932,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer
   background-color:var(--rc-outline,#a38b65);
 }
 
-/* La base y el contorno usan exactamente las mismas coordenadas (256 px). */
+/* La máscara vectorial y la ilustración se alinean por la caja 1:1, sin alterar el layout. */
 .immersive-prayer .rosario-lamb-gesture img,
 .immersive-prayer .rosario-lamb-gesture .rosario-lamb-outline{
   image-rendering:auto;
