@@ -1010,11 +1010,18 @@
       const paragraph = $('immersiveText');
       paragraph.replaceChildren();
       [
-        ['℣.', step.verse, 'Versículo'],
-        ['℟.', step.response, 'Respuesta']
-      ].forEach(([mark, text, label]) => {
+        ['℣.', step.verse, 'Versículo','guide'],
+        ['℟.', step.response, 'Respuesta','assembly']
+      ].forEach(([mark, text, label, role]) => {
         const line = document.createElement('span');
-        line.className = 'dialogue-line';
+        const station=step.title==='Estación al Santísimo Sacramento';
+        line.className = station?'dialogue-line voice-'+role:'dialogue-line';
+        if(station){
+          const voice=document.createElement('span');
+          voice.className='voice-label';
+          voice.textContent=role==='guide'?'Guía':'Asamblea';
+          line.append(voice);
+        }
         const badge = document.createElement('span');
         badge.className = 'verse-mark';
         badge.textContent = mark;
@@ -1063,7 +1070,7 @@
     };
     // La tarjeta dorada de la intención se crea dentro de #immersiveText.
     // No insertar un encabezado adicional que duplique esa tarjeta.
-    const intentionPrayerNames=['Padrenuestro','Avemaría','Gloria'];
+    const intentionPrayerNames=['Padrenuestro','Avemaría','Gloria','Descansen en paz'];
     function updateFinalIntentions(step){
       const visible=Number.isInteger(step?.intentionNumber)&&
         (step.kind==='final-intention'||intentionPrayerNames.includes(step.title));
