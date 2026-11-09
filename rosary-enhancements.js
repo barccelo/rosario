@@ -68,11 +68,10 @@
     'Alabanzas y gracias sean dadas en todo momento, al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
     'Y bendita sea por siempre, la Santa e Inmaculada Concepción, de la Bienaventurada, siempre Virgen María, Madre de Dios y Madre nuestra.';
   prayers.Salve =
-    'Dios te salve, Reina y Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve. ' +
-    'A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas. ' +
-    'Ea, pues, Señora, abogada nuestra, vuelve a nosotros esos tus ojos misericordiosos; ' +
-    'y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre. ' +
-    '¡Oh clementísima, oh piadosa, oh dulce siempre Virgen María!';
+    'Dios te salve, Reina y Madre, Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve.\n\n' +
+    'A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas.\n\n' +
+    'Ea, pues, Señora, abogada nuestra, vuelve a nosotros esos tus ojos misericordiosos; y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre.\n\n' +
+    '¡Oh clemente, oh piadosa, oh dulce siempre Virgen María!';
   prayers['Ruega por nosotros'] =
     'Ruega por nosotros, Santa Madre de Dios.\n\nPara que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.';
   prayers['Bajo tu amparo'] =
