@@ -604,3 +604,19 @@ body.rosario-pouch-hide-original .physical-scroll-viewport > svg.physical-path{
 .rosario-pouch-layer[data-phase=sealing] .rosario-pouch-title{
   opacity:0!important;animation:none!important;
 }
+
+/* El nombre del misterio sólo puede verse cuando la carterita terminó
+   de cerrarse. Nunca aparece mientras se introduce o recoge el Rosario,
+   ni durante el giro final de la solapa. */
+.rosario-pouch-layer[data-phase]:not([data-phase="closed"]):not([data-phase="finished"]) .rosario-pouch-title{
+  visibility:hidden!important;
+  opacity:0!important;
+  animation:none!important;
+  transition:none!important;
+}
+.rosario-pouch-layer[data-phase="closed"] .rosario-pouch-title,
+.rosario-pouch-layer[data-phase="finished"] .rosario-pouch-title{
+  visibility:visible!important;
+  opacity:.83!important;
+  animation:none!important;
+}
