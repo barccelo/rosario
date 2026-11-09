@@ -415,3 +415,19 @@
   background:#2c3233;color:#e8e9e2;border-color:#89928e;
   --ui-muted:#b1b8b1;--ui-accent:#dfc38d;--ui-outline:#707c75;
 }
+
+/* Iconografía incrustada: nunca delegar los símbolos a emojis del sistema. */
+.brand>span svg{
+  display:inline-block;vertical-align:middle;
+  width:1em;height:1em;margin-right:1px;
+  stroke:currentColor;fill:none;stroke-width:1.5;
+}
+#settings.icon svg{
+  width:21px;height:21px;display:block;margin:auto;
+  stroke:currentColor;fill:none;stroke-width:1.65;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+#modalContent .rosario-onboarding-launch-mark svg{
+  display:block;width:21px;height:21px;
+  fill:none;stroke:currentColor;
+}
