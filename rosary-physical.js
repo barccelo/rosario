@@ -61,7 +61,9 @@
     const svg=document.createElementNS(NS,'svg');
     svg.classList.add('physical-path');
     svg.setAttribute('role','group');
-    svg.setAttribute('aria-label','Un solo rosario: cinco decenas en un lazo y un colgante con una cruz.');
+    // Cada cuenta y la cruz tienen su propia descripción accesible.
+    // No añadir texto descriptivo al SVG general: algunos navegadores
+    // incorporaban ese aria-label al copiar el texto de las oraciones.
     svg.style.setProperty('--physical-path-height',HEIGHT+'px');
     viewport.append(svg);
     stage.append(viewport);
