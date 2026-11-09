@@ -369,9 +369,11 @@
       const cross=document.createElement('span');
       cross.className='prayer-symbol';
       cross.setAttribute('aria-hidden','true');
+      // Recupera la silueta de la cruz latina anterior, ahora con un
+      // único contorno SVG sólido; ninguna fuente del sistema interviene.
       cross.innerHTML='<svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">'+
-        '<path d="M32 5V59M12 25H52" fill="none" stroke="currentColor" '+
-        'stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        '<path d="M29 5Q32 3 35 5V22H49Q52 22 53 20H56V33H53Q52 30 49 30H35V58Q35 61 32 61Q29 61 29 58V30H15Q12 30 11 33H8V20H11Q12 22 15 22H29Z" '+
+        'fill="currentColor"/></svg>';
       return cross;
     }
     // Se anima un único elemento real. Jamás crear una copia del
