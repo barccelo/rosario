@@ -116,10 +116,24 @@
         Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
     }
-    function addVerses(parts,showVoiceLabels=false) {
+    function addVerses(parts,showVoiceLabels=false,includeChestIcon=false) {
       prayer.replaceChildren();
       parts.forEach(part=>{
         [['℣.',part.verse,'guide'],['℟.',part.response,'assembly']].forEach(([glyph,text,role])=>{
+          if(role==='assembly'&&includeChestIcon&&window.rosarioChestGestureData){
+            const cue=document.createElement('span');
+            cue.className='rosario-lamb-gesture';
+            cue.setAttribute('role','img');
+            cue.setAttribute('aria-label','Golpearse el pecho con el puño derecho');
+            const image=document.createElement('img');
+            image.src=window.rosarioChestGestureData;
+            image.alt='';
+            image.width=96;image.height=96;
+            image.decoding='async';
+            image.draggable=false;
+            cue.append(image);
+            prayer.append(cue);
+          }
           const line=document.createElement('span');
           line.className='dialogue-line voice-'+role;
           if(showVoiceLabels){
@@ -172,11 +186,7 @@
       }
     }
     function specialSymbol() {
-      const symbol=document.createElement('span');
-      symbol.className='prayer-symbol';
-      symbol.setAttribute('aria-hidden','true');
-      symbol.textContent='✝';
-      prayer.append(symbol);
+      prayer.append(makeCross());
     }
     function prayerSource(step) {
       return window.rosarioPrayerText?.(step.title,step) ||
@@ -266,7 +276,8 @@
           const match=edited.match(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]+)/);
           if(match)addVerses([{verse:match[1],response:match[2]}]);
           else {prayer.replaceChildren();appendWithAmen(prayer,edited);}
-        }else addVerses([step],step.title==='Estación al Santísimo Sacramento');
+        }else addVerses([step],step.title==='Estación al Santísimo Sacramento',
+                      step.title==='Cordero de Dios');
       }
       else if(step){
         prayer.replaceChildren();
@@ -277,7 +288,29 @@
                    state.finalIntentionsDisplay==='checklist')){
           const label=document.createElement('span');
           label.className='intention-heading';
-          label.textContent=intro;
+          const words=document.createElement('span');
+          words.className='intention-heading-words';
+          words.textContent=intro;
+          label.append(words);
+          // El título es una estación de paso cuando se muestran
+          // las oraciones completas: la flecha indica avanzar.
+          if(step.kind==='final-intention' &&
+             state.finalIntentionsDisplay==='prayers'){
+            const arrow=document.createElement('span');
+            arrow.className='intention-heading-next';
+            arrow.setAttribute('aria-hidden','true');
+            arrow.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>';
+            label.append(arrow);
+          }
+          if(isFinalIntention){
+            const picker=document.createElement('button');
+            picker.type='button';
+            picker.className='intention-heading-settings';
+            picker.setAttribute('aria-label','Configurar formato de intenciones finales');
+            picker.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3a8 8 0 0 1 2 1.1l2.3-.7 2 3.5-1.7 1.7a8 8 0 0 1 0 2.3l1.7 1.7-2 3.5-2.3-.7a8 8 0 0 1-2-1.1l-.6 2.3h-4l-.6-2.3a8 8 0 0 1-2-1.1l-2.3.7-2-3.5 1.7-1.7a8 8 0 0 1 0-2.3L3.1 8.7l2-3.5 2.3.7a8 8 0 0 1 2-1.1z"/></svg>';
+            picker.onclick=()=>window.rosarioOpenFinalIntentionChoice?.();
+            label.append(picker);
+          }
           prayer.append(label);
         }
         if(isFinalIntention && (state.finalIntentionsDisplay==='checklist'||step.kind==='final-intention')){
@@ -336,7 +369,9 @@
       const cross=document.createElement('span');
       cross.className='prayer-symbol';
       cross.setAttribute('aria-hidden','true');
-      cross.textContent='✝';
+      cross.innerHTML='<svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">'+
+        '<path d="M32 5V59M12 25H52" fill="none" stroke="currentColor" '+
+        'stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       return cross;
     }
     // Se anima un único elemento real. Jamás crear una copia del
