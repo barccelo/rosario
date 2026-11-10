@@ -966,7 +966,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer
   flex:0 0 clamp(88px,28%,175px);
   width:clamp(88px,28%,175px);
   max-width:38%;
-  aspect-ratio:229/348;
+  aspect-ratio:229/382;
   height:auto;
   margin:0!important;
   padding:0!important;
@@ -1080,4 +1080,13 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer.is-lamb-layout
 .immersive-prayer .rosario-final-intention-section .rosario-final-intention-list{
   width:100%;
   flex:0 0 auto;
+}
+
+/* Ilustración completada: el codo se redondea dentro del SVG, sin
+   recortar la figura ni modificar la columna de las oraciones. */
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
+  overflow:visible!important;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture.rosario-lamb-fallback{
+  aspect-ratio:229/348;
 }

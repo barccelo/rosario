@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261109-14';
+    sheet.href = 'rosary-polish.css?v=20261110-1';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -147,10 +147,10 @@
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
         const image=document.createElement('img');
-        image.src='assets/rosary-lamb-approved.webp';
+        image.src='assets/rosary-lamb-complete.svg';
         image.alt='';
         image.width=229;
-        image.height=348;
+        image.height=382;
         image.decoding='async';
         image.draggable=false;
         visual.append(image);
@@ -158,12 +158,16 @@
         ink.className='rosario-lamb-outline';
         ink.setAttribute('aria-hidden','true');
         ink.style.setProperty('--rosario-lamb-ink-mask',
-          'url("assets/rosary-lamb-approved-outline.png")');
+          'url("assets/rosary-lamb-complete-outline.svg")');
         visual.append(ink);
         image.onerror=()=>{
           image.onerror=null;
-          ink.remove();
-          image.src='assets/rosary-lamb-256.png';
+          // Respaldar la ilustración anterior si el dispositivo no
+          // admite imágenes SVG con recursos incrustados.
+          visual.classList.add('rosario-lamb-fallback');
+          ink.style.setProperty('--rosario-lamb-ink-mask',
+            'url("assets/rosary-lamb-approved-outline.png")');
+          image.src='assets/rosary-lamb-approved.webp';
         };
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
