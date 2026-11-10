@@ -1053,13 +1053,13 @@ body:not([data-rosary-color-mode="mystery"]) .immersive-prayer.is-lamb-layout .r
   }
 }
 
-/* Ajuste fino de los Corderos: menos grosor y contraste en el
-   contorno, sin alterar rellenos, cabello ni el layout horizontal.
-   Si SVG filters no está disponible, la opacidad mantiene el efecto. */
+/* Acentos sobre el dibujo tomado directamente de la captura aprobada:
+   alterar exclusivamente el color de los trazos lilas. Los rellenos,
+   el brillo del rostro y el codo no se transforman. */
 body[data-rosary-color-mode="mystery"] .immersive-prayer.is-lamb-layout
 .rosario-lamb-gesture .rosario-lamb-outline{
-  opacity:.69;
-  filter:url(#rosario-lamb-stroke-soften)!important;
+  opacity:.83;
+  filter:none!important;
 }
 /* Las dos pequeñas marcas del golpe forman parte del mismo contorno
    y reciben el tratamiento menos intenso, sin introducir otro color. */
@@ -1082,8 +1082,8 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer.is-lamb-layout
   flex:0 0 auto;
 }
 
-/* Ilustración completada: el codo se redondea dentro del SVG, sin
-   recortar la figura ni modificar la columna de las oraciones. */
+/* La imagen original de la captura mantiene su recorte natural
+   y su transparencia, sin extensiones ni parches del brazo. */
 .immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
   overflow:visible!important;
 }
