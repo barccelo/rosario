@@ -1090,3 +1090,60 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer.is-lamb-layout
 .immersive-prayer.is-lamb-layout .rosario-lamb-gesture.rosario-lamb-fallback{
   aspect-ratio:229/348;
 }
+
+/* ROSARIO LAMB COMPLETION v0.1.84
+   El WebP de referencia termina en una línea horizontal antes del codo.
+   Se conserva intacta la parte superior y solo se completa la silueta
+   por detrás, sin recortar las cuentas ni ampliar el panel de oración. */
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
+  isolation:isolate;
+  overflow:visible!important;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-original,
+.immersive-prayer.is-lamb-layout .rosario-lamb-completion{
+  display:block;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-original{
+  z-index:2;
+  /* Atenuar únicamente el corte inferior grabado en el archivo original. */
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 87.5%,#000b 89%,#0006 93%,transparent 96%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 87.5%,#000b 89%,#0006 93%,transparent 96%);
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-completion{z-index:1}
+.immersive-prayer.is-lamb-layout .rosario-lamb-completion svg{
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-original img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+}
+/* Una sola tinta para contornos de la imagen y del codo completado:
+   depende del modo y de la variante clara u oscura del Rosario. */
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture .rosario-lamb-outline{
+  display:block!important;
+  background-color:var(--rosario-lamb-ink,#9f8668)!important;
+  opacity:1!important;
+  mix-blend-mode:screen;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-completion svg
+  :is(.rosario-lamb-completion-shirt,.rosario-lamb-completion-hanging,.rosario-lamb-completion-elbow){
+  stroke:var(--rosario-lamb-ink,#9f8668)!important;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture.rosario-lamb-fallback
+  .rosario-lamb-original{
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture.rosario-lamb-fallback
+  .rosario-lamb-completion{display:none}
