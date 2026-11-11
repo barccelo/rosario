@@ -321,3 +321,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - El borde inferior del recurso se suaviza ligeramente en la silueta visible, sin volver a reconstruir ni calcar ningún brazo.
 - La actualización cromática funciona en los modos Clásico, Misionero y Según los misterios, con variantes claras y oscuras; no cambia los controles, los misterios ni el progreso.
 - Se actualizan las referencias de caché y se conserva la firma permanente para GitHub Releases y Obtainium.
+
+## v0.1.86 — Ilustración vectorial única, codo completo y sin titileo (11 de noviembre de 2026)
+
+- Se reemplaza el WebP del gesto de «Cordero de Dios» por un SVG nuevo, dibujado íntegramente en `rosary-lamb-vector.js`: rostro de ojos cerrados, cabello, camisa y puño derecho sobre el pecho izquierdo.
+- El antebrazo elevado forma una **única silueta continua**, con el codo redondeado, cerrado y separado del borde inferior del `viewBox` para evitar recortes. No se superponen brazos ni trazos duplicados.
+- Todos los contornos principales, incluidos el puño, el codo y el perfil, heredan `--rosario-lamb-ink` de los modos Clásico, Misionero y Según los misterios, incluidos sus tonos claros/oscuros; no se usa contorno negro.
+- Se elimina el sistema de canvas, máscaras y recoloreado píxel a píxel que podía titilar al cambiar de oración. El SVG se dibuja de forma síncrona y sus colores cambian por variables CSS sin regenerar la imagen.
+- Se conserva el diseño horizontal de oración, la división, los textos, los controles y el progreso. Se actualizan las referencias de caché para web y APK.
+- Publicar como APK firmado en GitHub Releases para que Obtainium detecte la actualización. Validación en Android: comprobar codo, contornos con distintas paletas y ausencia de titileo en los tres «Cordero de Dios».
