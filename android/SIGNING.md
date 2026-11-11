@@ -351,3 +351,5 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se mantiene una única instancia del recurso durante las tres invocaciones «Cordero de Dios» para evitar recargas de imagen al avanzar. No se utiliza canvas ni reconstrucciones dinámicas.
 - Se actualizan las versiones de caché web/Android y se conserva la firma estable. Publicar APK firmado en GitHub Releases para que Obtainium detecte `v0.1.88`.
 - Validación visual en el teléfono pendiente: contorno del brazo sin doble línea, codo completo y estabilidad de los bordes al avanzar y al cambiar de tema.
+
+> Reintento de publicación v0.1.88: se reactiva GitHub Actions después de quedar la ejecución original en cola sin tareas. Sin modificaciones al código ni a la firma.
