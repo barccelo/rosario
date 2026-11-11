@@ -148,7 +148,7 @@
                 result="darkContours"/>
               <feComposite in="darkContours" in2="SourceAlpha" operator="in"
                 result="actualContours"/>
-              <feFlood flood-color="var(--rosario-lamb-ink,#95789d)"
+              <feFlood style="flood-color:var(--rosario-lamb-ink,#95789d)"
                 result="themeInk"/>
               <feComposite in="themeInk" in2="actualContours" operator="in"/>
             </filter>
