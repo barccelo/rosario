@@ -121,6 +121,8 @@
         mode==='missionary' ? missionary[missionarySection].border :
         state.dark ? '#C3A982' : '#947960';
       document.body.style.setProperty('--rosario-lamb-ink',lambInk);
+      // Recolorear el único dibujo ya mostrado; sin reconstruir extremidades.
+      window.rosarioRecolorLamb?.();
       if(mode==='mystery'){
         const cssMap = {
           '--rc-bg':colors.bg,'--rc-surface':colors.surface,
