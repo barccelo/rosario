@@ -146,36 +146,92 @@
         visual.className='rosario-lamb-gesture';
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
+
+        // Una sola ilustración: sin segundo brazo, siluetas adicionales
+        // ni máscaras visuales superpuestas. La tinta cambia dentro del arte.
         const image=document.createElement('img');
-        image.src='assets/rosary-lamb-reference.webp';
         image.alt='';
-        image.width=480;
-        image.height=800;
         image.decoding='async';
         image.draggable=false;
-        // La silueta original se funde suavemente con la terminación inferior.
-        // El complemento permanece detrás; nunca cubre el gesto ni el rostro.
-        const completion=document.createElement('span');
-        completion.className='rosario-lamb-completion';
-        completion.setAttribute('aria-hidden','true');
-        completion.innerHTML=window.rosarioLambCompletionSVG||'';
-        const original=document.createElement('span');
-        original.className='rosario-lamb-original';
-        const ink=document.createElement('span');
-        ink.className='rosario-lamb-outline';
-        ink.setAttribute('aria-hidden','true');
-        ink.style.setProperty('--rosario-lamb-ink-mask',
-          'url("assets/rosary-lamb-reference-outline.png")');
-        original.append(image,ink);
-        visual.append(completion,original);
-        image.onerror=()=>{
-          image.onerror=null;
-          // Recurso de respaldo en navegadores con decodificación WebP antigua.
-          visual.classList.add('rosario-lamb-fallback');
-          ink.style.setProperty('--rosario-lamb-ink-mask',
-            'url("assets/rosary-lamb-approved-outline.png")');
+        const canvas=document.createElement('canvas');
+        canvas.className='rosario-lamb-themed-art';
+        canvas.hidden=true;
+        visual.append(image,canvas);
+
+        function renderThemedLamb(){
+          if(!visual.isConnected||!image.naturalWidth)return;
+          const w=image.naturalWidth,h=image.naturalHeight;
+          const ctx=canvas.getContext('2d',{willReadFrequently:true});
+          if(!ctx)return;
+          canvas.width=w;canvas.height=h;
+          ctx.drawImage(image,0,0,w,h);
+          const base=ctx.getImageData(0,0,w,h);
+          const original=new Uint8ClampedArray(base.data);
+          const lastInkRow=new Int32Array(w);
+          for(let x=0;x<w;x++){
+            lastInkRow[x]=-1;
+            for(let y=h-1;y>=0;y--){
+              if(original[(y*w+x)*4+3]>35){lastInkRow[x]=y;break;}
+            }
+          }
+          let currentColor='';
+          function updateInk(){
+            if(!visual.isConnected)return;
+            const value=getComputedStyle(document.body)
+              .getPropertyValue('--rosario-lamb-ink').trim()||'#9883a0';
+            if(value===currentColor)return;
+            const hex=/^#([0-9a-f]{6})$/i.exec(value);
+            if(!hex)return;
+            currentColor=value;
+            const n=parseInt(hex[1],16);
+            const tint=[(n>>16)&255,(n>>8)&255,n&255];
+            const data=base.data;
+            const feather=Math.max(6,Math.round(h*.013));
+            for(let y=0;y<h;y++){
+              for(let x=0;x<w;x++){
+                const i=(y*w+x)*4;
+                const r=original[i],g=original[i+1],b=original[i+2],alpha=original[i+3];
+                if(!alpha)continue;
+                const peak=Math.max(r,g,b);
+                // Recolorear tinta morada u oscura, sin alterar cabello marrón,
+                // piel, camisa ni brillo del rostro.
+                const purple=b>=r*.86&&b>=g*1.065&&
+                  ((peak<195&&g<174)||(b-r>17&&g<184));
+                const nearBlack=peak<92&&b>=r*.78&&b>=g*.94;
+                const weight=purple ? .96 : nearBlack ? .9 : 0;
+                if(weight){
+                  const shade=.78+.2*Math.min(1,(r+g+b)/390);
+                  for(let c=0;c<3;c++)
+                    data[i+c]=Math.round(original[i+c]*(1-weight)+tint[c]*shade*weight);
+                }else{
+                  data[i]=r;data[i+1]=g;data[i+2]=b;
+                }
+                // Suavizar el borde inferior recto que pertenece al WebP,
+                // sin repetir la forma del codo ni introducir otra extremidad.
+                const tail=lastInkRow[x]-y;
+                data[i+3]=(lastInkRow[x]>h*.82&&tail<feather)
+                  ?Math.round(alpha*Math.max(0,Math.min(1,tail/feather)))
+                  :alpha;
+              }
+            }
+            ctx.putImageData(base,0,0);
+            canvas.hidden=false;
+            image.classList.add('rosario-lamb-source-hidden');
+          }
+          window.rosarioRecolorLamb=updateInk;
+          updateInk();
+        }
+        image.addEventListener('load',()=>{
+          try{renderThemedLamb();}catch(error){
+            canvas.hidden=true;
+            image.classList.remove('rosario-lamb-source-hidden');
+          }
+        });
+        image.addEventListener('error',()=>{
+          if(image.src.includes('rosary-lamb-approved.webp'))return;
           image.src='assets/rosary-lamb-approved.webp';
-        };
+        });
+        image.src='assets/rosary-lamb-reference.webp';
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
         divider.setAttribute('aria-hidden','true');
