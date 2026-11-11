@@ -341,3 +341,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se elimina el archivo `rosary-lamb-vector.js` rechazado y se actualizan las versiones de caché en web y Android.
 - La publicación mantiene la firma estable y genera APK en GitHub Releases para que Obtainium detecte `v0.1.87`.
 - Validación pendiente de dispositivo: comprobar el color del contorno del antebrazo en variantes de misterios y ausencia de parpadeo al avanzar.
+
+## v0.1.88 — Contorno integrado sin duplicaciones (11 de noviembre de 2026)
+
+- Se conserva **exactamente** la ilustración original `assets/rosary-lamb-reference.webp`; no se alteran rostro, gesto, proporciones, codo ni camisa.
+- Se elimina la segunda imagen filtrada y la máscara en forma de brazo de v0.1.87 que generaban una línea celeste superpuesta, irregular y artificial.
+- El contorno se modifica dentro de **una sola imagen** con un filtro SVG que primero retira los píxeles de tinta morada/oscura originales y los sustituye por tinta temática en la misma posición. No añade un brazo, una segunda silueta ni píxeles por encima de la imagen original.
+- La tinta toma un tono sobrio derivado de la variante activa del rosario (clásica, misionera, misterios, clara u oscura); no utiliza negro fijo ni colores fluorescentes.
+- Se mantiene una única instancia del recurso durante las tres invocaciones «Cordero de Dios» para evitar recargas de imagen al avanzar. No se utiliza canvas ni reconstrucciones dinámicas.
+- Se actualizan las versiones de caché web/Android y se conserva la firma estable. Publicar APK firmado en GitHub Releases para que Obtainium detecte `v0.1.88`.
+- Validación visual en el teléfono pendiente: contorno del brazo sin doble línea, codo completo y estabilidad de los bordes al avanzar y al cambiar de tema.
