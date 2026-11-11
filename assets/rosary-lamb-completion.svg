@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 800" preserveAspectRatio="none" aria-hidden="true">
+  <!-- Continuación inferior de la ilustración de referencia: solo codo, brazo y camisa.
+       El arte del rostro, mano, pelo y gesto no se modifica. -->
+  <defs>
+    <linearGradient id="rosarioLambShirt" x1="0" y1="0" x2=".42" y2="1">
+      <stop offset="0" stop-color="#f5ecd9"/>
+      <stop offset=".64" stop-color="#eee2cf"/>
+      <stop offset="1" stop-color="#d4c2ae"/>
+    </linearGradient>
+    <linearGradient id="rosarioLambSkin" x1="0" y1="0" x2=".35" y2="1">
+      <stop offset="0" stop-color="#f7b69e"/>
+      <stop offset=".62" stop-color="#f6ac96"/>
+      <stop offset="1" stop-color="#e99380"/>
+    </linearGradient>
+  </defs>
+  <path class="rosario-lamb-completion-shirt"
+        d="M109 689 C171 683 317 684 380 686 L385 750
+           Q380 786 350 790 Q234 799 143 789
+           Q111 786 109 755Z"
+        fill="url(#rosarioLambShirt)" stroke="var(--rosario-lamb-ink,#9882a2)"
+        stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="rosario-lamb-completion-hanging"
+        d="M388 620 Q421 636 452 619 L452 749
+           Q453 787 427 793 Q398 795 391 771Z"
+        fill="url(#rosarioLambSkin)" stroke="var(--rosario-lamb-ink,#9882a2)"
+        stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M402 681 Q406 738 402 769" fill="none"
+        stroke="#ffe0c6" stroke-width="7" stroke-linecap="round" opacity=".46"/>
+  <path class="rosario-lamb-completion-elbow"
+        d="M51 637 C34 661 25 703 31 729
+           C37 762 61 780 88 779
+           C108 778 130 764 151 746
+           L189 709 Q169 698 140 705
+           L86 723 Q57 716 51 637Z"
+        fill="url(#rosarioLambSkin)" stroke="var(--rosario-lamb-ink,#9882a2)"
+        stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M53 689 C46 720 49 749 64 758" fill="none"
+        stroke="#ffe0c6" stroke-width="8" stroke-linecap="round" opacity=".43"/>
+  <path d="M138 739 Q127 761 99 768" fill="none"
+        stroke="#d58975" stroke-width="4" stroke-linecap="round" opacity=".2"/>
+</svg>
