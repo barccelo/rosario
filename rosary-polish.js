@@ -153,13 +153,21 @@
         image.height=800;
         image.decoding='async';
         image.draggable=false;
-        visual.append(image);
+        // La silueta original se funde suavemente con la terminación inferior.
+        // El complemento permanece detrás; nunca cubre el gesto ni el rostro.
+        const completion=document.createElement('span');
+        completion.className='rosario-lamb-completion';
+        completion.setAttribute('aria-hidden','true');
+        completion.innerHTML=window.rosarioLambCompletionSVG||'';
+        const original=document.createElement('span');
+        original.className='rosario-lamb-original';
         const ink=document.createElement('span');
         ink.className='rosario-lamb-outline';
         ink.setAttribute('aria-hidden','true');
         ink.style.setProperty('--rosario-lamb-ink-mask',
           'url("assets/rosary-lamb-reference-outline.png")');
-        visual.append(ink);
+        original.append(image,ink);
+        visual.append(completion,original);
         image.onerror=()=>{
           image.onerror=null;
           // Recurso de respaldo en navegadores con decodificación WebP antigua.
