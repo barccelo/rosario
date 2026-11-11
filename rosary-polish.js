@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261111-5';
+    sheet.href = 'rosary-polish.css?v=20261111-6';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -130,9 +130,35 @@
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
 
-        // Un único SVG completo, en línea: sin WebP recortado, overlays,
-        // canvas, callbacks asíncronos ni recoloreado píxel a píxel.
-        visual.innerHTML=window.rosarioLambVectorSVG||'';
+        // Referencia gráfica original aprobada. Se conserva íntegra:
+        // rostro, cabello, mano, camisa, codo y proporciones.
+        // La segunda lectura usa exactamente el mismo archivo alineado,
+        // únicamente como máscara de la tinta oscura del antebrazo.
+        // No hay extremidades reconstruidas ni repintado en canvas.
+        visual.innerHTML=`<svg viewBox="0 0 480 800" xmlns="http://www.w3.org/2000/svg"
+          role="presentation" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter id="rosarioLambArmInk" x="0" y="0" width="100%" height="100%"
+              color-interpolation-filters="sRGB">
+              <feColorMatrix in="SourceGraphic" type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.1 -1.1 -1.1 0 1.9"
+                result="darkContours"/>
+              <feComposite in="darkContours" in2="SourceAlpha" operator="in"
+                result="actualContours"/>
+              <feFlood flood-color="var(--rosario-lamb-ink,#95789d)"
+                result="themeInk"/>
+              <feComposite in="themeInk" in2="actualContours" operator="in"/>
+            </filter>
+            <clipPath id="rosarioLambArmOnly">
+              <rect x="0" y="403" width="480" height="397"/>
+            </clipPath>
+          </defs>
+          <image href="assets/rosary-lamb-reference.webp" width="480"
+            height="800" preserveAspectRatio="xMidYMid meet"/>
+          <image href="assets/rosary-lamb-reference.webp" width="480"
+            height="800" preserveAspectRatio="xMidYMid meet"
+            clip-path="url(#rosarioLambArmOnly)" filter="url(#rosarioLambArmInk)"/>
+        </svg>`;
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
         divider.setAttribute('aria-hidden','true');
