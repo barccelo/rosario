@@ -112,6 +112,15 @@
       // tono y no el relleno tenue reservado antes para el resaltado.
       const activeFill=state.group==='Luminosos'?colors.bead:colors.activeFill;
       document.body.dataset.rosaryColorMode=mode;
+      // Contorno del personaje y de su codo: siempre toma el color del rosario.
+      // También se actualiza al cambiar misterio, modo, variante o tema oscuro.
+      const currentBead=Number(steps[state.index]?.bead);
+      const missionarySection=Math.max(0,Math.min(4,
+        Math.floor((Number.isFinite(currentBead)?currentBead:0)/11)));
+      const lambInk=mode==='mystery' ? colors.outline :
+        mode==='missionary' ? missionary[missionarySection].border :
+        state.dark ? '#C3A982' : '#947960';
+      document.body.style.setProperty('--rosario-lamb-ink',lambInk);
       if(mode==='mystery'){
         const cssMap = {
           '--rc-bg':colors.bg,'--rc-surface':colors.surface,
