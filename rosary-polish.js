@@ -548,24 +548,36 @@
       event.preventDefault();
     },true);
 
-    // Pulsación prolongada sobre dorado, compatible con touch y ratón.
-    // Prevenir el menú nativo del navegador (seleccionar/copiar texto).
-    let hold=null,origin=null,holdFired=false,suppressVoiceClickUntil=0;
-    const goldTarget=target=>target.closest?.('.voice-assembly,.wheel-response');
-    function openVoiceSettings(){
-      if(holdFired)return;
-      holdFired=true;
-      clearTimeout(hold);hold=null;
-      suppressVoiceClickUntil=performance.now()+950;
-      window.rosarioOpenVoiceSettings?.();
+    // Los ajustes de voces sólo se abren al mantener pulsada una respuesta.
+    // En Android, contextmenu puede llegar antes que el umbral del gesto:
+    // se bloquea el menú nativo, pero NUNCA se utiliza para abrir ajustes.
+    const VOICE_HOLD_MS=1200;
+    const VOICE_HOLD_MOVE_PX=12;
+    let voiceHold=null,suppressVoiceClickUntil=0;
+    const voiceTarget=target=>target.closest?.('.voice-assembly,.wheel-response');
+    function cancelVoiceHold(){
+      if(voiceHold)clearTimeout(voiceHold.timer);
+      voiceHold=null;
     }
-    function cancelHold(){
-      clearTimeout(hold);hold=null;origin=null;
+    function startVoiceHold(source,id,x,y){
+      cancelVoiceHold();
+      const candidate={source,id,x,y,timer:null};
+      voiceHold=candidate;
+      candidate.timer=setTimeout(()=>{
+        if(voiceHold!==candidate || document.hidden ||
+           document.getElementById('modal')?.open)return;
+        cancelVoiceHold();
+        suppressVoiceClickUntil=performance.now()+950;
+        window.rosarioOpenVoiceSettings?.();
+      },VOICE_HOLD_MS);
+    }
+    function moveVoiceHold(source,id,x,y){
+      if(!voiceHold||voiceHold.source!==source||voiceHold.id!==id)return;
+      if(Math.hypot(x-voiceHold.x,y-voiceHold.y)>VOICE_HOLD_MOVE_PX)
+        cancelVoiceHold();
     }
     reading.addEventListener('contextmenu',e=>{
-      if(!state.voiceColors || !goldTarget(e.target))return;
-      e.preventDefault();
-      openVoiceSettings();
+      if(state.voiceColors && voiceTarget(e.target))e.preventDefault();
     });
     reading.addEventListener('click',e=>{
       if(performance.now()<suppressVoiceClickUntil){
@@ -573,39 +585,46 @@
         e.stopImmediatePropagation();
       }
     },true);
+    // Un solo temporizador por gesto: touch para Android y pointer para ratón/lápiz.
+    // No iniciar dos temporizadores para el mismo dedo.
     reading.addEventListener('pointerdown',e=>{
-      if(!state.voiceColors || e.button!==0 || !goldTarget(e.target))return;
-      cancelHold();
-      holdFired=false;
-      origin={x:e.clientX,y:e.clientY,id:e.pointerId};
-      hold=setTimeout(openVoiceSettings,1100);
+      if(e.pointerType==='touch')return;
+      if(!state.voiceColors||e.button!==0||!voiceTarget(e.target)){
+        cancelVoiceHold();
+        return;
+      }
+      startVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
     },true);
     reading.addEventListener('pointermove',e=>{
-      if(origin && e.pointerId===origin.id &&
-         Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>10)cancelHold();
+      moveVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
     },true);
     for(const name of ['pointerup','pointercancel','pointerleave'])
-      reading.addEventListener(name,cancelHold,true);
-    // En pantallas táctiles Android el menú de selección puede interceptar
-    // pointercancel; conservar también el temporizador de touchstart.
-    let touchTimer=null,touchOrigin=null;
+      reading.addEventListener(name,e=>{
+        if(voiceHold?.source==='pointer'&&voiceHold.id===e.pointerId)
+          cancelVoiceHold();
+      },true);
     reading.addEventListener('touchstart',e=>{
-      if(!state.voiceColors || e.touches.length!==1 || !goldTarget(e.target))return;
-      touchOrigin={x:e.touches[0].clientX,y:e.touches[0].clientY};
-      holdFired=false;
-      clearTimeout(touchTimer);
-      touchTimer=setTimeout(openVoiceSettings,1100);
+      if(!state.voiceColors||e.touches.length!==1||!voiceTarget(e.target)){
+        cancelVoiceHold();
+        return;
+      }
+      const t=e.touches[0];
+      startVoiceHold('touch',t.identifier,t.clientX,t.clientY);
     },{passive:true,capture:true});
     reading.addEventListener('touchmove',e=>{
-      if(touchOrigin && Math.hypot(e.touches[0].clientX-touchOrigin.x,
-          e.touches[0].clientY-touchOrigin.y)>10){
-        clearTimeout(touchTimer);touchTimer=null;touchOrigin=null;
-      }
+      if(voiceHold?.source!=='touch')return;
+      if(e.touches.length!==1){cancelVoiceHold();return;}
+      const t=e.touches[0];
+      moveVoiceHold('touch',t.identifier,t.clientX,t.clientY);
     },{passive:true,capture:true});
     for(const name of ['touchend','touchcancel'])
       reading.addEventListener(name,()=>{
-        clearTimeout(touchTimer);touchTimer=null;touchOrigin=null;
+        if(voiceHold?.source==='touch')cancelVoiceHold();
       },{passive:true,capture:true});
+    window.addEventListener('blur',cancelVoiceHold);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden)cancelVoiceHold();
+    });
     render();
   });
 })();
