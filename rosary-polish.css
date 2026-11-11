@@ -885,19 +885,28 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   display:block;width:1em;height:1em;margin:0 auto;
   color:inherit;overflow:visible;
 }
-/* Imagen original aprobada: restaurar colores y trazos
-   íntegros; nada de máscaras que pierdan la expresión del gesto. */
+/* Cordero de Dios: ilustración vectorial completa, sin capas duplicadas.
+   El contorno se hereda del tema mediante --rosario-lamb-ink. */
 .immersive-prayer .rosario-lamb-gesture{
-  display:block!important;position:relative!important;
+  display:block!important;
+  position:relative!important;
   width:clamp(105px,4.6em,135px);
-  height:auto;aspect-ratio:1/1;
-  max-width:100%;margin:.18em auto .22em!important;
-  padding:0!important;flex-shrink:0;clear:both;
+  height:auto;
+  aspect-ratio:320/430;
+  max-width:100%;
+  margin:.18em auto .22em!important;
+  padding:0!important;
+  flex-shrink:0;
+  clear:both;
   pointer-events:none;
+  overflow:visible!important;
 }
-.immersive-prayer .rosario-lamb-gesture img{
-  display:block;width:100%;height:100%;
-  object-fit:contain;object-position:center;
+.immersive-prayer .rosario-lamb-gesture svg{
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  image-rendering:auto;
 }
 .immersive-prayer .dialogue-line.voice-guide:has(+ .rosario-lamb-gesture){
   margin-bottom:.22em!important;
@@ -933,18 +942,18 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   flex:0 0 clamp(88px,28%,175px);
   width:clamp(88px,28%,175px);
   max-width:38%;
-  aspect-ratio:229/382;
+  aspect-ratio:320/430;
   height:auto;
   margin:0!important;
   padding:0!important;
   align-self:center;
 }
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture img{
-  width:100%;height:100%;
+/* El SVG completo ocupa el contenedor sin recortar el codo. */
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture svg{
   display:block;
-  object-fit:contain;
-  object-position:center;
-  image-rendering:auto;
+  width:100%;
+  height:100%;
+  overflow:visible;
 }
 .immersive-prayer.is-lamb-layout .rosario-lamb-divider{
   align-self:stretch;
@@ -1019,34 +1028,4 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
 .immersive-prayer .rosario-final-intention-section .rosario-final-intention-list{
   width:100%;
   flex:0 0 auto;
-}
-
-/* La imagen original de la captura mantiene su recorte natural
-   y su transparencia, sin extensiones ni parches del brazo. */
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
-  overflow:visible!important;
-}
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture.rosario-lamb-fallback{
-  aspect-ratio:229/348;
-}
-
-/* Cordero de Dios: un solo dibujo de referencia. El lienzo recolorea
-   los contornos del WebP con la tinta del tema; no hay segundo brazo,
-   máscara o boceto añadido sobre la figura. */
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture{
-  overflow:visible!important;
-  isolation:isolate;
-}
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture img,
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture canvas{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:center;
-  image-rendering:auto;
-}
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture canvas[hidden],
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture img.rosario-lamb-source-hidden{
-  display:none!important;
 }
