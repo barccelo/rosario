@@ -116,6 +116,9 @@
         Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
     }
+    // Una sola instancia del arte de referencia para los tres Cordero de Dios.
+    // Reutilizar el SVG evita que WebView vuelva a decodificarlo al avanzar.
+    let persistentLambVisual=null;
     function addVerses(parts,showVoiceLabels=false,includeChestIcon=false) {
       prayer.replaceChildren();
       // Únicamente los tres Cordero de Dios usan el diseño horizontal:
@@ -125,7 +128,7 @@
       if(includeChestIcon){
         const layout=document.createElement('span');
         layout.className='rosario-lamb-layout';
-        const visual=document.createElement('span');
+        const visual=persistentLambVisual||document.createElement('span');
         visual.className='rosario-lamb-gesture';
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
@@ -135,7 +138,7 @@
         // La segunda lectura usa exactamente el mismo archivo alineado,
         // únicamente como máscara de la tinta oscura del antebrazo.
         // No hay extremidades reconstruidas ni repintado en canvas.
-        visual.innerHTML=`<svg viewBox="0 0 480 800" xmlns="http://www.w3.org/2000/svg"
+        if(!persistentLambVisual)visual.innerHTML=`<svg viewBox="0 0 480 800" xmlns="http://www.w3.org/2000/svg"
           role="presentation" preserveAspectRatio="xMidYMid meet">
           <defs>
             <filter id="rosarioLambArmInk" x="0" y="0" width="100%" height="100%"
@@ -159,6 +162,7 @@
             height="800" preserveAspectRatio="xMidYMid meet"
             clip-path="url(#rosarioLambArmOnly)" filter="url(#rosarioLambArmInk)"/>
         </svg>`;
+        persistentLambVisual=visual;
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
         divider.setAttribute('aria-hidden','true');
