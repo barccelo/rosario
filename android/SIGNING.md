@@ -330,3 +330,14 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se elimina el sistema de canvas, máscaras y recoloreado píxel a píxel que podía titilar al cambiar de oración. El SVG se dibuja de forma síncrona y sus colores cambian por variables CSS sin regenerar la imagen.
 - Se conserva el diseño horizontal de oración, la división, los textos, los controles y el progreso. Se actualizan las referencias de caché para web y APK.
 - Publicar como APK firmado en GitHub Releases para que Obtainium detecte la actualización. Validación en Android: comprobar codo, contornos con distintas paletas y ausencia de titileo en los tres «Cordero de Dios».
+
+## v0.1.87 — Recuperación de la ilustración aprobada (11 de noviembre de 2026)
+
+- Se revierte el rediseño vectorial no aprobado de «Cordero de Dios» y se recupera la ilustración original `assets/rosary-lamb-reference.webp` **sin redibujar** rostro, cabello, brazo, codo, mano ni camiseta.
+- El contorno oscuro del brazo levantado se adapta a `--rosario-lamb-ink` según el tema elegido, mediante máscara del propio recurso original; la superposición usa exactamente los mismos píxeles, no añade extremidades ni siluetas.
+- El ajuste de color se limita a la región del brazo; no modifica el dibujo ni los detalles faciales.
+- El contenedor respeta las dimensiones naturales 480 × 800 del recurso y mantiene el codo dentro del encuadre.
+- Se conserva una única instancia de la ilustración durante los tres «Cordero de Dios» para evitar recargas y titileo al avanzar.
+- Se elimina el archivo `rosary-lamb-vector.js` rechazado y se actualizan las versiones de caché en web y Android.
+- La publicación mantiene la firma estable y genera APK en GitHub Releases para que Obtainium detecte `v0.1.87`.
+- Validación pendiente de dispositivo: comprobar el color del contorno del antebrazo en variantes de misterios y ausencia de parpadeo al avanzar.
