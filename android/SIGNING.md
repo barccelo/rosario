@@ -304,3 +304,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se cancela la pulsación al deslizar, finalizar o cancelar el contacto. Un único temporizador gestiona cada toque en Android para evitar aperturas accidentales.
 - La web y la APK utilizan el mismo archivo corregido (`rosary-polish.js`) con versión de caché renovada.
 - La publicación del APK firmado en GitHub Releases es parte obligatoria de cada cambio destinado a los usuarios de Obtainium.
+
+## v0.1.84 — Codo completo y contornos por tema (11 de noviembre de 2026)
+
+- La imagen aprobada de «Cordero de Dios» conserva rostro, mano, cabello y gesto; se añade únicamente una continuación inferior vectorial detrás de la imagen para redondear el codo derecho y evitar el corte horizontal del recurso anterior.
+- La transición inferior atenúa el borde recto que estaba grabado en el WebP, sin recortar la ilustración ni alterar las cuentas o el texto.
+- Los contornos de la ilustración y de la continuación comparten un único color de tinta dependiente del modo Clásico, Misionero o Según los misterios (incluidas sus variantes claras y oscuras). Ya no se introduce un contorno negro fijo.
+- Se renuevan las versiones de caché de los archivos de ilustración, estilos y colores para distribuir el mismo resultado en la web y la APK.
+- La firma permanente y los datos locales de progreso se conservan; la publicación requiere un APK firmado en GitHub Releases para su detección por Obtainium.
