@@ -123,23 +123,6 @@
       // Los otros diálogos conservan el diseño y la navegación originales.
       let output=prayer;
       if(includeChestIcon){
-        // El contorno del personaje se afina sin tocar la ilustración
-        // ni alterar las dos líneas del golpe, el rostro o el cabello.
-        // El filtro actúa únicamente sobre la capa coloreada del misterio.
-        if(!document.getElementById('rosario-lamb-stroke-soften')){
-          const ns='http://www.w3.org/2000/svg';
-          const svg=document.createElementNS(ns,'svg');
-          svg.id='rosario-lamb-stroke-soften-defs';
-          svg.setAttribute('aria-hidden','true');
-          svg.setAttribute('width','0');
-          svg.setAttribute('height','0');
-          svg.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
-          svg.innerHTML='<defs><filter id="rosario-lamb-stroke-soften" x="-5%" y="-5%" width="110%" height="110%">'+
-            '<feMorphology in="SourceAlpha" operator="erode" radius="0.45" result="fine"/>'+
-            '<feComposite in="SourceGraphic" in2="fine" operator="in"/>'+
-            '</filter></defs>';
-          document.body.append(svg);
-        }
         const layout=document.createElement('span');
         layout.className='rosario-lamb-layout';
         const visual=document.createElement('span');
@@ -147,91 +130,9 @@
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
 
-        // Una sola ilustración: sin segundo brazo, siluetas adicionales
-        // ni máscaras visuales superpuestas. La tinta cambia dentro del arte.
-        const image=document.createElement('img');
-        image.alt='';
-        image.decoding='async';
-        image.draggable=false;
-        const canvas=document.createElement('canvas');
-        canvas.className='rosario-lamb-themed-art';
-        canvas.hidden=true;
-        visual.append(image,canvas);
-
-        function renderThemedLamb(){
-          if(!visual.isConnected||!image.naturalWidth)return;
-          const w=image.naturalWidth,h=image.naturalHeight;
-          const ctx=canvas.getContext('2d',{willReadFrequently:true});
-          if(!ctx)return;
-          canvas.width=w;canvas.height=h;
-          ctx.drawImage(image,0,0,w,h);
-          const base=ctx.getImageData(0,0,w,h);
-          const original=new Uint8ClampedArray(base.data);
-          const lastInkRow=new Int32Array(w);
-          for(let x=0;x<w;x++){
-            lastInkRow[x]=-1;
-            for(let y=h-1;y>=0;y--){
-              if(original[(y*w+x)*4+3]>35){lastInkRow[x]=y;break;}
-            }
-          }
-          let currentColor='';
-          function updateInk(){
-            if(!visual.isConnected)return;
-            const value=getComputedStyle(document.body)
-              .getPropertyValue('--rosario-lamb-ink').trim()||'#9883a0';
-            if(value===currentColor)return;
-            const hex=/^#([0-9a-f]{6})$/i.exec(value);
-            if(!hex)return;
-            currentColor=value;
-            const n=parseInt(hex[1],16);
-            const tint=[(n>>16)&255,(n>>8)&255,n&255];
-            const data=base.data;
-            const feather=Math.max(6,Math.round(h*.013));
-            for(let y=0;y<h;y++){
-              for(let x=0;x<w;x++){
-                const i=(y*w+x)*4;
-                const r=original[i],g=original[i+1],b=original[i+2],alpha=original[i+3];
-                if(!alpha)continue;
-                const peak=Math.max(r,g,b);
-                // Recolorear tinta morada u oscura, sin alterar cabello marrón,
-                // piel, camisa ni brillo del rostro.
-                const purple=b>=r*.86&&b>=g*1.065&&
-                  ((peak<195&&g<174)||(b-r>17&&g<184));
-                const nearBlack=peak<92&&b>=r*.78&&b>=g*.94;
-                const weight=purple ? .96 : nearBlack ? .9 : 0;
-                if(weight){
-                  const shade=.78+.2*Math.min(1,(r+g+b)/390);
-                  for(let c=0;c<3;c++)
-                    data[i+c]=Math.round(original[i+c]*(1-weight)+tint[c]*shade*weight);
-                }else{
-                  data[i]=r;data[i+1]=g;data[i+2]=b;
-                }
-                // Suavizar el borde inferior recto que pertenece al WebP,
-                // sin repetir la forma del codo ni introducir otra extremidad.
-                const tail=lastInkRow[x]-y;
-                data[i+3]=(lastInkRow[x]>h*.82&&tail<feather)
-                  ?Math.round(alpha*Math.max(0,Math.min(1,tail/feather)))
-                  :alpha;
-              }
-            }
-            ctx.putImageData(base,0,0);
-            canvas.hidden=false;
-            image.classList.add('rosario-lamb-source-hidden');
-          }
-          window.rosarioRecolorLamb=updateInk;
-          updateInk();
-        }
-        image.addEventListener('load',()=>{
-          try{renderThemedLamb();}catch(error){
-            canvas.hidden=true;
-            image.classList.remove('rosario-lamb-source-hidden');
-          }
-        });
-        image.addEventListener('error',()=>{
-          if(image.src.includes('rosary-lamb-approved.webp'))return;
-          image.src='assets/rosary-lamb-approved.webp';
-        });
-        image.src='assets/rosary-lamb-reference.webp';
+        // Un único SVG completo, en línea: sin WebP recortado, overlays,
+        // canvas, callbacks asíncronos ni recoloreado píxel a píxel.
+        visual.innerHTML=window.rosarioLambVectorSVG||'';
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
         divider.setAttribute('aria-hidden','true');
