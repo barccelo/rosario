@@ -92,7 +92,7 @@ window.rosarioLambVectorSVG = String.raw`
     <path d="M97 94 Q109 100 128 88 Q148 73 168 71"
           fill="none" stroke="#d99166" stroke-width="5" opacity=".65"/>
     <path d="M126 114 Q144 114 158 99 M194 103 Q209 108 215 126"
-          fill="none" stroke="#6d4b43" stroke-width="3.2" opacity=".54"/>
+          fill="none" stroke="var(--rosario-lamb-ink,#967f9c)" stroke-width="3.2" opacity=".54"/>
     <path d="M195 61 Q213 75 215 91" fill="none"
           stroke="#d18b62" stroke-width="4" opacity=".53"/>
 
