@@ -312,3 +312,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Los contornos de la ilustración y de la continuación comparten un único color de tinta dependiente del modo Clásico, Misionero o Según los misterios (incluidas sus variantes claras y oscuras). Ya no se introduce un contorno negro fijo.
 - Se renuevan las versiones de caché de los archivos de ilustración, estilos y colores para distribuir el mismo resultado en la web y la APK.
 - La firma permanente y los datos locales de progreso se conservan; la publicación requiere un APK firmado en GitHub Releases para su detección por Obtainium.
+
+## v0.1.85 — Ilustración única sin segundo brazo (11 de noviembre de 2026)
+
+- Se retira por completo el complemento SVG de extremidades de v0.1.84, que había provocado un segundo antebrazo visible.
+- El dibujo original de «Cordero de Dios» se procesa como una **única ilustración** en un canvas, sin duplicar imágenes ni superponer contornos.
+- Los píxeles de la tinta oscura y morada se adaptan a la paleta activa del Rosario; se preservan el pelo, los tonos de piel, la camisa, la expresión y las luces de la referencia.
+- El borde inferior del recurso se suaviza ligeramente en la silueta visible, sin volver a reconstruir ni calcar ningún brazo.
+- La actualización cromática funciona en los modos Clásico, Misionero y Según los misterios, con variantes claras y oscuras; no cambia los controles, los misterios ni el progreso.
+- Se actualizan las referencias de caché y se conserva la firma permanente para GitHub Releases y Obtainium.
