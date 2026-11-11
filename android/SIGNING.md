@@ -296,3 +296,11 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - En **Configurar controles** se añade «Sentido del deslizamiento»: **Seguir el recorrido** (el gesto se invierte al cruzar el arco superior) o **Siempre hacia arriba** (mismo gesto para avanzar todo el Rosario), con dos tarjetas de tutorial visual animado y persistencia de la preferencia. La opción predeterminada mantiene el sentido contextual anterior. **No se modifica el swipe nativo sobre las cuentas.**
 - En **Presentación**, nuevo apartado «Hilo del rosario → Variación diaria del hilo», activo por defecto y desactivable. El cordón varía levemente cada día con una semilla reproducible basada en la fecha local: dos aperturas el mismo día muestran idéntica caída y un nuevo día produce otra. La variación altera **sólo los controles de las curvas Bézier de los tramos rectos**, conservando exactamente las 55 posiciones de las cuentas, arcos superior/inferior, cruz y límites de scroll. Se actualiza al volver a la app después de medianoche sin cambiar oración ni encuadre.
 - Verificado: sintaxis de módulos JS, geometría de cuentas comparada y sin cambios con v0.1.27, semillas idénticas durante un día y distintas entre días, vinculación de las dos preferencias a su comportamiento real, recursos versionados para evitar caché de APK/Web.
+
+## v0.1.83 — Corrección del toque sostenido (11 de noviembre de 2026)
+
+- Los ajustes de Guía y Asamblea sólo se abren tras 1,2 segundos de pulsación continua sobre una respuesta coloreada.
+- Los toques breves no abren la configuración; el menú contextual nativo de Android se bloquea sin abrir el menú de voces.
+- Se cancela la pulsación al deslizar, finalizar o cancelar el contacto. Un único temporizador gestiona cada toque en Android para evitar aperturas accidentales.
+- La web y la APK utilizan el mismo archivo corregido (`rosary-polish.js`) con versión de caché renovada.
+- La publicación del APK firmado en GitHub Releases es parte obligatoria de cada cambio destinado a los usuarios de Obtainium.
