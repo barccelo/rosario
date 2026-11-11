@@ -153,7 +153,13 @@
               <feComposite in="themeInk" in2="actualContours" operator="in"/>
             </filter>
             <clipPath id="rosarioLambArmOnly">
-              <rect x="0" y="403" width="480" height="397"/>
+              <!-- Zona del único brazo elevado. No toca cara, cabello ni camisa
+                   fuera del gesto. Sigue el antebrazo real de la referencia. -->
+              <path d="M0 584 L56 582 L115 609 L207 573
+                L230 506 Q252 469 269 470 L332 472
+                Q373 481 383 552 L380 608 L353 649
+                L281 677 L216 730 Q143 776 62 766
+                Q16 756 0 699Z"/>
             </clipPath>
           </defs>
           <image href="assets/rosary-lamb-reference.webp" width="480"
