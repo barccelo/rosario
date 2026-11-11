@@ -121,8 +121,7 @@
         mode==='missionary' ? missionary[missionarySection].border :
         state.dark ? '#C3A982' : '#947960';
       document.body.style.setProperty('--rosario-lamb-ink',lambInk);
-      // Recolorear el único dibujo ya mostrado; sin reconstruir extremidades.
-      window.rosarioRecolorLamb?.();
+      // El SVG ya hereda esta variable: no se repinta al avanzar.
       if(mode==='mystery'){
         const cssMap = {
           '--rc-bg':colors.bg,'--rc-surface':colors.surface,
