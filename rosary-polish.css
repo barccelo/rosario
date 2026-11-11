@@ -885,14 +885,14 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   display:block;width:1em;height:1em;margin:0 auto;
   color:inherit;overflow:visible;
 }
-/* Cordero de Dios: ilustración vectorial completa, sin capas duplicadas.
-   El contorno se hereda del tema mediante --rosario-lamb-ink. */
+/* Cordero de Dios: restauración de la ilustración de referencia.
+   No modificar su anatomía, silueta, rostro ni proporciones. */
 .immersive-prayer .rosario-lamb-gesture{
   display:block!important;
   position:relative!important;
   width:clamp(105px,4.6em,135px);
   height:auto;
-  aspect-ratio:320/430;
+  aspect-ratio:480/800;
   max-width:100%;
   margin:.18em auto .22em!important;
   padding:0!important;
@@ -942,18 +942,20 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   flex:0 0 clamp(88px,28%,175px);
   width:clamp(88px,28%,175px);
   max-width:38%;
-  aspect-ratio:320/430;
+  aspect-ratio:480/800;
   height:auto;
   margin:0!important;
   padding:0!important;
   align-self:center;
 }
-/* El SVG completo ocupa el contenedor sin recortar el codo. */
+/* Mantener la proporción exacta del recurso aprobado (480 × 800).
+   Ambas lecturas utilizan el mismo encuadre y no generan doble brazo. */
 .immersive-prayer.is-lamb-layout .rosario-lamb-gesture svg{
   display:block;
   width:100%;
   height:100%;
   overflow:visible;
+  contain:paint;
 }
 .immersive-prayer.is-lamb-layout .rosario-lamb-divider{
   align-self:stretch;
