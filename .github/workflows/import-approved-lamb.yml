@@ -1,0 +1,30 @@
+name: Import approved Rosario illustration
+on:
+  push:
+    paths:
+      - '.github/workflows/import-approved-lamb.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  import-artwork:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Save approved image as a permanent repository asset
+        env:
+          ROSARIO_ART_URL: 'https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2F2672282e-4f03-4ba5-b4d6-498b7c7de387/watermark:F/width:150?csig=AAAAAAAAAAAAAAAAAAAAAP47OImuMFb5y2zIedcqjl9e3eg5unchRfwdQGaqM9eF&exp=1794505349&osig=AAAAAAAAAAAAAAAAAAAAAIFpD1URJR-47rXxfYM8c0N9SS0U3KOl99Ef4izyKvJJ&signer=media-rpc&token=AAIAAU0AJDI2NzIyODJlLTRmMDMtNGJhNS1iNGQ2LTQ5OGI3YzdkZTM4NwAAAAABodDal4jTYmNRu23TuOijUs_Nbf4sCDUElLATLxb0uGCB_6imUg&x-canva-quality=thumbnail'
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          curl -fLsS --retry 3 --retry-delay 2 --max-time 45 "$ROSARIO_ART_URL" -o assets/rosary-lamb-illustration.png
+          test "$(wc -c < assets/rosary-lamb-illustration.png)" -gt 1000
+          file assets/rosary-lamb-illustration.png | grep -q 'PNG image data'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/rosary-lamb-illustration.png
+          git commit -m 'Save user-approved Lamb of God illustration' || exit 0
+          git push origin HEAD:main
