@@ -885,14 +885,14 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   display:block;width:1em;height:1em;margin:0 auto;
   color:inherit;overflow:visible;
 }
-/* Cordero de Dios: restauración de la ilustración de referencia.
-   No modificar su anatomía, silueta, rostro ni proporciones. */
+/* Cordero de Dios: ilustración aprobada con fondo transparente.
+   Se preservan íntegros rostro, gesto, contornos y los demás temas. */
 .immersive-prayer .rosario-lamb-gesture{
   display:block!important;
   position:relative!important;
   width:clamp(105px,4.6em,135px);
   height:auto;
-  aspect-ratio:480/800;
+  aspect-ratio:3/4;
   max-width:100%;
   margin:.18em auto .22em!important;
   padding:0!important;
@@ -901,11 +901,12 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   pointer-events:none;
   overflow:visible!important;
 }
-.immersive-prayer .rosario-lamb-gesture svg{
+.immersive-prayer .rosario-lamb-gesture img{
   display:block;
   width:100%;
   height:100%;
-  overflow:visible;
+  object-fit:contain;
+  object-position:center;
   image-rendering:auto;
 }
 .immersive-prayer .dialogue-line.voice-guide:has(+ .rosario-lamb-gesture){
@@ -942,20 +943,21 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   flex:0 0 clamp(88px,28%,175px);
   width:clamp(88px,28%,175px);
   max-width:38%;
-  aspect-ratio:480/800;
+  aspect-ratio:3/4;
   height:auto;
   margin:0!important;
   padding:0!important;
   align-self:center;
 }
-/* Mantener la proporción exacta del recurso aprobado (480 × 800).
-   Ambas lecturas utilizan el mismo encuadre y no generan doble brazo. */
-.immersive-prayer.is-lamb-layout .rosario-lamb-gesture svg{
+/* Proporción natural 150 × 200; no recortar el codo ni las señales
+   del gesto. La imagen mantiene sus colores propios, sin filtros. */
+.immersive-prayer.is-lamb-layout .rosario-lamb-gesture img{
   display:block;
   width:100%;
   height:100%;
-  overflow:visible;
-  contain:paint;
+  object-fit:contain;
+  object-position:center;
+  filter:none;
 }
 .immersive-prayer.is-lamb-layout .rosario-lamb-divider{
   align-self:stretch;
