@@ -119,6 +119,32 @@
     // Una sola instancia del arte de referencia para los tres Cordero de Dios.
     // Reutilizar el SVG evita que WebView vuelva a decodificarlo al avanzar.
     let persistentLambVisual=null;
+    let requestedLambAsset=null;
+    // Cambiar de paleta sólo cuando cambia realmente el tono. El recurso
+    // es una PNG estática precoloreada: jamás se crean máscaras ni canvas,
+    // y cada avance de oración conserva el mismo elemento y la misma URL.
+    window.rosarioSetLambInk=function(ink){
+      const hex=/^#([0-9a-f]{6})$/i.exec(String(ink||''));
+      if(!hex)return;
+      const path='assets/rosary-lamb-palettes/ink-'+hex[1].toLowerCase()+'.png';
+      if(requestedLambAsset===path)return;
+      requestedLambAsset=path;
+      const img=persistentLambVisual?.querySelector('img');
+      if(!img||img.dataset.palette===path)return;
+      const next=new Image();
+      next.decoding='async';
+      next.onload=()=>{
+        if(requestedLambAsset!==path)return;
+        img.src=path;
+        img.dataset.palette=path;
+      };
+      next.onerror=()=>{
+        if(requestedLambAsset!==path)return;
+        img.src='assets/rosary-lamb-illustration.png';
+        img.dataset.palette='fallback';
+      };
+      next.src=path;
+    };
     function addVerses(parts,showVoiceLabels=false,includeChestIcon=false) {
       prayer.replaceChildren();
       // Únicamente los tres Cordero de Dios usan el diseño horizontal:
@@ -139,7 +165,8 @@
         // Mantener el mismo nodo entre las tres invocaciones evita parpadeos.
         if(!persistentLambVisual){
           const image=document.createElement('img');
-          image.src='assets/rosary-lamb-illustration.png';
+          image.src=requestedLambAsset||'assets/rosary-lamb-illustration.png';
+          image.dataset.palette=requestedLambAsset||'default';
           image.alt='';
           image.draggable=false;
           image.decoding='async';
