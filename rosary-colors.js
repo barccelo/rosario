@@ -120,19 +120,11 @@
       const lambInk=mode==='mystery' ? colors.outline :
         mode==='missionary' ? missionary[missionarySection].border :
         state.dark ? '#C3A982' : '#947960';
-      // El borde del personaje debe contrastar sin volverse una línea
-      // celeste fosforescente. Conservar el matiz del tema y oscurecerlo
-      // ligeramente; no modifica los colores del rosario ni la piel.
-      const tonedLambInk=(()=>{
-        const hex=/^#([0-9a-f]{6})$/i.exec(lambInk);
-        if(!hex)return lambInk;
-        const n=parseInt(hex[1],16);
-        const parts=[(n>>16)&255,(n>>8)&255,n&255]
-          .map(v=>Math.round(v*.72).toString(16).padStart(2,'0'));
-        return '#'+parts.join('');
-      })();
-      document.body.style.setProperty('--rosario-lamb-ink',tonedLambInk);
-      // El SVG ya hereda esta variable: no se repinta al avanzar.
+      // Cada modo usa su contorno real. La ilustración aprobada tiene
+      // variantes PNG ya procesadas, una para cada borde de las paletas.
+      // Ojos, nariz, boca, cabello, piel y camisa no reciben filtros.
+      document.body.style.setProperty('--rosario-lamb-ink',lambInk);
+      window.rosarioSetLambInk?.(lambInk);
       if(mode==='mystery'){
         const cssMap = {
           '--rc-bg':colors.bg,'--rc-surface':colors.surface,
