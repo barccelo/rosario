@@ -892,7 +892,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   position:relative!important;
   width:clamp(105px,4.6em,135px);
   height:auto;
-  aspect-ratio:3/4;
+  aspect-ratio:7/10;
   max-width:100%;
   margin:.18em auto .22em!important;
   padding:0!important;
@@ -943,7 +943,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   flex:0 0 clamp(88px,28%,175px);
   width:clamp(88px,28%,175px);
   max-width:38%;
-  aspect-ratio:3/4;
+  aspect-ratio:7/10;
   height:auto;
   margin:0!important;
   padding:0!important;
