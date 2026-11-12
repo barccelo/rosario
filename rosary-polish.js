@@ -337,13 +337,24 @@
         }else addVerses(step.dialogues,true);
         prayer.prepend(makeCross());
       } else if(step?.verse && step?.response) {
-        const edited=step.title==='Cordero de Dios'?null:state.prayerEdits?.[step.title];
+        // Las intervenciones de Guía y Asamblea se identifican en todas
+        // las invocaciones solicitadas, también con oraciones editadas.
+        // El ajuste global «Mostrar guía y asamblea» sigue controlando
+        // si aparecen las etiquetas, sin depender de los colores.
+        const voiceDialogue=[
+          'Estación al Santísimo Sacramento',
+          'Virgen purísima y castísima',
+          'Ruega por nosotros',
+          'Cordero de Dios',
+          'Avemaría purísima'
+        ].includes(step.title);
+        const lamb=step.title==='Cordero de Dios';
+        const edited=lamb?null:state.prayerEdits?.[step.title];
         if(edited){
           const match=edited.match(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]+)/);
-          if(match)addVerses([{verse:match[1],response:match[2]}]);
+          if(match)addVerses([{verse:match[1],response:match[2]}],voiceDialogue,lamb);
           else {prayer.replaceChildren();appendWithAmen(prayer,edited);}
-        }else addVerses([step],step.title==='Estación al Santísimo Sacramento',
-                      step.title==='Cordero de Dios');
+        }else addVerses([step],voiceDialogue,lamb);
       }
       else if(step){
         prayer.replaceChildren();
@@ -522,17 +533,31 @@
     render=function(){
       const step=steps[state.index];
       const mode=state.textTransition;
-      const animate=lastRenderedIndex!==null&&state.index!==lastRenderedIndex&&
+      const isSelectedTransition=['fade','slide','soft'].includes(mode);
+      const betweenAvemarias=lastRenderedIndex!==null&&state.index!==lastRenderedIndex&&
         lastRenderedTitle==='Avemaría'&&step?.title==='Avemaría'&&
-        step.m>=0&&step.m<5&&['fade','slide','soft'].includes(mode);
+        step.m>=0&&step.m<5;
+      const betweenLambInvocations=lastRenderedIndex!==null&&
+        state.index!==lastRenderedIndex&&
+        lastRenderedTitle==='Cordero de Dios'&&step?.title==='Cordero de Dios'&&
+        Math.abs(state.index-lastRenderedIndex)===1;
+      const animateAvemaria=betweenAvemarias&&isSelectedTransition;
+      const animateLamb=betweenLambInvocations&&isSelectedTransition;
       transitions.get(prayer)?.cancel();
-      const oldNodes=animate?[...prayer.childNodes]:null;
-      prior();
-      renderPrayer();
-      if(animate){
-        const nextNodes=[...prayer.childNodes];
-        prayer.replaceChildren(...oldNodes);
-        animateText(prayer,mode,()=>prayer.replaceChildren(...nextNodes));
+      if(animateLamb){
+        // Usar EXACTAMENTE el motor y el modo de las Avemarías.
+        // Al diferir el cambio de contenido hasta la mitad de la animación,
+        // se conserva la única ilustración real, sin clones ni reapariciones.
+        animateText(prayer,mode,()=>{prior();renderPrayer();});
+      }else{
+        const oldNodes=animateAvemaria?[...prayer.childNodes]:null;
+        prior();
+        renderPrayer();
+        if(animateAvemaria){
+          const nextNodes=[...prayer.childNodes];
+          prayer.replaceChildren(...oldNodes);
+          animateText(prayer,mode,()=>prayer.replaceChildren(...nextNodes));
+        }
       }
       lastRenderedIndex=state.index;
       lastRenderedTitle=step?.title||null;
