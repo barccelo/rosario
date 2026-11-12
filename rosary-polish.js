@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261111-7';
+    sheet.href = 'rosary-polish.css?v=20261112-1';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -133,40 +133,21 @@
         visual.setAttribute('role','img');
         visual.setAttribute('aria-label','Golpearse el lado izquierdo del pecho con la mano derecha empuñada');
 
-        // La única imagen es la referencia aprobada. El filtro sustituye
-        // los píxeles violeta/oscuros por la tinta del tema EN LA MISMA
-        // imagen: primero elimina la tinta anterior y luego coloca la nueva.
-        // Nunca dibuja una segunda imagen ni añade líneas sobre el brazo.
-        if(!persistentLambVisual)visual.innerHTML=`<svg viewBox="0 0 480 800"
-          xmlns="http://www.w3.org/2000/svg" role="presentation"
-          preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <filter id="rosarioLambReplaceInk" x="-1%" y="-1%"
-              width="102%" height="102%" color-interpolation-filters="sRGB">
-              <feColorMatrix in="SourceGraphic" type="matrix"
-                values="0 0 0 0 0
-                        0 0 0 0 0
-                        0 0 0 0 0
-                       -22 0 22 0 -0.1" result="inkMask"/>
-              <feComposite in="inkMask" in2="SourceAlpha"
-                operator="in" result="visibleInk"/>
-              <feComposite in="SourceGraphic" in2="visibleInk"
-                operator="out" result="imageWithoutInk"/>
-              <feFlood style="flood-color:var(--rosario-lamb-ink,#84719c)"
-                result="themeInk"/>
-              <feComposite in="themeInk" in2="visibleInk"
-                operator="in" result="replacementInk"/>
-              <feMerge>
-                <feMergeNode in="imageWithoutInk"/>
-                <feMergeNode in="replacementInk"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <image href="assets/rosary-lamb-reference.webp"
-            width="480" height="800"
-            preserveAspectRatio="xMidYMid meet"
-            filter="url(#rosarioLambReplaceInk)"/>
-        </svg>`;
+        // Ilustración única aprobada por el usuario, almacenada en el APK.
+        // El fondo es transparente; rasgos faciales y contornos permanecen
+        // intactos. Sin filtros, canvas, recoloreado ni brazos superpuestos.
+        // Mantener el mismo nodo entre las tres invocaciones evita parpadeos.
+        if(!persistentLambVisual){
+          const image=document.createElement('img');
+          image.src='assets/rosary-lamb-illustration.png';
+          image.alt='';
+          image.draggable=false;
+          image.decoding='async';
+          image.loading='eager';
+          image.width=150;
+          image.height=200;
+          visual.append(image);
+        }
         persistentLambVisual=visual;
         const divider=document.createElement('span');
         divider.className='rosario-lamb-divider';
