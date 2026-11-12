@@ -388,3 +388,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Los cambios de tema continúan precargando la variante correspondiente y sólo sustituyen el PNG cuando cambia el color. No hay filtros, canvas ni superposiciones durante las oraciones.
 - El workflow del repositorio regenera las ilustraciones con NumPy y Pillow; valida tamaño original, transparencia, conservación facial y ausencia de violeta residual en los temas no violetas.
 - Publicar versión firmada por la clave estable en GitHub Releases para Obtainium.
+
+## v0.1.92 — Oraciones finales, Guía/Asamblea, transición y signos litúrgicos (12 de noviembre de 2026)
+
+- **Comunión espiritual**: texto exacto solicitado: «Yo quisiera, Señor, recibirte, con aquella pureza, humildad y devoción, con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos. Amén.»
+- Se actualizan automáticamente las copias locales que conserven **exactamente** el antiguo texto predeterminado; se respetan las ediciones personalizadas diferentes.
+- Se habilitan las etiquetas de **Guía** (versículo) y **Asamblea** (respuesta) en las tres «Virgen purísima y castísima», en ambos «Ruega por nosotros, Santa Madre de Dios», los tres «Cordero de Dios» y «Avemaría purísima». El usuario continúa pudiendo desactivar dichas etiquetas desde Configuración, independientemente de los colores de las voces.
+- Las tres invocaciones consecutivas de «Cordero de Dios» utilizan el mismo motor de transición configurable de las Avemarías: fundido, deslizamiento, suave o ninguna. En los Corderos se conserva la **única imagen original**, sin clonar su nodo ni redecodificarla durante el intercambio de texto.
+- Se refinan los SVG de los signos **℣. y ℟.**, siguiendo las referencias litúrgicas aprobadas: diagonal más fina, sin extenderse por arriba o por debajo de la letra, situada a la derecha en ℟; menor tamaño del punto y serifas con proporciones más cercanas a la referencia.
+- Las demás oraciones, cuentas, misterios, ilustración del brazo, temas, ajustes y gestos permanecen sin cambios.
+- Se actualizan las claves de caché de los tres módulos JS afectados para web y APK. Generación automática de APK firmada y publicación en GitHub Releases para Obtainium.
