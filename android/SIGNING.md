@@ -375,3 +375,16 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Los archivos de las variantes se copian a la APK con `assets/**` y se sirven igualmente en GitHub Pages. Se conservan textos, layout horizontal, gestos, colores de cuentas, modo claro/oscuro, variantes y ajustes previos.
 - Se actualizan las referencias de caché de la web. Compilar APK firmada y publicar en GitHub Releases para Obtainium.
 - Validación visual final en Android pendiente: comprobar tonos de los cinco temas principales y ausencia de destellos durante los tres «Cordero de Dios».
+
+## v0.1.91 — Ilustración original nítida y contornos temáticos sin violeta residual (12 de noviembre de 2026)
+
+- **Fuente única aprobada de 420 × 600 píxeles:** `assets/rosary-lamb-approved-master.png`. Sustituye la versión reducida de 150 × 200 que generaba bordes dentados.
+- Las 21 variantes se vuelven a generar íntegramente desde ese archivo maestro, **sin redibujar ningún contorno ni volver a muestrear el brazo**.
+- La conversión sustituye directamente todos los píxeles de contorno violeta claros y oscuros (incluidos bordes suavizados) por el color real del tema. En temas no violetas se verifica automáticamente que no queden píxeles del contorno violeta fuera de los rasgos faciales.
+- Los ojos, la nariz y la boca permanecen oscuros exactamente como en la referencia. Piel, cabello, camisa, geometría y transparencia se mantienen píxel por píxel, salvo en los trazos originalmente violetas.
+- La nueva fuente conserva el codo redondeado y la silueta exacta del antebrazo; no añade ni elimina líneas.
+- Se ajusta el contenedor a la proporción 7:10 del recurso aprobado y la imagen declara sus dimensiones naturales 420×600.
+- Se actualizan las versiones de caché de JavaScript, CSS y de todos los PNG de temas; la APK y GitHub Pages muestran los archivos nuevos, no los colores antiguos guardados en caché.
+- Los cambios de tema continúan precargando la variante correspondiente y sólo sustituyen el PNG cuando cambia el color. No hay filtros, canvas ni superposiciones durante las oraciones.
+- El workflow del repositorio regenera las ilustraciones con NumPy y Pillow; valida tamaño original, transparencia, conservación facial y ausencia de violeta residual en los temas no violetas.
+- Publicar versión firmada por la clave estable en GitHub Releases para Obtainium.
