@@ -364,3 +364,14 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se conservan sin cambios las paletas del rosario, la modalidad misionera, los modos de misterio, el modo claro/oscuro y los controles de interacción. Los trazos del personaje conservan los tonos aprobados, sin alterar ojos, nariz ni boca por la elección del tema.
 - Se actualizan las referencias de caché de la web y se incluye el recurso en la copia de assets de Android. Se conserva la firma estable y la distribución por GitHub Releases / Obtainium.
 - Verificación de dispositivo pendiente: comprobar la imagen en modo claro y oscuro y en los diferentes temas, sin pestañeo ni recorte.
+
+## v0.1.90 — Contornos adaptados a todos los temas (12 de noviembre de 2026)
+
+- La ilustración de «Cordero de Dios» **sigue siendo exactamente la aprobada**: se preservan rostro, expresión, cuerpo, codo, mano, camiseta, cabello y transparencia. No se redibuja la figura.
+- Se generan y conservan en GitHub **21 archivos PNG con contornos precoloreados** para todos los modos: clásico claro/oscuro, cinco secciones misioneras y siete variantes de misterios (cada una en claro/oscuro).
+- Los contornos de cabello, cuello, camisa, codo, brazo y señales toman el color de borde real de cada paleta, **sin delineado morado fijo**. Ojos, nariz y boca conservan los píxeles oscuros originales, sin color de acento.
+- Se utiliza tratamiento píxel a píxel **fuera de la aplicación**, sólo durante la preparación de archivos estáticos en GitHub, con transición de tinta continua que preserva el suavizado de los bordes. En el teléfono no se utiliza canvas, filtros, máscaras superpuestas ni partes reconstruidas.
+- `rosary-colors.js` indica el color vigente y `rosary-polish.js` selecciona el PNG estático correspondiente; únicamente precarga y cambia el recurso cuando cambia realmente el color. Los avances de oración reutilizan el mismo elemento y URL, sin titileo.
+- Los archivos de las variantes se copian a la APK con `assets/**` y se sirven igualmente en GitHub Pages. Se conservan textos, layout horizontal, gestos, colores de cuentas, modo claro/oscuro, variantes y ajustes previos.
+- Se actualizan las referencias de caché de la web. Compilar APK firmada y publicar en GitHub Releases para Obtainium.
+- Validación visual final en Android pendiente: comprobar tonos de los cinco temas principales y ausencia de destellos durante los tres «Cordero de Dios».
