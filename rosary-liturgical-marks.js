@@ -16,7 +16,7 @@
         color:inherit;fill:currentColor;pointer-events:none;
       }
       .rosario-liturgical-mark .liturgical-slash{
-        stroke:currentColor;fill:none;stroke-width:2.4;
+        stroke:currentColor;fill:none;stroke-width:1.7;
         stroke-linecap:round;
       }
       .litany-wheel .rosario-liturgical-mark{
@@ -31,17 +31,18 @@
       const value=mark.textContent?.trim()||'';
       const isResponse=/^([℟R])/.test(value);
       const letter=isResponse?'R':'V';
-      // La única barra es una diagonal simple que cruza la letra.
-      // V: atraviesa el centro. R: está ligeramente a la derecha.
-      const slash=isResponse?'M 20 42 L 34 0':'M 13 42 L 29 0';
+      // Referencia tradicional: una sola diagonal fina, contenida dentro
+      // de la letra; sin prolongación inferior ni remate superior.
+      // En ℟ se desplaza a la derecha respecto a ℣.
+      const slash=isResponse?'M 23 33 L 32 6':'M 16 33 L 28 6';
       mark.replaceChildren();
       mark.dataset.liturgicalDrawn='true';
       mark.classList.add('rosario-liturgical-mark');
       if(!mark.hasAttribute('aria-label'))mark.setAttribute('aria-label',isResponse?'Respuesta':'Versículo');
       mark.innerHTML='<svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">'+
-        '<text x="1" y="34" font-family="Georgia, Times New Roman, serif" font-size="37">'+letter+'</text>'+
+        '<text x="2" y="34" font-family="Georgia, Times New Roman, serif" font-size="34">'+letter+'</text>'+
         '<path class="liturgical-slash" d="'+slash+'"/>'+
-        '<circle cx="40" cy="35" r="2.7"/></svg>';
+        '<circle cx="39" cy="34" r="1.85"/></svg>';
     }
     function decoratePlainText(root){
       if(!root)return;
