@@ -398,3 +398,10 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se refinan los SVG de los signos **℣. y ℟.**, siguiendo las referencias litúrgicas aprobadas: diagonal más fina, sin extenderse por arriba o por debajo de la letra, situada a la derecha en ℟; menor tamaño del punto y serifas con proporciones más cercanas a la referencia.
 - Las demás oraciones, cuentas, misterios, ilustración del brazo, temas, ajustes y gestos permanecen sin cambios.
 - Se actualizan las claves de caché de los tres módulos JS afectados para web y APK. Generación automática de APK firmada y publicación en GitHub Releases para Obtainium.
+
+## v0.1.93 — Punto más próximo a ℣ y ℟ (12 de noviembre de 2026)
+
+- Se **restauran íntegramente los símbolos litúrgicos de v0.1.91**, con sus formas anteriores: letra de 37 unidades, grosor 2,4, recorrido y longitud de ambas diagonales y punto de radio 2,7.
+- La **única diferencia respecto a los originales anteriores** es el desplazamiento horizontal de los puntos: `cx=40` → `cx=33` en ambos SVG para reducir la separación que señaló el usuario.
+- No se modifican los colores del tema, las voces, las oraciones, las animaciones, la ilustración del Cordero de Dios ni otros controles.
+- Se actualiza la referencia de caché `rosary-liturgical-marks.js?v=20261112-3` en la web y APK, manteniendo la firma permanente y distribución desde GitHub Releases por Obtainium.
