@@ -353,3 +353,14 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Validación visual en el teléfono pendiente: contorno del brazo sin doble línea, codo completo y estabilidad de los bordes al avanzar y al cambiar de tema.
 
 > Reintento de publicación v0.1.88: se reactiva GitHub Actions después de quedar la ejecución original en cola sin tareas. Sin modificaciones al código ni a la firma.
+
+## v0.1.89 — Integración de la ilustración aprobada de «Cordero de Dios» (12 de noviembre de 2026)
+
+- Se incorpora como archivo local de la aplicación `assets/rosary-lamb-illustration.png` la ilustración aprobada por el usuario: ojos cerrados, rostro limpio, cabello marrón, camiseta crema y un solo puño sobre el pecho, con el codo completo y sin una línea inferior atravesando el brazo.
+- El recurso utiliza transparencia real para funcionar sobre fondos claros u oscuros, sin caja morada alrededor de la figura.
+- Se elimina el filtro SVG `rosarioLambReplaceInk` y todos los filtros de recoloreado del personaje, que previamente alteraban los rasgos faciales y producían bordes superpuestos.
+- Se renderiza una sola imagen `<img>` persistente, reutilizada entre los tres «Cordero de Dios»; no se regenera al avanzar ni hay superposiciones o canvas.
+- La presentación horizontal mantiene el divisor, los textos de guía y asamblea, tipografía y navegación. El contenedor adopta la proporción natural 3:4 de la ilustración, sin recortes.
+- Se conservan sin cambios las paletas del rosario, la modalidad misionera, los modos de misterio, el modo claro/oscuro y los controles de interacción. Los trazos del personaje conservan los tonos aprobados, sin alterar ojos, nariz ni boca por la elección del tema.
+- Se actualizan las referencias de caché de la web y se incluye el recurso en la copia de assets de Android. Se conserva la firma estable y la distribución por GitHub Releases / Obtainium.
+- Verificación de dispositivo pendiente: comprobar la imagen en modo claro y oscuro y en los diferentes temas, sin pestañeo ni recorte.
