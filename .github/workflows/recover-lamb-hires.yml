@@ -1,0 +1,40 @@
+name: Recover approved high resolution artwork
+on:
+  push:
+    paths:
+      - '.github/workflows/recover-lamb-hires.yml'
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Try original and full size approved artwork URLs
+        env:
+          ASSET_URL: 'https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2F2672282e-4f03-4ba5-b4d6-498b7c7de387/watermark:F/width:150?csig=AAAAAAAAAAAAAAAAAAAAAMA_YelD69pb5Y1gGXyQzGr_gKGfLe6kL9mxMoWQatfH&exp=1794508949&osig=AAAAAAAAAAAAAAAAAAAAAKDZ_fqTB8SMu5mhuagS3sWMednAOGrAvUDKNVKQd2XH&signer=media-rpc&token=AAIAAU0AJDI2NzIyODJlLTRmMDMtNGJhNS1iNGQ2LTQ5OGI3YzdkZTM4NwAAAAABodERhgjh0ucg8y28Yyl7gtb8KHTmlG9Ny_lKR2rRZwC6R8Qm9A&x-canva-quality=thumbnail'
+        run: |
+          set -u
+          url="$ASSET_URL"
+          enlarged="$(echo "$url" | sed -e 's/height:200/height:600/' -e 's/width:150/width:450/')"
+          for kind in original resized unprotected; do
+            case "$kind" in
+              original) current="$url" ;;
+              resized) current="$enlarged" ;;
+              unprotected) current="${enlarged%%\?*}" ;;
+            esac
+            status="$(curl -L -s -w '%{http_code}' --max-time 25 -o "/tmp/$kind.png" "$current" || true)"
+            echo "$kind : HTTP $status ; bytes $(wc -c < "/tmp/$kind.png")"
+            file "/tmp/$kind.png"
+          done
+          if file /tmp/resized.png | grep -q 'PNG image data'; then
+            mkdir -p assets
+            cp /tmp/resized.png assets/rosary-lamb-hires.png
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add assets/rosary-lamb-hires.png
+            git commit -m 'Recover high resolution approved artwork from source' || exit 0
+            git push origin HEAD:main
+          fi
