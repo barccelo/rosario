@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261112-1';
+    sheet.href = 'rosary-polish.css?v=20261112-3';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -126,7 +126,7 @@
     window.rosarioSetLambInk=function(ink){
       const hex=/^#([0-9a-f]{6})$/i.exec(String(ink||''));
       if(!hex)return;
-      const path='assets/rosary-lamb-palettes/ink-'+hex[1].toLowerCase()+'.png';
+      const path='assets/rosary-lamb-palettes/ink-'+hex[1].toLowerCase()+'.png?v=20261112-hires';
       if(requestedLambAsset===path)return;
       requestedLambAsset=path;
       const img=persistentLambVisual?.querySelector('img');
@@ -140,7 +140,7 @@
       };
       next.onerror=()=>{
         if(requestedLambAsset!==path)return;
-        img.src='assets/rosary-lamb-illustration.png';
+        img.src='assets/rosary-lamb-approved-master.png';
         img.dataset.palette='fallback';
       };
       next.src=path;
@@ -165,14 +165,14 @@
         // Mantener el mismo nodo entre las tres invocaciones evita parpadeos.
         if(!persistentLambVisual){
           const image=document.createElement('img');
-          image.src=requestedLambAsset||'assets/rosary-lamb-illustration.png';
+          image.src=requestedLambAsset||'assets/rosary-lamb-approved-master.png';
           image.dataset.palette=requestedLambAsset||'default';
           image.alt='';
           image.draggable=false;
           image.decoding='async';
           image.loading='eager';
-          image.width=150;
-          image.height=200;
+          image.width=420;
+          image.height=600;
           visual.append(image);
         }
         persistentLambVisual=visual;
