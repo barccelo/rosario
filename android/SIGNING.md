@@ -438,3 +438,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - **Sin infraestructura adicional:** la fuente es la API pública de GitHub Releases; no hay servidor, Firebase, cuenta, autorización de notificaciones push ni verificaciones periódicas. Las nuevas versiones se descubren en la siguiente apertura de la aplicación. Enviar push remoto con la app cerrada requeriría una infraestructura y permisos adicionales y **no se implementa**.
 - Estilos compactos y sobrios en `rosary-updates.css`, lógica compartida en `rosary-updates.js`, puente nativo en `MainActivity.java`. Conserva intactos oraciones, avances, gestos, pantalla completa y el resto del Rosario.
 - Compilar APK firmada y publicar `v0.1.96` en GitHub Releases para Obtainium.
+
+## v0.1.97 — Compatibilidad de vibraciones simples y largas en Android (13 de noviembre de 2026)
+
+- Se corrige una diferencia nativa de reproducción que podía hacer que ciertos teléfonos Android vibrasen con los patrones dobles/triples, pero no con los pulsos simples: la API `vibrate(int)` deja de utilizar `VibrationEffect.createOneShot` y delega en `vibrateSequence`, **el mismo recorrido nativo con `VibrationEffect.createWaveform`** que ya funcionaba para los demás patrones.
+- Se conserva exactamente la duración de cada patrón guardado: normal 440 ms, largo 1000 ms, doble 300–80–300 ms y triple 270–120–270–120–270 ms, además de las personalizaciones del usuario.
+- En teléfonos cuyo vibrador no admite `hasAmplitudeControl()`, la intensidad personalizada emplea una forma de onda encendido/apagado compatible, en lugar de intentar amplitudes que el motor no puede regular. En teléfonos compatibles se mantiene el ajuste suave/medio/fuerte.
+- Continúa el soporte para Android 7 (API 24/25) mediante `Vibrator.vibrate(long[], -1)`; Android 8 y posteriores emplean `VibrationEffect.createWaveform`.
+- No se modifican los controles del Rosario, la navegación, las oraciones, el tutorial, la web ni el actualizador integrado.
+- La vibración física sigue dependiendo de que el dispositivo disponga de motor y de los ajustes del sistema; no es posible garantizarla en absolutamente todos los modelos Android.
+- Generar APK con la firma permanente y publicar en GitHub Releases para Obtainium y el nuevo sistema de actualizaciones dentro de Rosario.
