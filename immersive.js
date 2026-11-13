@@ -50,6 +50,36 @@ const isHomeScreenApp=()=>Boolean(navigator.standalone)||
   Boolean(window.matchMedia?.('(display-mode: fullscreen)').matches);
 const isRosarioFullscreen=()=>Boolean(document.fullscreenElement)||
   androidFullscreen||isHomeScreenApp();
+
+// La PWA instalada entra directamente por display:fullscreen del manifest.
+// Una pestaña normal no puede solicitar fullscreen en la carga: la API
+// exige un gesto real. Activarlo al PRIMER toque/clic/tecla compatible,
+// sin inventar eventos ni impedir que los controles del rosario funcionen.
+// Si el usuario sale del fullscreen, no se le obliga a volver a entrar.
+let webFullscreenAutoTried=false;
+function autoFullscreenFromGesture(event){
+  if(webFullscreenAutoTried||!event.isTrusted||
+     window.RosarioAndroid||iosBrowser||isHomeScreenApp()||
+     document.fullscreenElement||
+     !document.fullscreenEnabled||
+     typeof document.documentElement.requestFullscreen!=='function')return;
+  if(event.target?.closest?.('#iFullscreen'))return;
+  webFullscreenAutoTried=true;
+  try{
+    const result=document.documentElement.requestFullscreen({navigationUI:'hide'});
+    result?.catch?.(()=>{}); // Safari o políticas del navegador pueden impedirlo.
+  }catch{/* Mantener el botón manual sin molestar al usuario. */}
+}
+document.addEventListener('pointerdown',event=>{
+  if(event.pointerType==='mouse')autoFullscreenFromGesture(event);
+},{capture:true,passive:true});
+document.addEventListener('pointerup',event=>{
+  if(event.pointerType!=='mouse')autoFullscreenFromGesture(event);
+},{capture:true,passive:true});
+document.addEventListener('keydown',event=>{
+  if(!['Escape','Esc','Tab'].includes(event.key)&&!event.ctrlKey&&!event.altKey&&!event.metaKey)
+    autoFullscreenFromGesture(event);
+},true);
 function collapseTopControls(){
   clearTimeout(controlsTimer);
   const full=isRosarioFullscreen();
