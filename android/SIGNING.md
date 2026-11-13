@@ -448,3 +448,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - No se modifican los controles del Rosario, la navegación, las oraciones, el tutorial, la web ni el actualizador integrado.
 - La vibración física sigue dependiendo de que el dispositivo disponga de motor y de los ajustes del sistema; no es posible garantizarla en absolutamente todos los modelos Android.
 - Generar APK con la firma permanente y publicar en GitHub Releases para Obtainium y el nuevo sistema de actualizaciones dentro de Rosario.
+
+## v0.1.98 — Seguimiento centrado de las cuentas durante el ascenso (13 de noviembre de 2026)
+
+- **La posición de inicio permanece idéntica**: la cruz se presenta en el límite inferior real del desplazamiento vertical y no se recentra al abrir Rosario, durante la carterita ni mientras se reza la Estación al Santísimo.
+- A partir de las primeras oraciones que avanzan por el colgante, la cuenta activa intenta quedar **justo en el centro vertical de la pantalla**. Se aplica tanto a la grande inferior, las tres pequeñas y la cuenta compartida, como a toda la primera rama ascendente del Rosario.
+- El destino de seguimiento es `selected.y - viewport.clientHeight / 2`, limitado mediante `clamp()` al recorrido real `0…scrollHeight−clientHeight`: junto a la cruz, el límite inferior impide mover más; al alcanzar el límite superior, el desplazamiento deja de subir. Se conserva el arco superior completo.
+- Se retira el encuadre fijo de las primeras cinco cuentas, que impedía el centrado solicitado. Los cambios de oración adyacentes conservan desplazamiento suave y el límite de distancia para evitar saltos.
+- Se respeta el desplazamiento manual nativo y, en el siguiente avance, vuelve a enfocarse la cuenta activa. La vuelta por la rama derecha, las oraciones finales, las animaciones del hilo, la posición inicial, las vibraciones y la navegación no cambian.
+- Se actualiza la referencia de caché de `rosary-physical.js` en `index.html` para web y Android. Los cambios se distribuyen con la misma APK firmada por la clave estable, publicándose en GitHub Releases para Obtainium.
+- Pendiente de prueba visual en dispositivo: comprobar centrado progresivo en diferentes alturas de pantalla y la detención natural al alcanzar la parte superior.
