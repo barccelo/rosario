@@ -405,3 +405,15 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - La **única diferencia respecto a los originales anteriores** es el desplazamiento horizontal de los puntos: `cx=40` → `cx=33` en ambos SVG para reducir la separación que señaló el usuario.
 - No se modifican los colores del tema, las voces, las oraciones, las animaciones, la ilustración del Cordero de Dios ni otros controles.
 - Se actualiza la referencia de caché `rosary-liturgical-marks.js?v=20261112-3` en la web y APK, manteniendo la firma permanente y distribución desde GitHub Releases por Obtainium.
+
+## v0.1.94 — Primer uso, valores predeterminados, inicio y pantalla completa Android (13 de noviembre de 2026)
+
+- **Tutorial, paso 5:** «Activar toques» seleccionado por defecto, tanto para una instalación nueva como cuando se omite el paso. Se mantiene desactivado cuando un usuario lo desactiva explícitamente.
+- **Colores del Rosario:** «Según los misterios» pasa al primer lugar y es el modo predeterminado. «Misionero» ocupa el segundo lugar y «Clásico» el último, tanto en el asistente inicial como en Ajustes. Las preferencias existentes no se sobrescriben en las actualizaciones.
+- **Tutorial, paso 6:** «Abajo» aparece primero y es la posición predeterminada de la barra. «Arriba» sigue disponible.
+- **Acto de contrición:** «Jesús, mi Señor y Redentor» pasa al primer lugar y es la fórmula predeterminada en el recorrido y en la selección de oraciones. La forma tradicional permanece accesible y las elecciones guardadas se respetan.
+- **«Omitir todo»:** aplica expresamente las opciones predeterminadas de los pasos del asistente inicial (tema claro, colores por misterios, gesto por recorrido, vibración activada, toques activados, barra inferior, «Jesús, mi Señor y Redentor») y finaliza el tutorial. «Omitir este paso» utiliza el valor predeterminado de ese paso sin cambiar los restantes.
+- **Oración inicial:** el primer fotograma usa «Estación al Santísimo Sacramento» en lugar de «Por la señal». Al completar el tutorial por primera vez se fija el índice inicial en la Estación; los progresos ya guardados de otras personas no se reinician al actualizar.
+- **Android:** `MainActivity` activa el modo inmersivo de manera nativa al abrir, desde antes de cargar WebView, con aviso de estado a la interfaz tras terminar la carga y recuperación del modo al retornar el foco. Se mantienen el botón de salir de pantalla completa y el comportamiento voluntario del usuario; al salir se elimina la bandera `FLAG_FULLSCREEN`.
+- Se invalidan las cachés de `app.js`, `rosary-enhancements.js`, `rosary-colors.js`, `rosary-physical.js` y `rosary-onboarding.js` para reflejar los cambios en GitHub Pages y Android.
+- Se conserva el certificado permanente de firma; publicar APK firmada para Obtener actualización desde Obtainium.
