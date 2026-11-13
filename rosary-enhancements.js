@@ -1921,14 +1921,42 @@
       intensityRow.append(intensityTitle,intensityChoice);
       // Orden común: interruptor, intensidad y patrón del misterio.
       $('vibration')?.closest('label')?.after(intensityRow,hapticRow);
-      if ((/iPad|iPhone|iPod/.test(navigator.userAgent)||
-           (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))&&
-          !window.RosarioAndroid) {
-        const iosNotice=document.createElement('p');
-        iosNotice.className='rosario-haptic-compatibility';
-        iosNotice.textContent='En iPhone, Safari y Chrome no ofrecen vibraciones web compatibles. Los patrones hápticos están disponibles en Android.';
-        iosNotice.style.cssText='font:12px/1.55 system-ui;color:var(--ui-muted,#999);padding:0 12px 10px;margin:0';
-        hapticRow.after(iosNotice);
+      // El navegador decide la compatibilidad con la API de vibración:
+      // la aceptación no garantiza que el dispositivo no esté silenciado.
+      // En la APK se mantiene el vibrador nativo independiente.
+      if(!window.RosarioAndroid){
+        const diagnostic=document.createElement('div');
+        diagnostic.className='rosario-haptic-compatibility';
+        diagnostic.style.cssText='font:12px/1.55 system-ui;color:var(--ui-muted,#999);padding:2px 12px 12px';
+        const info=document.createElement('p');
+        info.style.margin='0 0 8px';
+        const result=document.createElement('p');
+        result.setAttribute('role','status');
+        result.setAttribute('aria-live','polite');
+        result.style.margin='6px 0 0';
+        const supportsVibration=typeof navigator.vibrate==='function';
+        info.textContent=supportsVibration
+          ?'El navegador admite solicitudes de vibración. El resultado depende también del teléfono, los ajustes hápticos y el modo silencio o No molestar.'
+          :'Este navegador no admite la vibración web. Prueba otro navegador compatible en Android o la APK de Rosario.';
+        diagnostic.append(info);
+        if(supportsVibration){
+          const test=document.createElement('button');
+          test.type='button';
+          test.className='rosario-haptic-test';
+          test.textContent='Probar vibración web';
+          test.onclick=()=>{
+            try{
+              const accepted=navigator.vibrate([220,90,220]);
+              result.textContent=accepted
+                ?'Solicitud aceptada por el navegador. Si no vibró, revisa la vibración y el silencio del teléfono.'
+                :'El navegador rechazó la vibración. Comprueba que ya hayas interactuado con la página y que siga visible.';
+            }catch{
+              result.textContent='El navegador impidió la vibración.';
+            }
+          };
+          diagnostic.append(test,result);
+        }
+        hapticRow.after(diagnostic);
       }
       const prayersGroup=group('Oraciones','rosario-prayer-settings-group');
       const contrition=document.createElement('label');
