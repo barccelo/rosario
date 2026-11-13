@@ -592,7 +592,6 @@
         const previous=autoFollowTarget===null?currentTop:autoFollowTarget;
         const clamp=n=>Math.max(0,Math.min(max,n));
         const margin=Math.max(22,Math.min(34,height*.055));
-        const firstFiveTop=clamp(positions[5].y-margin);
         // El encuadre inferior es el límite REAL del scroll nativo.
         // El antiguo 39 % dejaba ~90 px de recorrido sin utilizar en
         // pantallas de 780 px y cortaba la cruz por el borde inferior.
@@ -616,8 +615,8 @@
             target=finalTop;
           }else if(atClosing||atFinalMystery||bead>=50){
             target=finalTop;
-          }else if(bead>=0&&bead<=5){
-            target=Math.min(firstFiveTop,clamp(selected.y-height*.64));
+          }else if(bead>=0&&bead<=FRONT_END){
+            target=clamp(selected.y-height*.5);
           }else{
             target=selected.y-height*.64;
           }
@@ -640,24 +639,16 @@
           // de la rama izquierda a la derecha (28).
           const beadGap=positions[26].y-positions[27].y;
           target=Math.min(previous,Math.max(0,27-bead)*beadGap);
-        }else if(goingForward &&
-                 selected.type==='intro' &&
-                 selected.phase==='opening' &&
-                 selected.intro===0){
-          // La tercera pequeña del colgante ya prepara el paso a la
-          // grande, evitando un salto en la siguiente oración.
-          target=Math.min(previous,firstFiveTop);
-        }else if(bead>=0&&bead<=5 && sequential &&
-                 (lastPhysicalType==='intro'||
-                  lastPhysicalBead>=0&&lastPhysicalBead<=5)){
-          // Entre la grande y las primeras cinco, mostrar toda la zona
-          // en un encuadre estable. Nunca recentrar cuenta por cuenta.
-          // Si el usuario había desplazado la cadena manualmente,
-          // también garantizar que la cuenta seleccionada no quede
-          // por debajo del límite visible.
-          const radius=bead%11===0?23:17;
-          const visibleMinimum=selected.y-height+margin+radius;
-          target=Math.max(visibleMinimum,Math.min(previous,firstFiveTop));
+        }else if(sequential&&!keepFinalFraming&&
+                  (selected.type==='intro'&&selected.phase==='opening'||
+                   selected.type==='loop'&&bead>=0&&bead<=FRONT_END)){
+          // La cruz conserva su posición inicial en el límite inferior.
+          // Luego, desde la cuenta grande del colgante y las tres pequeñas
+          // hasta la rama ascendente, centrar cada cuenta seleccionada.
+          // clamp() detiene el avance al llegar al límite superior (0)
+          // o mientras aún no se puede centrar junto a la cruz (max).
+          // El scroll manual sigue siendo enteramente nativo.
+          target=selected.y-height*.5;
         }else if(goingForward&&bead>=(height<620?33:height<720?35:39)&&
                  bead<=54&&lastPhysicalBead===bead-1){
           // Sobre la rama derecha, llegar gradualmente al final REAL
@@ -690,9 +681,9 @@
           if(selected.type==='cross' || selected.phase==='closing'){
             target=finalTop;
           }else if(selected.type==='intro'){
-            target=clamp(selected.y-height*.55);
+            target=clamp(selected.y-height*.5);
           }else if(selected.type==='loop'){
-            target=clamp(selected.y-height*.53);
+            target=clamp(selected.y-height*.5);
           }
         }
         target=clamp(target);
