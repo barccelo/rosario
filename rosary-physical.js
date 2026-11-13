@@ -612,11 +612,11 @@
             target=clamp(selected.y-height*.5);
           }
           }
-        }else if(keepFinalFraming&&priorInFinalSection){
-          // Desde las últimas cuentas del quinto misterio debe llegar
-          // al scroll máximo real. Conservar la posición anterior aquí
-          // impedía que se revelaran el colgante y la cruz al avanzar.
-          // El encuadre queda anclado también durante las letanías.
+        }else if(keepFinalFraming&&(priorInFinalSection||goingForward)){
+          // El scroll inferior se recupera AL INICIAR las oraciones
+          // finales (y se conserva dentro de ellas), nunca durante las
+          // últimas cuentas de la quinta decena. Así la bajada permanece
+          // centrada hasta completar el aro, sin un salto anticipado.
           target=finalTop;
         }else if(!sequential&&keepFinalFraming){
           // Navegación deliberada a una oración final desde otro punto.
