@@ -556,17 +556,12 @@
         const bead=selected.type==='loop'?selected.bead:-1;
         const prayerStep=steps[state.index];
         const priorStep=steps[beforeIndex];
-        // La vuelta superior sólo cambia el encuadre; NO cambia la
-        // geometría ni la lógica del swipe sobre las cuentas.
+        // El encuadre final comienza al salir efectivamente del aro.
+        // Las cuentas 51–54 siguen siendo cuentas del quinto misterio:
+        // nunca adelantarles la vista hacia el extremo inferior.
         const atClosing=selected.phase==='closing';
-        const atFinalMystery=prayerStep?.m===4&&
-          (bead>=51||(bead===0&&selected.completed===55));
-        const priorInFinalSection=priorStep?.m>=5||
-          priorStep?.m===4&&
-          (lastPhysicalBead>=51||
-           lastPhysicalBead===0&&
-           steps[beforeIndex]?.kind!=='mystery');
-        const keepFinalFraming=atClosing||atFinalMystery;
+        const priorInFinalSection=priorStep?.m>=5;
+        const keepFinalFraming=atClosing;
         // Después de un desplazamiento manual el siguiente avance
         // debe volver a la cuenta activa, esté a la distancia que esté.
         let restoreActiveBead=displacedManually;
@@ -592,11 +587,9 @@
         const previous=autoFollowTarget===null?currentTop:autoFollowTarget;
         const clamp=n=>Math.max(0,Math.min(max,n));
         const margin=Math.max(22,Math.min(34,height*.055));
-        // El encuadre inferior es el límite REAL del scroll nativo.
-        // El antiguo 39 % dejaba ~90 px de recorrido sin utilizar en
-        // pantallas de 780 px y cortaba la cruz por el borde inferior.
-        // Al llegar a la cuenta 7 de la última decena, ese límite se
-        // alcanza gradualmente y se conserva durante los cierres.
+        // La cruz comienza en el extremo inferior. Ese límite vuelve a
+        // utilizarse cuando empiezan las oraciones finales, no durante
+        // la quinta decena de la rama descendente.
         const finalTop=max;
         let target=previous;
 
@@ -613,12 +606,10 @@
              selected.type==='cross'&&selected.phase==='opening' ||
              state.index===0&&selected.phase==='opening'){
             target=finalTop;
-          }else if(atClosing||atFinalMystery||bead>=50){
+          }else if(atClosing){
             target=finalTop;
-          }else if(bead>=0&&bead<=FRONT_END){
+          }else if(selected.type==='loop'||selected.type==='intro'){
             target=clamp(selected.y-height*.5);
-          }else{
-            target=selected.y-height*.64;
           }
           }
         }else if(keepFinalFraming&&priorInFinalSection){
@@ -649,20 +640,18 @@
           // o mientras aún no se puede centrar junto a la cruz (max).
           // El scroll manual sigue siendo enteramente nativo.
           target=selected.y-height*.5;
-        }else if(goingForward&&bead>=(height<620?33:height<720?35:39)&&
-                 bead<=54&&lastPhysicalBead===bead-1){
-          // Sobre la rama derecha, llegar gradualmente al final REAL
-          // en la séptima cuenta (51). Pantallas compactas empiezan
-          // antes: su límite de distancia por paso es más pequeño.
-          const startBead=height<620?33:height<720?35:39;
-          const startTop=clamp(positions[startBead].y-height*.57);
-          const progress=Math.max(0,Math.min(1,
-            (bead-startBead)/(51-startBead)));
-          const planned=startTop+(finalTop-startTop)*progress;
-          target=Math.max(previous,planned);
+        }else if(sequential&&selected.type==='loop'&&
+                 bead>FRONT_END&&bead<=54){
+          // Después de la vuelta superior, centrar cada cuenta en la
+          // bajada (28–54), igual que en la subida. Nunca anticipar el
+          // final al llegar a las últimas cuentas del quinto misterio.
+          // El clamp posterior limita el centrado sólo cuando no queda
+          // más recorrido real de pantalla.
+          target=selected.y-height*.5;
         }else if(goingForward&&bead===0&&lastPhysicalBead===54){
-          // La cuenta grande final no debe iniciar otro encuadre.
-          target=previous;
+          // La cuenta grande compartida termina el aro a la misma
+          // altura que la última cuenta; no provocar un salto final.
+          target=selected.y-height*.5;
         }else{
           // El seguimiento habitual mueve la cadena sólo cuando la
           // siguiente cuenta deja de estar dentro de la zona visible.
@@ -690,8 +679,8 @@
         if(sequential&&!restoreActiveBead&&!keepFinalFraming){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
           // entre oraciones adyacentes. No modifica el swipe manual.
-          // Más corto junto a la unión inferior; suficiente margen
-          // para llegar gradualmente al encuadre final en la cuenta 7.
+          // Más corto junto a la unión inferior; el encuadre final
+          // se activa solamente al pasar a las oraciones de cierre.
           const closeToBottom=bead>=0&&bead<=5 ||
             selected.type==='intro'&&selected.phase==='opening';
           const limit=closeToBottom
