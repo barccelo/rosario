@@ -469,3 +469,12 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - La transición suave entre oraciones y las protecciones de avance rápido no se alteran. No se mueven cuentas, hilos, texturas, geometrías ni elementos gráficos.
 - Actualizada la caché de `rosary-physical.js?v=20261113-3` en web y APK. Distribución mediante el APK firmado permanentemente y GitHub Releases para Obtainium y el aviso integrado de actualización.
 - Queda pendiente comprobar en Android la bajada completa en teléfonos de diversas alturas.
+
+## v0.1.100 — Ajuste final de seguimiento en el inicio de las oraciones finales (13 de noviembre de 2026)
+
+- Consolida el centrado de la **rama descendente (cuentas 28–54)** publicado en el código de v0.1.99: al avanzar o retroceder, la cuenta activa se mantiene en la línea central cuando las dimensiones físicas lo permiten. No se adelanta el desplazamiento inferior durante la quinta decena.
+- **Ajusta el paso de la quinta decena al cierre:** el scroll vuelve a su límite inferior **en la primera oración final**, y lo conserva en las posteriores, en lugar de recuperar esa posición de forma tardía. Evita tanto el salto anticipado durante la bajada como una transición incorrecta al mostrar el colgante y la cruz.
+- Se preservan la cruz en la posición inicial, la vuelta del arco superior, los límites físicos de scroll, la animación suave, los gestos manuales y la geometría íntegra del rosario.
+- No se modifican el contenido litúrgico, las opciones visuales, la firma, las vibraciones ni el mecanismo integrado de actualizaciones.
+- El archivo actualizado `rosary-physical.js` con el seguimiento de bajada y esta transición queda incluido conjuntamente en el APK; la web y Android comparten la referencia `rosary-physical.js?v=20261113-3`.
+- Publicar APK firmada y compatible con Obtainium desde GitHub Releases.
