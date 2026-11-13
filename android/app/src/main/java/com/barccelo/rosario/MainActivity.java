@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import java.io.File;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Vibrator;
@@ -212,7 +213,19 @@ public final class MainActivity extends Activity {
             String expected = "https://github.com/barccelo/rosario/releases/download/"
                 + version + "/Rosario-" + version + ".apk";
             if (!expected.equals(url)) return false;
+            int previousStatus=getUpdateDownloadStatus();
+            if (version.equals(getDownloadedUpdateVersion()) &&
+                (previousStatus==DownloadManager.STATUS_PENDING ||
+                 previousStatus==DownloadManager.STATUS_RUNNING ||
+                 previousStatus==DownloadManager.STATUS_PAUSED ||
+                 previousStatus==DownloadManager.STATUS_SUCCESSFUL)) return true;
             try {
+                // Una descarga fallida de la misma versión puede dejar un
+                // archivo parcial. Limpiar sólo ese APK antes de reintentar.
+                File directory=getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                if (directory == null) return false;
+                File partial=new File(directory,"Rosario-" + version + ".apk");
+                if (partial.exists()&&!partial.delete())return false;
                 DownloadManager manager=(DownloadManager)
                     getSystemService(Context.DOWNLOAD_SERVICE);
                 if (manager == null) return false;
