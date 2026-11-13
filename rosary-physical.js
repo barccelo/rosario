@@ -49,8 +49,9 @@
     const haloModes=['normal','continuous','none'];
     if(!haloModes.includes(state.rosaryHaloMode))
       state.rosaryHaloMode='continuous';
-    // Opcional y DESACTIVADO por defecto; disponible en ambas vistas.
-    state.screenTapNavigation=state.screenTapNavigation===true;
+    // Los toques están ACTIVADOS por defecto (tutorial, paso 5).
+    // Respetar el valor false de quienes los hayan desactivado.
+    state.screenTapNavigation=state.screenTapNavigation!==false;
     // De manera predeterminada el texto también acepta toques. Esta
     // protección es voluntaria y no altera las cuentas ni los gestos.
     state.accidentalTouchProtection=state.accidentalTouchProtection===true;
