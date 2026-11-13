@@ -62,11 +62,11 @@
     }
   };
 
-  const modes = ['classic','missionary','mystery'];
+  const modes = ['mystery','missionary','classic'];
   const paletteGroups = ['Dolorosos','Luminosos','Gozosos','Gloriosos'];
 
   function validMode(value) {
-    return modes.includes(value) ? value : 'classic';
+    return modes.includes(value) ? value : 'mystery';
   }
   function normaliseVariants(value) {
     const result = {};
@@ -192,10 +192,10 @@
       legend.textContent='Colores del rosario';
       const list=document.createElement('div');
       list.className='rosary-colors-mode-list';
-      const classic=addMode('classic','Clásico',['#B79355'],list);
-      const mission=addMode('missionary','Misionero',missionary.map(item=>item.color),list);
       const myst=addMode('mystery','Según los misterios',
         ['#76579B','#BC922D','#70B9DE','#F7F6F1'],list);
+      const mission=addMode('missionary','Misionero',missionary.map(item=>item.color),list);
+      const classic=addMode('classic','Clásico',['#B79355'],list);
 
       const variations=document.createElement('div');
       variations.className='rosary-colors-variants';
