@@ -151,9 +151,11 @@
     let page=0;
     let zoom=0;
     const wasInitialSetup=state.rosarioFirstRunDone!==true;
+    let initialStartApplied=false;
     const applyDefault=page=>setPreference(page,defaultChoices[page]);
     const resetInitialStart=()=>{
-      if(!wasInitialSetup)return;
+      if(!wasInitialSetup||initialStartApplied)return;
+      initialStartApplied=true;
       // La estación al Santísimo es la primera pantalla del Rosario.
       // Una nueva instalación empieza allí, no en «Por la señal».
       if(!state.chapletActive){
