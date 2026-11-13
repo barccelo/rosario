@@ -105,7 +105,8 @@
       check();
     };
     try{
-      if(Number(window.RosarioAndroid.getUpdateDownloadStatus())===8){
+      if(window.RosarioAndroid.getDownloadedUpdateVersion()===asset.tag &&
+         Number(window.RosarioAndroid.getUpdateDownloadStatus())===8){
         button.disabled=true;
         button.textContent='Descargado';
         addButton(notice.actions,'Instalar',()=>window.RosarioAndroid.installDownloadedUpdate());
