@@ -58,28 +58,12 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void vibrate(int milliseconds) {
             if (milliseconds <= 0) return;
-            final int duration = Math.min(milliseconds, 1100);
-            runOnUiThread(() -> {
-                try {
-                    Vibrator vibrator;
-                    if (Build.VERSION.SDK_INT >= 31) {
-                        VibratorManager manager = (VibratorManager)
-                            getSystemService(VIBRATOR_MANAGER_SERVICE);
-                        vibrator = manager != null ? manager.getDefaultVibrator() : null;
-                    } else {
-                        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                    }
-                    if (vibrator == null || !vibrator.hasVibrator()) return;
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        vibrator.vibrate(VibrationEffect.createOneShot(duration,
-                            VibrationEffect.DEFAULT_AMPLITUDE));
-                    } else {
-                        vibrator.vibrate(duration);
-                    }
-                } catch (SecurityException ignored) {
-                    // El sistema puede denegar vibración según sus permisos.
-                }
-            });
+            // Antes el pulso simple usaba createOneShot, mientras que
+            // doble y triple usaban createWaveform. Algunos dispositivos
+            // reproducían sólo estos últimos. Todos los pulsos, incluidos
+            // la duración normal y la larga, comparten ahora EXACTAMENTE
+            // el mismo camino de reproducción que los patrones múltiples.
+            vibrateSequence(Integer.toString(Math.min(milliseconds, 1100)));
         }
 
         @JavascriptInterface
