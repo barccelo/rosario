@@ -417,3 +417,14 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - **Android:** `MainActivity` activa el modo inmersivo de manera nativa al abrir, desde antes de cargar WebView, con aviso de estado a la interfaz tras terminar la carga y recuperación del modo al retornar el foco. Se mantienen el botón de salir de pantalla completa y el comportamiento voluntario del usuario; al salir se elimina la bandera `FLAG_FULLSCREEN`.
 - Se invalidan las cachés de `app.js`, `rosary-enhancements.js`, `rosary-colors.js`, `rosary-physical.js` y `rosary-onboarding.js` para reflejar los cambios en GitHub Pages y Android.
 - Se conserva el certificado permanente de firma; publicar APK firmada para Obtener actualización desde Obtainium.
+
+## v0.1.95 — Pantalla completa automática en web instalada y diagnóstico de vibración (13 de noviembre de 2026)
+
+- **PWA web instalada:** `manifest.webmanifest` solicita `display:"fullscreen"`, de modo que al abrir el icono instalado se oculten automáticamente los controles de navegador en las plataformas que admiten este modo. No afecta a la apertura normal de la web desde una pestaña.
+- **Web en pestaña normal:** la Fullscreen API exige una interacción real. En navegadores compatibles se solicita pantalla completa con el primer toque, clic o tecla, sin bloquear la interacción original ni afectar la ejecución nativa de Android. No se reintenta automáticamente una vez que el usuario sale del modo completo. El botón habitual permite volver a entrar o salir manualmente.
+- **iOS/Safari y navegadores que no admiten la Fullscreen API:** se mantiene el comportamiento de compatibilidad; la web no afirma que pueda saltarse una restricción del navegador. Se puede abrir instalada desde la pantalla de inicio donde esté admitido.
+- **APK Android:** conserva el arranque nativo en modo inmersivo y el botón de salida.
+- **Compatibilidad de vibración web:** en Ajustes > Vibración se identifica si `navigator.vibrate()` está disponible; si lo está, se agrega un botón de prueba de dos pulsos. El resultado indica únicamente si el navegador aceptó la solicitud, nunca garantiza un efecto físico: ajustes hápticos, modo silencio, ahorro de energía y soporte de hardware pueden impedirlo.
+- No se altera la API de vibración nativa de la APK ni los patrones configurados, la identidad gráfica, los misterios ni la secuencia de oraciones.
+- Se invalidan las referencias de caché del manifiesto, `immersive.js` y `rosary-enhancements.js` para la web y APK.
+- Publicar APK firmada en GitHub Releases para actualización desde Obtainium.
