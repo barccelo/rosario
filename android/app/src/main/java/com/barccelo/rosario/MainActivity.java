@@ -2,16 +2,22 @@ package com.barccelo.rosario;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.os.VibrationEffect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Build;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.View;
@@ -37,6 +43,9 @@ public final class MainActivity extends Activity {
     private volatile boolean downIsSystem = false;
     private boolean nativeFullscreen = false;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 42;
+    private static final String UPDATE_PREFERENCES = "rosario_updates";
+    private static final String UPDATE_DOWNLOAD_ID = "download_id";
+    private static final String APK_MIME = "application/vnd.android.package-archive";
 
     public final class RosarioBridge {
         @JavascriptInterface
@@ -177,6 +186,103 @@ public final class MainActivity extends Activity {
                     }
                 } catch (SecurityException ignored) {
                     // El dispositivo puede limitar las vibraciones.
+                }
+            });
+        }
+
+        // Actualizador voluntario: una comprobación web al abrir; el
+        // botón descarga la APK firmada mediante DownloadManager. Android
+        // siempre exige que el usuario confirme su instalación.
+        @JavascriptInterface
+        public String getAppVersion() {
+            try {
+                String version = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+                return version != null ? version : "v0.0.0";
+            } catch (PackageManager.NameNotFoundException ignored) {
+                return "v0.0.0";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean downloadUpdate(String url, String version) {
+            if (url == null || version == null ||
+                !version.matches("v[0-9]+\\.[0-9]+\\.[0-9]+")) return false;
+            String expected = "https://github.com/barccelo/rosario/releases/download/"
+                + version + "/Rosario-" + version + ".apk";
+            if (!expected.equals(url)) return false;
+            try {
+                DownloadManager manager=(DownloadManager)
+                    getSystemService(Context.DOWNLOAD_SERVICE);
+                if (manager == null) return false;
+                DownloadManager.Request request=new DownloadManager.Request(Uri.parse(url));
+                request.setTitle("Rosario " + version);
+                request.setDescription("Descargando actualización para instalarla");
+                request.setMimeType(APK_MIME);
+                request.setNotificationVisibility(
+                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                // Carpeta propia: sin permisos de almacenamiento adicionales
+                // en Android 7-15. DownloadManager proporciona content URI
+                // para que el instalador del sistema lea el APK.
+                request.setDestinationInExternalFilesDir(MainActivity.this,
+                    Environment.DIRECTORY_DOWNLOADS,"Rosario-" + version + ".apk");
+                long id=manager.enqueue(request);
+                getSharedPreferences(UPDATE_PREFERENCES,MODE_PRIVATE).edit()
+                    .putLong(UPDATE_DOWNLOAD_ID,id).apply();
+                return true;
+            } catch (Exception ignored) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public int getUpdateDownloadStatus() {
+            long id=getSharedPreferences(UPDATE_PREFERENCES,MODE_PRIVATE)
+                .getLong(UPDATE_DOWNLOAD_ID,-1);
+            if (id < 0) return 0;
+            try {
+                DownloadManager manager=(DownloadManager)
+                    getSystemService(Context.DOWNLOAD_SERVICE);
+                if (manager == null) return 0;
+                DownloadManager.Query query=new DownloadManager.Query().setFilterById(id);
+                try (Cursor cursor=manager.query(query)) {
+                    if (cursor != null && cursor.moveToFirst())
+                        return cursor.getInt(cursor.getColumnIndexOrThrow(
+                            DownloadManager.COLUMN_STATUS));
+                }
+            } catch (Exception ignored) {
+                return 0;
+            }
+            return 0;
+        }
+
+        @JavascriptInterface
+        public void installDownloadedUpdate() {
+            runOnUiThread(() -> {
+                if (getUpdateDownloadStatus()!=DownloadManager.STATUS_SUCCESSFUL)return;
+                if (Build.VERSION.SDK_INT >= 26 &&
+                    !getPackageManager().canRequestPackageInstalls()) {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                            Uri.parse("package:" + getPackageName())));
+                    } catch (Exception ignored) {}
+                    return;
+                }
+                try {
+                    long id=getSharedPreferences(UPDATE_PREFERENCES,MODE_PRIVATE)
+                        .getLong(UPDATE_DOWNLOAD_ID,-1);
+                    DownloadManager manager=(DownloadManager)
+                        getSystemService(Context.DOWNLOAD_SERVICE);
+                    if (manager == null) return;
+                    Uri apk=manager.getUriForDownloadedFile(id);
+                    if (apk == null) return;
+                    Intent install=new Intent(Intent.ACTION_VIEW);
+                    install.setDataAndType(apk,APK_MIME);
+                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(install);
+                } catch (Exception ignored) {
+                    // La app queda utilizable; Android sigue teniendo la APK
+                    // descargada y el usuario puede reintentar la instalación.
                 }
             });
         }
