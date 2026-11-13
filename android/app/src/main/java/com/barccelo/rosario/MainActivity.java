@@ -292,6 +292,20 @@ public final class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // La interfaz web debe conocer el modo inicial después de
+                // instalar sus controles. Sin esto el botón de pantalla
+                // completa podría mostrar el estado contrario al de Android.
+                if (ROOT.equals(url)) {
+                    view.evaluateJavascript(
+                        "window.rosarioNativeFullscreenChanged&&" +
+                        "window.rosarioNativeFullscreenChanged(" + nativeFullscreen + ")",
+                        null);
+                }
+            }
+
+            @Override
             public WebResourceResponse shouldInterceptRequest(
                     WebView view, WebResourceRequest request) {
                 return loader.shouldInterceptRequest(request.getUrl());
@@ -315,8 +329,21 @@ public final class MainActivity extends Activity {
         });
         webView.addJavascriptInterface(new RosarioBridge(), "RosarioAndroid");
         setContentView(webView);
+        // En Android el rosario comienza directamente en pantalla
+        // completa. El botón de la interfaz permite salir y regresar;
+        // no se fuerza otra vez si el usuario decidió desactivarla.
+        applyFullscreen(true);
         ReminderScheduler.schedule(this);
         webView.loadUrl(ROOT);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // Los diálogos del sistema y el cambio de aplicación pueden
+        // devolver las barras: restaurarlas sólo si sigue activado el
+        // modo inmersivo elegido por el usuario.
+        if (hasFocus && nativeFullscreen) applyFullscreen(true);
     }
 
     @Override
