@@ -165,8 +165,17 @@ public final class MainActivity extends Activity {
                     }
                     if (vibrator == null || !vibrator.hasVibrator()) return;
                     if (Build.VERSION.SDK_INT >= 26) {
-                        vibrator.vibrate(VibrationEffect.createWaveform(timings,
-                            strengths, -1));
+                        // La intensidad personalizada sólo puede modularse
+                        // cuando el motor admite control de amplitud. En
+                        // otros Android usamos los mismos tiempos, pero con
+                        // pulsos encendido/apagado de máxima compatibilidad.
+                        if (vibrator.hasAmplitudeControl()) {
+                            vibrator.vibrate(VibrationEffect.createWaveform(
+                                timings, strengths, -1));
+                        } else {
+                            vibrator.vibrate(VibrationEffect.createWaveform(
+                                timings, -1));
+                        }
                     } else {
                         vibrator.vibrate(timings, -1);
                     }
