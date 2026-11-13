@@ -155,7 +155,7 @@
     'Propongo firmemente no volver a pecar y confío en que por tu infinita misericordia '+
     'me has de conceder el perdón de mis culpas y me has de llevar a la vida eterna. Amén.';
   // Dos textos, una sola estación; cambiar de versión nunca mueve la cuenta.
-  state.contritionVersion=saved.contritionVersion==='redentor'?'redentor':'jesucristo';
+  state.contritionVersion=saved.contritionVersion==='jesucristo'?'jesucristo':'redentor';
   window.rosarioContritionText=()=>{
     return state.contritionVersion==='redentor'
       ?prayers['Acto de contrición (Jesús, mi Señor y Redentor)']
@@ -786,7 +786,7 @@
   state.textTransition=textTransitions.includes(saved.textTransition)?saved.textTransition:
     (saved.subtleBeadMotion===false?'none':'fade');
   // La barra y el botón compacto comparten ubicación configurada.
-  state.controlsPosition = saved.controlsPosition === 'bottom' ? 'bottom' : 'top';
+  state.controlsPosition = saved.controlsPosition === 'top' ? 'top' : 'bottom';
   function applyControlsPosition(){
     document.body.classList.toggle('controls-bottom',state.controlsPosition==='bottom');
   }
@@ -887,8 +887,8 @@
             :defaultPrayerText(key)));
   };
   window.rosarioContritionChoices=[
-    ['jesucristo','Señor mío Jesucristo'],
-    ['redentor','Jesús, mi Señor y Redentor']
+    ['redentor','Jesús, mi Señor y Redentor'],
+    ['jesucristo','Señor mío Jesucristo']
   ];
   window.rosarioSavePrayer=(title,text)=>{
     if(typeof text!=='string'||!title)return false;
