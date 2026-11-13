@@ -458,3 +458,14 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - Se respeta el desplazamiento manual nativo y, en el siguiente avance, vuelve a enfocarse la cuenta activa. La vuelta por la rama derecha, las oraciones finales, las animaciones del hilo, la posición inicial, las vibraciones y la navegación no cambian.
 - Se actualiza la referencia de caché de `rosary-physical.js` en `index.html` para web y Android. Los cambios se distribuyen con la misma APK firmada por la clave estable, publicándose en GitHub Releases para Obtainium.
 - Pendiente de prueba visual en dispositivo: comprobar centrado progresivo en diferentes alturas de pantalla y la detención natural al alcanzar la parte superior.
+
+## v0.1.99 — Seguimiento centrado también en la rama descendente (13 de noviembre de 2026)
+
+- **Corrección de encuadre de la bajada del rosario:** la cuenta activa se mantiene en el centro vertical tanto durante la subida (1–27) como en toda la rama descendente (28–54), dentro de los límites físicos del scroll.
+- La regla antigua que adelantaba el encuadre hasta el límite inferior desde la séptima cuenta de la quinta decena (y lo mantenía durante las cuentas 51–54) se elimina. Ese desplazamiento causaba que la cuenta activa quedara relegada a un extremo y que la vista subiera después de la cuenta grande final.
+- **La quinta cuenta grande y las últimas Avemarías** siguen enfocándose en el medio mientras sea geométricamente posible; el límite real inferior sólo se alcanza cuando la posición de la cuenta y la altura del teléfono lo requieren.
+- El cierre del aro en la **cuenta grande compartida** usa el mismo centrado y no introduce un salto artificial antes de pasar al colgante.
+- Las **oraciones finales** conservan su encuadre al extremo inferior para mostrar el colgante y la cruz. La Estación inicial conserva su encuadre original, el arco superior se muestra entero, y los gestos manuales siguen siendo nativos y libres.
+- La transición suave entre oraciones y las protecciones de avance rápido no se alteran. No se mueven cuentas, hilos, texturas, geometrías ni elementos gráficos.
+- Actualizada la caché de `rosary-physical.js?v=20261113-3` en web y APK. Distribución mediante el APK firmado permanentemente y GitHub Releases para Obtainium y el aviso integrado de actualización.
+- Queda pendiente comprobar en Android la bajada completa en teléfonos de diversas alturas.
