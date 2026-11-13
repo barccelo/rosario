@@ -17,6 +17,7 @@ import android.view.WindowInsetsController;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -211,6 +212,14 @@ public final class MainActivity extends Activity {
 
     private void applyFullscreen(boolean enabled) {
         nativeFullscreen = enabled;
+        // El tema oculta la barra ya durante el splash. Al salir de
+        // pantalla completa hay que limpiar también el flag nativo:
+        // WindowInsetsController.show() solo no revierte el tema.
+        if (enabled) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
         View decor = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= 30) {
             WindowInsetsController controller = decor.getWindowInsetsController();
