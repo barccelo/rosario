@@ -11,6 +11,9 @@
     {title:'Acto de contrición',detail:'Escoge la oración que prefieres utilizar. Las dos se pueden cambiar después.'},
     {title:'Conoce los controles',detail:'Toca los botones de esta demostración para descubrir su función.'}
   ];
+  // Valores oficiales del primer uso. También se aplican al pulsar
+  // «Omitir todo» o al omitir un paso individual.
+  const defaultChoices=['light','mystery','follow','yes','yes','bottom','redentor'];
   const icon = {
     settings:'<circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3 2 1.1 2.3-.7 2 3.5-1.7 1.7v2.3l1.7 1.7-2 3.5-2.3-.7-2 1.1-.6 2.3h-4l-.6-2.3-2-1.1-2.3.7-2-3.5 1.7-1.7v-2.3L3.1 8.7l2-3.5 2.3.7 2-1.1z"/>',
     full:'<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>',
@@ -56,12 +59,12 @@
   function savedValue(page) {
     return [
       state.dark?'dark':'light',
-      state.rosaryColorMode||'classic',
+      state.rosaryColorMode||'mystery',
       state.rosarySwipeMode||'follow',
       state.haptics!==false?'yes':'no',
-      state.screenTapNavigation===true?'yes':'no',
-      state.controlsPosition==='bottom'?'bottom':'top',
-      state.contritionVersion||'jesucristo'
+      state.screenTapNavigation!==false?'yes':'no',
+      state.controlsPosition==='top'?'top':'bottom',
+      state.contritionVersion||'redentor'
     ][page];
   }
   function contentFor(page) {
@@ -75,9 +78,9 @@
     if(page===1){
       const beads = colors => '<span class="onb-palette">'+colors.map(color=>'<i style="--preview-bead:'+color+'"></i>').join('')+'</span>';
       return '<div class="onb-choices">'+
-        choice('classic','Clásico',beads(['#B99557','#B99557','#B99557','#B99557','#B99557']),'Un mismo estilo durante todo el Rosario',selected==='classic')+
+        choice('mystery','Según los misterios',beads(['#9775B9','#D9BD66','#71B8D9','#DFE2DC']),'Colores correspondientes al día y misterio',selected==='mystery')+
         choice('missionary','Misionero',beads(['#68A6DD','#E7CB64','#C85C58','#84A87C','#F6EEE0']),'Cinco colores, una intención universal',selected==='missionary')+
-        choice('mystery','Según los misterios',beads(['#9775B9','#D9BD66','#71B8D9','#DFE2DC']),'Colores correspondientes al día y misterio',selected==='mystery')+'</div>';
+        choice('classic','Clásico',beads(['#B99557','#B99557','#B99557','#B99557','#B99557']),'Un mismo estilo durante todo el Rosario',selected==='classic')+'</div>';
     }
     if(page===2){
       return '<div class="onb-choices onb-swipes">'+
@@ -112,14 +115,14 @@
         '<span>'+svg(icon.full)+'</span></span>'+
         '</span>';
       return '<div class="onb-choices onb-position-choices">'+
-        choice('top','Arriba',preview('top'),'Controles cerca del borde superior',selected==='top')+
         choice('bottom','Abajo',preview('bottom'),'Controles cerca del borde inferior',selected==='bottom')+
+        choice('top','Arriba',preview('top'),'Controles cerca del borde superior',selected==='top')+
         '</div>';
     }
     if(page===6){
       const sources=[
-        ['jesucristo','Señor mío Jesucristo','Señor mío Jesucristo, Dios y hombre verdadero…'],
-        ['redentor','Jesús, mi Señor y Redentor','Jesús, mi Señor y Redentor, yo me arrepiento…']
+        ['redentor','Jesús, mi Señor y Redentor','Jesús, mi Señor y Redentor, yo me arrepiento…'],
+        ['jesucristo','Señor mío Jesucristo','Señor mío Jesucristo, Dios y hombre verdadero…']
       ];
       return '<div class="onb-choices">'+sources.map(a=>choice(a[0],a[1],
         '<span class="onb-prayer-paper"><span class="onb-prayer-cross">'+
@@ -147,14 +150,29 @@
     if(!modal)return;
     let page=0;
     let zoom=0;
+    const wasInitialSetup=state.rosarioFirstRunDone!==true;
+    const applyDefault=page=>setPreference(page,defaultChoices[page]);
+    const resetInitialStart=()=>{
+      if(!wasInitialSetup)return;
+      // La estación al Santísimo es la primera pantalla del Rosario.
+      // Una nueva instalación empieza allí, no en «Por la señal».
+      if(!state.chapletActive){
+        state.index=0;
+        state.rosaryIndex=0;
+        state.pouchSessionStarted=false;
+        window.rosarioPhysicalReset?.();
+        render();
+      }
+    };
     const finish=()=>{
+      resetInitialStart();
       state.rosarioFirstRunDone=true;
       persist();
       modal.close();
     };
-    // Cerrar o pulsar Atrás equivale a omitir el recorrido, pero no
-    // descarta las preferencias que ya se hayan elegido.
+    // Cerrar o pulsar Atrás conserva las opciones ya escogidas.
     function onClose(){
+      resetInitialStart();
       state.rosarioFirstRunDone=true;
       persist();
       modal.removeEventListener('close',onClose);
@@ -177,10 +195,14 @@
         (page>0?'<button type="button" class="onb-back" id="onbBack">← Anterior</button>':'')+
         '<button type="button" class="onb-skip" id="onbSkip">Omitir este paso</button>'+
         '<button type="button" class="onb-next" id="onbNext">'+(page===pages.length-1?'Comenzar':'Continuar →')+'</button></div>';
-      host.querySelector('#onbSkipAll').onclick=finish;
+      host.querySelector('#onbSkipAll').onclick=()=>{
+        defaultChoices.forEach((value,i)=>applyDefault(i));
+        finish();
+      };
       const back=host.querySelector('#onbBack');
       if(back)back.onclick=()=>{page--;draw();};
       host.querySelector('#onbSkip').onclick=()=>{
+        if(page<defaultChoices.length)applyDefault(page);
         if(page===pages.length-1)finish();
         else{page++;draw();}
       };
