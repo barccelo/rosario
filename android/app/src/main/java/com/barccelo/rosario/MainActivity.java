@@ -45,6 +45,7 @@ public final class MainActivity extends Activity {
     private static final int NOTIFICATION_PERMISSION_REQUEST = 42;
     private static final String UPDATE_PREFERENCES = "rosario_updates";
     private static final String UPDATE_DOWNLOAD_ID = "download_id";
+    private static final String UPDATE_DOWNLOAD_TAG = "download_tag";
     private static final String APK_MIME = "application/vnd.android.package-archive";
 
     public final class RosarioBridge {
@@ -228,11 +229,18 @@ public final class MainActivity extends Activity {
                     Environment.DIRECTORY_DOWNLOADS,"Rosario-" + version + ".apk");
                 long id=manager.enqueue(request);
                 getSharedPreferences(UPDATE_PREFERENCES,MODE_PRIVATE).edit()
-                    .putLong(UPDATE_DOWNLOAD_ID,id).apply();
+                    .putLong(UPDATE_DOWNLOAD_ID,id)
+                    .putString(UPDATE_DOWNLOAD_TAG,version).apply();
                 return true;
             } catch (Exception ignored) {
                 return false;
             }
+        }
+
+        @JavascriptInterface
+        public String getDownloadedUpdateVersion() {
+            return getSharedPreferences(UPDATE_PREFERENCES,MODE_PRIVATE)
+                .getString(UPDATE_DOWNLOAD_TAG,"");
         }
 
         @JavascriptInterface
