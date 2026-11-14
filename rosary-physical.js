@@ -573,6 +573,13 @@
         const goingForward=!entering&&state.index===beforeIndex+1;
         const goingBackward=!entering&&state.index===beforeIndex-1;
         const sequential=goingForward||goingBackward;
+        // La décima Avemaría de la quinta decena (cuenta 54) pasa a
+        // la cuenta grande compartida (0), antes del Gloria final.
+        // Es la única transición del aro que debe recorrer el tramo
+        // restante hasta el límite inferior real en un solo movimiento.
+        const closingLoopTransition=goingForward&&
+          selected.type==='loop'&&bead===0&&lastPhysicalBead===54&&
+          prayerStep?.m===4;
         const currentTop=viewport.scrollTop;
         // Recuperar la cuenta fuera de pantalla incluso cuando no hubo
         // pointerdown previo; no limitar el salto a 90–176 px por avance.
@@ -621,6 +628,11 @@
         }else if(!sequential&&keepFinalFraming){
           // Navegación deliberada a una oración final desde otro punto.
           target=finalTop;
+        }else if(closingLoopTransition){
+          // Última pequeña → cuenta grande inferior: extender suavemente
+          // el recorrido hasta el tope real. No usar el tope intermedio
+          // del centrado normal: deja el aro demasiado arriba.
+          target=finalTop;
         }else if(goingForward&&bead>=24&&bead<=28&&
                  lastPhysicalBead===bead-1){
           // La curva superior comienza sobre los dos extremos y está
@@ -648,10 +660,6 @@
           // El clamp posterior limita el centrado sólo cuando no queda
           // más recorrido real de pantalla.
           target=selected.y-height*.5;
-        }else if(goingForward&&bead===0&&lastPhysicalBead===54){
-          // La cuenta grande compartida termina el aro a la misma
-          // altura que la última cuenta; no provocar un salto final.
-          target=selected.y-height*.5;
         }else{
           // El seguimiento habitual mueve la cadena sólo cuando la
           // siguiente cuenta deja de estar dentro de la zona visible.
@@ -676,7 +684,8 @@
           }
         }
         target=clamp(target);
-        if(sequential&&!restoreActiveBead&&!keepFinalFraming){
+        if(sequential&&!restoreActiveBead&&!keepFinalFraming&&
+           !closingLoopTransition){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
           // entre oraciones adyacentes. No modifica el swipe manual.
           // Más corto junto a la unión inferior; el encuadre final
