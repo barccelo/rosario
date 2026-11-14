@@ -478,3 +478,13 @@ Si persiste la apertura, el halo queda descartado como causa suficiente; si desa
 - No se modifican el contenido litúrgico, las opciones visuales, la firma, las vibraciones ni el mecanismo integrado de actualizaciones.
 - El archivo actualizado `rosary-physical.js` con el seguimiento de bajada y esta transición queda incluido conjuntamente en el APK; la web y Android comparten la referencia `rosary-physical.js?v=20261113-3`.
 - Publicar APK firmada y compatible con Obtainium desde GitHub Releases.
+
+## v0.1.101 — Última Avemaría a la cuenta grande con recorrido completo (14 de noviembre de 2026)
+
+- **Ajuste puntual del cierre del quinto misterio:** al avanzar desde la décima Avemaría (cuenta 54) hasta la cuenta grande compartida (cuenta 0), el rosario se desplaza de una sola vez y suavemente hasta el límite inferior real `scrollTop = scrollHeight - clientHeight`.
+- La transición se reconoce únicamente cuando la oración avanza secuencialmente en el quinto misterio, desde la cuenta 54 a la cuenta grande 0; el resto de las transiciones del rosario mantienen sus reglas previas.
+- Se evita que esta transición sea interceptada por el centrado ordinario de las cuentas 0–27 y se exime del límite reducido de movimiento automático, que antes dejaba el rosario lejos del límite y cortaba el recorrido final.
+- El movimiento sigue usando `scrollTo({top:target,behavior:'smooth'})`; no realiza saltos bruscos ni cambia la geometría, el hilo, las cuentas o sus posiciones.
+- Se preservan el encuadre inicial en la cruz, el centrado de la subida y bajada, la navegación manual y el encuadre inferior de las oraciones finales.
+- `index.html` actualiza la versión del recurso a `rosary-physical.js?v=20261114-1` para evitar caché antigua en web y APK.
+- Publicar APK firmada con la clave permanente en GitHub Releases y disponible para Obtainium y el actualizador integrado de Rosario.
