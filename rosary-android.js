@@ -5,7 +5,7 @@
   const key='rosario.android.preferences.v1';
   const validActions=['next','previous','system'];
   const isoDays=['L','M','X','J','V','S','D'];
-  const defaults={up:'next',down:'previous',remind:false,time:'20:00',days:[1,2,3,4,5,6,7]};
+  const defaults={up:'previous',down:'next',remind:false,time:'20:00',days:[1,2,3,4,5,6,7]};
   let saved={};
   try { saved=JSON.parse(localStorage.getItem(key)||'{}'); } catch {}
   const pref={...defaults,...saved};
