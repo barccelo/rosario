@@ -177,9 +177,13 @@ document.addEventListener('keydown',e=>{if($('modal').open||e.target.matches('in
 window.rosarioHardwareKey=direction=>{
   if($('modal').open) return false;
   const configured=window.rosarioAndroidGetVolumeActions?.();
-  const action=configured?.[direction] || (direction==='up'?'next':'previous');
+  const action=configured?.[direction] || (direction==='down'?'next':'previous');
   if(action==='next'){
     if(state.index < steps.length) advance();
+    else window.rosarioPouchFinish?.();
+    // Con el Rosario completado, el último toque de volumen ejecuta
+    // exactamente la misma función que un toque final en pantalla.
+    // El cierre comprueba por sí mismo si la carterita está disponible.
     return true;
   }
   if(action==='previous'){
