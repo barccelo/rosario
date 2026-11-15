@@ -21,6 +21,24 @@ final class ReminderScheduler {
     private static final String ACTION = "com.barccelo.rosario.PRAYER_REMINDER";
     private ReminderScheduler() {}
 
+    // Sólo al primer inicio de una instalación (o para perfiles sin
+    // preferencia anterior): recordatorio diario a las 15:00. Los
+    // ajustes explícitos, incluyendo desactivarlo, nunca se sobrescriben.
+    static void ensureDefaults(Context context) {
+        SharedPreferences p=context.getSharedPreferences(PREFS,Context.MODE_PRIVATE);
+        if (p.contains("enabled")) return;
+        p.edit().putBoolean("enabled",true).putInt("hour",15)
+            .putInt("minute",0).putString("weekdays","1,2,3,4,5,6,7").apply();
+    }
+
+    static String getSettings(Context context) {
+        SharedPreferences p=context.getSharedPreferences(PREFS,Context.MODE_PRIVATE);
+        int h=p.getInt("hour",15), m=p.getInt("minute",0);
+        return (p.getBoolean("enabled",true)?"1":"0")+"|"+
+            String.format(java.util.Locale.US,"%02d:%02d",h,m)+"|"+
+            p.getString("weekdays","1,2,3,4,5,6,7");
+    }
+
     static void save(Context context, boolean enabled, int hour, int minute, String weekdays) {
         if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return;
         if (weekdays == null || !weekdays.matches("[1-7](,[1-7])*")) {
@@ -45,12 +63,12 @@ final class ReminderScheduler {
         PendingIntent pending = reminderIntent(context);
         alarm.cancel(pending);
         SharedPreferences p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        if (!p.getBoolean("enabled", false)) return;
+        if (!p.getBoolean("enabled", true)) return;
         if (Build.VERSION.SDK_INT >= 33 &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) return;
 
-        int hour = p.getInt("hour", 20), minute = p.getInt("minute", 0);
+        int hour = p.getInt("hour", 15), minute = p.getInt("minute", 0);
         String days = p.getString("weekdays", "1,2,3,4,5,6,7");
         Calendar now = Calendar.getInstance();
         Calendar next = (Calendar) now.clone();
