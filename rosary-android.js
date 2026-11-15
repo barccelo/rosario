@@ -19,7 +19,7 @@
       window.RosarioAndroid.getReminderSettings()).split('|');
     const days=weekdays?.split(',').map(Number);
     if((enabled==='1'||enabled==='0')&&
-       /^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)&&
+       /^([01]\d|2[0-3]):[0-5]\d$/.test(time)&&
        Array.isArray(days)&&days.length>0&&
        days.every(n=>Number.isInteger(n)&&n>=1&&n<=7)){
       pref.remind=enabled==='1';
