@@ -189,6 +189,14 @@
       });
     pouchToggle.classList.add('rosario-pouch-settings-toggle');
     buckets.appearance.unshift(pouchToggle);
+    // Mismo estado que el botón de sol/luna de la barra superior.
+    // El control es accesible también dentro de «Rosario y apariencia»
+    // y utiliza el mismo evento existente para guardar y redibujar.
+    const darkModeToggle=makeToggle('Modo oscuro',Boolean(state.dark),enabled=>{
+      if(Boolean(state.dark)!==enabled)byId('theme')?.click();
+    });
+    darkModeToggle.classList.add('rosario-appearance-theme-setting');
+    buckets.appearance.unshift(darkModeToggle);
 
     // Extraer una sola vez las opciones de los grupos originales.
     // Sus nodos se reutilizan al entrar y volver de otras pantallas,
