@@ -49,6 +49,20 @@ public final class MainActivity extends Activity {
     private static final String UPDATE_DOWNLOAD_TAG = "download_tag";
     private static final String APK_MIME = "application/vnd.android.package-archive";
 
+    /**
+     * Algunos controladores de vibración de Android ignoran ondas de un
+     * único tramo, aunque reproducen las dobles y triples correctamente.
+     * Representamos un pulso largo como dos tramos ON separados por 8 ms.
+     * No cambia su duración total, no añade una segunda pulsación
+     * perceptible y pasa por el MISMO motor de ondas que ya funciona.
+     * Es una medida de compatibilidad, no una garantía de hardware.
+     */
+    private static long[] compatibleHapticWaveform(long[] timings) {
+        if (timings.length != 2 || timings[1] < 20) return timings;
+        final long first = (timings[1] - 8) / 2;
+        return new long[]{0, first, 8, timings[1] - 8 - first};
+    }
+
     public final class RosarioBridge {
         @JavascriptInterface
         public void setPrayerActive(boolean active) {
@@ -111,6 +125,7 @@ public final class MainActivity extends Activity {
             } catch (NumberFormatException ex) {
                 return;
             }
+            final long[] playable = compatibleHapticWaveform(waveform);
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
@@ -123,8 +138,8 @@ public final class MainActivity extends Activity {
                     }
                     if (vibrator == null || !vibrator.hasVibrator()) return;
                     if (Build.VERSION.SDK_INT >= 26)
-                        vibrator.vibrate(VibrationEffect.createWaveform(waveform, -1));
-                    else vibrator.vibrate(waveform, -1);
+                        vibrator.vibrate(VibrationEffect.createWaveform(playable, -1));
+                    else vibrator.vibrate(playable, -1);
                 } catch (SecurityException ignored) {
                     // Android puede restringir la vibración.
                 }
@@ -153,6 +168,9 @@ public final class MainActivity extends Activity {
             } catch (NumberFormatException ex) {
                 return;
             }
+            final long[] playable = compatibleHapticWaveform(timings);
+            final int[] playableStrengths = playable == timings ? strengths :
+                new int[]{0, amplitude, 0, amplitude};
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
@@ -171,13 +189,13 @@ public final class MainActivity extends Activity {
                         // pulsos encendido/apagado de máxima compatibilidad.
                         if (vibrator.hasAmplitudeControl()) {
                             vibrator.vibrate(VibrationEffect.createWaveform(
-                                timings, strengths, -1));
+                                playable, playableStrengths, -1));
                         } else {
                             vibrator.vibrate(VibrationEffect.createWaveform(
-                                timings, -1));
+                                playable, -1));
                         }
                     } else {
-                        vibrator.vibrate(timings, -1);
+                        vibrator.vibrate(playable, -1);
                     }
                 } catch (SecurityException ignored) {
                     // El dispositivo puede limitar las vibraciones.
