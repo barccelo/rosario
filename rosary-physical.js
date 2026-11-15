@@ -562,6 +562,12 @@
         const atClosing=selected.phase==='closing';
         const priorInFinalSection=priorStep?.m>=5;
         const keepFinalFraming=atClosing;
+        // Gloria, jaculatorias y oraciones siguientes del quinto misterio
+        // siguen sobre la cuenta grande compartida (bead 0). Una vez
+        // llegado al límite inferior, no volver al centrado ordinario.
+        const atFifthClosingBead=prayerStep?.m===4 &&
+          selected.type==='loop' && bead===0 &&
+          selected.completed===55;
         // Después de un desplazamiento manual el siguiente avance
         // debe volver a la cuenta activa, esté a la distancia que esté.
         let restoreActiveBead=displacedManually;
@@ -613,7 +619,7 @@
              selected.type==='cross'&&selected.phase==='opening' ||
              state.index===0&&selected.phase==='opening'){
             target=finalTop;
-          }else if(atClosing){
+          }else if(atClosing||atFifthClosingBead){
             target=finalTop;
           }else if(selected.type==='loop'||selected.type==='intro'){
             target=clamp(selected.y-height*.5);
@@ -628,10 +634,11 @@
         }else if(!sequential&&keepFinalFraming){
           // Navegación deliberada a una oración final desde otro punto.
           target=finalTop;
-        }else if(closingLoopTransition){
-          // Última pequeña → cuenta grande inferior: extender suavemente
-          // el recorrido hasta el tope real. No usar el tope intermedio
-          // del centrado normal: deja el aro demasiado arriba.
+        }else if(closingLoopTransition||atFifthClosingBead){
+          // Mantener el extremo inferior desde la décima Avemaría
+          // hasta TODAS las oraciones de la cuenta grande final.
+          // El primer paso recorre el resto de la cadena; los demás
+          // permanecen estables, sin regresos al punto medio.
           target=finalTop;
         }else if(goingForward&&bead>=24&&bead<=28&&
                  lastPhysicalBead===bead-1){
@@ -675,7 +682,8 @@
         // Si el usuario dejó el rosario en otro sitio, recentrar
         // directamente el destino litúrgico, sin el límite por paso.
         if(restoreActiveBead){
-          if(selected.type==='cross' || selected.phase==='closing'){
+          if(selected.type==='cross' || selected.phase==='closing' ||
+             atFifthClosingBead){
             target=finalTop;
           }else if(selected.type==='intro'){
             target=clamp(selected.y-height*.5);
@@ -685,7 +693,7 @@
         }
         target=clamp(target);
         if(sequential&&!restoreActiveBead&&!keepFinalFraming&&
-           !closingLoopTransition){
+           !closingLoopTransition&&!atFifthClosingBead){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
           // entre oraciones adyacentes. No modifica el swipe manual.
           // Más corto junto a la unión inferior; el encuadre final
