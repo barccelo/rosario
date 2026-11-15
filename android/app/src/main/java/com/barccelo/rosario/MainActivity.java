@@ -44,6 +44,8 @@ public final class MainActivity extends Activity {
     private volatile boolean downIsSystem = false;
     private boolean nativeFullscreen = false;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 42;
+    private static final String NOTIFICATION_PREFS = "rosario_permissions";
+    private static final String FIRST_NOTIFICATION_REQUEST = "first_reminder_prompt";
     private static final String UPDATE_PREFERENCES = "rosario_updates";
     private static final String UPDATE_DOWNLOAD_ID = "download_id";
     private static final String UPDATE_DOWNLOAD_TAG = "download_tag";
@@ -331,6 +333,11 @@ public final class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String getReminderSettings() {
+            return ReminderScheduler.getSettings(MainActivity.this);
+        }
+
+        @JavascriptInterface
         public void configureReminder(boolean enabled, int hour, int minute, String weekdays) {
             runOnUiThread(() -> {
                 ReminderScheduler.save(MainActivity.this, enabled, hour, minute, weekdays);
@@ -386,6 +393,31 @@ public final class MainActivity extends Activity {
             webView.evaluateJavascript(
                 "window.rosarioNativeFullscreenChanged&&" +
                 "window.rosarioNativeFullscreenChanged(" + enabled + ")", null);
+        }
+    }
+
+    private void askFirstReminderPermission() {
+        // Android 13+ requiere consentimiento explícito. Pedirlo una
+        // sola vez al abrir Rosario por primera vez, después de cargar
+        // la pantalla. Si el usuario lo rechaza, no repetir el diálogo
+        // cada vez que vuelva a abrir; se puede activar en Ajustes.
+        if (Build.VERSION.SDK_INT < 33) {
+            notifyReminderPermission();
+            return;
+        }
+        SharedPreferences p=getSharedPreferences(NOTIFICATION_PREFS,MODE_PRIVATE);
+        if (p.getBoolean(FIRST_NOTIFICATION_REQUEST,false)) {
+            notifyReminderPermission();
+            return;
+        }
+        p.edit().putBoolean(FIRST_NOTIFICATION_REQUEST,true).apply();
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                NOTIFICATION_PERMISSION_REQUEST);
+        } else {
+            ReminderScheduler.schedule(this);
+            notifyReminderPermission();
         }
     }
 
@@ -449,6 +481,7 @@ public final class MainActivity extends Activity {
                         "window.rosarioNativeFullscreenChanged&&" +
                         "window.rosarioNativeFullscreenChanged(" + nativeFullscreen + ")",
                         null);
+                    view.post(() -> askFirstReminderPermission());
                 }
             }
 
@@ -480,6 +513,7 @@ public final class MainActivity extends Activity {
         // completa. El botón de la interfaz permite salir y regresar;
         // no se fuerza otra vez si el usuario decidió desactivarla.
         applyFullscreen(true);
+        ReminderScheduler.ensureDefaults(this);
         ReminderScheduler.schedule(this);
         webView.loadUrl(ROOT);
     }
