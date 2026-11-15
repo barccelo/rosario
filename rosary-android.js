@@ -5,12 +5,28 @@
   const key='rosario.android.preferences.v1';
   const validActions=['next','previous','system'];
   const isoDays=['L','M','X','J','V','S','D'];
-  const defaults={up:'previous',down:'next',remind:false,time:'20:00',days:[1,2,3,4,5,6,7]};
+  const defaults={up:'previous',down:'next',remind:true,time:'15:00',days:[1,2,3,4,5,6,7]};
   let saved={};
   try { saved=JSON.parse(localStorage.getItem(key)||'{}'); } catch {}
   const pref={...defaults,...saved};
-  if(!validActions.includes(pref.up))pref.up='next';
-  if(!validActions.includes(pref.down))pref.down='previous';
+  if(!validActions.includes(pref.up))pref.up=defaults.up;
+  if(!validActions.includes(pref.down))pref.down=defaults.down;
+  // Android guarda los recordatorios por separado del estado visual.
+  // La preferencia nativa es la autoridad; así, una actualización no
+  // confunde el 'false' antiguo del JS con una desactivación voluntaria.
+  try{
+    const [enabled,time,weekdays]=String(
+      window.RosarioAndroid.getReminderSettings()).split('|');
+    const days=weekdays?.split(',').map(Number);
+    if((enabled==='1'||enabled==='0')&&
+       /^([01]\\d|2[0-3]):[0-5]\\d$/.test(time)&&
+       Array.isArray(days)&&days.length>0&&
+       days.every(n=>Number.isInteger(n)&&n>=1&&n<=7)){
+      pref.remind=enabled==='1';
+      pref.time=time;
+      pref.days=[...new Set(days)];
+    }
+  }catch{/* APK anterior: usar los valores disponibles en la web. */}
   if(!Array.isArray(pref.days)||!pref.days.length)pref.days=defaults.days.slice();
 
   function persist(){
@@ -92,7 +108,7 @@
     const timeLabel=fieldTitle('Hora del aviso');
     const time=document.createElement('input');
     time.type='time';
-    time.value=/^([01]\d|2[0-3]):[0-5]\d$/.test(pref.time)?pref.time:'20:00';
+    time.value=/^([01]\d|2[0-3]):[0-5]\d$/.test(pref.time)?pref.time:'15:00';
     timeLabel.append(time);
     reminder.append(timeLabel);
 
@@ -123,7 +139,7 @@
       if(enabled.checked&&!selected.length){
         status.textContent='Selecciona al menos un día.';return;
       }
-      const [hour,minute]=(time.value||'20:00').split(':').map(Number);
+      const [hour,minute]=(time.value||'15:00').split(':').map(Number);
       if(!Number.isInteger(hour)||!Number.isInteger(minute)){
         status.textContent='Selecciona una hora válida.';return;
       }
