@@ -49,7 +49,7 @@
     const haloModes=['normal','continuous','none'];
     if(!haloModes.includes(state.rosaryHaloMode))
       state.rosaryHaloMode='continuous';
-    // Los toques están ACTIVADOS por defecto (tutorial, paso 5).
+    // Los toques están ACTIVADOS por defecto (tutorial, paso 6).
     // Respetar el valor false de quienes los hayan desactivado.
     state.screenTapNavigation=state.screenTapNavigation!==false;
     // De manera predeterminada el texto también acepta toques. Esta
