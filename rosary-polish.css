@@ -383,6 +383,47 @@ body.rosario-physical-view[data-rosary-side="right"] .controls-dot{
   right:auto!important;
   left:calc(env(safe-area-inset-left,0px) + 10px)!important;
 }
+/* En teléfonos estrechos la barra no puede invadir el 42 % reservado
+   al Rosario físico. Dos filas permiten mantener zonas táctiles de 36 px
+   sin comprimir los iconos ni superponerlos a las cuentas. */
+@media (max-width:460px){
+  body.rosario-physical-view .top-controls{
+    display:flex;
+    flex-flow:row wrap!important;
+    justify-content:center!important;
+    align-content:center!important;
+    width:164px!important;
+    max-width:calc(58vw - 28px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))!important;
+    box-sizing:border-box!important;
+    gap:0!important;
+    padding:4px!important;
+    border-radius:19px!important;
+  }
+  body.rosario-physical-view .top-controls .top-divider{
+    display:none!important;
+  }
+  body.rosario-physical-view .top-controls .top-control,
+  body.rosario-physical-view .top-controls #iNavigate,
+  body.rosario-physical-view .top-controls #iRestart,
+  body.rosario-physical-view .top-controls .font-button{
+    flex:0 0 36px!important;
+    width:36px!important;
+    min-width:36px!important;
+    height:36px!important;
+    padding:0!important;
+  }
+}
+@media (max-width:340px){
+  body.rosario-physical-view .top-controls .top-control,
+  body.rosario-physical-view .top-controls #iNavigate,
+  body.rosario-physical-view .top-controls #iRestart,
+  body.rosario-physical-view .top-controls .font-button{
+    flex-basis:30px!important;
+    width:30px!important;
+    min-width:30px!important;
+    height:34px!important;
+  }
+}
 /* Contraste del misterio en el tema claro. El gris anterior era demasiado pálido. */
 body:not(.dark) .immersive-prayer .rosary-mystery-name{
   color:#465347!important;
