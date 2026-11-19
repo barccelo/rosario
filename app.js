@@ -119,11 +119,39 @@ function rosarioHaptic(fromIndex){
   }
 }
 function advance(){if(window.rosarioPhysicalResumeFromCross?.())return;if(state.index>=steps.length)return;const previousIndex=state.index;state.index++;rosarioHaptic(previousIndex);render()}
-function show(html){const modal=$('modal');$('modalContent').innerHTML=html;if(!modal.open)modal.showModal();modal.scrollTop=0;requestAnimationFrame(()=>{if(modal.open)modal.scrollTop=0;})}$('modal').querySelector('.close').onclick=()=>$('modal').close();$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').close()};$('next').onclick=advance;$('back').onclick=()=>{if(state.index>0){state.index--;rosarioHaptic();render()}};$('restart').onclick=reset;function reset(){show('<h2>Empezar de nuevo</h2><p>Tu progreso actual se reiniciará.</p><button class="advance" id="confirmReset">Reiniciar rosario</button>');$('confirmReset').onclick=()=>{
-  state.index=0;
-  state.pouchSessionStarted=false;
-  window.rosarioPhysicalReset?.();render();$('modal').close()
-}}
+function show(html){const modal=$('modal');$('modalContent').innerHTML=html;if(!modal.open)modal.showModal();modal.scrollTop=0;requestAnimationFrame(()=>{if(modal.open)modal.scrollTop=0;})}$('modal').querySelector('.close').onclick=()=>$('modal').close();$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').close()};$('next').onclick=advance;$('back').onclick=()=>{if(state.index>0){state.index--;rosarioHaptic();render()}};$('restart').onclick=reset;
+function reset(){
+  window.rosarioEnsureDailyProgress?.();
+  const fromChaplet=state.chapletActive===true;
+  show('<section class="rosario-restart-confirm"><h2>Reiniciar el Rosario</h2>'+
+    '<p>'+(fromChaplet
+      ?'¿Quieres volver al Rosario de hoy y comenzar desde el principio?'
+      :'¿Quieres comenzar de nuevo el Rosario de hoy?')+
+    ' Se perderá el progreso actual del Rosario.</p>'+
+    '<div class="rosario-restart-actions">'+
+      '<button type="button" id="cancelReset">Cancelar</button>'+
+      '<button type="button" id="confirmReset">Reiniciar Rosario</button>'+
+    '</div></section>');
+  $('cancelReset').onclick=()=>$('modal').close();
+  $('confirmReset').onclick=()=>{
+    // Reiniciar únicamente el Rosario del día, sin borrar las preferencias.
+    state.rosaryIndex=0;
+    if(state.chapletActive===true&&window.rosarioChapletReturn){
+      // Volver al Rosario conservando el progreso separado de la Coronilla.
+      window.rosarioChapletReturn();
+    }else{
+      state.index=0;
+    }
+    state.pouchSessionStarted=false;
+    state.pouchCompletedDate=null;
+    window.rosarioPhysicalReset?.();
+    document.dispatchEvent(new Event('rosario:progress-reset'));
+    persist();
+    render();
+    if($('modal').open)$('modal').close();
+  };
+}
+window.rosarioConfirmRestart=reset;
 for(const mode of ['simple','guided'])$(mode).onclick=()=>{state.mode=mode;render()};$('theme').onclick=()=>{state.dark=!state.dark;render()};$('allMysteries').onclick=()=>show('<div class="eyebrow">Los misterios de hoy</div><h2>'+state.group+'</h2><ol>'+groups[state.group].map(x=>'<li>'+x+'</li>').join('')+'</ol>');$('prayers').onclick=()=>{show('<h2>Oraciones</h2><select id="prayerSelect">'+Object.keys(prayers).map(x=>'<option>'+x+'</option>').join('')+'</select><div class="prayer" id="reading"></div><p><a href="https://opusdei.org/es/prayers/section/?section1=25&section2=35#dm-prayer-145" target="_blank" rel="noopener">Devocionario de referencia · Opus Dei ↗</a></p>');$('reading').textContent=prayers[$('prayerSelect').value];$('prayerSelect').onchange=()=>$('reading').textContent=prayers[$('prayerSelect').value]};$('settings').onclick=()=>{show('<h2>Preferencias</h2><label for="groupSelect" class="settings-field-label">Misterios del día</label><select id="groupSelect">'+Object.keys(groups).map(x=>`<option ${x===state.group?'selected':''}>${x}</option>`).join('')+'</select><label>Vibración al avanzar<input type="checkbox" id="vibration" '+(state.haptics?'checked':'')+'></label><button class="advance" id="resetSettings">Reiniciar progreso</button>');$('vibration').onchange=e=>{state.haptics=e.target.checked;persist()};$('groupSelect').onchange=e=>{state.group=e.target.value;render()};$('resetSettings').onclick=()=>{$('modal').close();reset()}};
 let timer,longHandled=false;$('beads').addEventListener('pointerdown',e=>{const b=e.target.closest('.bead');if(!b)return;longHandled=false;timer=setTimeout(()=>{longHandled=true;pick(Number(b.dataset.step))},500)});for(const event of ['pointerup','pointercancel','pointerleave'])$('beads').addEventListener(event,()=>clearTimeout(timer));$('beads').addEventListener('click',e=>{const b=e.target.closest('.bead');if(b&&!longHandled)pick(Number(b.dataset.step));longHandled=false});$('beads').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const b=e.target.closest('.bead');if(b)pick(Number(b.dataset.step))}});function pick(idx){
   if(!Number.isInteger(idx)||idx<0||idx>=steps.length)return;
