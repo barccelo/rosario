@@ -1666,9 +1666,6 @@
         control.value=value;control.onchange=()=>callback(control.value);
         row.append(name,control);root.append(row);
       };
-      selectRow('Lado del Rosario completo',
-        [['left','Izquierda'],['right','Derecha']],state.rosarySide,
-        value=>window.rosarioSetSide?.(value));
       selectRow('Posición de los controles',
         [['top','Arriba'],['bottom','Abajo']],state.controlsPosition,
         value=>window.rosarioSetControlsPosition?.(value));
