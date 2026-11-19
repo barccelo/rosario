@@ -366,8 +366,8 @@
     if(!animating&&(layer.dataset.phase==='closed'||
                     layer.dataset.phase==='finished'))openPouch();
   });
-  document.addEventListener('rosario:daily-reset',()=>{
-    // Nuevo día: la funda se presenta como al iniciar otro Rosario.
+  const resetPouchForNewRosary=()=>{
+    // Reinicio diario o manual: presentar la funda como al iniciar otro Rosario.
     animating=false;
     opened=false;
     lastIndex=0;
@@ -381,7 +381,9 @@
     layer.dataset.phase='closed';
     layer.hidden=state.pouchEnabled===false||state.chapletActive===true;
     if(!layer.hidden)appearance();
-  });
+  };
+  document.addEventListener('rosario:daily-reset',resetPouchForNewRosary);
+  document.addEventListener('rosario:progress-reset',resetPouchForNewRosary);
   const formerRender=render;
   render=function(){
     formerRender();
