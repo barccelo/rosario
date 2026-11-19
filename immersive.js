@@ -66,8 +66,9 @@ function autoFullscreenFromGesture(event){
   if(event.target?.closest?.('#iFullscreen'))return;
   // Ignorar también el primer gesto que antecede a la apertura de la guía.
   // No consumir el intento: el primer toque tras finalizarla sí funcionará.
-  const initialGuidePending=window.rosarioHadSavedStateAtLoad===false&&
-    state.rosarioFirstRunDone!==true;
+  const initialGuidePending=state.rosarioFirstRunDone!==true&&
+    (window.rosarioHadSavedStateAtLoad===false||
+     state.rosarioOnboardingInProgress===true);
   if(document.getElementById('modal')?.open||initialGuidePending)return;
   webFullscreenAutoTried=true;
   try{
