@@ -197,6 +197,21 @@
     });
     darkModeToggle.classList.add('rosario-appearance-theme-setting');
     buckets.appearance.unshift(darkModeToggle);
+    // La posición de la camándula es una preferencia visual.
+    const sideRow=document.createElement('label');
+    sideRow.className='rosario-setup-choice rosario-appearance-side-setting';
+    const sideName=document.createElement('span');
+    sideName.textContent='Lado del Rosario';
+    const sideSelect=document.createElement('select');
+    sideSelect.setAttribute('aria-label','Lado del Rosario');
+    [['left','Izquierda'],['right','Derecha']].forEach(([value,name])=>{
+      const option=document.createElement('option');
+      option.value=value;option.textContent=name;sideSelect.append(option);
+    });
+    sideSelect.value=state.rosarySide==='right'?'right':'left';
+    sideSelect.addEventListener('change',()=>window.rosarioSetSide?.(sideSelect.value));
+    sideRow.append(sideName,sideSelect);
+    buckets.appearance.splice(1,0,sideRow);
 
     // Extraer una sola vez las opciones de los grupos originales.
     // Sus nodos se reutilizan al entrar y volver de otras pantallas,
