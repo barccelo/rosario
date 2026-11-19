@@ -63,7 +63,9 @@ function autoFullscreenFromGesture(event){
      document.fullscreenElement||
      !document.fullscreenEnabled||
      typeof document.documentElement.requestFullscreen!=='function')return;
-  if(event.target?.closest?.('#iFullscreen'))return;
+  // La barra puede abrir un diálogo con este mismo gesto: no adelantar
+  // fullscreen antes de que Ajustes o Navegación se hayan presentado.
+  if(event.target?.closest?.('#modal, .top-controls, .controls-dot, #settings'))return;
   // Ignorar también el primer gesto que antecede a la apertura de la guía.
   // No consumir el intento: el primer toque tras finalizarla sí funcionará.
   const initialGuidePending=state.rosarioFirstRunDone!==true&&
