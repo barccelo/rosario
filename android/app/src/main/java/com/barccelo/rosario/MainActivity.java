@@ -53,19 +53,9 @@ public final class MainActivity extends Activity {
     private static final String UPDATE_DOWNLOAD_TAG = "download_tag";
     private static final String APK_MIME = "application/vnd.android.package-archive";
 
-    /**
-     * Algunos controladores de vibración de Android ignoran ondas de un
-     * único tramo, aunque reproducen las dobles y triples correctamente.
-     * Representamos un pulso largo como dos tramos ON separados por 8 ms.
-     * No cambia su duración total, no añade una segunda pulsación
-     * perceptible y pasa por el MISMO motor de ondas que ya funciona.
-     * Es una medida de compatibilidad, no una garantía de hardware.
-     */
-    private static long[] compatibleHapticWaveform(long[] timings) {
-        if (timings.length != 2 || timings[1] < 20) return timings;
-        final long first = (timings[1] - 8) / 2;
-        return new long[]{0, first, 8, timings[1] - 8 - first};
-    }
+    // Los patrones de un pulso se reproducen con un único tramo
+    // continuo de vibración. Nunca insertar una pausa artificial: algunos
+    // motores interpretan incluso 8 ms de silencio como dos pulsos.
 
     public final class RosarioBridge {
         @JavascriptInterface
@@ -76,11 +66,8 @@ public final class MainActivity extends Activity {
         @JavascriptInterface
         public void vibrate(int milliseconds) {
             if (milliseconds <= 0) return;
-            // Antes el pulso simple usaba createOneShot, mientras que
-            // doble y triple usaban createWaveform. Algunos dispositivos
-            // reproducían sólo estos últimos. Todos los pulsos, incluidos
-            // la duración normal y la larga, comparten ahora EXACTAMENTE
-            // el mismo camino de reproducción que los patrones múltiples.
+            // Usar createWaveform también en el pulso individual,
+            // sin segmentarlo en dos encendidos distintos.
             vibrateSequence(Integer.toString(Math.min(milliseconds, 1100)));
         }
 
@@ -129,7 +116,7 @@ public final class MainActivity extends Activity {
             } catch (NumberFormatException ex) {
                 return;
             }
-            final long[] playable = compatibleHapticWaveform(waveform);
+            final long[] playable = waveform;
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
@@ -172,9 +159,10 @@ public final class MainActivity extends Activity {
             } catch (NumberFormatException ex) {
                 return;
             }
-            final long[] playable = compatibleHapticWaveform(timings);
-            final int[] playableStrengths = playable == timings ? strengths :
-                new int[]{0, amplitude, 0, amplitude};
+            // Mantener un solo tramo ON para corta/larga; las pausas
+            // explícitas de doble/triple se conservan sin cambios.
+            final long[] playable = timings;
+            final int[] playableStrengths = strengths;
             runOnUiThread(() -> {
                 try {
                     Vibrator vibrator;
