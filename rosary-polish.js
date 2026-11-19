@@ -531,6 +531,11 @@
     const prior=render;
     let lastRenderedIndex=null,lastRenderedTitle=null;
     render=function(){
+      // Al avanzar puede reemplazarse todo #immersiveText antes de que
+      // touchend/click alcance su nodo anterior. Cancelar aquí evita
+      // temporizadores huérfanos de pulsaciones sobre texto coloreado.
+      if(lastRenderedIndex!==null&&state.index!==lastRenderedIndex)
+        cancelVoiceHold();
       const step=steps[state.index];
       const mode=state.textTransition;
       const isSelectedTransition=['fade','slide','soft'].includes(mode);
@@ -581,24 +586,34 @@
       event.preventDefault();
     },true);
 
-    // Los ajustes de voces sólo se abren al mantener pulsada una respuesta.
-    // En Android, contextmenu puede llegar antes que el umbral del gesto:
-    // se bloquea el menú nativo, pero NUNCA se utiliza para abrir ajustes.
+    // Los ajustes de voces requieren una pulsación continua REAL de
+    // 1200 ms sobre texto de la Asamblea, nunca un toque individual.
+    // Usamos el mismo flujo Pointer Events para dedos/ratón/lápiz.
+    // pointerup/cancel se escuchan en document: la navegación de Rosario
+    // puede reemplazar la oración durante pointerup y quitar del DOM el
+    // elemento que recibió pointerdown, impidiendo que reading reciba
+    // el evento de liberación. También cancelamos al cambiar de oración.
     const VOICE_HOLD_MS=1200;
     const VOICE_HOLD_MOVE_PX=12;
     let voiceHold=null,suppressVoiceClickUntil=0;
-    const voiceTarget=target=>target.closest?.('.voice-assembly,.wheel-response');
+    const voiceTarget=target=>target?.closest?.('.voice-assembly,.wheel-response');
     function cancelVoiceHold(){
       if(voiceHold)clearTimeout(voiceHold.timer);
       voiceHold=null;
     }
-    function startVoiceHold(source,id,x,y){
+    function startVoiceHold(source,id,x,y,target){
       cancelVoiceHold();
-      const candidate={source,id,x,y,timer:null};
+      const candidate={source,id,x,y,target,index:state.index,timer:null};
       voiceHold=candidate;
       candidate.timer=setTimeout(()=>{
         if(voiceHold!==candidate || document.hidden ||
-           document.getElementById('modal')?.open)return;
+           state.index!==candidate.index ||
+           !candidate.target.isConnected ||
+           !reading.contains(candidate.target) ||
+           document.getElementById('modal')?.open){
+          if(voiceHold===candidate)cancelVoiceHold();
+          return;
+        }
         cancelVoiceHold();
         suppressVoiceClickUntil=performance.now()+950;
         window.rosarioOpenVoiceSettings?.();
@@ -612,48 +627,56 @@
     reading.addEventListener('contextmenu',e=>{
       if(state.voiceColors && voiceTarget(e.target))e.preventDefault();
     });
-    reading.addEventListener('click',e=>{
-      if(performance.now()<suppressVoiceClickUntil){
+    // Bloquear el clic sintético posterior a una pulsación larga incluso
+    // si el nodo inicial fue sustituido y el clic se redirige a otro.
+    document.addEventListener('click',e=>{
+      if(performance.now()<suppressVoiceClickUntil &&
+         !e.target.closest?.('#modal')){
         e.preventDefault();
         e.stopImmediatePropagation();
       }
     },true);
-    // Un solo temporizador por gesto: touch para Android y pointer para ratón/lápiz.
-    // No iniciar dos temporizadores para el mismo dedo.
-    reading.addEventListener('pointerdown',e=>{
-      if(e.pointerType==='touch')return;
-      if(!state.voiceColors||e.button!==0||!voiceTarget(e.target)){
-        cancelVoiceHold();
-        return;
-      }
-      startVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
-    },true);
-    reading.addEventListener('pointermove',e=>{
-      moveVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
-    },true);
-    for(const name of ['pointerup','pointercancel','pointerleave'])
-      reading.addEventListener(name,e=>{
-        if(voiceHold?.source==='pointer'&&voiceHold.id===e.pointerId)
+    if(window.PointerEvent){
+      reading.addEventListener('pointerdown',e=>{
+        const target=voiceTarget(e.target);
+        if(!state.voiceColors||e.button!==0||!e.isPrimary||!target){
           cancelVoiceHold();
+          return;
+        }
+        startVoiceHold('pointer',e.pointerId,e.clientX,e.clientY,target);
       },true);
-    reading.addEventListener('touchstart',e=>{
-      if(!state.voiceColors||e.touches.length!==1||!voiceTarget(e.target)){
-        cancelVoiceHold();
-        return;
-      }
-      const t=e.touches[0];
-      startVoiceHold('touch',t.identifier,t.clientX,t.clientY);
-    },{passive:true,capture:true});
-    reading.addEventListener('touchmove',e=>{
-      if(voiceHold?.source!=='touch')return;
-      if(e.touches.length!==1){cancelVoiceHold();return;}
-      const t=e.touches[0];
-      moveVoiceHold('touch',t.identifier,t.clientX,t.clientY);
-    },{passive:true,capture:true});
-    for(const name of ['touchend','touchcancel'])
-      reading.addEventListener(name,()=>{
-        if(voiceHold?.source==='touch')cancelVoiceHold();
+      document.addEventListener('pointermove',e=>{
+        moveVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
+      },true);
+      for(const name of ['pointerup','pointercancel','lostpointercapture'])
+        document.addEventListener(name,e=>{
+          if(voiceHold?.source==='pointer'&&voiceHold.id===e.pointerId)
+            cancelVoiceHold();
+        },true);
+    }else{
+      // Compatibilidad con navegadores antiguos sin Pointer Events.
+      // Los eventos de terminación también deben observarse en
+      // document, no sólo en la lectura que puede ser reemplazada.
+      reading.addEventListener('touchstart',e=>{
+        const target=voiceTarget(e.target);
+        if(!state.voiceColors||e.touches.length!==1||!target){
+          cancelVoiceHold();
+          return;
+        }
+        const t=e.touches[0];
+        startVoiceHold('touch',t.identifier,t.clientX,t.clientY,target);
       },{passive:true,capture:true});
+      document.addEventListener('touchmove',e=>{
+        if(voiceHold?.source!=='touch')return;
+        if(e.touches.length!==1){cancelVoiceHold();return;}
+        const t=e.touches[0];
+        moveVoiceHold('touch',t.identifier,t.clientX,t.clientY);
+      },{passive:true,capture:true});
+      for(const name of ['touchend','touchcancel'])
+        document.addEventListener(name,()=>{
+          if(voiceHold?.source==='touch')cancelVoiceHold();
+        },{passive:true,capture:true});
+    }
     window.addEventListener('blur',cancelVoiceHold);
     document.addEventListener('visibilitychange',()=>{
       if(document.hidden)cancelVoiceHold();
