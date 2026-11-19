@@ -554,7 +554,11 @@
     unified.rel='stylesheet';
     unified.href='rosary-design-system.css?v=20261020-10';
     document.head.append(unified);
-    if(window.rosarioHadSavedStateAtLoad===false&&state.rosarioFirstRunDone!==true){
+    // También recuperar la guía si se cerró sin que el usuario la terminara.
+    // Los usuarios existentes sin esta marca conservan su configuración.
+    if(state.rosarioFirstRunDone!==true&&
+       (window.rosarioHadSavedStateAtLoad===false||
+        state.rosarioOnboardingInProgress===true)){
       requestAnimationFrame(()=>setTimeout(showFirstRun,80));
     }
   });
