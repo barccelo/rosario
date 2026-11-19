@@ -383,23 +383,37 @@ body.rosario-physical-view[data-rosary-side="right"] .controls-dot{
   right:auto!important;
   left:calc(env(safe-area-inset-left,0px) + 10px)!important;
 }
-/* En teléfonos estrechos la barra no puede invadir el 42 % reservado
-   al Rosario físico. Dos filas permiten mantener zonas táctiles de 36 px
-   sin comprimir los iconos ni superponerlos a las cuentas. */
-@media (max-width:460px){
+/* Una única fila siempre. En teléfonos la barra ocupa SÓLO el carril
+   de lectura, fuera del 42 % del ancho reservado al rosario físico.
+   Los botones conservan sus zonas táctiles y se recorren en horizontal. */
+@media (max-width:540px){
   body.rosario-physical-view .top-controls{
-    display:flex;
-    flex-flow:row wrap!important;
-    justify-content:center!important;
+    flex-flow:row nowrap!important;
+    justify-content:flex-start!important;
+    align-items:center!important;
     align-content:center!important;
-    width:164px!important;
-    max-width:calc(58vw - 28px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))!important;
     box-sizing:border-box!important;
-    gap:0!important;
-    padding:4px!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    left:calc(42% + 10px)!important;
+    right:calc(env(safe-area-inset-right,0px) + 10px)!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x!important;
+    scroll-snap-type:x proximity;
+    gap:2px!important;
+    padding:3px 5px!important;
     border-radius:19px!important;
   }
-  body.rosario-physical-view .top-controls .top-divider{
+  body.rosario-physical-view[data-rosary-side="right"] .top-controls{
+    left:calc(env(safe-area-inset-left,0px) + 10px)!important;
+    right:calc(42% + 10px)!important;
+  }
+  body.rosario-physical-view .top-controls::-webkit-scrollbar{
     display:none!important;
   }
   body.rosario-physical-view .top-controls .top-control,
@@ -411,17 +425,12 @@ body.rosario-physical-view[data-rosary-side="right"] .controls-dot{
     min-width:36px!important;
     height:36px!important;
     padding:0!important;
+    touch-action:pan-x!important;
+    scroll-snap-align:center;
   }
-}
-@media (max-width:340px){
-  body.rosario-physical-view .top-controls .top-control,
-  body.rosario-physical-view .top-controls #iNavigate,
-  body.rosario-physical-view .top-controls #iRestart,
-  body.rosario-physical-view .top-controls .font-button{
-    flex-basis:30px!important;
-    width:30px!important;
-    min-width:30px!important;
-    height:34px!important;
+  body.rosario-physical-view .top-controls .top-divider{
+    flex:0 0 1px!important;
+    display:block!important;
   }
 }
 /* Contraste del misterio en el tema claro. El gris anterior era demasiado pálido. */
