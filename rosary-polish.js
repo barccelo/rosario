@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261119-4';
+    sheet.href = 'rosary-polish.css?v=20261119-7';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -58,9 +58,20 @@
     }
     const increase = makeSizeButton(1);
     const decrease = makeSizeButton(-1);
-    document.getElementById('iNavigate').after(decrease, increase);
-    // Los tres controles (menú, T− y T+) pertenecen a .top-controls:
-    // al ocultarse la barra en pantalla completa quedan detrás del punto.
+    // Reinicio visible en la barra desplegada; sin gestos ocultos.
+    const restartButton=document.createElement('button');
+    restartButton.type='button';
+    restartButton.id='iRestart';
+    restartButton.className='top-control';
+    restartButton.title='Reiniciar el Rosario de hoy';
+    restartButton.setAttribute('aria-label','Reiniciar el Rosario de hoy');
+    restartButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+
+      '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>'+
+      '<path d="M3 3v5h5"/></svg>';
+    restartButton.onclick=()=>window.rosarioConfirmRestart?.();
+    document.getElementById('iNavigate').after(restartButton,decrease,increase);
+    // El menú, el reinicio y los ajustes de texto comparten la barra
+    // y se ocultan juntos detrás del punto compacto.
 
 
     function applyPrefs() {
