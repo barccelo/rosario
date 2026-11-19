@@ -764,7 +764,9 @@
   state.index = Number.isFinite(restoredIndex) && restoredIndex >= 0
     ? Math.max(0, Math.min(restoredIndex, steps.length)) : 0;
   state.sequenceVersion = 14;
-  if (saved.dayDate !== dateKey() || !Number.isInteger(saved.day)) {
+  // Sólo se restaura la posición durante la misma fecha civil LOCAL.
+  const freshCalendarDay = saved.dayDate !== dateKey();
+  if (freshCalendarDay || !Number.isInteger(saved.day)) {
     state.day = new Date().getDay();
     state.group = dayGroups[state.day];
     state.intentionCycle = [null,null,null,null,null];
@@ -773,6 +775,31 @@
     state.group = groups[saved.group] ? saved.group : (dayGroups[state.day] || dayGroups[new Date().getDay()]);
   }
   state.dayDate = dateKey();
+  if (freshCalendarDay) {
+    state.index = 0;
+    state.rosaryIndex = 0;
+    state.chapletIndex = 0;
+    state.pouchSessionStarted = false;
+    state.pouchCompletedDate = null;
+  }
+  function ensureCurrentCalendarDay() {
+    const today = dateKey();
+    if (state.dayDate === today) return false;
+    state.dayDate = today;
+    state.day = new Date().getDay();
+    state.group = dayGroups[state.day];
+    state.index = 0;
+    state.rosaryIndex = 0;
+    state.chapletIndex = 0;
+    state.pouchSessionStarted = false;
+    state.pouchCompletedDate = null;
+    state.intentionCycle = [null,null,null,null,null];
+    window.rosarioPhysicalReset?.();
+    persist();
+    document.dispatchEvent(new Event('rosario:daily-reset'));
+    return true;
+  }
+  window.rosarioEnsureDailyProgress = ensureCurrentCalendarDay;
   const alignments = ['justify', 'left', 'center', 'right'];
   state.textAlign = alignments.includes(saved.textAlign) ? saved.textAlign : 'justify';
   // Dos presentaciones excluyentes, manteniendo la secuencia de oraciones.
@@ -917,6 +944,9 @@
   };
   const rawRender = render;
   render = function () {
+    // La primera interacción tras una suspensión nocturna tampoco
+    // puede recuperar el índice guardado del día anterior.
+    ensureCurrentCalendarDay();
     const step = steps[state.index];
     document.body.dataset.voiceGuideTone=state.voiceGuideTone;
     document.body.dataset.voiceAssemblyTone=state.voiceAssemblyTone;
@@ -2120,16 +2150,28 @@
       showSelectedPrayer();
     };
 
-    // Cambiar de día automáticamente al iniciar el primer rezo del día siguiente.
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && state.dayDate !== dateKey()) {
-        state.day = new Date().getDay();
-        state.group = dayGroups[state.day];
-        state.dayDate = dateKey();
-        resetIntentionCycle();
-        render();
-      }
+    // Cambio de día a las 00:00 de la hora local, sin exigir cerrar la app.
+    // Android puede suspender temporizadores: reconciliar también al volver.
+    let midnightTimer;
+    const scheduleMidnight=()=>{
+      clearTimeout(midnightTimer);
+      const now=new Date();
+      const midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+      midnightTimer=setTimeout(()=>{
+        if(ensureCurrentCalendarDay())render();
+        scheduleMidnight();
+      },Math.max(1,midnight.getTime()-now.getTime()+50));
+    };
+    const resumeDailyProgress=()=>{
+      if(ensureCurrentCalendarDay())render();
+      scheduleMidnight();
+    };
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden)resumeDailyProgress();
     });
+    window.addEventListener('focus',resumeDailyProgress);
+    window.addEventListener('pageshow',resumeDailyProgress);
+    scheduleMidnight();
     render();
   });
 })();

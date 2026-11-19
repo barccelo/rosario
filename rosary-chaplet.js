@@ -143,5 +143,9 @@ document.addEventListener('DOMContentLoaded',()=>{
  checkDay();
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.chapletChoiceDate!==key())checkDay()});
  window.addEventListener('pageshow',()=>{if(state.chapletChoiceDate!==key())checkDay()});
+ document.addEventListener('rosario:daily-reset',()=>{
+   // El cambio del modo diario se realiza fuera del render en curso.
+   queueMicrotask(()=>{if(state.chapletChoiceDate!==key())checkDay()});
+ });
 });
 })();

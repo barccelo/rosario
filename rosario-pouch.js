@@ -366,10 +366,28 @@
     if(!animating&&(layer.dataset.phase==='closed'||
                     layer.dataset.phase==='finished'))openPouch();
   });
+  document.addEventListener('rosario:daily-reset',()=>{
+    // Nuevo día: la funda se presenta como al iniciar otro Rosario.
+    animating=false;
+    opened=false;
+    lastIndex=0;
+    finalPress=null;
+    finalTouch=null;
+    transfer?.remove();
+    transfer=null;
+    document.body.classList.remove('rosario-pouch-hide-original');
+    layer.classList.remove('is-revealing','pouch-departing','pouch-arriving',
+      'pouch-gone','pouch-reveal-text');
+    layer.dataset.phase='closed';
+    layer.hidden=state.pouchEnabled===false||state.chapletActive===true;
+    if(!layer.hidden)appearance();
+  });
   const formerRender=render;
   render=function(){
     formerRender();
     lastIndex=state.index;
+    if(!opened&&!animating&&state.pouchEnabled!==false&&
+       !state.chapletActive&&state.index===0)layer.hidden=false;
     if(!layer.hidden&&!animating)appearance();
   };
 

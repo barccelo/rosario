@@ -1052,13 +1052,13 @@
       if(initialFramePending||initialFrameAnchored)
         requestAnimationFrame(restoreInitialFrame);
     });
-    // La caída diaria se actualiza al regresar a la aplicación después
-    // de medianoche, manteniendo el scroll y la oración actuales.
+    // La cuerda cambia con la fecha; comenzar con la cruz y no con el
+    // desplazamiento de la víspera.
     const checkDailyThread=()=>{
       if(drawnThreadDate===threadDateKey())return;
-      const scroll=viewport.scrollTop;
-      draw();paint();viewport.scrollTop=scroll;
+      draw();paint();
     };
+    document.addEventListener('rosario:daily-reset',checkDailyThread);
     document.addEventListener('visibilitychange',()=>{
       if(!document.hidden)checkDailyThread();
     });
