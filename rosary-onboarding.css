@@ -126,6 +126,23 @@
   background:var(--preview-bead);border:3px solid #00000023;
   box-shadow:0 3px 12px #00000016,inset 0 1px 3px #fff7
 }
+/* Miniaturas simétricas para elegir el lado del Rosario. */
+#modalContent .onb-side-preview{
+ width:100%;height:118px;display:flex;align-items:center;gap:14px;
+ padding:11px 13px;border:1px solid var(--onb-outline);border-radius:13px;
+ background:color-mix(in srgb,var(--onb-ink) 3%,var(--onb-surface));
+}
+#modalContent .onb-side-preview.is-right{flex-direction:row-reverse}
+#modalContent .onb-side-beads{display:flex;align-self:stretch;flex:0 0 31px;justify-content:center}
+#modalContent .onb-side-beads .onb-chain{height:100%}
+#modalContent .onb-side-reading{display:flex;flex:1;flex-direction:column;gap:8px;min-width:0}
+#modalContent .onb-side-reading i{
+ display:block;height:5px;width:100%;border-radius:4px;
+ background:var(--onb-ink);opacity:.35
+}
+#modalContent .onb-side-reading i:nth-child(2){width:82%}
+#modalContent .onb-side-reading i:nth-child(3){width:92%}
+#modalContent .onb-side-reading i:nth-child(4){width:60%}
 #modalContent .onb-swipes .onb-choice{
   flex-direction:row!important;align-items:center!important;gap:15px!important;min-height:114px
 }
