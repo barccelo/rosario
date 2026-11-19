@@ -4,6 +4,7 @@
   const pages = [
     {title:'Elige cómo quieres verlo',detail:'Prueba ambos temas. El Rosario y las oraciones cambiarán al instante.'},
     {title:'Los colores del Rosario',detail:'Las cuentas pueden conservar el diseño clásico, recorrer los cinco continentes o cambiar según el misterio.'},
+    {title:'¿En qué lado quieres el Rosario?',detail:'Elige izquierda o derecha; la oración se acomodará al otro lado.'},
     {title:'Sentido del deslizamiento',detail:'Mira cómo se mueve el dedo en cada lado del Rosario. Elige el recorrido que te resulte natural.'},
     {title:'Vibración al avanzar',detail:'Una señal táctil confirma cada avance. También puedes rezar sin vibración.'},
     {title:'Avanzar tocando la pantalla',detail:'Elige si quieres navegar con un toque, además de los gestos y las cuentas.'},
@@ -13,7 +14,7 @@
   ];
   // Valores oficiales del primer uso. También se aplican al pulsar
   // «Omitir todo» o al omitir un paso individual.
-  const defaultChoices=['light','mystery','follow','yes','yes','bottom','redentor'];
+  const defaultChoices=['light','mystery','left','follow','yes','yes','bottom','redentor'];
   const icon = {
     settings:'<circle cx="12" cy="12" r="3"/><path d="M10 2.5h4l.6 2.3 2 1.1 2.3-.7 2 3.5-1.7 1.7v2.3l1.7 1.7-2 3.5-2.3-.7-2 1.1-.6 2.3h-4l-.6-2.3-2-1.1-2.3.7-2-3.5 1.7-1.7v-2.3L3.1 8.7l2-3.5 2.3.7 2-1.1z"/>',
     full:'<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>',
@@ -41,25 +42,30 @@
   function setPreference(page,value) {
     if(page===0)state.dark=value==='dark';
     if(page===1)state.rosaryColorMode=value;
-    if(page===2)state.rosarySwipeMode=value;
-    if(page===3)state.haptics=value==='yes';
-    if(page===4)state.screenTapNavigation=value==='yes';
-    if(page===5){
+    if(page===2){
+      window.rosarioSetSide?.(value);
+      return;
+    }
+    if(page===3)state.rosarySwipeMode=value;
+    if(page===4)state.haptics=value==='yes';
+    if(page===5)state.screenTapNavigation=value==='yes';
+    if(page===6){
       window.rosarioSetControlsPosition?.(value);
       return;
     }
-    if(page===6){
+    if(page===7){
       window.rosarioSetContrition?.(value);
       return;
     }
     persist();
-    if(page===0||page===1||page===4)render();
-    if(page===3&&value==='yes')window.rosarioPreviewHapticPattern?.('normal');
+    if(page===0||page===1||page===5)render();
+    if(page===4&&value==='yes')window.rosarioPreviewHapticPattern?.('normal');
   }
   function savedValue(page) {
     return [
       state.dark?'dark':'light',
       state.rosaryColorMode||'mystery',
+      state.rosarySide==='right'?'right':'left',
       state.rosarySwipeMode||'follow',
       state.haptics!==false?'yes':'no',
       state.screenTapNavigation!==false?'yes':'no',
@@ -83,18 +89,28 @@
         choice('classic','Clásico',beads(['#B99557','#B99557','#B99557','#B99557','#B99557']),'Un mismo estilo durante todo el Rosario',selected==='classic')+'</div>';
     }
     if(page===2){
+      const preview=side=>'<span class="onb-side-preview is-'+side+'">'+
+        '<span class="onb-side-beads" aria-hidden="true">'+rosary()+'</span>'+
+        '<span class="onb-side-reading" aria-hidden="true"><i></i><i></i><i></i><i></i></span>'+
+        '</span>';
+      return '<div class="onb-choices onb-two onb-side-choices">'+
+        choice('left','Izquierda',preview('left'),'Rosario a la izquierda · Texto a la derecha',selected==='left')+
+        choice('right','Derecha',preview('right'),'Rosario a la derecha · Texto a la izquierda',selected==='right')+
+        '</div>';
+    }
+    if(page===3){
       return '<div class="onb-choices onb-swipes">'+
         choice('follow','Según el recorrido',swipeGraphic(['down','up']),'El gesto se invierte después del arco',selected==='follow')+
         choice('uniform','Siempre hacia arriba',swipeGraphic(['up','up']),'El mismo gesto en ambos lados',selected==='uniform')+
         choice('down','Siempre hacia abajo',swipeGraphic(['down','down']),'El mismo gesto hacia abajo',selected==='down')+'</div>';
     }
-    if(page===3){
+    if(page===4){
       const pulses = '<span class="onb-vibration-preview"><span class="onb-pulse-ring"></span><span class="onb-pulse-bead"></span><span class="onb-pulse-ring"></span></span>';
       return '<div class="onb-choices onb-two">'+choice('yes','Con vibración',pulses,'Una respuesta táctil al avanzar',selected==='yes')+
         choice('no','Sin vibración','<span class="onb-no-vibration">'+rosary()+'</span>','Recorrido silencioso',selected==='no')+
         '</div><button type="button" class="onb-demo-action" id="onbTestVibration">Probar una vibración</button>';
     }
-    if(page===4){
+    if(page===5){
       return '<div class="onb-tap-demo" aria-label="Demostración de las zonas táctiles">'+
         '<button type="button" data-demotap="previous" class="onb-tap-half onb-tap-prev"><span>Mitad superior</span>'+
           '<strong>↑ Anterior</strong><small>Toca aquí para probar</small></button>'+
@@ -105,7 +121,7 @@
         choice('yes','Activar toques',svg('<path d="M12 3v11m0 0-4-4m4 4 4-4M5 18h14"/>'),'Puedes tocar incluso las oraciones',selected==='yes')+
         choice('no','Solo gestos y cuentas',svg('<path d="M5 12h14M12 5l7 7-7 7"/>'),'El toque no cambia de oración',selected==='no')+'</div>';
     }
-    if(page===5){
+    if(page===6){
       const preview=position=>'<span class="onb-position-phone">'+
         '<span class="onb-position-status" aria-hidden="true">•••</span>'+
         '<span class="onb-position-beads" aria-hidden="true">'+rosary()+'</span>'+
@@ -119,7 +135,7 @@
         choice('top','Arriba',preview('top'),'Controles cerca del borde superior',selected==='top')+
         '</div>';
     }
-    if(page===6){
+    if(page===7){
       const sources=[
         ['redentor','Jesús, mi Señor y Redentor','Jesús, mi Señor y Redentor, yo me arrepiento…'],
         ['jesucristo','Señor mío Jesucristo','Señor mío Jesucristo, Dios y hombre verdadero…']
