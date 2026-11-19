@@ -700,6 +700,10 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
 .immersive-prayer.is-mystery-announcement .mystery-intention-body{
  font-size:clamp(15px,2vw,19px)!important;
 }
+/* Agrupar intención y botón de meditación sin espacio sobrante. */
+.immersive-prayer.is-mystery-announcement .meditation-tools{
+ margin:clamp(10px,1dvh,14px) auto 2px!important;
+}
 /* Opciones de gesto con miniatura animada que enseña el cambio
    de dirección, sin tocar en absoluto la geometría del rosario. */
 #modalContent .rosario-swipe-settings{
