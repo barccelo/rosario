@@ -168,6 +168,16 @@
     let zoom=0;
     const wasInitialSetup=state.rosarioFirstRunDone!==true;
     let initialStartApplied=false;
+    let intentionallyClosed=false;
+    const closeButton=modal.querySelector('.close');
+    const markIntentionalClose=()=>{intentionallyClosed=true;};
+    closeButton?.addEventListener('click',markIntentionalClose,true);
+    modal.addEventListener('cancel',markIntentionalClose);
+    // Recordar una guía interrumpida sin afectar a instalaciones anteriores.
+    if(wasInitialSetup){
+      state.rosarioOnboardingInProgress=true;
+      persist();
+    }
     const applyDefault=page=>setPreference(page,defaultChoices[page]);
     const resetInitialStart=()=>{
       if(!wasInitialSetup||initialStartApplied)return;
@@ -183,16 +193,27 @@
       }
     };
     const finish=()=>{
+      intentionallyClosed=true;
       resetInitialStart();
       state.rosarioFirstRunDone=true;
+      state.rosarioOnboardingInProgress=false;
       persist();
       modal.close();
     };
-    // Cerrar o pulsar Atrás conserva las opciones ya escogidas.
+    // Cerrar voluntariamente conserva los cambios. Un cierre inesperado
+    // no debe dar la configuración por terminada (p. ej. un cambio de modo).
     function onClose(){
       resetInitialStart();
-      state.rosarioFirstRunDone=true;
+      if(intentionallyClosed||!wasInitialSetup){
+        state.rosarioFirstRunDone=true;
+        state.rosarioOnboardingInProgress=false;
+      }else{
+        state.rosarioFirstRunDone=false;
+        state.rosarioOnboardingInProgress=true;
+      }
       persist();
+      closeButton?.removeEventListener('click',markIntentionalClose,true);
+      modal.removeEventListener('cancel',markIntentionalClose);
       modal.removeEventListener('close',onClose);
     }
     modal.addEventListener('close',onClose,{once:true});
