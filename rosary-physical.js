@@ -810,7 +810,7 @@
     // El tap por mitades también funciona sobre el texto de la oración.
     // Las cuentas, controles y títulos que abren meditaciones conservan
     // sus acciones específicas. Arrastres y selección de texto no navegan.
-    let tapStart=null,lastChainScroll=0;
+    let tapStart=null,lastChainScroll=0,suppressNavigationClickUntil=0;
     for(const pane of [viewport,window.rosarioNativeScroll]){
       pane?.addEventListener('scroll',()=>{
         lastChainScroll=performance.now();
@@ -891,6 +891,9 @@
       return true;
     }
     document.addEventListener('pointerdown',event=>{
+      // Una interacción NUEVA ya no pertenece al clic sintético
+      // generado por el toque de navegación anterior.
+      suppressNavigationClickUntil=0;
       tapStart=null;
       if(!state.screenTapNavigation||$('modal').open||!prompt.hidden||
          event.button!==0||!event.isPrimary||
@@ -910,10 +913,18 @@
          performance.now()-lastChainScroll<250||
          window.getSelection?.()?.toString())return;
       if(event.clientY<window.innerHeight/2){
-        if(state.index>0){state.index--;render();}
+        if(state.index>0){
+          suppressNavigationClickUntil=performance.now()+700;
+          state.index--;render();
+        }
         return;
       }
       const from=state.index;
+      // El toque navega en pointerup, antes del clic sintético.
+      // Si cambió el DOM, dicho clic podría impactar el nuevo botón
+      // de meditación o cualquier control en la misma coordenada.
+      // Consumir SOLAMENTE el clic de este mismo toque.
+      suppressNavigationClickUntil=performance.now()+700;
       advance();
       // Registrar únicamente avances reales hechos tocando la lectura.
       // Si la cruz sólo estaba enfocando una sesión guardada, no cuenta.
@@ -922,6 +933,13 @@
     },true);
     for(const name of ['pointercancel','lostpointercapture'])
       document.addEventListener(name,()=>{tapStart=null;},true);
+    document.addEventListener('click',event=>{
+      if(event.detail===0||
+         performance.now()>=suppressNavigationClickUntil)return;
+      suppressNavigationClickUntil=0;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },true);
 
     const originalRender=render;
     render=function(){originalRender();observeAccidentalCorrection();paint();};
