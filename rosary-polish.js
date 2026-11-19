@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261119-10';
+    sheet.href = 'rosary-polish.css?v=20261119-11';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -58,7 +58,7 @@
     }
     const increase = makeSizeButton(1);
     const decrease = makeSizeButton(-1);
-    // Reinicio visible en la barra desplegada; sin gestos ocultos.
+    // El reinicio utiliza el mismo lenguaje visual del resto de la barra.
     const restartButton=document.createElement('button');
     restartButton.type='button';
     restartButton.id='iRestart';
@@ -70,8 +70,7 @@
       '<path d="M3 3v5h5"/></svg>';
     restartButton.onclick=()=>window.rosarioConfirmRestart?.();
     document.getElementById('iNavigate').after(restartButton,decrease,increase);
-    // El menú, el reinicio y los ajustes de texto comparten la barra
-    // y se ocultan juntos detrás del punto compacto.
+    // Los siete botones se mantienen en una única fila, como en v0.1.110.
 
 
     function applyPrefs() {
