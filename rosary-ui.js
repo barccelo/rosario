@@ -9,7 +9,7 @@
 
     const style=document.createElement('link');
     style.rel='stylesheet';
-    style.href='rosary-ui.css?v=20261019-17';
+    style.href='rosary-ui.css?v=20261119-5';
     document.head.append(style);
 
     const header=document.createElement('div');

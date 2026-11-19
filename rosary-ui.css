@@ -653,6 +653,19 @@ html:has(#modal[open]),body:has(#modal[open]){
   font:600 14px system-ui
 }
 #modalContent #androidReminderStatus{font:13px/1.5 system-ui;color:var(--ui-muted)}
+#modalContent .android-exact-reminder-status{
+  margin:0!important;
+  color:var(--ui-muted);
+  font:12px/1.55 system-ui;
+}
+#modalContent button.android-grant-exact-reminder{
+  display:block;min-height:44px;width:100%;margin:0!important;
+  padding:10px 13px;border:1px solid var(--ui-outline);
+  border-radius:12px;background:var(--ui-surface);
+  color:var(--ui-ink);font:600 13px/1.4 system-ui;
+  box-shadow:none;
+}
+#modalContent button.android-grant-exact-reminder[hidden]{display:none!important}
 
 /* Flecha única: centrada en el alto REAL de cada select de Ajustes.
    Evita que la flecha salte a la esquina inferior del control Android. */

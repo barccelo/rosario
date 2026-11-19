@@ -2,6 +2,7 @@ package com.barccelo.rosario;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.Context;
@@ -44,6 +45,7 @@ public final class MainActivity extends Activity {
     private volatile boolean downIsSystem = false;
     private boolean nativeFullscreen = false;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 42;
+    private boolean requestExactAfterNotificationPermission = false;
     private static final String NOTIFICATION_PREFS = "rosario_permissions";
     private static final String FIRST_NOTIFICATION_REQUEST = "first_reminder_prompt";
     private static final String UPDATE_PREFERENCES = "rosario_updates";
@@ -338,18 +340,31 @@ public final class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public boolean canScheduleExactReminder() {
+            return ReminderScheduler.canScheduleExact(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public void requestExactReminderPermission() {
+            runOnUiThread(MainActivity.this::requestExactReminderAccess);
+        }
+
+        @JavascriptInterface
         public void configureReminder(boolean enabled, int hour, int minute, String weekdays) {
             runOnUiThread(() -> {
                 ReminderScheduler.save(MainActivity.this, enabled, hour, minute, weekdays);
                 if (enabled && Build.VERSION.SDK_INT >= 33 &&
                     checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
                         != PackageManager.PERMISSION_GRANTED) {
+                    requestExactAfterNotificationPermission=true;
                     requestPermissions(new String[] {
                         Manifest.permission.POST_NOTIFICATIONS
                     }, NOTIFICATION_PERMISSION_REQUEST);
                 } else {
                     ReminderScheduler.schedule(MainActivity.this);
                     notifyReminderPermission();
+                    if (enabled) requestExactReminderAccess();
+                    else notifyReminderExactPermission();
                 }
             });
         }
@@ -396,6 +411,32 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private void requestExactReminderAccess() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            ReminderScheduler.canScheduleExact(this)) {
+            ReminderScheduler.schedule(this);
+            notifyReminderExactPermission();
+            return;
+        }
+        try {
+            Intent intent=new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception ignored) {
+            // El fabricante puede no ofrecer la pantalla de acceso especial.
+            notifyReminderExactPermission();
+        }
+    }
+
+    private void notifyReminderExactPermission() {
+        boolean allowed=ReminderScheduler.canScheduleExact(this);
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "window.rosarioAndroidReminderExactPermission&&" +
+                "window.rosarioAndroidReminderExactPermission(" + allowed + ")", null);
+        }
+    }
+
     private void askFirstReminderPermission() {
         // Android 13+ requiere consentimiento explícito. Pedirlo una
         // sola vez al abrir Rosario por primera vez, después de cargar
@@ -439,6 +480,14 @@ public final class MainActivity extends Activity {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
             ReminderScheduler.schedule(this);
             notifyReminderPermission();
+            boolean requestExact=requestExactAfterNotificationPermission;
+            requestExactAfterNotificationPermission=false;
+            if (requestExact && grantResults.length>0 &&
+                grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+                requestExactReminderAccess();
+            } else {
+                notifyReminderExactPermission();
+            }
         }
     }
 
@@ -481,7 +530,10 @@ public final class MainActivity extends Activity {
                         "window.rosarioNativeFullscreenChanged&&" +
                         "window.rosarioNativeFullscreenChanged(" + nativeFullscreen + ")",
                         null);
-                    view.post(() -> askFirstReminderPermission());
+                    view.post(() -> {
+                        askFirstReminderPermission();
+                        notifyReminderExactPermission();
+                    });
                 }
             }
 
@@ -516,6 +568,20 @@ public final class MainActivity extends Activity {
         ReminderScheduler.ensureDefaults(this);
         ReminderScheduler.schedule(this);
         webView.loadUrl(ROOT);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // El permiso se puede conceder o revocar en Ajustes de Android.
+        // Reprogramar con la modalidad disponible al regresar a Rosario.
+        if (webView != null) {
+            ReminderScheduler.schedule(this);
+            webView.post(() -> {
+                notifyReminderPermission();
+                notifyReminderExactPermission();
+            });
+        }
     }
 
     @Override

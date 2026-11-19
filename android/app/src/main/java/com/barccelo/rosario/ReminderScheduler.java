@@ -51,6 +51,12 @@ final class ReminderScheduler {
             .putString("weekdays", weekdays).apply();
     }
 
+    static boolean canScheduleExact(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
+        AlarmManager alarm=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        return alarm != null && alarm.canScheduleExactAlarms();
+    }
+
     private static PendingIntent reminderIntent(Context context) {
         Intent intent = new Intent(context, ReminderReceiver.class).setAction(ACTION);
         return PendingIntent.getBroadcast(context, 2026, intent,
@@ -81,8 +87,21 @@ final class ReminderScheduler {
             int iso = (next.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1;
             if (("," + days + ",").contains("," + iso + ",") &&
                 next.getTimeInMillis() > now.getTimeInMillis() + 10000L) {
-                alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                    next.getTimeInMillis(), pending);
+                long triggerAt=next.getTimeInMillis();
+                if (canScheduleExact(context)) {
+                    try {
+                        // Respeta la hora elegida incluso durante Doze, cuando
+                        // Android autoriza las alarmas exactas.
+                        alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                            triggerAt, pending);
+                        return;
+                    } catch (SecurityException ignored) {
+                        // El acceso puede ser revocado entre comprobación y uso.
+                    }
+                }
+                // Mantener el aviso aunque no se haya concedido el permiso.
+                // Este mecanismo admite retrasos impuestos por Android.
+                alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending);
                 return;
             }
             next.add(Calendar.DAY_OF_MONTH, 1);

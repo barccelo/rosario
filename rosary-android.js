@@ -38,6 +38,10 @@
   }
   syncKeys();
 
+  const exactAllowed=()=>{
+    try{return Boolean(window.RosarioAndroid.canScheduleExactReminder());}
+    catch{return false;}
+  };
   window.rosarioAndroidReminderPermission=allowed=>{
     const message=document.getElementById('androidReminderStatus');
     if(message && !allowed && pref.remind) {
@@ -128,6 +132,30 @@
     });
     reminder.append(daysTitle,days);
 
+    const exactStatus=document.createElement('p');
+    exactStatus.id='androidExactReminderStatus';
+    exactStatus.className='android-exact-reminder-status';
+    exactStatus.setAttribute('role','status');
+    const grantExact=document.createElement('button');
+    grantExact.type='button';
+    grantExact.className='android-grant-exact-reminder';
+    grantExact.id='androidGrantExactReminder';
+    grantExact.textContent='Autorizar alarmas puntuales';
+    grantExact.onclick=()=>window.RosarioAndroid.requestExactReminderPermission();
+    const refreshExactStatus=allowed=>{
+      if(!enabled.checked){
+        exactStatus.textContent='El recordatorio está desactivado.';
+      }else if(allowed){
+        exactStatus.textContent='Alarmas puntuales autorizadas. Las restricciones del teléfono aún pueden afectar el aviso.';
+      }else{
+        exactStatus.textContent='Android no ha autorizado las alarmas exactas. Los avisos pueden llegar unos minutos después.';
+      }
+      grantExact.hidden=!enabled.checked||allowed;
+    };
+    window.rosarioAndroidReminderExactPermission=refreshExactStatus;
+    enabled.addEventListener('change',()=>refreshExactStatus(exactAllowed()));
+    reminder.append(exactStatus,grantExact);
+
     const button=document.createElement('button');
     button.type='button';button.className='android-save-reminder';
     button.textContent='Guardar recordatorio';
@@ -149,12 +177,14 @@
       window.RosarioAndroid.configureReminder(
         pref.remind,hour,minute,pref.days.join(','));
       status.textContent=pref.remind?
-        'Recordatorio configurado. Android puede ajustar ligeramente la hora.':
+        'Recordatorio guardado. Si Android solicita acceso a alarmas, autorízalo para mayor puntualidad.':
         'Recordatorio desactivado.';
+      refreshExactStatus(exactAllowed());
     });
     reminder.append(button,status);
     root.append(reminder);
     host.append(root);
+    refreshExactStatus(exactAllowed());
   }
   document.addEventListener('DOMContentLoaded',()=>{
     // Esperar a que los otros módulos terminen de envolver Ajustes.
