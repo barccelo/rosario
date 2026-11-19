@@ -399,9 +399,9 @@ body.rosario-physical-view[data-rosary-side="right"] .controls-dot{
   .top-controls #iNavigate,
   .top-controls #iRestart,
   .top-controls .font-button{
-    width:clamp(20px,calc(14.2857vw - 23.43px),30px)!important;
+    width:clamp(20px,calc(8vw - 4px),26px)!important;
     min-width:0!important;
-    flex:0 0 clamp(20px,calc(14.2857vw - 23.43px),30px)!important;
+    flex:0 0 clamp(20px,calc(8vw - 4px),26px)!important;
     height:36px!important;
     padding:0!important;
   }
