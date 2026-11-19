@@ -52,10 +52,10 @@ const isRosarioFullscreen=()=>Boolean(document.fullscreenElement)||
   androidFullscreen||isHomeScreenApp();
 
 // La PWA instalada entra directamente por display:fullscreen del manifest.
-// Una pestaña normal no puede solicitar fullscreen en la carga: la API
-// exige un gesto real. Activarlo al PRIMER toque/clic/tecla compatible,
-// sin inventar eventos ni impedir que los controles del rosario funcionen.
-// Si el usuario sale del fullscreen, no se le obliga a volver a entrar.
+// En navegador, esperar al primer gesto real FUERA de un diálogo.
+// La configuración inicial debe terminar antes de pasar a pantalla completa:
+// solicitarla mientras showModal() está abierto puede ocultar el tutorial.
+// Si el usuario sale de fullscreen, no se le obliga a volver a entrar.
 let webFullscreenAutoTried=false;
 function autoFullscreenFromGesture(event){
   if(webFullscreenAutoTried||!event.isTrusted||
@@ -64,6 +64,11 @@ function autoFullscreenFromGesture(event){
      !document.fullscreenEnabled||
      typeof document.documentElement.requestFullscreen!=='function')return;
   if(event.target?.closest?.('#iFullscreen'))return;
+  // Ignorar también el primer gesto que antecede a la apertura de la guía.
+  // No consumir el intento: el primer toque tras finalizarla sí funcionará.
+  const initialGuidePending=window.rosarioHadSavedStateAtLoad===false&&
+    state.rosarioFirstRunDone!==true;
+  if(document.getElementById('modal')?.open||initialGuidePending)return;
   webFullscreenAutoTried=true;
   try{
     const result=document.documentElement.requestFullscreen({navigationUI:'hide'});
