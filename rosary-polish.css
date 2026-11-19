@@ -355,6 +355,16 @@
   top:auto!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;
 }
+/* La barra y su botón compacto permanecen frente al Rosario, en el lado
+   del texto. Sólo se intercambia el eje horizontal: arriba/abajo se respeta. */
+body.rosario-physical-view[data-rosary-side="right"] .top-controls{
+  right:auto!important;
+  left:calc(env(safe-area-inset-left,0px) + 16px)!important;
+}
+body.rosario-physical-view[data-rosary-side="right"] .controls-dot{
+  right:auto!important;
+  left:calc(env(safe-area-inset-left,0px) + 10px)!important;
+}
 /* Contraste del misterio en el tema claro. El gris anterior era demasiado pálido. */
 body:not(.dark) .immersive-prayer .rosary-mystery-name{
   color:#465347!important;
