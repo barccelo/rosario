@@ -80,7 +80,20 @@
   color:var(--ui-ink,inherit)!important
 }
 #modalContent.rosario-settings-dashboard .rosario-settings-home{
-  margin:18px 0!important;gap:10px!important
+  margin:10px 0 12px!important;gap:10px!important
+}
+/* El margen inferior de Configuración rápida no se suma al del menú. */
+#modalContent.rosario-settings-dashboard > .rosario-quick-configuration{
+  margin:14px 0 0!important;
+}
+/* Las tres tarjetas consecutivas de Apariencia utilizan exactamente
+   el mismo espacio, sin los márgenes generales de los labels del modal. */
+#modalContent:not(.rosario-settings-dashboard) > label.rosario-appearance-theme-setting,
+#modalContent:not(.rosario-settings-dashboard) > label.rosario-appearance-side-setting{
+  margin:0 0 10px!important;
+}
+#modalContent:not(.rosario-settings-dashboard) > label.rosario-pouch-settings-toggle{
+  margin:0!important;
 }
 #modalContent.rosario-settings-dashboard .rosario-settings-inline>label,
 #modalContent.rosario-settings-dashboard .rosario-settings-inline>button,
