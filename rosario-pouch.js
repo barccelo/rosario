@@ -406,6 +406,26 @@
       window.rosarioPouchFinish();
       return;
     }
+    // Los botones de volumen (y el teclado) usan este mismo avance.
+    // Si todavía está visible la funda, abrirla primero; el paso y
+    // su vibración ocurren DESPUÉS de terminar la animación.
+    if(state.pouchEnabled!==false && state.chapletActive!==true &&
+       !layer.hidden){
+      if(animating)return; // No acumular pulsaciones durante la extracción.
+      if(!opened){
+        const startingIndex=state.index;
+        const startingDate=dayKey();
+        openPouch().then(()=>{
+          if(opened && !animating && layer.hidden &&
+             layer.dataset.phase==='handoff' &&
+             state.index===startingIndex && dayKey()===startingDate &&
+             !state.chapletActive && state.pouchEnabled!==false){
+            priorAdvance(...args);
+          }
+        }).catch(()=>{}); // No avanzar si el dispositivo interrumpió el efecto.
+        return;
+      }
+    }
     return priorAdvance(...args);
   };
   // Acceso equivalente mediante teclado y controles de accesibilidad.
