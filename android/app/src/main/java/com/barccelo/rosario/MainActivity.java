@@ -48,6 +48,7 @@ public final class MainActivity extends Activity {
     private boolean requestExactAfterNotificationPermission = false;
     private static final String NOTIFICATION_PREFS = "rosario_permissions";
     private static final String FIRST_NOTIFICATION_REQUEST = "first_reminder_prompt";
+    private static final String FIRST_EXACT_REMINDER_REQUEST = "first_exact_reminder_prompt";
     private static final String UPDATE_PREFERENCES = "rosario_updates";
     private static final String UPDATE_DOWNLOAD_ID = "download_id";
     private static final String UPDATE_DOWNLOAD_TAG = "download_tag";
@@ -425,6 +426,26 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private void requestDefaultExactReminderOnce() {
+        // El recordatorio viene activado diariamente a las 15:00. Ofrecer
+        // la autorización de puntualidad durante la configuración inicial,
+        // sin obligar a buscarla manualmente dentro de Ajustes de Rosario.
+        // Android exige confirmar el acceso especial en su propia pantalla.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            ReminderScheduler.canScheduleExact(this)) return;
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) return;
+        if (!getSharedPreferences("rosario_reminder", MODE_PRIVATE)
+                .getBoolean("enabled", true)) return;
+        SharedPreferences flags = getSharedPreferences(NOTIFICATION_PREFS, MODE_PRIVATE);
+        if (flags.getBoolean(FIRST_EXACT_REMINDER_REQUEST, false)) return;
+        // Una sola solicitud automática por instalación, aunque el usuario
+        // decida no autorizarla. Sigue disponible el botón de Ajustes.
+        flags.edit().putBoolean(FIRST_EXACT_REMINDER_REQUEST, true).apply();
+        requestExactReminderAccess();
+    }
+
     private void askFirstReminderPermission() {
         // Android 13+ requiere consentimiento explícito. Pedirlo una
         // sola vez al abrir Rosario por primera vez, después de cargar
@@ -432,11 +453,13 @@ public final class MainActivity extends Activity {
         // cada vez que vuelva a abrir; se puede activar en Ajustes.
         if (Build.VERSION.SDK_INT < 33) {
             notifyReminderPermission();
+            requestDefaultExactReminderOnce();
             return;
         }
         SharedPreferences p=getSharedPreferences(NOTIFICATION_PREFS,MODE_PRIVATE);
         if (p.getBoolean(FIRST_NOTIFICATION_REQUEST,false)) {
             notifyReminderPermission();
+            requestDefaultExactReminderOnce();
             return;
         }
         p.edit().putBoolean(FIRST_NOTIFICATION_REQUEST,true).apply();
@@ -447,6 +470,7 @@ public final class MainActivity extends Activity {
         } else {
             ReminderScheduler.schedule(this);
             notifyReminderPermission();
+            requestDefaultExactReminderOnce();
         }
     }
 
@@ -470,9 +494,12 @@ public final class MainActivity extends Activity {
             notifyReminderPermission();
             boolean requestExact=requestExactAfterNotificationPermission;
             requestExactAfterNotificationPermission=false;
-            if (requestExact && grantResults.length>0 &&
-                grantResults[0]==PackageManager.PERMISSION_GRANTED) {
+            boolean notificationAllowed=grantResults.length>0 &&
+                grantResults[0]==PackageManager.PERMISSION_GRANTED;
+            if (notificationAllowed && requestExact) {
                 requestExactReminderAccess();
+            } else if (notificationAllowed) {
+                requestDefaultExactReminderOnce();
             } else {
                 notifyReminderExactPermission();
             }
