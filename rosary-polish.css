@@ -334,6 +334,48 @@
 .intention-backup button{align-self:flex-start;min-height:40px}
 .intention-backup small{font:12px system-ui;color:#b48067}
 
+/* Frase configurable de la intención: controles discretos como el resto de Ajustes. */
+.intention-caption-settings{
+  display:flex;flex-direction:column;gap:10px;
+  min-width:0;margin:18px 0 22px;padding:16px 0 17px;
+  border-top:1px solid var(--ui-rule,#aaa18a44);
+  border-bottom:1px solid var(--ui-rule,#aaa18a44);
+}
+.intention-caption-settings h3{
+  margin:0;font:600 15px/1.4 system-ui;color:var(--ui-ink,inherit);
+}
+.intention-caption-help{
+  margin:0!important;font:12px/1.5 system-ui;color:var(--ui-muted,#888);
+}
+.intention-caption-options{display:flex;flex-direction:column;gap:7px}
+.intention-caption-option{
+  display:flex;align-items:center;gap:12px;min-height:44px;
+  padding:10px 12px;margin:0!important;
+  border:1px solid var(--ui-outline,#aaa28b4a);border-radius:12px;
+  background:var(--ui-surface,transparent);color:var(--ui-ink,inherit);
+  font:13px/1.4 system-ui;cursor:pointer;
+}
+.intention-caption-option.is-selected{
+  border-color:var(--ui-accent,#b99b65);background:var(--ui-selected,#b99b651a);
+}
+.intention-caption-option input[type="radio"]{
+  width:18px;height:18px;margin:0;accent-color:var(--ui-accent,#b99b65);
+  flex:0 0 18px;
+}
+.intention-caption-option span{flex:1;min-width:0}
+.intention-caption-custom{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.intention-caption-custom[hidden]{display:none!important}
+.intention-caption-custom label{
+  display:flex;flex-direction:column;align-items:stretch;gap:7px;
+  margin:0!important;font:600 13px/1.4 system-ui;
+}
+.intention-caption-custom input{
+  display:block;width:100%;min-height:45px;padding:11px 12px;
+  border:1px solid var(--ui-outline,#aaa28b4a);border-radius:11px;
+  background:var(--ui-surface,transparent);color:var(--ui-ink,inherit);
+  font:14px/1.4 system-ui;box-shadow:none;
+}
+.intention-caption-custom small{font:12px/1.45 system-ui;color:var(--ui-muted,#888)}
 /* Intención elegida antes del anuncio: no agrega una cuenta ni mueve el progreso. */
 .mystery-random-intention{display:flex;flex-direction:column;align-items:center;width:100%;gap:8px;margin-bottom:clamp(26px,4dvh,42px);padding:13px 15px 16px;border:1px solid #bd9f6850;border-radius:16px;background:#b99b6510;text-align:center}
 .mystery-intention-caption{font:600 10px/1.6 system-ui;text-transform:uppercase;letter-spacing:1.7px;color:#b69a66}

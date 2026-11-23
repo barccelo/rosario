@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261123-1';
+    sheet.href = 'rosary-polish.css?v=20261123-5';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -238,13 +238,20 @@
       if(intention){
         const block=document.createElement('div');
         block.className='mystery-random-intention';
-        const caption=document.createElement('span');
-        caption.className='mystery-intention-caption';
-        caption.textContent='Intención de este misterio';
+        const captionText=window.rosarioIntentionCaption?.() ?? 'Intención de este misterio';
+        if(captionText){
+          const caption=document.createElement('span');
+          caption.className='mystery-intention-caption';
+          caption.textContent=captionText;
+          block.append(caption);
+        }
         const content=document.createElement('span');
         content.className='mystery-intention-body';
-        content.textContent=intention;
-        block.append(caption,content);
+        // La intención almacenada no cambia. Sólo en la fórmula
+        // «... por» se evita repetir «Por» al inicio de la siguiente línea.
+        content.textContent=state.intentionCaptionMode==='offer-for'
+          ?intention.replace(/^\s*Por\s+/i,''):intention;
+        block.append(content);
         prayer.append(block);
       }
     }

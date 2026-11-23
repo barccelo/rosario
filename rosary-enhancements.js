@@ -370,6 +370,22 @@
     : [...new Set([...existingIntentions,...allMysteryIntentions])].slice(0,200);
   state.intentionCatalogVersion=1;
   state.randomIntentionsEnabled = saved.randomIntentionsEnabled !== false;
+  // Encabezado que acompaña a la intención al anunciar cada misterio.
+  // Las instalaciones actuales conservan la frase original por defecto.
+  const intentionCaptionModes=['default','this-mystery','offer-for','custom','none'];
+  state.intentionCaptionMode=intentionCaptionModes.includes(saved.intentionCaptionMode)
+    ?saved.intentionCaptionMode:'default';
+  state.intentionCaptionCustomText=typeof saved.intentionCaptionCustomText==='string'
+    ?saved.intentionCaptionCustomText.slice(0,120):'';
+  const intentionCaptions={
+    default:'Intención de este misterio',
+    'this-mystery':'Este misterio lo ofrecemos',
+    'offer-for':'Ofrecemos este misterio por'
+  };
+  window.rosarioIntentionCaption=()=>state.intentionCaptionMode==='none'?''
+    :state.intentionCaptionMode==='custom'
+      ?state.intentionCaptionCustomText.trim()
+      :intentionCaptions[state.intentionCaptionMode]||intentionCaptions.default;
   state.intentionCycle = Array.isArray(saved.intentionCycle) &&
     saved.intentionCycle.length === 5 ? saved.intentionCycle : [null,null,null,null,null];
   function intentionFor(m) {
@@ -1450,6 +1466,80 @@
             option.append(radio,caption);modeRow.append(option);
           });
           list.append(modeRow);
+
+          // El encabezado de la tarjeta es independiente del catálogo:
+          // escoger una frase nunca recalcula las intenciones aleatorias.
+          const captionSettings=document.createElement('section');
+          captionSettings.className='intention-caption-settings';
+          const captionHeading=document.createElement('h3');
+          captionHeading.textContent='Texto sobre la intención';
+          const captionHint=document.createElement('p');
+          captionHint.textContent='Elige la frase que acompaña cada intención antes de los misterios.';
+          captionHint.className='intention-caption-help';
+          captionSettings.append(captionHeading,captionHint);
+          const captionChoices=document.createElement('div');
+          captionChoices.className='intention-caption-options';
+          captionChoices.setAttribute('role','radiogroup');
+          captionChoices.setAttribute('aria-label','Texto sobre la intención');
+          const customWrap=document.createElement('div');
+          customWrap.className='intention-caption-custom';
+          const customLabel=document.createElement('label');
+          customLabel.textContent='Tu propio texto';
+          const customInput=document.createElement('input');
+          customInput.type='text';
+          customInput.maxLength=120;
+          customInput.value=state.intentionCaptionCustomText;
+          customInput.placeholder='Escribe una frase breve';
+          customInput.setAttribute('aria-label','Texto personalizado sobre la intención');
+          customInput.addEventListener('input',()=>{
+            state.intentionCaptionCustomText=customInput.value.slice(0,120);
+            persist();
+            if(state.intentionCaptionMode==='custom')render();
+          });
+          const customNote=document.createElement('small');
+          customNote.textContent='Se guarda automáticamente. Si está vacío, se muestra solo la intención.';
+          customLabel.append(customInput);
+          customWrap.append(customLabel,customNote);
+          const captionRows=[];
+          const syncCaptionSelection=()=>{
+            captionRows.forEach(row=>{
+              const radio=row.querySelector('input');
+              row.classList.toggle('is-selected',radio.checked);
+            });
+            customWrap.hidden=state.intentionCaptionMode!=='custom';
+          };
+          [
+            ['default','Intención de este misterio'],
+            ['this-mystery','Este misterio lo ofrecemos'],
+            ['offer-for','Ofrecemos este misterio por'],
+            ['custom','Texto personalizado'],
+            ['none','Sin encabezado']
+          ].forEach(([value,labelText])=>{
+            const choice=document.createElement('label');
+            choice.className='intention-caption-option';
+            const radio=document.createElement('input');
+            radio.type='radio';
+            radio.name='intentionCaptionMode';
+            radio.value=value;
+            radio.checked=state.intentionCaptionMode===value;
+            const label=document.createElement('span');
+            label.textContent=labelText;
+            radio.addEventListener('change',()=>{
+              if(!radio.checked)return;
+              state.intentionCaptionMode=value;
+              persist();
+              syncCaptionSelection();
+              render();
+              if(value==='custom')customInput.focus();
+            });
+            choice.append(radio,label);
+            captionRows.push(choice);
+            captionChoices.append(choice);
+          });
+          captionSettings.append(captionChoices,customWrap);
+          list.append(captionSettings);
+          syncCaptionSelection();
+
           const addRow=document.createElement('div');
           addRow.className='intention-add';
           const input=document.createElement('input');
