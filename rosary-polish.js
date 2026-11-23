@@ -456,11 +456,11 @@
             (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
         }else{
-          // Las oraciones de prosa (Salve, contrición y otras) conservan
-          // sus párrafos sin introducir una línea vacía adicional.
-          // Los saltos dobles de Guía/Asamblea y letanías se procesan
-          // previamente en las ramas de voces y diálogos.
-          appendWithAmen(prayer,source.replace(/\n[ \t]*\n+/g,'\n'));
+          // Una única línea de separación entre párrafos de prosa:
+          // conservar los saltos propios de cada oración y comprimir
+          // únicamente los espacios duplicados (3 o más saltos).
+          // Los turnos de Guía y Asamblea conservan su formato separado.
+          appendWithAmen(prayer,source.replace(/\n[ \t]*\n+/g,'\n\n'));
         }
         }
       }else{

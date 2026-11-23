@@ -95,6 +95,11 @@
     let initialFramePending=true;
     let initialFrameAnchored=false;
     let startFrameInterrupted=false;
+    // Con el Rosario nuevo, la cruz ya está en el límite inferior.
+    // No seguir automáticamente las cuentas introductorias ni la
+    // cuenta grande del primer misterio: la primera subida de la cuerda
+    // será de esa grande a la primera Avemaría (cuenta pequeña n.º 1).
+    let holdInitialRosaryFrame=launchPrayerIndex===0&&!state.chapletActive;
     function restoreInitialFrame(){
       if(!initialFramePending&&!initialFrameAnchored)return;
       if(state.rosaryViewLayout!=='physical'||
@@ -128,6 +133,7 @@
     // La opción «Reiniciar progreso» debe restaurar también el
     // encuadre inicial, incluso si ya está seleccionada la oración 0.
     window.rosarioPhysicalReset=()=>{
+      holdInitialRosaryFrame=!state.chapletActive;
       resumeAtCrossPending=false;
       animateResumeFollow=false;
       autoFollowTarget=null;
@@ -334,6 +340,8 @@
     // Los gestos manuales siguen siendo 100 % nativos. Sólo anulan
     // el destino de centrado automático pendiente cuando empiezan.
     function clearAutoFollow(){
+      // El arrastre voluntario de las cuentas siempre tiene prioridad.
+      holdInitialRosaryFrame=false;
       autoFollowTarget=null;
       displacedManually=true;
       startFrameInterrupted=true;
@@ -510,6 +518,12 @@
         initialFramePending=false;
       if(initialFrameAnchored&&state.index!==launchPrayerIndex)
         initialFrameAnchored=false;
+      if(holdInitialRosaryFrame){
+        const firstSmall=steps.findIndex(step=>step.title==='Avemaría'&&
+          step.m===0&&step.bead===1);
+        if(state.chapletActive||firstSmall<0||state.index>=firstSmall)
+          holdInitialRosaryFrame=false;
+      }
       const selected=positionFor(steps[state.index]);
       const completed=Math.max(0,Math.min(55,selected.completed||0));
       // El recorrido se acumula: el lado izquierdo NO se vuelve gris
@@ -692,21 +706,6 @@
           }
         }
         target=clamp(target);
-        // La cuenta grande junto a la cruz queda fija al rezar la
-        // Comunión espiritual. El primer movimiento se produce al pasar
-        // a la primera pequeña (Señal de la cruz), sin esperar a
-        // «Señor, ábreme los labios». No desplazar nunca en sentido
-        // contrario durante las otras pequeñas introductorias.
-        if(goingForward&&!restoreActiveBead&&
-           selected.type==='intro'&&selected.phase==='opening'){
-          if(selected.intro===2&&
-             priorStep?.title==='Comunión espiritual'){
-            const firstAdvance=Math.max(16,Math.min(24,height*.03));
-            target=clamp(Math.min(target,previous-firstAdvance));
-          }else{
-            target=Math.min(target,previous);
-          }
-        }
         if(sequential&&!restoreActiveBead&&!keepFinalFraming&&
            !closingLoopTransition&&!atFifthClosingBead){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS
@@ -721,6 +720,10 @@
           target=clamp(previous+
             Math.max(-limit,Math.min(limit,target-previous)));
         }
+        // No mover ni un píxel automáticamente antes de la primera
+        // Avemaría del primer misterio. El Padre nuestro de la cuenta
+        // grande también permanece en el encuadre inferior inicial.
+        if(holdInitialRosaryFrame)target=finalTop;
         if(Math.abs(target-previous)>.5){
           autoFollowTarget=target;
           // No saltar por una sucesión rápida de clics: los trayectos
