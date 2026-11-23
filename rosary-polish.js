@@ -442,6 +442,21 @@
           }
           prayer.append(heading);
         }
+        // En los misterios segundo y cuarto, anunciar la oración
+        // conjunta una sola vez al comenzar cada tipo de oración.
+        // Depende de «Mostrar Guía y Asamblea», no de los colores.
+        if(state.voiceLabels!==false&&(step.m===1||step.m===3)){
+          const allPrayer=step.title==='Padrenuestro'
+            ?'Todos padrenuestro'
+            :step.title==='Avemaría'&&step.n===1
+              ?'Todos avemaría':null;
+          if(allPrayer){
+            const cue=document.createElement('span');
+            cue.className='reading-prayer-heading';
+            cue.textContent=allPrayer;
+            prayer.append(cue);
+          }
+        }
         const voices=(step.title==='Padrenuestro'||step.title==='Avemaría'||
           step.title==='Gloria'||step.kind==='jaculatory');
         const pair=step.kind==='jaculatory'?addJaculatoria(step,source):source.split(/\n\s*\n/);
