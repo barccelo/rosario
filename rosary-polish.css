@@ -389,6 +389,48 @@
   font:14px/1.4 system-ui;box-shadow:none;
 }
 .intention-caption-custom small{font:12px/1.45 system-ui;color:var(--ui-muted,#888)}
+/* Fijadas: mismo diseño, un matiz azul grisáceo discreto.
+   Permanecen como tarjetas independientes después de la aleatoria. */
+.immersive-prayer.is-mystery-announcement .mystery-pinned-intention{
+  border-color:rgba(120,144,158,.5)!important;
+  background:rgba(124,145,160,.09)!important;
+}
+.dark .immersive-prayer.is-mystery-announcement .mystery-pinned-intention{
+  border-color:rgba(160,174,194,.35)!important;
+  background:rgba(150,164,186,.11)!important;
+}
+.immersive-prayer.is-mystery-announcement .mystery-pinned-intention .mystery-intention-caption{
+  color:#718999!important;
+}
+.dark .immersive-prayer.is-mystery-announcement .mystery-pinned-intention .mystery-intention-caption{
+  color:#b0bed0!important;
+}
+/* El gesto sostenido abre la configuración, no la selección de texto. */
+.immersive-prayer .mystery-random-intention{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+}
+.immersive-prayer .mystery-random-intention:focus-visible{
+  outline:2px solid var(--ui-accent,#b99b65);outline-offset:2px;
+}
+.intention-pins-help{
+  margin:7px 3px 12px!important;
+  font:12px/1.5 system-ui;color:var(--ui-muted,#888);
+}
+.intention-entry.is-pinned{
+  border-color:rgba(115,141,156,.6);
+  background:rgba(123,144,162,.065);
+}
+.intention-pin-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  white-space:nowrap;
+}
+.intention-pin-btn svg{
+  width:15px;height:15px;flex:0 0 15px;
+  fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linejoin:round;stroke-linecap:round;
+}
+.intention-pin-btn.is-pinned{color:var(--ui-accent,#b99b65)!important}
+.intention-pin-btn.is-pinned svg path:first-child{fill:rgba(170,143,102,.18)}
 /* Intención elegida antes del anuncio: no agrega una cuenta ni mueve el progreso. */
 .mystery-random-intention{display:flex;flex-direction:column;align-items:center;width:100%;gap:8px;margin-bottom:clamp(26px,4dvh,42px);padding:13px 15px 16px;border:1px solid #bd9f6850;border-radius:16px;background:#b99b6510;text-align:center}
 .mystery-intention-caption{font:600 10px/1.6 system-ui;text-transform:uppercase;letter-spacing:1.7px;color:#b69a66}
