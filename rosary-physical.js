@@ -95,11 +95,6 @@
     let initialFramePending=true;
     let initialFrameAnchored=false;
     let startFrameInterrupted=false;
-    // Con el Rosario nuevo, la cruz ya está en el límite inferior.
-    // No seguir automáticamente las cuentas introductorias ni la
-    // cuenta grande del primer misterio: la primera subida de la cuerda
-    // será de esa grande a la primera Avemaría (cuenta pequeña n.º 1).
-    let holdInitialRosaryFrame=launchPrayerIndex===0&&!state.chapletActive;
     function restoreInitialFrame(){
       if(!initialFramePending&&!initialFrameAnchored)return;
       if(state.rosaryViewLayout!=='physical'||
@@ -133,7 +128,6 @@
     // La opción «Reiniciar progreso» debe restaurar también el
     // encuadre inicial, incluso si ya está seleccionada la oración 0.
     window.rosarioPhysicalReset=()=>{
-      holdInitialRosaryFrame=!state.chapletActive;
       resumeAtCrossPending=false;
       animateResumeFollow=false;
       autoFollowTarget=null;
@@ -341,7 +335,6 @@
     // el destino de centrado automático pendiente cuando empiezan.
     function clearAutoFollow(){
       // El arrastre voluntario de las cuentas siempre tiene prioridad.
-      holdInitialRosaryFrame=false;
       autoFollowTarget=null;
       displacedManually=true;
       startFrameInterrupted=true;
@@ -518,12 +511,6 @@
         initialFramePending=false;
       if(initialFrameAnchored&&state.index!==launchPrayerIndex)
         initialFrameAnchored=false;
-      if(holdInitialRosaryFrame){
-        const firstSmall=steps.findIndex(step=>step.title==='Avemaría'&&
-          step.m===0&&step.bead===1);
-        if(state.chapletActive||firstSmall<0||state.index>=firstSmall)
-          holdInitialRosaryFrame=false;
-      }
       const selected=positionFor(steps[state.index]);
       const completed=Math.max(0,Math.min(55,selected.completed||0));
       // El recorrido se acumula: el lado izquierdo NO se vuelve gris
@@ -564,6 +551,30 @@
       cross.classList.toggle('is-complete',state.index>0);
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
+
+      // La geometría litúrgica de la apertura NO debe desplazar la
+      // cadena. Hasta completar el Padrenuestro del primer misterio,
+      // todas las oraciones comparten el encuadre inferior inicial.
+      // Este bloqueo se deduce del paso actual y funciona también si
+      // se recupera una sesión, se toca una cuenta o se reinicia.
+      const firstDecadeSmall=steps.findIndex(item=>
+        item.title==='Avemaría'&&item.m===0&&item.n===1&&item.bead===1);
+      const openingBeforeFirstSmall=!state.chapletActive&&
+        firstDecadeSmall>=0&&state.index<firstDecadeSmall;
+      if(openingBeforeFirstSmall){
+        // En el primer render sí se sitúa en el extremo inferior; el
+        // scroll manual posterior nunca se corrige al cambiar oración.
+        if(beforeMode!=='physical'&&!displacedManually){
+          const maxScroll=Math.max(0,viewport.scrollHeight-viewport.clientHeight);
+          viewport.scrollTop=maxScroll;
+        }
+        autoFollowTarget=null;
+        lastPhysicalType=selected.type;
+        lastPhysicalBead=selected.type==='loop'?selected.bead:-1;
+        beforeMode='physical';beforeIndex=state.index;
+        return;
+      }
+
       if(beforeMode!=='physical'||beforeIndex!==state.index){
         const height=viewport.clientHeight;
         const max=Math.max(0,viewport.scrollHeight-height);
@@ -720,10 +731,6 @@
           target=clamp(previous+
             Math.max(-limit,Math.min(limit,target-previous)));
         }
-        // No mover ni un píxel automáticamente antes de la primera
-        // Avemaría del primer misterio. El Padre nuestro de la cuenta
-        // grande también permanece en el encuadre inferior inicial.
-        if(holdInitialRosaryFrame)target=finalTop;
         if(Math.abs(target-previous)>.5){
           autoFollowTarget=target;
           // No saltar por una sucesión rápida de clics: los trayectos
