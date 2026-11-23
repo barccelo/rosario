@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261123-6';
+    sheet.href = 'rosary-polish.css?v=20261123-7';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -221,6 +221,7 @@
       const sing={Gozosos:'gozoso',Dolorosos:'doloroso',
         Gloriosos:'glorioso',Luminosos:'luminoso'}[state.group];
       const intention=window.rosarioIntentionFor?.(step.m);
+      const pinned=window.rosarioPinnedIntentions?.()||[];
 
       const label=document.createElement('span');
       label.className='mystery-announcement-label';
@@ -235,10 +236,24 @@
       frame.className='rosario-mystery-frame';
       frame.append(label,title);
       prayer.append(frame);
-      if(intention){
+      function addIntentionCard(text,isPinned){
         const block=document.createElement('div');
-        block.className='mystery-random-intention';
-        const captionText=window.rosarioIntentionCaption?.() ?? 'Intención de este misterio';
+        block.className='mystery-random-intention'+
+          (isPinned?' mystery-pinned-intention':'');
+        block.tabIndex=0;
+        block.title='Mantén pulsado para configurar intenciones';
+        block.setAttribute('role','button');
+        block.setAttribute('aria-label',(isPinned?'Intención fijada: ':'Intención: ')+
+          text+'. Mantén pulsado para configurar las intenciones.');
+        block.addEventListener('keydown',event=>{
+          if(event.key==='Enter'||event.key===' '){
+            event.preventDefault();
+            window.rosarioOpenIntentionSettings?.();
+          }
+        });
+        const captionText=isPinned
+          ?(state.intentionCaptionMode==='none'?'':'Intención fijada')
+          :(window.rosarioIntentionCaption?.() ?? 'Intención de este misterio');
         if(captionText){
           const caption=document.createElement('span');
           caption.className='mystery-intention-caption';
@@ -247,13 +262,15 @@
         }
         const content=document.createElement('span');
         content.className='mystery-intention-body';
-        // La intención almacenada no cambia. Sólo en la fórmula
-        // «... por» se evita repetir «Por» al inicio de la siguiente línea.
-        content.textContent=state.intentionCaptionMode==='offer-for'
-          ?intention.replace(/^\s*Por\s+/i,''):intention;
+        // Sólo con la fórmula «... por» quitar el «Por» inicial
+        // de las aleatorias. El texto fijado permanece intacto.
+        content.textContent=!isPinned&&state.intentionCaptionMode==='offer-for'
+          ?text.replace(/^\s*Por\s+/i,''):text;
         block.append(content);
         prayer.append(block);
       }
+      if(intention)addIntentionCard(intention,false);
+      pinned.forEach(text=>addIntentionCard(text,true));
     }
     function specialSymbol() {
       prayer.append(makeCross());
@@ -635,13 +652,14 @@
     const VOICE_HOLD_MOVE_PX=12;
     let voiceHold=null,suppressVoiceClickUntil=0;
     const voiceTarget=target=>target?.closest?.('.voice-assembly,.wheel-response');
+    const intentionTarget=target=>target?.closest?.('.mystery-random-intention');
     function cancelVoiceHold(){
       if(voiceHold)clearTimeout(voiceHold.timer);
       voiceHold=null;
     }
-    function startVoiceHold(source,id,x,y,target){
+    function startVoiceHold(source,id,x,y,target,kind='voices'){
       cancelVoiceHold();
-      const candidate={source,id,x,y,target,index:state.index,timer:null};
+      const candidate={source,id,x,y,target,kind,index:state.index,timer:null};
       voiceHold=candidate;
       candidate.timer=setTimeout(()=>{
         if(voiceHold!==candidate || document.hidden ||
@@ -654,7 +672,8 @@
         }
         cancelVoiceHold();
         suppressVoiceClickUntil=performance.now()+950;
-        window.rosarioOpenVoiceSettings?.();
+        if(candidate.kind==='intentions')window.rosarioOpenIntentionSettings?.();
+        else window.rosarioOpenVoiceSettings?.();
       },VOICE_HOLD_MS);
     }
     function moveVoiceHold(source,id,x,y){
@@ -663,7 +682,8 @@
         cancelVoiceHold();
     }
     reading.addEventListener('contextmenu',e=>{
-      if(state.voiceColors && voiceTarget(e.target))e.preventDefault();
+      if(intentionTarget(e.target)||
+         (state.voiceColors && voiceTarget(e.target)))e.preventDefault();
     });
     // Bloquear el clic sintético posterior a una pulsación larga incluso
     // si el nodo inicial fue sustituido y el clic se redirige a otro.
@@ -676,12 +696,15 @@
     },true);
     if(window.PointerEvent){
       reading.addEventListener('pointerdown',e=>{
-        const target=voiceTarget(e.target);
-        if(!state.voiceColors||e.button!==0||!e.isPrimary||!target){
+        const intention=intentionTarget(e.target);
+        const target=intention||voiceTarget(e.target);
+        if(e.button!==0||!e.isPrimary||!target||
+           (!intention&&!state.voiceColors)){
           cancelVoiceHold();
           return;
         }
-        startVoiceHold('pointer',e.pointerId,e.clientX,e.clientY,target);
+        startVoiceHold('pointer',e.pointerId,e.clientX,e.clientY,target,
+          intention?'intentions':'voices');
       },true);
       document.addEventListener('pointermove',e=>{
         moveVoiceHold('pointer',e.pointerId,e.clientX,e.clientY);
@@ -696,13 +719,16 @@
       // Los eventos de terminación también deben observarse en
       // document, no sólo en la lectura que puede ser reemplazada.
       reading.addEventListener('touchstart',e=>{
-        const target=voiceTarget(e.target);
-        if(!state.voiceColors||e.touches.length!==1||!target){
+        const intention=intentionTarget(e.target);
+        const target=intention||voiceTarget(e.target);
+        if(e.touches.length!==1||!target||
+           (!intention&&!state.voiceColors)){
           cancelVoiceHold();
           return;
         }
         const t=e.touches[0];
-        startVoiceHold('touch',t.identifier,t.clientX,t.clientY,target);
+        startVoiceHold('touch',t.identifier,t.clientX,t.clientY,target,
+          intention?'intentions':'voices');
       },{passive:true,capture:true});
       document.addEventListener('touchmove',e=>{
         if(voiceHold?.source!=='touch')return;
