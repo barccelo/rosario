@@ -68,9 +68,9 @@
     'Alabanzas y gracias sean dadas en todo momento, al Santísimo y Divinísimo Sacramento del Altar.\n\n' +
     'Y bendita sea por siempre, la Santa e Inmaculada Concepción, de la Bienaventurada, siempre Virgen María, Madre de Dios y Madre nuestra.';
   prayers.Salve =
-    'Dios te salve, Reina y Madre, Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve.\n\n' +
-    'A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas.\n\n' +
-    'Ea, pues, Señora, abogada nuestra, vuelve a nosotros esos tus ojos misericordiosos; y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre.\n\n' +
+    'Dios te salve, Reina y Madre, Madre de misericordia, vida, dulzura y esperanza nuestra; Dios te salve.\n' +
+    'A ti llamamos los desterrados hijos de Eva; a ti suspiramos, gimiendo y llorando en este valle de lágrimas.\n' +
+    'Ea, pues, Señora, abogada nuestra, vuelve a nosotros esos tus ojos misericordiosos; y después de este destierro, muéstranos a Jesús, fruto bendito de tu vientre.\n' +
     '¡Oh clemente, oh piadosa, oh dulce siempre Virgen María!';
   prayers['Ruega por nosotros'] =
     'Ruega por nosotros, Santa Madre de Dios.\n\nPara que seamos dignos de alcanzar las promesas de nuestro Señor Jesucristo. Amén.';
@@ -145,8 +145,8 @@
   // Respuestas en dos intervenciones, igual que en el Padrenuestro y el Avemaría.
   prayers.Gloria = 'Gloria al Padre, y al Hijo, y al Espíritu Santo.\n\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
   prayers['Señor mío Jesucristo'] =
-    'Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío: por ser Vos quien sois y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido.\n\n' +
-    'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n\n' +
+    'Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío: por ser Vos quien sois y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido.\n' +
+    'Propongo firmemente nunca más pecar, apartarme de todas las ocasiones de ofenderos, confesarme y cumplir la penitencia que me fuera impuesta.\n' +
     'Ofrezco, Señor, mi vida, obras y trabajos en satisfacción de todos mis pecados; y, así como lo suplico, confío en vuestra bondad y misericordia infinita que los perdonaréis por los méritos de vuestra preciosísima sangre, pasión y muerte, y me daréis gracia para enmendarme y perseverar en vuestro santo amor y servicio hasta el fin de mi vida. Amén.';
   const contritionTraditional=prayers['Señor mío Jesucristo']; 
   prayers['Acto de contrición (Jesús, mi Señor y Redentor)'] =

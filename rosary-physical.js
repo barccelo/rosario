@@ -692,6 +692,21 @@
           }
         }
         target=clamp(target);
+        // La cuenta grande junto a la cruz queda fija al rezar la
+        // Comunión espiritual. El primer movimiento se produce al pasar
+        // a la primera pequeña (Señal de la cruz), sin esperar a
+        // «Señor, ábreme los labios». No desplazar nunca en sentido
+        // contrario durante las otras pequeñas introductorias.
+        if(goingForward&&!restoreActiveBead&&
+           selected.type==='intro'&&selected.phase==='opening'){
+          if(selected.intro===2&&
+             priorStep?.title==='Comunión espiritual'){
+            const firstAdvance=Math.max(16,Math.min(24,height*.03));
+            target=clamp(Math.min(target,previous-firstAdvance));
+          }else{
+            target=Math.min(target,previous);
+          }
+        }
         if(sequential&&!restoreActiveBead&&!keepFinalFraming&&
            !closingLoopTransition&&!atFifthClosingBead){
           // Límite exclusivamente para los movimientos AUTOMÁTICOS

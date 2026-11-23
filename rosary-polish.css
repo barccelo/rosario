@@ -120,7 +120,7 @@
 .amen-line{display:block!important;clear:both;text-align:right!important;margin-top:9px!important;padding-right:1px;white-space:nowrap}
 .intention-heading{display:block;margin:0 0 28px;padding:15px 17px;border-left:2px solid #b89965;border-radius:0 12px 12px 0;background:#bd9d5c0c;font:600 15px/1.6 Georgia,serif;color:#aa8953}
 .dark .intention-heading{background:#bd9d5c12;color:#d8b982}
-.prayer-symbol{display:block;text-align:center;width:100%;margin:0 auto 22px;font:300 46px/1 Georgia,serif;color:#b79a67}
+.prayer-symbol{display:block;text-align:center;width:100%;margin:0 auto 22px;font:300 55px/1 Georgia,serif;color:#b79a67}
 
 /* Panel de texto: utiliza su propia altura y se desplaza SOLO si es necesario. */
 .immersive-prayer{

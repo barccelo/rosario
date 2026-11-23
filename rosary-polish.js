@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261119-12';
+    sheet.href = 'rosary-polish.css?v=20261123-1';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -455,7 +455,13 @@
           const addGloria=step.title==='Avemaría'&&step.n===10&&
             (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
-        }else appendWithAmen(prayer,source);
+        }else{
+          // Las oraciones de prosa (Salve, contrición y otras) conservan
+          // sus párrafos sin introducir una línea vacía adicional.
+          // Los saltos dobles de Guía/Asamblea y letanías se procesan
+          // previamente en las ramas de voces y diálogos.
+          appendWithAmen(prayer,source.replace(/\n[ \t]*\n+/g,'\n'));
+        }
         }
       }else{
         prayer.replaceChildren();
