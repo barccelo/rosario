@@ -102,15 +102,33 @@
 .litany-wheel .wheel-response{color:#b58d50!important}
 .dark .litany-wheel .wheel-response{color:#dfbf85!important}
 .litany-wheel .wheel-response .verse-mark,.litany-wheel .wheel-main .verse-mark{font-size:24px!important}
-/* Centrar el texto de las invocaciones, independientemente de la
-   preferencia general de alineación del texto de las oraciones. */
-.immersive-prayer .litany-wheel .wheel-main{
-  display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;
-  gap:8px;width:100%;text-align:center!important;
+/* Centrar sólo las palabras de cada letanía. Los símbolos ℣. y ℟.
+   siguen anclados a la izquierda, en la misma posición en ambos renglones,
+   sin saltar encima del texto cuando la invocación ocupa dos líneas. */
+.immersive-prayer .litany-wheel .wheel-main,
+.immersive-prayer .litany-wheel .wheel-response{
+  display:grid!important;
+  grid-template-columns:36px minmax(0,1fr) 36px;
+  align-items:baseline;
+  width:100%;
+  gap:0;
 }
-.immersive-prayer .litany-wheel .wheel-main .verse-mark{margin-right:0!important}
-.immersive-prayer .litany-wheel #litanyCurrent{
-  display:inline-block;min-width:0;text-align:center!important;
+.immersive-prayer .litany-wheel .wheel-main .verse-mark,
+.immersive-prayer .litany-wheel .wheel-response .verse-mark{
+  grid-column:1;
+  grid-row:1;
+  justify-self:start;
+  margin-right:0!important;
+}
+.immersive-prayer .litany-wheel #litanyCurrent,
+.immersive-prayer .litany-wheel #litanyResponse{
+  grid-column:2;
+  grid-row:1;
+  display:block;
+  min-width:0;
+  width:100%;
+  text-align:center!important;
+  overflow-wrap:break-word;
 }
 .immersive-prayer .litany-wheel .wheel-side{
   justify-content:center!important;text-align:center!important;
@@ -1134,7 +1152,7 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
   width:100%;
   margin:0!important;
   line-height:1.48!important;
-  font-size:clamp(16px,calc(var(--rosary-font-size,23px) * .94),37px)!important;
+  font-size:var(--rosary-font-size,23px)!important;
   white-space:normal;
   overflow-wrap:break-word;
   text-align:inherit;
@@ -1160,12 +1178,65 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
     width:clamp(75px,29%,114px);
   }
   .immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line{
-    font-size:clamp(15px,calc(var(--rosary-font-size,23px) * .86),27px)!important;
+    font-size:var(--rosary-font-size,23px)!important;
     line-height:1.43!important;
   }
   .immersive-prayer.is-lamb-layout .rosario-lamb-copy .dialogue-line.voice-assembly{
     margin-top:.95em!important;
   }
+}
+
+/* Vista previa de los dos formatos de intenciones finales. */
+#modalContent .rosario-final-choice-preview{
+  display:flex;flex-direction:column;gap:10px;
+  margin-top:23px;padding:16px 0 0;
+  border-top:1px solid var(--ui-rule,rgba(180,160,120,.25));
+}
+#modalContent .rosario-final-choice-preview-title{
+  margin:0;color:var(--ui-muted,#88908b);
+  font:600 11px/1.5 system-ui;letter-spacing:.09em;text-transform:uppercase;
+}
+#modalContent .rosario-final-choice-preview-stage{
+  display:flex;flex-direction:column;gap:11px;
+  padding:17px 15px;border-radius:14px;
+  background:var(--ui-surface,rgba(120,137,151,.09));
+  border:1px solid var(--ui-outline,rgba(150,159,174,.26));
+}
+#modalContent .rosario-final-choice-preview-intention{
+  color:var(--rc-accent,var(--ui-accent,#b99b65));
+  padding:10px 12px;border-radius:10px;
+  background:color-mix(in srgb,var(--rc-accent,#b99b65) 8%,transparent);
+  border-left:2px solid var(--rc-accent,var(--ui-accent,#b99b65));
+  font:600 14px/1.5 Georgia,serif;text-align:left;
+}
+#modalContent .rosario-final-choice-preview-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;min-height:37px;padding:3px 2px;
+  border-bottom:1px solid var(--ui-rule,rgba(150,159,174,.18));
+  color:var(--ui-ink,inherit);font:15px/1.45 Georgia,serif;
+}
+#modalContent .rosario-final-choice-preview-row:last-child{border-bottom:0}
+#modalContent .rosario-final-choice-preview-check{
+  flex:none;display:grid;place-items:center;
+  width:19px;height:19px;border:1.5px solid currentColor;
+  border-radius:50%;opacity:.38;
+}
+#modalContent .rosario-final-choice-preview-prayer{
+  padding:6px 2px 3px;color:var(--ui-ink,inherit);
+  font:16px/1.6 Georgia,serif;
+}
+#modalContent .rosario-final-choice-preview-prayer strong{
+  display:block;margin-bottom:7px;font:600 15px/1.4 Georgia,serif;
+}
+#modalContent .rosario-final-choice-preview-note{
+  color:var(--ui-muted,#88908b);font:12px/1.5 system-ui;
+}
+#modalContent .rosario-final-choice-done{
+  align-self:flex-end;min-height:43px;margin-top:8px;
+  padding:10px 20px;border:1px solid var(--ui-outline,rgba(150,159,174,.35));
+  border-radius:12px;background:var(--ui-selected,rgba(185,155,101,.13));
+  color:var(--ui-ink,inherit);font:600 13px/1.4 system-ui;
+  box-shadow:none;
 }
 
 /* Intenciones finales en lista: tarjeta y filas forman un solo bloque.
