@@ -87,7 +87,7 @@
 .nav-list.align-list{max-height:none}
 .jac-choice{padding:12px 13px!important;margin:0!important}
 .litany-directory{display:flex;flex-direction:column;gap:6px;max-height:min(60dvh,560px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:6px 3px 14px}
-.litany-directory-item{display:flex;flex-direction:column;text-align:left;justify-content:center;min-height:60px;flex:0 0 auto;gap:4px;width:100%;padding:10px 13px;border-radius:12px;border:1px solid #aaa28d55;background:transparent;font:16px/1.35 Georgia,serif}
+.litany-directory-item{display:flex;flex-direction:column;text-align:center;align-items:center;justify-content:center;min-height:60px;flex:0 0 auto;gap:4px;width:100%;padding:10px 13px;border-radius:12px;border:1px solid #aaa28d55;background:transparent;font:16px/1.35 Georgia,serif}
 .litany-directory-item small{font:12px/1.4 system-ui;color:#998668}
 .litany-directory-item.selected{border:1px solid #af9365;background:#af936526}
 .dark .litany-directory-item{border-color:#67706077}.dark .litany-directory-item.selected{background:#b99b6330;border-color:#c1a26d}
@@ -102,6 +102,19 @@
 .litany-wheel .wheel-response{color:#b58d50!important}
 .dark .litany-wheel .wheel-response{color:#dfbf85!important}
 .litany-wheel .wheel-response .verse-mark,.litany-wheel .wheel-main .verse-mark{font-size:24px!important}
+/* Centrar el texto de las invocaciones, independientemente de la
+   preferencia general de alineación del texto de las oraciones. */
+.immersive-prayer .litany-wheel .wheel-main{
+  display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;
+  gap:8px;width:100%;text-align:center!important;
+}
+.immersive-prayer .litany-wheel .wheel-main .verse-mark{margin-right:0!important}
+.immersive-prayer .litany-wheel #litanyCurrent{
+  display:inline-block;min-width:0;text-align:center!important;
+}
+.immersive-prayer .litany-wheel .wheel-side{
+  justify-content:center!important;text-align:center!important;
+}
 .litany-wheel .wheel-current{cursor:pointer;border-radius:10px}
 .litany-wheel .wheel-current:focus-visible{outline:2px solid #bf9a59;outline-offset:2px}
 .voice-colors-off .dialogue-line.voice-assembly,

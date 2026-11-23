@@ -103,7 +103,7 @@
     'Virgen digna de veneración', 'Virgen digna de alabanza',
     'Virgen poderosa', 'Virgen clemente', 'Virgen fiel', 'Espejo de justicia',
     'Trono de la sabiduría', 'Causa de nuestra alegría', 'Vaso espiritual',
-    'Vaso digno de honor', 'Vaso de insigne devoción', 'Rosa mística',
+    'Vaso digno de honor', 'Vaso insigne de devoción', 'Rosa mística',
     'Torre de David', 'Torre de marfil', 'Casa de oro', 'Arca de la Alianza',
     'Puerta del cielo', 'Estrella de la mañana', 'Salud de los enfermos',
     'Refugio de los pecadores', 'Consuelo de los migrantes',
@@ -120,10 +120,10 @@
     if (i < 9) {
       const separator = ', ten misericordia de nosotros.';
       return { verse: line.endsWith(separator)
-        ? line.slice(0,-separator.length)+',' : line.replace(/,?\s*ten piedad de nosotros\.$/,','),
+        ? line.slice(0,-separator.length) : line.replace(/,?\s*ten piedad de nosotros\.$/,''),
         response: 'ten misericordia de nosotros.' };
     }
-    return { verse: line.replace(/ ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
+    return { verse: line.replace(/,?\s*ruega por nosotros\.$/, ''), response: 'ruega por nosotros.' };
   });
   const baseLitanyPairs=litanyPairs.map(pair=>({...pair}));
   const lambLines = [
@@ -851,6 +851,18 @@
       ' contemplamos:\n\n' + groups[state.group][step.m] + '.';
   };
   state.prayerEdits=(saved.prayerEdits&&typeof saved.prayerEdits==='object'&&!Array.isArray(saved.prayerEdits))?saved.prayerEdits:{};
+  // Normalizar únicamente el final de cada versículo de las letanías;
+  // conservar comas interiores («Dios, Padre celestial») y respuestas.
+  const normalizeLitanyText=value=>String(value)
+    .replaceAll('Vaso de insigne devoción','Vaso insigne de devoción')
+    .replace(/^(℣\.\s*[^\n]*?),[ \t]*$/gm,'$1');
+  if(typeof state.prayerEdits.Letanías==='string'){
+    const normalized=normalizeLitanyText(state.prayerEdits.Letanías);
+    if(normalized!==state.prayerEdits.Letanías){
+      state.prayerEdits.Letanías=normalized;
+      persist();
+    }
+  }
   // Quien haya guardado exactamente la versión anterior de la Comunión
   // espiritual recibe la corrección; las ediciones personales se respetan.
   const previousSpiritualCommunion='Yo quisiera, Señor, recibirte con aquella pureza, humildad y devoción con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos.';
@@ -872,7 +884,7 @@
     const matches=[...pairs.matchAll(/℣\.\s*([^\n]+)\s*\n\s*℟\.\s*([\s\S]*?)(?=\n\s*\n℣\.|$)/g)];
     if(matches.length!==litanyPairs.length)return false;
     matches.forEach((m,i)=>{
-      litanyPairs[i].verse=m[1].trim();
+      litanyPairs[i].verse=i>=5?m[1].trim().replace(/,\s*$/,''):m[1].trim();
       litanyPairs[i].response=m[2].trim();
     });
     steps.filter(step=>step.kind==='litany').forEach(step=>{
@@ -936,9 +948,10 @@
   window.rosarioSavePrayer=(title,text)=>{
     if(typeof text!=='string'||!title)return false;
     if(text.length>20000)return false;
-    if(title==='Letanías'&&!applyLitanyText(text))return false;
-    if(title==='Cordero de Dios'&&!applyLambText(text))return false;
-    state.prayerEdits[title]=text;
+    const normalized=title==='Letanías'?normalizeLitanyText(text):text;
+    if(title==='Letanías'&&!applyLitanyText(normalized))return false;
+    if(title==='Cordero de Dios'&&!applyLambText(normalized))return false;
+    state.prayerEdits[title]=normalized;
     // Mantener el texto elegido para las futuras lecturas.
     persist();render();
     return true;
