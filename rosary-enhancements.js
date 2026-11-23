@@ -2029,6 +2029,60 @@
       show('<h2>Intenciones finales</h2>'+
         '<div class="rosario-contrition-choices" id="finalIntentionChoices"></div>');
       const root=$('finalIntentionChoices');
+      const preview=document.createElement('section');
+      preview.className='rosario-final-choice-preview';
+      preview.setAttribute('aria-label','Vista previa de las intenciones finales');
+      const previewTitle=document.createElement('h3');
+      previewTitle.className='rosario-final-choice-preview-title';
+      previewTitle.textContent='Vista previa';
+      const stage=document.createElement('div');
+      stage.className='rosario-final-choice-preview-stage';
+      const note=document.createElement('p');
+      note.className='rosario-final-choice-preview-note';
+      const done=document.createElement('button');
+      done.type='button';
+      done.className='rosario-final-choice-done';
+      done.textContent='Listo';
+      done.onclick=()=>$('modal').close();
+      preview.append(previewTitle,stage,note,done);
+      root.after(preview);
+      const buttons=[];
+      const exampleTitle='Por las necesidades de la Iglesia y del Estado';
+      function updatePreview(){
+        stage.replaceChildren();
+        const heading=document.createElement('div');
+        heading.className='rosario-final-choice-preview-intention';
+        heading.textContent=exampleTitle;
+        stage.append(heading);
+        if(state.finalIntentionsDisplay==='checklist'){
+          ['Padrenuestro','Avemaría','Gloria'].forEach(name=>{
+            const row=document.createElement('div');
+            row.className='rosario-final-choice-preview-row';
+            const title=document.createElement('span');
+            title.textContent=name;
+            const circle=document.createElement('span');
+            circle.className='rosario-final-choice-preview-check';
+            circle.setAttribute('aria-hidden','true');
+            row.append(title,circle);
+            stage.append(row);
+          });
+          note.textContent='Al avanzar, se marca cada oración completada sin salir de la lista.';
+        }else{
+          const next=document.createElement('div');
+          next.className='rosario-final-choice-preview-prayer';
+          const label=document.createElement('strong');
+          label.textContent='Pantalla siguiente · Padrenuestro';
+          const excerpt=document.createElement('span');
+          excerpt.textContent='Padre nuestro, que estás en el cielo, santificado sea tu nombre…';
+          next.append(label,excerpt);
+          stage.append(next);
+          note.textContent='La intención aparece primero. Después, cada oración se muestra en su propia pantalla.';
+        }
+        buttons.forEach(({button,value})=>{
+          button.setAttribute('aria-pressed',
+            String(state.finalIntentionsDisplay===value));
+        });
+      }
       [
         ['checklist','Lista con marcas'],
         ['prayers','Oraciones completas']
@@ -2036,15 +2090,15 @@
         const button=document.createElement('button');
         button.type='button';button.className='rosario-contrition-option';
         button.textContent=name;
-        button.setAttribute('aria-pressed',
-          String(state.finalIntentionsDisplay===value));
         button.onclick=()=>{
           state.finalIntentionsDisplay=value;
           persist();render();
-          $('modal').close();
+          updatePreview();
         };
+        buttons.push({button,value});
         root.append(button);
       });
+      updatePreview();
     }
     window.rosarioOpenFinalIntentionChoice=openFinalIntentionChoice;
     const originalSettings = $('settings').onclick;
