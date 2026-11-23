@@ -369,6 +369,13 @@
     ? existingIntentions.slice(0,200)
     : [...new Set([...existingIntentions,...allMysteryIntentions])].slice(0,200);
   state.intentionCatalogVersion=1;
+  // Las fijadas son permanentes durante los cinco misterios, incluso
+  // si se desactivan las aleatorias. Usar texto, no índices editables.
+  state.pinnedIntentions=Array.isArray(saved.pinnedIntentions)
+    ?[...new Set(saved.pinnedIntentions.filter(text=>
+        typeof text==='string'&&state.intentionPool.includes(text)))]
+    :[];
+  window.rosarioPinnedIntentions=()=>state.pinnedIntentions.slice();
   state.randomIntentionsEnabled = saved.randomIntentionsEnabled !== false;
   // Encabezado que acompaña a la intención al anunciar cada misterio.
   // Las instalaciones actuales conservan la frase original por defecto.
@@ -389,12 +396,14 @@
   state.intentionCycle = Array.isArray(saved.intentionCycle) &&
     saved.intentionCycle.length === 5 ? saved.intentionCycle : [null,null,null,null,null];
   function intentionFor(m) {
-    if (!state.randomIntentionsEnabled || !state.intentionPool.length) return '';
+    // Las fijadas se muestran aparte y no compiten en el sorteo.
+    const unpinned=state.intentionPool.filter(t=>!state.pinnedIntentions.includes(t));
+    if (!state.randomIntentionsEnabled || !unpinned.length) return '';
     const relevant=mysteryIntentions[state.group]?.[m] || [];
-    const custom=state.intentionPool.filter(t=>!defaultIntentions.includes(t));
-    const matched=state.intentionPool.filter(t=>relevant.includes(t)||custom.includes(t));
+    const custom=unpinned.filter(t=>!defaultIntentions.includes(t));
+    const matched=unpinned.filter(t=>relevant.includes(t)||custom.includes(t));
     const pool=state.intentionSelectionMode==='random'
-      ? state.intentionPool : (matched.length?matched:state.intentionPool);
+      ? unpinned : (matched.length?matched:unpinned);
     const current=state.intentionCycle[m];
     if(current && pool.includes(current)) return current;
     const used=state.intentionCycle.filter((t,i)=>i!==m && pool.includes(t));
@@ -1440,7 +1449,7 @@
         } else if (selected === 'intentions') {
           const caption=document.createElement('p');
           caption.className='jac-intro';
-          caption.textContent='Una intención antes de cada misterio. Elige si prefieres cualquier intención o las relacionadas con el misterio.';
+          caption.textContent='Antes de cada misterio puedes mostrar una intención aleatoria y todas las intenciones que hayas fijado.';
           list.append(caption);
           const switchRow=document.createElement('label');
           switchRow.className='jac-choice';
@@ -1451,7 +1460,7 @@
           const bold=document.createElement('strong');
           bold.textContent='Mostrar intenciones aleatorias';
           const small=document.createElement('small');
-          small.textContent='Activar o desactivar antes de cada misterio.';
+          small.textContent='Las intenciones fijadas se seguirán mostrando al desactivar las aleatorias.';
           label.append(bold,small);
           switchRow.append(check,label);
           check.onchange=()=>{
@@ -1573,11 +1582,44 @@
           input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add.click();}};
           addRow.append(input,add);
           list.append(addRow);
-          state.intentionPool.forEach((value,i)=>{
+          const pinHint=document.createElement('p');
+          pinHint.className='intention-pins-help';
+          pinHint.textContent=state.pinnedIntentions.length
+            ?state.pinnedIntentions.length+' '+(state.pinnedIntentions.length===1
+              ?'intención fijada':'intenciones fijadas')+
+              ' · Aparecen en todos los misterios junto a la aleatoria.'
+            :'Fija una intención para mostrarla en todos los misterios. Mantén pulsada una tarjeta para regresar aquí.';
+          list.append(pinHint);
+          // Ordenar visualmente primero las fijadas sin modificar los
+          // índices originales utilizados por las funciones de edición.
+          const ordered=state.intentionPool.map((value,i)=>({value,i}))
+            .sort((a,b)=>Number(state.pinnedIntentions.includes(b.value))-
+                          Number(state.pinnedIntentions.includes(a.value)));
+          ordered.forEach(({value,i})=>{
             const row=document.createElement('div');
-            row.className='intention-entry';
+            const isPinned=state.pinnedIntentions.includes(value);
+            row.className='intention-entry'+(isPinned?' is-pinned':'');
             const span=document.createElement('span');
             span.textContent=value;
+            const pin=document.createElement('button');
+            pin.type='button';
+            pin.className='intention-small-btn intention-pin-btn'+
+              (isPinned?' is-pinned':'');
+            pin.setAttribute('aria-pressed',String(isPinned));
+            pin.setAttribute('aria-label',(isPinned?'Desfijar':'Fijar')+' intención '+(i+1));
+            pin.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+
+              '<path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"/>'+
+              '<path d="M12 14v7"/></svg><span>'+(isPinned?'Desfijar':'Fijar')+'</span>';
+            pin.onclick=()=>{
+              state.pinnedIntentions=isPinned
+                ?state.pinnedIntentions.filter(text=>text!==value)
+                :[...state.pinnedIntentions,value];
+              state.intentionCycle=state.intentionCycle.map(text=>
+                state.pinnedIntentions.includes(text)?null:text);
+              persist();
+              render();
+              fill('intentions');
+            };
             const edit=document.createElement('button');
             edit.type='button';
             edit.className='intention-small-btn';
@@ -1598,7 +1640,9 @@
                 if(!updated || (updated!==value && state.intentionPool.includes(updated)))return;
                 state.intentionPool[i]=updated;
                 state.intentionCycle=state.intentionCycle.map(t=>t===value?updated:t);
+                state.pinnedIntentions=state.pinnedIntentions.map(t=>t===value?updated:t);
                 persist();
+                render();
                 fill('intentions');
               };
               const cancel=document.createElement('button');
@@ -1617,10 +1661,12 @@
             del.onclick=()=>{
               state.intentionPool.splice(i,1);
               state.intentionCycle=state.intentionCycle.map(t=>t===value?null:t);
+              state.pinnedIntentions=state.pinnedIntentions.filter(t=>t!==value);
               persist();
+              render();
               fill('intentions');
             };
-            row.append(span,edit,del);
+            row.append(span,pin,edit,del);
             list.append(row);
           });
           const backup=document.createElement('details');
@@ -1633,7 +1679,10 @@
           exportButton.type='button';
           exportButton.textContent='Descargar archivo JSON';
           exportButton.onclick=()=>{
-            const payload=JSON.stringify({intentions:state.intentionPool},null,2);
+            const payload=JSON.stringify({
+              intentions:state.intentionPool,
+              pinnedIntentions:state.pinnedIntentions
+            },null,2);
             const blob=new Blob([payload],{type:'application/json'});
             const url=URL.createObjectURL(blob);
             const a=document.createElement('a');
@@ -1657,7 +1706,15 @@
               if(!Array.isArray(arr)||arr.length>200||arr.some(x=>typeof x!=='string'||x.length>350))
                 throw Error('Archivo no válido');
               state.intentionPool=[...new Set(arr.map(x=>x.trim()).filter(Boolean))];
+              const savedPins=Array.isArray(parsed)
+                ?[]:(parsed.pinnedIntentions??parsed.pinned??[]);
+              if(!Array.isArray(savedPins) || savedPins.length>200 ||
+                 savedPins.some(x=>typeof x!=='string'||x.length>350))
+                throw Error('Archivo de intenciones fijadas no válido');
+              state.pinnedIntentions=[...new Set(savedPins.map(x=>x.trim())
+                .filter(x=>state.intentionPool.includes(x)))];
               resetIntentionCycle();
+              render();
               fill('intentions');
             }catch{feedback.textContent='No se pudo leer la lista. Comprueba el formato JSON.';}
           };
@@ -1771,6 +1828,7 @@
     // otra lista interminable en la página principal.
     window.rosarioOpenNavigation=openNavigation;
     window.rosarioOpenVoiceSettings = () => openNavigation('voices');
+    window.rosarioOpenIntentionSettings = () => openNavigation('intentions');
     const animationOptions=[
       ['fade','Fundido','El texto desaparece y aparece con suavidad.'],
       ['slide','Deslizamiento','El nuevo texto aparece con un leve movimiento hacia arriba.'],
