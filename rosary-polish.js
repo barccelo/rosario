@@ -114,16 +114,21 @@
       prayer.append(wrapper);
     }
     function voiceOrder(step) {
-      // Durante las tres vueltas de la Estación el primer fragmento
-      // pertenece siempre al Guía y el segundo a la Asamblea. El
-      // dorado no debe alternar en la segunda vuelta.
+      // La asignación depende del misterio, NUNCA de si las etiquetas
+      // Guía/Asamblea están visibles ni de los colores seleccionados.
+      // Esto se aplica por igual al Padrenuestro, las diez Avemarías,
+      // el Gloria y TODAS las jaculatorias de cada misterio.
+      if(Number.isInteger(step.m)&&step.m>=0&&step.m<5)
+        return step.m%2===0 ? ['guide','assembly'] : ['assembly','guide'];
+
+      // Las tres estaciones iniciales y las Avemarías de dedicación
+      // conservan su orden propio, independiente de los misterios.
       if(Number.isInteger(step.stationNumber) ||
-        (step.title==='Avemaría'&&step.m===5) ||
-        (step.title==='Avemaría'&&step.n===10&&(step.m===1||step.m===3)))
+         (step.title==='Avemaría'&&step.m===5))
         return ['guide','assembly'];
-      const i = step.m>=0 && step.m<5 ? step.m :
-        Number.isInteger(step.dedication) ? step.dedication :
-        Number.isInteger(step.intentionNumber) ? step.intentionNumber : 0;
+
+      const i=Number.isInteger(step.dedication)?step.dedication:
+        Number.isInteger(step.intentionNumber)?step.intentionNumber:0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
     }
     // Una sola instancia del arte de referencia para los tres Cordero de Dios.
@@ -488,9 +493,9 @@
           const [a,b]=voiceOrder(step);
           appendVoice(pair[0],a);
           const second=pair.slice(1).join('\n\n');
-          // En los misterios II y IV, solamente en la décima Avemaría,
-          // la Asamblea dice «Gloria» inmediatamente ANTES de «Santa María».
-          // Se preserva el primer «Dios te salve» sin modificaciones.
+          // En los misterios II y IV, el «Gloria» especial aparece
+          // antes de «Santa María» en la segunda mitad, sin cambiar
+          // el orden de voces ni la asignación de colores y etiquetas.
           const addGloria=step.title==='Avemaría'&&step.n===10&&
             (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
