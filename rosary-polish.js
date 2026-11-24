@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261123-8';
+    sheet.href = 'rosary-polish.css?v=20261124-2';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -121,14 +121,20 @@
       if(Number.isInteger(step.m)&&step.m>=0&&step.m<5)
         return step.m%2===0 ? ['guide','assembly'] : ['assembly','guide'];
 
-      // Las tres estaciones iniciales y las Avemarías de dedicación
-      // conservan su orden propio, independiente de los misterios.
+      // Las tres intenciones finales (Iglesia/Estado, obispo y
+      // ánimas del purgatorio) conservan SIEMPRE el mismo orden en
+      // Padrenuestro, Avemaría y Gloria, también si las etiquetas
+      // están ocultas y los colores siguen activos.
+      if(Number.isInteger(step.intentionNumber))
+        return ['guide','assembly'];
+
+      // Las estaciones iniciales y las Avemarías de dedicación
+      // conservan también el orden Guía → Asamblea.
       if(Number.isInteger(step.stationNumber) ||
          (step.title==='Avemaría'&&step.m===5))
         return ['guide','assembly'];
 
-      const i=Number.isInteger(step.dedication)?step.dedication:
-        Number.isInteger(step.intentionNumber)?step.intentionNumber:0;
+      const i=Number.isInteger(step.dedication)?step.dedication:0;
       return i%2===0 ? ['guide','assembly'] : ['assembly','guide'];
     }
     // Una sola instancia del arte de referencia para los tres Cordero de Dios.
