@@ -102,32 +102,41 @@
 .litany-wheel .wheel-response{color:#b58d50!important}
 .dark .litany-wheel .wheel-response{color:#dfbf85!important}
 .litany-wheel .wheel-response .verse-mark,.litany-wheel .wheel-main .verse-mark{font-size:24px!important}
-/* Centrar sólo las palabras de cada letanía. Los símbolos ℣. y ℟.
-   siguen anclados a la izquierda, en la misma posición en ambos renglones,
-   sin saltar encima del texto cuando la invocación ocupa dos líneas. */
+/* En la tarjeta de las letanías, las marcas ℣. y ℟. quedan
+   ancladas a la izquierda. Sólo el TEXTO se centra dentro del ancho
+   restante de la tarjeta, aprovechando también su extremo derecho.
+   Alinear por arriba evita que las marcas queden por encima de la
+   primera línea cuando una invocación se distribuye en varias. */
 .immersive-prayer .litany-wheel .wheel-main,
 .immersive-prayer .litany-wheel .wheel-response{
   display:grid!important;
-  grid-template-columns:36px minmax(0,1fr) 36px;
-  align-items:baseline;
-  width:100%;
-  gap:0;
+  grid-template-columns:30px minmax(0,1fr)!important;
+  align-items:start!important;
+  justify-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  gap:0!important;
 }
 .immersive-prayer .litany-wheel .wheel-main .verse-mark,
 .immersive-prayer .litany-wheel .wheel-response .verse-mark{
-  grid-column:1;
-  grid-row:1;
-  justify-self:start;
-  margin-right:0!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:start!important;
+  justify-self:start!important;
+  line-height:1.35!important;
+  margin:3px 0 0!important;
+  width:auto!important;
 }
 .immersive-prayer .litany-wheel #litanyCurrent,
 .immersive-prayer .litany-wheel #litanyResponse{
-  grid-column:2;
-  grid-row:1;
-  display:block;
-  min-width:0;
-  width:100%;
+  grid-column:2!important;
+  grid-row:1!important;
+  display:block!important;
+  min-width:0!important;
+  max-width:none!important;
+  width:100%!important;
   text-align:center!important;
+  text-wrap:pretty;
   overflow-wrap:break-word;
 }
 .immersive-prayer .litany-wheel .wheel-side{
