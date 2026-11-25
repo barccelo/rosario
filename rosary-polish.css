@@ -101,30 +101,32 @@
 .dark .dialogue-line.voice-assembly{color:#dfbf85}
 .litany-wheel .wheel-response{color:#b58d50!important}
 .dark .litany-wheel .wheel-response{color:#dfbf85!important}
-.litany-wheel .wheel-response .verse-mark,.litany-wheel .wheel-main .verse-mark{font-size:24px!important}
-/* En la tarjeta de las letanías, las marcas ℣. y ℟. quedan
-   ancladas a la izquierda. Sólo el TEXTO se centra dentro del ancho
-   restante de la tarjeta, aprovechando también su extremo derecho.
-   Alinear por arriba evita que las marcas queden por encima de la
-   primera línea cuando una invocación se distribuye en varias. */
+.litany-wheel .wheel-response .verse-mark,.litany-wheel .wheel-main .verse-mark{
+  /* La marca es un indicador discreto, no otro encabezado. */
+  font-size:clamp(17px,calc(var(--rosary-font-size,23px) * .78),21px)!important;
+  line-height:1.15!important;
+  clip-path:none!important;
+}
+/* Los signos ℣. y ℟. son más pequeños y están alineados al centro
+   vertical de su propio texto, también cuando éste ocupa varias líneas.
+   Mantener dos columnas permite aprovechar todo el ancho del recuadro. */
 .immersive-prayer .litany-wheel .wheel-main,
 .immersive-prayer .litany-wheel .wheel-response{
   display:grid!important;
-  grid-template-columns:30px minmax(0,1fr)!important;
-  align-items:start!important;
+  grid-template-columns:25px minmax(0,1fr)!important;
+  align-items:center!important;
   justify-items:stretch!important;
   width:100%!important;
   min-width:0!important;
-  gap:0!important;
+  column-gap:8px!important;
 }
 .immersive-prayer .litany-wheel .wheel-main .verse-mark,
 .immersive-prayer .litany-wheel .wheel-response .verse-mark{
   grid-column:1!important;
   grid-row:1!important;
-  align-self:start!important;
-  justify-self:start!important;
-  line-height:1.35!important;
-  margin:3px 0 0!important;
+  align-self:center!important;
+  justify-self:center!important;
+  margin:0!important;
   width:auto!important;
 }
 .immersive-prayer .litany-wheel #litanyCurrent,
