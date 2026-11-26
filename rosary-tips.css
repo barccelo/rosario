@@ -1,0 +1,86 @@
+/* Descubrimiento progresivo: tarjeta discreta, nunca un diálogo modal. */
+#rosario-discovery-tip{
+  position:fixed;
+  z-index:8;
+  left:calc(42% + 12px);
+  right:calc(env(safe-area-inset-right,0px) + 12px);
+  bottom:calc(env(safe-area-inset-bottom,0px) + 65px);
+  box-sizing:border-box;
+  padding:15px 14px 13px;
+  border-radius:17px;
+  border:1px solid rgba(139,128,103,.27);
+  background:rgba(250,248,241,.96);
+  box-shadow:0 9px 32px rgba(23,28,21,.14);
+  color:#363d34;
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  max-height:65dvh;
+  overflow-y:auto;
+}
+body.dark #rosario-discovery-tip{
+  background:rgba(39,43,38,.96);
+  border-color:rgba(214,197,155,.2);
+  color:#eee9db;
+}
+body.rosario-physical-view[data-rosary-side="right"] #rosario-discovery-tip{
+  left:calc(env(safe-area-inset-left,0px) + 12px);
+  right:calc(42% + 12px);
+}
+#rosario-discovery-tip .rosario-tip-kicker{
+  margin:0 0 7px;
+  font:600 10px/1.3 system-ui;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:#a0814c;
+}
+body.dark #rosario-discovery-tip .rosario-tip-kicker{color:#d7ba8a}
+#rosario-discovery-tip .rosario-tip-description{
+  margin:0;
+  font:13px/1.5 system-ui;
+  text-wrap:pretty;
+}
+#rosario-discovery-tip .rosario-tip-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-start;
+  gap:5px 8px;
+  margin-top:14px;
+}
+#rosario-discovery-tip button{
+  border:0;
+  padding:9px 10px;
+  min-height:36px;
+  border-radius:9px;
+  background:transparent;
+  color:inherit;
+  text-align:center;
+  font:500 11px/1.3 system-ui;
+  white-space:normal;
+  box-shadow:none;
+}
+#rosario-discovery-tip .rosario-tip-primary{
+  background:#947950;
+  color:white;
+}
+#rosario-discovery-tip .rosario-tip-later{
+  background:rgba(130,130,115,.09);
+}
+#rosario-discovery-tip .rosario-tip-never{
+  flex-basis:100%;
+  text-align:left;
+  color:#777d71;
+  padding-left:1px;
+}
+body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
+#rosario-discovery-tip button:focus-visible{
+  outline:2px solid #a68b63;
+  outline-offset:2px;
+}
+@media(max-width:420px){
+  #rosario-discovery-tip{
+    padding:13px 11px;
+    border-radius:13px;
+  }
+  #rosario-discovery-tip .rosario-tip-description{font-size:12px}
+}
