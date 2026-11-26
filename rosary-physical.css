@@ -109,23 +109,32 @@ body.dark .physical-path{
    mantiene el halo más destacado. También incluye el colgante. */
 .physical-path .physical-bead.is-complete .halo{opacity:.52}
 .physical-path .physical-bead.active .halo{opacity:.75}
-/* Una misma cuenta admite varias oraciones: el halo se atenúa y
-   vuelve a llenarse suavemente una sola vez por avance. */
+/* Reutilizar la MISMA cuenta requiere una respuesta perceptible
+   incluso con «Sin transición» o «Reducir movimiento»: el brillo baja
+   y se recupera, sin desplazamientos ni ampliaciones decorativas.
+   Iluminar también el aro evita que el pulso del halo, de por sí suave,
+   sea imperceptible en temas de poco contraste. */
 @keyframes rosario-halo-refill{
-  0%{opacity:.75;transform:scale(1)}
-  25%{opacity:.20;transform:scale(.82)}
-  68%{opacity:.96;transform:scale(1.09)}
-  100%{opacity:.75;transform:scale(1)}
+  0%,100%{opacity:.75}
+  35%{opacity:.12}
+}
+@keyframes rosario-ring-refill{
+  0%,100%{filter:brightness(1)}
+  35%{filter:brightness(.60)}
 }
 .physical-path .physical-bead.is-reused .halo{
-  transform-box:fill-box;transform-origin:center;
-  animation:rosario-halo-refill .7s ease-in-out both!important;
+  animation:rosario-halo-refill .62s ease-in-out both!important;
 }
-@media(prefers-reduced-motion:reduce){
-  .physical-path .physical-bead.is-reused .halo{animation:none!important}
+.physical-path .physical-bead.is-reused .ring{
+  animation:rosario-ring-refill .62s ease-in-out both!important;
 }
+/* Es una señal de avance de oración, no una transición de navegación:
+   se conserva cuando el sistema prefiere movimiento reducido. */
 body[data-rosary-halo-mode="none"] .physical-path .physical-bead.is-reused .halo{
   animation:none!important;opacity:0!important;
+}
+body[data-rosary-halo-mode="none"] .physical-path .physical-bead.is-reused .ring{
+  animation:none!important;
 }
 .physical-path .physical-bead.active .ring{
   fill:#E9D7B6;stroke:#B18A48;stroke-width:6;
