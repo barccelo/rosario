@@ -32,6 +32,12 @@ controlsDot.setAttribute('aria-expanded','false');
 controlsDot.innerHTML='<span aria-hidden="true"></span>';
 controlsDot.hidden=true;
 document.body.append(controlsDot);
+// Capa independiente: el desenfoque no afecta la nitidez del menú.
+const controlsBackdrop=document.createElement('div');
+controlsBackdrop.className='rosario-controls-backdrop';
+controlsBackdrop.hidden=true;
+controlsBackdrop.setAttribute('aria-hidden','true');
+document.body.append(controlsBackdrop);
 const compactStyle=document.createElement('style');
 compactStyle.textContent=`
 .top-controls[hidden],.controls-dot[hidden]{display:none!important}
@@ -94,21 +100,49 @@ function collapseTopControls(){
   topControls.hidden=full;
   controlsDot.hidden=!full;
   controlsDot.setAttribute('aria-expanded','false');
+  controlsDot.setAttribute('aria-label','Mostrar controles del rosario');
+  controlsBackdrop.hidden=true;
+  document.body.classList.remove('controls-menu-open');
 }
+window.rosarioCloseCompactControls=collapseTopControls;
 function scheduleControlsCollapse(){
   clearTimeout(controlsTimer);
+  // El modo vertical se cierra con el punto o tocando el fondo.
+  // No retirarlo tras tres segundos mientras se leen las etiquetas.
+  if(document.body.classList.contains('controls-menu-vertical'))return;
   if(isRosarioFullscreen())controlsTimer=setTimeout(()=>{
     if(topControls.querySelector(':focus-visible')){scheduleControlsCollapse();return;}
     collapseTopControls();
   },3000);
 }
 controlsDot.onclick=()=>{
+  const vertical=document.body.classList.contains('controls-menu-vertical');
+  if(vertical&&document.body.classList.contains('controls-menu-open')){
+    collapseTopControls();
+    return;
+  }
   topControls.hidden=false;
-  controlsDot.hidden=true;
+  controlsDot.hidden=!vertical;
   controlsDot.setAttribute('aria-expanded','true');
-  scheduleControlsCollapse();
+  if(vertical){
+    controlsBackdrop.hidden=false;
+    controlsDot.setAttribute('aria-label','Ocultar controles del rosario');
+    document.body.classList.add('controls-menu-open');
+  }else scheduleControlsCollapse();
 };
-topControls.addEventListener('click',scheduleControlsCollapse);
+controlsBackdrop.addEventListener('click',collapseTopControls);
+topControls.addEventListener('click',event=>{
+  if(!document.body.classList.contains('controls-menu-vertical')){
+    scheduleControlsCollapse();
+  }else if(event.target.closest('#iNavigate,#iRestart,#iSettingsTop,#iFullscreen')){
+    collapseTopControls();
+  }
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&document.body.classList.contains('controls-menu-open')){
+    collapseTopControls();
+  }
+},true);
 document.addEventListener('fullscreenchange',collapseTopControls);
 
 const topIcons={
