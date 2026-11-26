@@ -83,6 +83,22 @@
     }
     let lastDrawWidth=0;
     let beforeIndex=-1,beforeMode='';
+    // Cada oración puede reutilizar la misma cuenta. La pulsación
+    // visual se dispara por cambio de paso, no por cada render().
+    const beadPulseTimers=new WeakMap();
+    function pulseReusedBead(el){
+      if(!el||state.rosaryHaloMode==='none')return;
+      const previous=beadPulseTimers.get(el);
+      if(previous)clearTimeout(previous);
+      el.classList.remove('is-reused');
+      // Reiniciar la animación aunque dos oraciones se avancen rápido.
+      void el.getBoundingClientRect().width;
+      el.classList.add('is-reused');
+      beadPulseTimers.set(el,setTimeout(()=>{
+        el.classList.remove('is-reused');
+        beadPulseTimers.delete(el);
+      },760));
+    }
     let lastPhysicalType=null;
     let lastPhysicalBead=-1;
     let autoFollowTarget=null;
@@ -551,6 +567,22 @@
       cross.classList.toggle('is-complete',state.index>0);
       cross.classList.toggle('active',crossActive);
       cross.setAttribute('aria-current',crossActive?'step':'false');
+
+      // Reutilizar una cuenta física debe verse como una nueva oración:
+      // p. ej. Padrenuestro, Gloria y jaculatorias sobre la misma
+      // grande. No se anima al cambiar de cuenta ni al redibujar.
+      if(beforeMode==='physical'&&beforeIndex>=0&&
+         state.index!==beforeIndex&&state.rosaryHaloMode!=='none'){
+        const before=positionFor(steps[beforeIndex]);
+        const sameLoop=selected.type==='loop'&&before.type==='loop'&&
+          selected.bead===before.bead;
+        const sameIntro=selected.type==='intro'&&before.type==='intro'&&
+          selected.intro===before.intro;
+        const activeElement=sameLoop
+          ?svg.querySelector('[data-bead="'+selected.bead+'"]')
+          :sameIntro?svg.querySelector('[data-intro="'+selected.intro+'"]'):null;
+        if(activeElement)pulseReusedBead(activeElement);
+      }
 
       // La geometría litúrgica de la apertura NO debe desplazar la
       // cadena. Hasta completar el Padrenuestro del primer misterio,
