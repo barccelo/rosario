@@ -162,9 +162,11 @@
       hideTip();
       return;
     }
-    if(!hiddenAt||Date.now()-hiddenAt<2000)return;
+    if(!hiddenAt||Date.now()-hiddenAt<10000)return;
     hiddenAt=0;
-    if(interactionStarted)return; // No interrumpir una sesión reanudada.
+    // Después de una ausencia real, esta es una nueva apertura.
+    // Nunca mostrar si el usuario ya ha interactuado desde el regreso.
+    interactionStarted=false;
     state.rosarioTipsOpenCount=Math.min(100000,
       (Number(state.rosarioTipsOpenCount)||0)+1);
     persist();
