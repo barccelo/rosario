@@ -84,3 +84,28 @@ body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
   }
   #rosario-discovery-tip .rosario-tip-description{font-size:12px}
 }
+
+/* Prueba manual de sugerencias dentro de Ajustes. */
+.rosario-tips-preview-setting{
+  display:flex;flex-direction:column;align-items:stretch;
+  gap:7px;margin:8px 0 16px;padding:0 2px;
+}
+.rosario-tips-preview-setting .rosario-tips-preview-button{
+  display:block;width:100%;min-height:45px;
+  border-radius:12px;
+  border:1px solid var(--ui-outline,rgba(150,159,174,.35));
+  background:var(--ui-selected,rgba(185,155,101,.12));
+  color:inherit;
+  font:600 13px/1.4 system-ui;
+  text-align:center;
+  padding:11px 14px;
+  box-shadow:none;
+}
+.rosario-tips-preview-setting .rosario-tips-preview-button:focus-visible{
+  outline:2px solid var(--ui-accent,#b99b65);outline-offset:2px;
+}
+.rosario-tips-preview-setting small{
+  display:block;
+  color:var(--ui-muted,#858d85);
+  font:12px/1.45 system-ui;
+}
