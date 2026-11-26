@@ -237,6 +237,24 @@
     controlsLayoutRow.append(controlsLayoutTitle,controlsLayoutSelect);
     buckets.interaction.unshift(controlsLayoutRow);
 
+    // Los consejos son opcionales y se gestionan localmente. Nunca
+    // aparecen durante un Rosario en curso ni interrumpen la oración.
+    const tipsRow=document.createElement('label');
+    tipsRow.className='rosario-setup-choice rosario-tips-setting';
+    const tipsTitle=document.createElement('span');
+    tipsTitle.textContent='Sugerencias de funciones';
+    const tipsCheck=document.createElement('input');
+    tipsCheck.type='checkbox';
+    tipsCheck.checked=state.rosarioTipsEnabled!==false;
+    tipsCheck.setAttribute('aria-label','Mostrar sugerencias de funciones');
+    tipsCheck.addEventListener('change',()=>{
+      state.rosarioTipsEnabled=tipsCheck.checked;
+      persist();
+      window.rosarioTipsSetEnabled?.(tipsCheck.checked);
+    });
+    tipsRow.append(tipsTitle,tipsCheck);
+    buckets.interaction.push(tipsRow);
+
     // Extraer una sola vez las opciones de los grupos originales.
     // Sus nodos se reutilizan al entrar y volver de otras pantallas,
     // en lugar de vaciar un contenedor distinto en cada apertura.
