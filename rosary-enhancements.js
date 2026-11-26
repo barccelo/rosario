@@ -849,6 +849,23 @@
     persist();
   };
   applyControlsPosition();
+  // La barra horizontal sigue siendo el modo predeterminado.
+  // En vertical el menú se abre hacia arriba desde el punto inferior.
+  state.controlsMenuLayout=saved.controlsMenuLayout==='vertical'
+    ?'vertical':'horizontal';
+  function applyControlsMenuLayout(){
+    document.body.classList.toggle('controls-menu-vertical',
+      state.controlsMenuLayout==='vertical');
+    // Cambiar la disposición debe cerrar el panel previamente abierto.
+    window.rosarioCloseCompactControls?.();
+  }
+  window.rosarioSetControlsMenuLayout=value=>{
+    if(value!=='horizontal'&&value!=='vertical')return;
+    state.controlsMenuLayout=value;
+    applyControlsMenuLayout();
+    persist();
+  };
+  applyControlsMenuLayout();
 
   const mysterySingular = {
     Gozosos: 'gozoso', Dolorosos: 'doloroso',
