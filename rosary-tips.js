@@ -7,6 +7,8 @@
   let tipCard=null;
   let hideTimer=null;
   let interactionStarted=false;
+  let hiddenAt=0;
+  let previewIndex=0;
 
   const openSettings=id=>{
     document.getElementById('settings')?.click();
@@ -60,7 +62,21 @@
     const seen=Array.isArray(state.rosarioTipsSeen)?state.rosarioTipsSeen:[];
     return tips.find(tip=>!seen.includes(tip.id)&&tip.unused());
   }
-  function showTip(tip){
+  // Desde Ajustes se puede probar todo el catálogo, incluso si se
+  // agotaron los consejos, están desactivados o faltan aperturas.
+  window.rosarioShowTipPreview=()=>{
+    const relevant=tips.filter(tip=>tip.unused());
+    const choices=relevant.length?relevant:tips;
+    const tip=choices[previewIndex%choices.length];
+    previewIndex++;
+    const modal=document.getElementById('modal');
+    if(modal?.open)modal.close();
+    hideTip();
+    // No cuenta como sugerencia mostrada: la siguiente sugerencia
+    // automática seguirá disponible al cumplir la cadencia.
+    requestAnimationFrame(()=>showTip(tip,true));
+  };
+  function showTip(tip,preview=false){
     const card=document.createElement('aside');
     card.id='rosario-discovery-tip';
     card.setAttribute('aria-label','Sugerencia de función de Rosario');
@@ -93,13 +109,16 @@
     document.body.append(card);
     tipCard=card;
 
-    // Cadencia y funciones ya sugeridas: sólo se almacenan en el equipo.
-    state.rosarioTipsLastShownAt=Date.now();
-    state.rosarioTipsSeen=[
-      ...new Set([...(Array.isArray(state.rosarioTipsSeen)?state.rosarioTipsSeen:[]),tip.id])
-    ];
-    persist();
-    hideTimer=setTimeout(hideTip,16000);
+    // Las pruebas desde Ajustes no alteran el intervalo semanal,
+    // ni consumen una sugerencia pendiente.
+    if(!preview){
+      state.rosarioTipsLastShownAt=Date.now();
+      state.rosarioTipsSeen=[
+        ...new Set([...(Array.isArray(state.rosarioTipsSeen)?state.rosarioTipsSeen:[]),tip.id])
+      ];
+      persist();
+    }
+    hideTimer=setTimeout(hideTip,preview?30000:16000);
   }
   function showOnEligibleLaunch(){
     // La guía inicial tiene prioridad. Las sesiones en curso, las
@@ -107,7 +126,7 @@
     if(interactionStarted||state.rosarioTipsEnabled===false||
        state.rosarioFirstRunDone!==true||
        !window.rosarioHadSavedStateAtLoad||
-       state.chapletActive===true||state.index!==0||
+       state.chapletActive===true||
        document.getElementById('modal')?.open||
        document.visibilityState==='hidden')return;
 
@@ -132,8 +151,23 @@
     state.rosarioTipsOpenCount=Math.min(100000,
       (Number(state.rosarioTipsOpenCount)||0)+1);
     persist();
-    // Una sola oportunidad por apertura, antes de tocar para rezar.
-    // No esperar ni intervenir en la navegación de una oración.
-    setTimeout(showOnEligibleLaunch,1700);
+    // Web y Android: ofrecer el consejo al abrir, antes del primer gesto.
+    setTimeout(showOnEligibleLaunch,500);
+  });
+  // En una PWA o pestaña web, volver a primer plano no siempre recarga
+  // el documento. Contar aperturas reales tras estar en segundo plano.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){
+      hiddenAt=Date.now();
+      hideTip();
+      return;
+    }
+    if(!hiddenAt||Date.now()-hiddenAt<2000)return;
+    hiddenAt=0;
+    if(interactionStarted)return; // No interrumpir una sesión reanudada.
+    state.rosarioTipsOpenCount=Math.min(100000,
+      (Number(state.rosarioTipsOpenCount)||0)+1);
+    persist();
+    setTimeout(showOnEligibleLaunch,500);
   });
 })();
