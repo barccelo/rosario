@@ -94,7 +94,27 @@ document.addEventListener('keydown',event=>{
   if(!['Escape','Esc','Tab'].includes(event.key)&&!event.ctrlKey&&!event.altKey&&!event.metaKey)
     autoFullscreenFromGesture(event);
 },true);
+// Algunas versiones de WebView conservan el fondo de .top-controls
+// mientras el elemento tiene un backdrop-filter. Anular la superficie
+// también en el propio nodo, además del CSS, evita el rectángulo.
+const verticalSurfaceProps=[
+  'background','background-color','background-image','border','border-radius',
+  'box-shadow','backdrop-filter','-webkit-backdrop-filter','filter'
+];
+function applyVerticalControlsSurface(open){
+  verticalSurfaceProps.forEach(property=>topControls.style.removeProperty(property));
+  if(!open)return;
+  const values={
+    'background':'transparent','background-color':'transparent',
+    'background-image':'none','border':'0','border-radius':'0',
+    'box-shadow':'none','backdrop-filter':'none',
+    '-webkit-backdrop-filter':'none','filter':'none'
+  };
+  Object.entries(values).forEach(([property,value])=>
+    topControls.style.setProperty(property,value,'important'));
+}
 function collapseTopControls(){
+  applyVerticalControlsSurface(false);
   clearTimeout(controlsTimer);
   const full=isRosarioFullscreen();
   topControls.hidden=full;
@@ -125,6 +145,7 @@ controlsDot.onclick=()=>{
   controlsDot.hidden=!vertical;
   controlsDot.setAttribute('aria-expanded','true');
   if(vertical){
+    applyVerticalControlsSurface(true);
     controlsBackdrop.hidden=false;
     controlsDot.setAttribute('aria-label','Ocultar controles del rosario');
     document.body.classList.add('controls-menu-open');
