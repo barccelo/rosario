@@ -1273,11 +1273,17 @@ body[data-rosary-color-mode="mystery"] .immersive-prayer .litany-wheel .wheel-pr
    Se ancla al punto inferior y crece hacia arriba; también funciona
    cuando el Rosario cambia de lado. */
 .rosario-controls-backdrop[hidden]{display:none!important}
+/* La oración y las cuentas se difuminan realmente, aunque el navegador
+   no aplique backdrop-filter o esté activado «Reducir movimiento».
+   Sólo se filtra el contenido del Rosario: los botones siguen nítidos. */
+body.controls-menu-vertical.controls-menu-open .rosary{
+  filter:blur(9px) brightness(.70)!important;
+}
 body.controls-menu-vertical.controls-menu-open .rosario-controls-backdrop{
   position:fixed;inset:0;z-index:5;
-  background:rgba(20,24,28,.23);
-  backdrop-filter:blur(7px) saturate(.92);
-  -webkit-backdrop-filter:blur(7px) saturate(.92);
+  background:rgba(10,14,18,.34);
+  backdrop-filter:blur(10px) saturate(.85);
+  -webkit-backdrop-filter:blur(10px) saturate(.85);
 }
 body.controls-menu-vertical .controls-dot{
   top:auto!important;
@@ -1305,8 +1311,12 @@ body.controls-menu-vertical .top-controls{
   width:min(225px,calc(100vw - 28px))!important;
   max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 92px);
   overflow-y:auto;overscroll-behavior:contain;
-  border-radius:18px!important;
-  box-shadow:0 18px 45px rgba(0,0,0,.21),inset 0 1px rgba(255,255,255,.12)!important;
+  /* Menú sin tarjeta: el contraste lo proporciona el fondo difuminado.
+     Los controles flotan libremente, con el mismo orden y pulsaciones. */
+  border:0!important;border-radius:0!important;
+  background:transparent!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
   z-index:6;
 }
 body.controls-menu-vertical.rosario-physical-view[data-rosary-side="right"] .top-controls{
@@ -1328,6 +1338,14 @@ body.controls-menu-vertical .top-controls .font-button{
   border-radius:11px!important;
   text-align:left!important;
   font:500 13px/1.25 system-ui!important;
+  color:#f6f2e9!important;
+  background:transparent!important;
+  text-shadow:0 1px 6px rgba(0,0,0,.42);
+}
+body.controls-menu-vertical .top-controls .top-control:hover,
+body.controls-menu-vertical .top-controls .top-control:focus-visible,
+body.controls-menu-vertical .top-controls .top-control:active{
+  background:rgba(255,255,255,.13)!important;
 }
 body.controls-menu-vertical .top-controls .top-control svg{
   flex:none;width:19px;height:19px;
@@ -1343,14 +1361,11 @@ body.controls-menu-vertical .top-controls .top-control::after{
 }
 body.controls-menu-vertical .top-controls .top-divider{
   flex:0 0 1px!important;width:100%!important;height:1px!important;
-  margin:4px 0!important;
+  margin:4px 0!important;background:rgba(255,255,255,.2)!important;
 }
 body.controls-menu-vertical.controls-menu-open .controls-dot{
   background:var(--ui-selected,rgba(185,155,101,.25));
   border-color:var(--ui-accent,#b99b65);
 }
-@media(prefers-reduced-motion:reduce){
-  body.controls-menu-vertical.controls-menu-open .rosario-controls-backdrop{
-    backdrop-filter:none;-webkit-backdrop-filter:none;
-  }
-}
+/* Reducir las animaciones no elimina un difuminado estático: también
+   debe funcionar cuando las transiciones del sistema están apagadas. */
