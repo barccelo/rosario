@@ -213,6 +213,30 @@
     sideRow.append(sideName,sideSelect);
     buckets.appearance.splice(1,0,sideRow);
 
+    // Disposición de los controles ocultos tras el punto compacto.
+    // La preferencia sólo modifica su presentación, no sus acciones.
+    const controlsLayoutRow=document.createElement('label');
+    controlsLayoutRow.className='rosario-setup-choice rosario-controls-menu-layout-setting';
+    const controlsLayoutTitle=document.createElement('span');
+    controlsLayoutTitle.textContent='Menú de controles';
+    const controlsLayoutSelect=document.createElement('select');
+    controlsLayoutSelect.setAttribute('aria-label','Disposición del menú de controles');
+    [
+      ['horizontal','Horizontal · barra clásica'],
+      ['vertical','Vertical · etiquetas y fondo difuminado']
+    ].forEach(([value,label])=>{
+      const option=document.createElement('option');
+      option.value=value;option.textContent=label;
+      controlsLayoutSelect.append(option);
+    });
+    controlsLayoutSelect.value=state.controlsMenuLayout==='vertical'
+      ?'vertical':'horizontal';
+    controlsLayoutSelect.addEventListener('change',()=>{
+      window.rosarioSetControlsMenuLayout?.(controlsLayoutSelect.value);
+    });
+    controlsLayoutRow.append(controlsLayoutTitle,controlsLayoutSelect);
+    buckets.interaction.unshift(controlsLayoutRow);
+
     // Extraer una sola vez las opciones de los grupos originales.
     // Sus nodos se reutilizan al entrar y volver de otras pantallas,
     // en lugar de vaciar un contenedor distinto en cada apertura.
