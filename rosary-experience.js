@@ -254,6 +254,19 @@
     });
     tipsRow.append(tipsTitle,tipsCheck);
     buckets.interaction.push(tipsRow);
+    const tipsPreviewRow=document.createElement('div');
+    tipsPreviewRow.className='rosario-tips-preview-setting';
+    const tipsPreviewButton=document.createElement('button');
+    tipsPreviewButton.type='button';
+    tipsPreviewButton.className='rosario-tips-preview-button';
+    tipsPreviewButton.textContent='Mostrar sugerencia ahora';
+    tipsPreviewButton.addEventListener('click',()=>{
+      window.rosarioShowTipPreview?.();
+    });
+    const tipsPreviewDescription=document.createElement('small');
+    tipsPreviewDescription.textContent='Vista de prueba: muestra una tarjeta en el Rosario y no afecta la frecuencia de las sugerencias automáticas.';
+    tipsPreviewRow.append(tipsPreviewButton,tipsPreviewDescription);
+    buckets.interaction.push(tipsPreviewRow);
 
     // Extraer una sola vez las opciones de los grupos originales.
     // Sus nodos se reutilizan al entrar y volver de otras pantallas,
