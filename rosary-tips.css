@@ -1,5 +1,15 @@
-/* Descubrimiento progresivo: tarjeta discreta, nunca un diálogo modal. */
+/* La tarjeta utiliza exactamente la paleta activa del Rosario.
+   Los colores clásicos son los valores de respaldo. */
 #rosario-discovery-tip{
+  --tip-surface:rgba(250,248,241,.96);
+  --tip-border:rgba(139,128,103,.27);
+  --tip-ink:#363d34;
+  --tip-accent:#a0814c;
+  --tip-primary:#947950;
+  --tip-primary-ink:#ffffff;
+  --tip-secondary:rgba(130,130,115,.09);
+  --tip-muted:#777d71;
+  --tip-focus:#a68b63;
   position:fixed;
   z-index:8;
   left:calc(42% + 12px);
@@ -8,19 +18,47 @@
   box-sizing:border-box;
   padding:15px 14px 13px;
   border-radius:17px;
-  border:1px solid rgba(139,128,103,.27);
-  background:rgba(250,248,241,.96);
+  border:1px solid var(--tip-border);
+  background:var(--tip-surface);
   box-shadow:0 9px 32px rgba(23,28,21,.14);
-  color:#363d34;
+  color:var(--tip-ink);
   -webkit-backdrop-filter:blur(12px);
   backdrop-filter:blur(12px);
   max-height:65dvh;
   overflow-y:auto;
 }
 body.dark #rosario-discovery-tip{
-  background:rgba(39,43,38,.96);
-  border-color:rgba(214,197,155,.2);
-  color:#eee9db;
+  --tip-surface:rgba(39,43,38,.96);
+  --tip-border:rgba(214,197,155,.2);
+  --tip-ink:#eee9db;
+  --tip-accent:#d7ba8a;
+  --tip-muted:#aaa99b;
+}
+/* En los misterios, fondo, contraste, contornos y acentos se derivan
+   de las mismas variables que las cuentas, oraciones y ajustes. */
+body[data-rosary-color-mode="mystery"] #rosario-discovery-tip{
+  --tip-surface:var(--rc-surface);
+  --tip-border:var(--rc-link);
+  --tip-ink:var(--rc-text);
+  --tip-accent:var(--rc-accent);
+  --tip-primary:var(--rc-accent);
+  --tip-primary-ink:var(--rosario-tip-on-accent,#202020);
+  --tip-secondary:var(--rc-subtle);
+  --tip-muted:var(--rc-text);
+  --tip-focus:var(--rc-outline);
+}
+/* El misionero conserva su fondo clásico y adopta el color de la
+   sección de cuentas que se está rezando, sin inventar una sexta paleta. */
+body[data-rosary-color-mode="missionary"] #rosario-discovery-tip{
+  --tip-primary:var(--rosario-tip-mission-accent,#23845E);
+  --tip-primary-ink:var(--rosario-tip-mission-ink,#ffffff);
+  --tip-border:color-mix(in srgb,var(--rosario-tip-mission-accent,#23845E) 56%,transparent);
+  --tip-secondary:color-mix(in srgb,var(--rosario-tip-mission-accent,#23845E) 13%,transparent);
+  --tip-focus:var(--rosario-tip-mission-accent,#23845E);
+  --tip-accent:var(--rosario-tip-mission-accent,#23845E);
+}
+body.dark[data-rosary-color-mode="missionary"] #rosario-discovery-tip{
+  --tip-accent:color-mix(in srgb,var(--rosario-tip-mission-accent,#23845E) 65%,white);
 }
 body.rosario-physical-view[data-rosary-side="right"] #rosario-discovery-tip{
   left:calc(env(safe-area-inset-left,0px) + 12px);
@@ -31,9 +69,8 @@ body.rosario-physical-view[data-rosary-side="right"] #rosario-discovery-tip{
   font:600 13px/1.3 system-ui;
   letter-spacing:0;
   text-transform:none;
-  color:#a0814c;
+  color:var(--tip-accent);
 }
-body.dark #rosario-discovery-tip .rosario-tip-kicker{color:#d7ba8a}
 #rosario-discovery-tip .rosario-tip-description{
   margin:0;
   font:13px/1.5 system-ui;
@@ -60,21 +97,21 @@ body.dark #rosario-discovery-tip .rosario-tip-kicker{color:#d7ba8a}
   box-shadow:none;
 }
 #rosario-discovery-tip .rosario-tip-primary{
-  background:#947950;
-  color:white;
+  background:var(--tip-primary);
+  color:var(--tip-primary-ink);
 }
 #rosario-discovery-tip .rosario-tip-later{
-  background:rgba(130,130,115,.09);
+  background:var(--tip-secondary);
 }
 #rosario-discovery-tip .rosario-tip-never{
   flex-basis:100%;
   text-align:left;
-  color:#777d71;
+  color:var(--tip-muted);
+  opacity:.74;
   padding-left:1px;
 }
-body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
 #rosario-discovery-tip button:focus-visible{
-  outline:2px solid #a68b63;
+  outline:2px solid var(--tip-focus);
   outline-offset:2px;
 }
 @media(max-width:420px){

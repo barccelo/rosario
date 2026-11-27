@@ -83,6 +83,17 @@
     const definition = palettes[supported][variant];
     return {...definition[dark?'dark':'light'], name:definition.label};
   }
+  // Tinta contrastante sobre el acento variable (incluidos morado claro,
+  // dorado oscuro y blanco perla). La tarjeta no debe perder legibilidad.
+  function readableAccentInk(hex){
+    const channels=(String(hex).match(/[0-9a-f]{2}/gi)||[]).slice(0,3)
+      .map(value=>parseInt(value,16)/255);
+    if(channels.length!==3)return '#FFFFFF';
+    const linear=channels.map(value=>value<=.04045?
+      value/12.92:Math.pow((value+.055)/1.055,2.4));
+    const luminance=.2126*linear[0]+.7152*linear[1]+.0722*linear[2];
+    return luminance>.179?'#1B1B1B':'#FFFFFF';
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     state.rosaryColorMode = validMode(state.rosaryColorMode);
@@ -120,6 +131,13 @@
       const lambInk=mode==='mystery' ? colors.outline :
         mode==='missionary' ? missionary[missionarySection].border :
         state.dark ? '#C3A982' : '#947960';
+      // Tokens que también consumen las tarjetas «¿Sabías que…?».
+      // Se actualizan en cada render: misterio, variante y modo claro/oscuro.
+      const missionTone=missionary[missionarySection];
+      document.body.style.setProperty('--rosario-tip-on-accent',
+        readableAccentInk(colors.active));
+      document.body.style.setProperty('--rosario-tip-mission-accent',missionTone.color);
+      document.body.style.setProperty('--rosario-tip-mission-ink',missionTone.label);
       // Cada modo usa su contorno real. La ilustración aprobada tiene
       // variantes PNG ya procesadas, una para cada borde de las paletas.
       // Ojos, nariz, boca, cabello, piel y camisa no reciben filtros.
