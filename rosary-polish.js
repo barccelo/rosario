@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261127-1';
+    sheet.href = 'rosary-polish.css?v=20261127-2';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
@@ -505,11 +505,20 @@
           const addGloria=step.title==='Avemaría'&&step.n===10&&
             (step.m===1||step.m===3)&&state.voiceLabels!==false;
           appendVoice(addGloria?'Gloria.\n'+second:second,b);
+        }else if(step.title==='Salve'){
+          // Evitar que los dos saltos del texto de origen dibujen una
+          // línea completa en blanco: conservar los cuatro párrafos y
+          // controlar su separación por CSS, también en textos editados.
+          const paragraphs=source.replace(/\r\n?/g,'\n').trim()
+            .split(/\n[ \t]*\n+/).filter(part=>part.trim());
+          paragraphs.forEach(part=>{
+            const stanza=document.createElement('span');
+            stanza.className='rosario-salve-paragraph';
+            appendWithAmen(stanza,part.trim());
+            prayer.append(stanza);
+          });
         }else{
-          // Una única línea de separación entre párrafos de prosa:
-          // conservar los saltos propios de cada oración y comprimir
-          // únicamente los espacios duplicados (3 o más saltos).
-          // Los turnos de Guía y Asamblea conservan su formato separado.
+          // El resto de las oraciones conserva su separación habitual.
           appendWithAmen(prayer,source.replace(/\n[ \t]*\n+/g,'\n\n'));
         }
         }

@@ -1090,7 +1090,6 @@
     wheel.hidden = true;
     wheel.setAttribute('aria-label', 'Letanías, una invocación por deslizamiento');
     wheel.innerHTML =
-      '<div class="wheel-label">Letanías lauretanas</div>' +
       '<button type="button" class="wheel-side" id="litanyPrevious" aria-label="Letanía anterior"></button>' +
       '<div class="wheel-current" role="button" tabindex="0" aria-label="Ver todas las letanías" aria-live="polite">' +
       '<div class="wheel-main"><span class="verse-mark" aria-label="Versículo">℣.</span><span id="litanyCurrent"></span></div>' +

@@ -1425,3 +1425,15 @@ body.controls-menu-vertical .top-controls::after{
 .immersive-prayer .litany-wheel.is-first-litany #litanyPrevious{
   display:none!important;
 }
+
+/* Salve: los cuatro párrafos se separan sin introducir una línea
+   vacía completa. Este ajuste no altera el espaciado de las voces. */
+.immersive-prayer #immersiveText .rosario-salve-paragraph{
+  display:block!important;
+  white-space:pre-line!important;
+  line-height:1.52!important;
+  margin:0 0 .42em!important;
+}
+.immersive-prayer #immersiveText .rosario-salve-paragraph:last-child{
+  margin-bottom:0!important;
+}
