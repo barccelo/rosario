@@ -812,6 +812,7 @@
       const lastFifthAvemaria=steps.findIndex(s=>
         s.m===4 && s.title==='Avemaría' && s.n===10 && s.bead===54);
       const closing=lastFifthAvemaria>=0 && state.index>=lastFifthAvemaria;
+      const firstMystery=steps.findIndex(s=>s.kind==='mystery'&&s.m===0);
       if(el.hasAttribute('data-cross')){
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
         const closingCross=state.salvePosition==='after-dedication'
@@ -826,11 +827,15 @@
         if(active.type==='loop'&&active.bead===touched){
           advance();return;
         }
-        // La grande compartida (cuenta 0) es el comienzo del primer
-        // misterio y también el cierre del quinto: no volver al primero.
+        // La grande compartida (cuenta 0) presenta primero el
+        // misterio, ANTES de su Padrenuestro. Al tocarla de nuevo,
+        // después del anuncio, el avance habitual llega al Padrenuestro.
+        // En el quinto misterio mantiene su función de cierre.
         destination=closing && touched===0
           ? steps.findIndex(s=>s.m===4 && s.title==='Gloria')
-          : steps.findIndex(s=>s.bead===touched);
+          : touched===0 && firstMystery>=0 && state.index<firstMystery
+            ? firstMystery
+            : steps.findIndex(s=>s.bead===touched);
       }else if(el.hasAttribute('data-intro')){
         const item=Number(el.dataset.intro);
         if(closing){
