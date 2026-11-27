@@ -1592,7 +1592,9 @@
           add.onclick=()=>{
             const value=input.value.trim();
             if(!value || state.intentionPool.includes(value) || state.intentionPool.length>=200)return;
-            state.intentionPool.push(value);
+            // Las nuevas intenciones se muestran al comienzo,
+            // incluso cuando ya existen intenciones fijadas.
+            state.intentionPool.unshift(value);
             persist();
             fill('intentions');
           };
@@ -1607,11 +1609,10 @@
               ' · Aparecen en todos los misterios junto a la aleatoria.'
             :'Fija una intención para mostrarla en todos los misterios. Mantén pulsada una tarjeta para regresar aquí.';
           list.append(pinHint);
-          // Ordenar visualmente primero las fijadas sin modificar los
-          // índices originales utilizados por las funciones de edición.
-          const ordered=state.intentionPool.map((value,i)=>({value,i}))
-            .sort((a,b)=>Number(state.pinnedIntentions.includes(b.value))-
-                          Number(state.pinnedIntentions.includes(a.value)));
+          // Respetar el orden de la lista; las nuevas van primero.
+          // Las fijadas se distinguen visualmente sin desplazar la
+          // intención recién creada al final del catálogo.
+          const ordered=state.intentionPool.map((value,i)=>({value,i}));
           ordered.forEach(({value,i})=>{
             const row=document.createElement('div');
             const isPinned=state.pinnedIntentions.includes(value);
