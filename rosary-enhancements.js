@@ -141,7 +141,7 @@
   // La antigua etiqueta era incorrecta: esta fórmula corresponde a la Estación.
   delete prayers['Alabanzas al Santísimo'];
   prayers['Comunión espiritual'] =
-    'Yo quisiera, Señor, recibirte, con aquella pureza, humildad y devoción, con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos. Amén.';
+    'Yo quisiera, Señor, recibirte, con aquella pureza, humildad y devoción, con que te recibió tu Santísima Madre, con el espíritu y el fervor de los santos. Amén.';
   // Respuestas en dos intervenciones, igual que en el Padrenuestro y el Avemaría.
   prayers.Gloria = 'Gloria al Padre, y al Hijo, y al Espíritu Santo.\n\nComo era en el principio, ahora y siempre, por los siglos de los siglos. Amén.';
   prayers['Señor mío Jesucristo'] =
@@ -892,7 +892,9 @@
   // Quien haya guardado exactamente la versión anterior de la Comunión
   // espiritual recibe la corrección; las ediciones personales se respetan.
   const previousSpiritualCommunion='Yo quisiera, Señor, recibirte con aquella pureza, humildad y devoción con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos.';
-  if(state.prayerEdits['Comunión espiritual']===previousSpiritualCommunion){
+  const lastDefaultSpiritualCommunion='Yo quisiera, Señor, recibirte, con aquella pureza, humildad y devoción, con que te recibió tu Santísima Madre, con el espíritu y fervor de los santos. Amén.';
+  if([previousSpiritualCommunion,lastDefaultSpiritualCommunion].includes(
+    state.prayerEdits['Comunión espiritual'])){
     state.prayerEdits['Comunión espiritual']=prayers['Comunión espiritual'];
     persist();
   }
@@ -1214,6 +1216,9 @@
       if (step && !isLitany && step.verse && step.response) formatDialogue(step);
       if (isLitany) {
         const i = step.litanyIndex;
+        // Al inicio todavía no existe una invocación anterior: no
+        // reservar su espacio hasta que se haya rezado la primera.
+        wheel.classList.toggle('is-first-litany',i===0);
         const pair = litanyPairs[i];
         $('litanyCurrent').textContent = pair.verse;
         $('litanyResponse').textContent = pair.response;

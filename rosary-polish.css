@@ -1393,3 +1393,35 @@ body.controls-menu-vertical .top-controls::after{
 }
 /* Reducir las animaciones no elimina un difuminado estático: también
    debe funcionar cuando las transiciones del sistema están apagadas. */
+
+/* Lectura: un salto de párrafo no debe sentirse como dos. Se conserva
+   el texto original y se reduce sólo el aire tipográfico entre líneas. */
+.immersive-prayer #immersiveText{
+  line-height:1.52!important;
+}
+.immersive-prayer #immersiveText .prayer-part,
+.immersive-prayer #immersiveText .dialogue-line{
+  line-height:1.52!important;
+  margin-bottom:14px!important;
+}
+.immersive-prayer #immersiveText .prayer-part:last-child,
+.immersive-prayer #immersiveText .dialogue-line:last-child{
+  margin-bottom:0!important;
+}
+
+/* Letanías: encabezado con la misma tipografía de las demás oraciones.
+   Antes de la primera, no dejar un hueco para la letanía previa.
+   Tras avanzar, la fila anterior reaparece y el título sube con ella. */
+.immersive-prayer .litany-wheel .wheel-label{
+  font:600 clamp(18px,2.6vw,23px)/1.3 Georgia,serif!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  color:#bea271;
+  margin-bottom:3px!important;
+}
+.dark .immersive-prayer .litany-wheel .wheel-label{
+  color:#d3b883;
+}
+.immersive-prayer .litany-wheel.is-first-litany #litanyPrevious{
+  display:none!important;
+}

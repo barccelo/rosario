@@ -7,7 +7,7 @@
     if (!prayer || !reading) return;
     const sheet = document.createElement('link');
     sheet.rel = 'stylesheet';
-    sheet.href = 'rosary-polish.css?v=20261126-3';
+    sheet.href = 'rosary-polish.css?v=20261127-1';
     document.head.append(sheet);
 
     state.textScale = Number.isFinite(Number(state.textScale)) ?
