@@ -10,36 +10,61 @@
   let hiddenAt=0;
   let previewIndex=0;
   let activeTarget=null;
+  let highlightFrame=null;
   let targetTimer=null;
   let focusRequestId=0;
 
-  // Un solo resalte activo. Cualquier interacción cancela también
-  // el temporizador o una animación de enfoque todavía pendiente.
+  // El cuadro se dibuja en la propia capa superior del diálogo.
+  // No depende del outline del botón (que puede quedar recortado por
+  // listas desplazables) ni del color del misterio.
+  function positionHighlight(){
+    if(!activeTarget?.isConnected||!highlightFrame)return;
+    const rect=activeTarget.getBoundingClientRect();
+    if(!rect.width||!rect.height)return;
+    const gap=5;
+    highlightFrame.style.left=(rect.left-gap)+'px';
+    highlightFrame.style.top=(rect.top-gap)+'px';
+    highlightFrame.style.width=(rect.width+gap*2)+'px';
+    highlightFrame.style.height=(rect.height+gap*2)+'px';
+  }
   function clearFocusedTarget(){
     focusRequestId++;
     clearTimeout(targetTimer);
     targetTimer=null;
-    if(activeTarget){
-      activeTarget.classList.remove('rosario-tip-target');
-      activeTarget=null;
-    }
+    window.removeEventListener('resize',positionHighlight,true);
+    document.removeEventListener('scroll',positionHighlight,true);
+    highlightFrame?.remove();
+    highlightFrame=null;
+    activeTarget=null;
   }
-  // «Probar» va al control exacto, incluso en listas con desplazamiento.
+  // Se espera a que Navegación / Ajustes termine de construir la
+  // pantalla. Sólo las interacciones humanas cierran el indicador.
   const focusControl=selector=>{
     clearFocusedTarget();
     const requestId=focusRequestId;
-    requestAnimationFrame(()=>{
+    let attempts=0;
+    function locate(){
       if(requestId!==focusRequestId)return;
-      const target=document.querySelector(selector);
-      if(!target)return;
+      const modal=document.getElementById('modal');
+      const target=modal?.querySelector(selector);
+      if(!modal?.open||!target||!target.getClientRects().length){
+        if(++attempts<14)requestAnimationFrame(locate);
+        return;
+      }
       target.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
       activeTarget=target;
-      target.classList.add('rosario-tip-target');
-      if(typeof target.focus==='function'&&
-         target.matches('button,select,input,[tabindex]'))
-        target.focus({preventScroll:true});
-      targetTimer=setTimeout(clearFocusedTarget,5500);
-    });
+      const frame=document.createElement('div');
+      frame.className='rosario-tip-highlight-frame';
+      frame.setAttribute('aria-hidden','true');
+      frame.setAttribute('role','presentation');
+      modal.append(frame);
+      highlightFrame=frame;
+      positionHighlight();
+      window.addEventListener('resize',positionHighlight,true);
+      document.addEventListener('scroll',positionHighlight,true);
+      targetTimer=setTimeout(clearFocusedTarget,7000);
+    }
+    requestAnimationFrame(locate);
   };
   const openSettings=(id,selector)=>{
     document.getElementById('settings')?.click();
@@ -181,17 +206,21 @@
     if(tip)showTip(tip);
   }
   document.addEventListener('pointerdown',event=>{
-    clearFocusedTarget();
+    if(event.isTrusted)clearFocusedTarget();
     if(!tipCard||!tipCard.contains(event.target))hideTip();
     interactionStarted=true;
   },true);
-  // También cubrir activación por teclado o clics sin pointerdown.
-  document.addEventListener('click',clearFocusedTarget,true);
+  // Los .click() programáticos que abren pantallas NO deben borrar
+  // el borde. Los clics reales, el teclado y los toques sí lo cierran.
+  document.addEventListener('click',event=>{
+    if(event.isTrusted)clearFocusedTarget();
+  },true);
   document.addEventListener('keydown',event=>{
-    clearFocusedTarget();
+    if(event.isTrusted)clearFocusedTarget();
     if(!tipCard||!tipCard.contains(event.target))hideTip();
     interactionStarted=true;
   },true);
+  document.getElementById('modal')?.addEventListener('close',clearFocusedTarget);
   document.addEventListener('rosario:daily-reset',()=>{
     hideTip();
     clearFocusedTarget();

@@ -110,16 +110,22 @@ body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
   font:12px/1.45 system-ui;
 }
 
-/* Una sola línea nítida, independiente del color del misterio.
-   Sin halo ni segundo anillo; contraste diferenciado por tema. */
-.rosario-tip-target,
-.rosario-tip-target:focus-visible{
-  outline:3px solid #245a89!important;
-  outline-offset:3px!important;
-  border-radius:9px;
+/* Un marco único flotante dentro del diálogo, por encima de listas
+   con scroll. No altera el foco ni dibuja sombras/segundos contornos. */
+#modal .rosario-tip-highlight-frame{
+  position:fixed!important;
+  display:block!important;
+  z-index:1000!important;
+  margin:0!important;
+  padding:0!important;
+  border:3px solid #205d96!important;
+  border-radius:13px!important;
+  background:transparent!important;
   box-shadow:none!important;
+  outline:0!important;
+  pointer-events:none!important;
+  box-sizing:border-box!important;
 }
-body.dark .rosario-tip-target,
-body.dark .rosario-tip-target:focus-visible{
-  outline-color:#b9e6ff!important;
+body.dark #modal .rosario-tip-highlight-frame{
+  border-color:#b9e6ff!important;
 }
