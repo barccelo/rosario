@@ -315,6 +315,7 @@
     }
     function openHome(){
       modal.dataset.rosarioSettingsLevel='home';
+      modal.dataset.rosarioSettingsParent='home';
       window.rosarioUpdateBackLabel?.();
       host.replaceChildren();
       host.classList.add('rosario-settings-dashboard');
@@ -360,6 +361,16 @@
     }
     // Un solo mecanismo de regreso para flecha, Escape y Atrás de Android.
     window.rosarioSettingsGoHome=openHome;
+    // Restaurar primero la sección exacta desde la que se abrió
+    // la ventana hija; sólo en el siguiente Atrás regresar al inicio.
+    window.rosarioSettingsGoPrevious=()=>{
+      const parent=modal.dataset.rosarioSettingsParent;
+      const section=sections.find(item=>item.id===parent);
+      if(section&&!['navigation','chaplet'].includes(parent)){
+        openSection(section);
+      }else openHome();
+      return true;
+    };
     window.rosarioOpenSettingsSection=id=>{
       const section=sections.find(item=>item.id===id);
       if(!section)return false;
@@ -373,6 +384,7 @@
       return true;
     };
     function openHapticEditor(section){
+      modal.dataset.rosarioSettingsParent=section.id;
       modal.dataset.rosarioSettingsLevel='subpage';
       window.rosarioUpdateBackLabel?.();
       host.replaceChildren();
@@ -474,6 +486,7 @@
       modal.scrollTop=0;
     }
     function openSection(section){
+      modal.dataset.rosarioSettingsParent=section.id;
       modal.dataset.rosarioSettingsLevel='section';
       window.rosarioUpdateBackLabel?.();
       host.classList.remove('rosario-settings-dashboard');
@@ -541,9 +554,30 @@
         const back=detail.querySelector('.nav-preview-back');
         if(back){back.click();return true;}
       }
-      window.rosarioSettingsGoHome?.();
+      if(modal.dataset.rosarioSettingsLevel==='subpage')
+        window.rosarioSettingsGoPrevious?.();
+      else window.rosarioSettingsGoHome?.();
       return true;
     };
+    // Distinguir las pantallas interiores que sustituyen el contenido
+    // del diálogo de los cambios habituales de un ajuste en su sección.
+    // Esto cubre los editores y los paneles que no marcan su propio nivel.
+    modal?.addEventListener('click',event=>{
+      const level=modal.dataset.rosarioSettingsLevel;
+      if(level!=='home'&&level!=='section')return;
+      if(!event.target.closest('button,.voice-settings-link,.rosario-navigation-settings-button'))return;
+      const originalScreen=byId('modalContent')?.firstElementChild;
+      const parent=level==='section'
+        ?modal.dataset.rosarioSettingsParent:'home';
+      queueMicrotask(()=>{
+        if(!modal.open||!window.rosarioSettingsGoHome)return;
+        if(modal.dataset.rosarioSettingsLevel!==level)return;
+        if(originalScreen===byId('modalContent')?.firstElementChild)return;
+        modal.dataset.rosarioSettingsParent=parent;
+        modal.dataset.rosarioSettingsLevel='subpage';
+        window.rosarioUpdateBackLabel?.();
+      });
+    },true);
     close?.addEventListener('click',event=>{
       if(!window.rosarioNavigateBack?.())return;
       event.preventDefault();
@@ -558,7 +592,9 @@
       delete modal.dataset.rosarioSettingsLevel;
       window.rosarioUpdateBackLabel?.();
       window.rosarioSettingsGoHome=null;
+      window.rosarioSettingsGoPrevious=null;
       window.rosarioOpenSettingsSection=null;
+      delete modal.dataset.rosarioSettingsParent;
     });
     byId('iNavigate')?.addEventListener('click',()=>{
       delete modal.dataset.rosarioSettingsLevel;
