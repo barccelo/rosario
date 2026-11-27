@@ -34,9 +34,12 @@ function makeSteps(){
 makeSteps();
 function persist(){try{localStorage.setItem('rosario',JSON.stringify(state))}catch{}}
 function render(){const s=steps[state.index];document.body.classList.toggle('simple',state.mode==='simple');document.body.classList.toggle('dark',state.dark);$('simple').classList.toggle('selected',state.mode==='simple');$('guided').classList.toggle('selected',state.mode==='guided');$('simple').setAttribute('aria-pressed',state.mode==='simple');$('guided').setAttribute('aria-pressed',state.mode==='guided');$('group').textContent='Misterios '+state.group.toLowerCase();$('date').textContent=new Date().toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'});$('mysteryNo').textContent=!s?'Rosario completado':s.m<0?'Comenzamos':s.m>4?'Oraciones finales':`Misterio ${s.m+1} de 5`;$('mystery').textContent=!s?'Gracias por este momento':s.m<0?'En el nombre del Padre':s.m>4?'Con María, nuestra Madre':groups[state.group][s.m];$('counter').textContent=s?(s.title+(s.n?` · ${s.n} de 10`:'')):'Que la paz te acompañe.';$('prayerTitle').textContent=s?s.title:'Oración terminada';$('prayer').textContent=s?prayers[s.title]:'El Señor nos bendiga, nos guarde de todo mal y nos lleve a la vida eterna. Amén.';$('stage').textContent=s&&s.m>=0&&s.m<5?`Misterio ${s.m+1} · ${state.group}`:'Santo Rosario';const pct=Math.round(state.index/steps.length*100);$('bar').style.width=pct+'%';$('percent').textContent=pct+'%';$('progressLabel').textContent=`${state.index} de ${steps.length} oraciones`;$('next').disabled=!s;$('next').textContent=s?'Completar oración →':'Rosario completado ✓';$('back').disabled=state.index===0;$('theme').textContent=state.dark?'Modo claro':'Modo oscuro';
-let markup='';for(let i=0;i<55;i++){const a=Math.PI/2+(i/55)*Math.PI*2,x=220+176*Math.cos(a),y=228+203*Math.sin(a);const idx=i===0
-      ?steps.findIndex(t=>t.kind==='mystery'&&t.m===0)
-      :steps.findIndex(t=>t.bead===i),done=idx<state.index,current=s&&(s.bead===i||i===0&&s.kind==='mystery'&&s.m===0),r=i%11===0?7:5.2;markup+=`<g class="bead" tabindex="0" role="button" aria-label="${i%11===0?'Padrenuestro':'Avemaría '+i%11}, misterio ${Math.floor(i/11)+1}${done?', completada':''}" data-step="${idx}"><circle cx="${x}" cy="${y}" r="17" fill="transparent"/>${current?`<circle cx="${x}" cy="${y}" r="13" fill="#c5a36a" opacity=".3" filter="url(#glow)"/>`:''}<circle cx="${x}" cy="${y}" r="${r}" fill="${done?'#a78c60':current?'#ead5ad':state.dark?'#3d483d':'#f6f4ef'}" stroke="${current?'#aa8752':'#c3b79d'}" stroke-width="${current?2:1.4}"/></g>`}$('beads').innerHTML=markup;persist()}
+let markup='';for(let i=0;i<55;i++){const a=Math.PI/2+(i/55)*Math.PI*2,x=220+176*Math.cos(a),y=228+203*Math.sin(a);const announcement=i%11===0
+      ?steps.findIndex(t=>t.kind==='mystery'&&t.m===i/11):-1,
+      idx=announcement>=0?announcement:steps.findIndex(t=>t.bead===i),
+      done=idx<state.index,
+      current=s&&(s.bead===i||announcement>=0&&state.index===announcement),
+      r=i%11===0?7:5.2;markup+=`<g class="bead" tabindex="0" role="button" aria-label="${i%11===0?'Padrenuestro':'Avemaría '+i%11}, misterio ${Math.floor(i/11)+1}${done?', completada':''}" data-step="${idx}"><circle cx="${x}" cy="${y}" r="17" fill="transparent"/>${current?`<circle cx="${x}" cy="${y}" r="13" fill="#c5a36a" opacity=".3" filter="url(#glow)"/>`:''}<circle cx="${x}" cy="${y}" r="${r}" fill="${done?'#a78c60':current?'#ead5ad':state.dark?'#3d483d':'#f6f4ef'}" stroke="${current?'#aa8752':'#c3b79d'}" stroke-width="${current?2:1.4}"/></g>`}$('beads').innerHTML=markup;persist()}
 // Patrones compartidos entre la web y Android; la muestra usa el mismo patrón.
 function rosarioVibrate(sequence, preview=false){
   if(!state.haptics&&!preview)return;
@@ -108,13 +111,16 @@ function rosarioHaptic(fromIndex){
   if(!state.haptics)return;
   const current=steps[state.index];
   const movingForward=Number.isInteger(fromIndex)&&state.index===fromIndex+1;
-  // Glorias y oraciones de la cuenta grande: el mismo patrón que
-  // «Dos vibraciones» al anunciar el misterio.
+  const enteringMystery=Number.isInteger(fromIndex)&&
+    state.index>fromIndex&&current?.kind==='mystery';
+  // El anuncio también usa el patrón configurado si se selecciona
+  // otra cuenta grande con salto confirmado, no sólo en pasos consecutivos.
+  // Los Glorias y las jaculatorias conservan su vibración doble.
   if(movingForward&&
     (current?.title==='Gloria'||current?.kind==='jaculatory'||
      current?.kind==='praise')){
     rosarioVibrate(window.rosarioGetHapticPattern('double'));
-  }else if(movingForward&&current?.kind==='mystery'){
+  }else if(enteringMystery){
     rosarioVibrate(window.rosarioGetHapticPattern(state.mysteryHapticMode)||1000);
   }else{
     rosarioVibrate(window.rosarioGetHapticPattern('normal'));
@@ -162,5 +168,10 @@ let timer,longHandled=false;$('beads').addEventListener('pointerdown',e=>{const 
   if(idx===state.index||idx===state.index+1){advance();return;}
   if(idx===state.index-1){state.index=idx;rosarioHaptic();render();return;}
   show('<h2>Continuar desde esta cuenta</h2><p>Se ajustará el progreso hasta la oración seleccionada.</p><button class="advance" id="jump">Continuar desde aquí</button>');
-  $('jump').onclick=()=>{state.index=idx;rosarioHaptic();render();$('modal').close()};
+  $('jump').onclick=()=>{
+    const previousIndex=state.index;
+    state.index=idx;
+    rosarioHaptic(previousIndex);
+    render();$('modal').close();
+  };
 }render();
