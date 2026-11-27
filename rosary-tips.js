@@ -10,34 +10,65 @@
   let hiddenAt=0;
   let previewIndex=0;
 
-  const openSettings=id=>{
+  // «Probar» va al control concreto y lo destaca durante unos
+  // segundos, incluso en una lista interior con desplazamiento.
+  const focusControl=selector=>{
+    requestAnimationFrame(()=>{
+      const target=document.querySelector(selector);
+      if(!target)return;
+      target.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
+      target.classList.add('rosario-tip-target');
+      if(typeof target.focus==='function'&&
+         target.matches('button,select,input,[tabindex]'))
+        target.focus({preventScroll:true});
+      setTimeout(()=>target.classList.remove('rosario-tip-target'),5500);
+    });
+  };
+  const openSettings=(id,selector)=>{
     document.getElementById('settings')?.click();
     window.rosarioOpenSettingsSection?.(id);
+    if(selector)focusControl(selector);
+  };
+  const openIntentionTarget=selector=>{
+    // Abrir desde la sección Navegación permite que «Atrás»
+    // regrese a Ajustes en lugar de cerrar el Rosario.
+    openSettings('navigation');
+    window.rosarioOpenIntentionSettings?.();
+    focusControl(selector);
+  };
+  const openFinalIntentionTarget=()=>{
+    document.getElementById('settings')?.click();
+    window.rosarioOpenFinalIntentionChoice?.();
+    focusControl('#finalIntentionChoices .rosario-contrition-option');
   };
   const tips=[
     {
       id:'pin-intentions',
       text:'Puedes fijar una intención para que aparezca en los cinco misterios, junto a la aleatoria.',
       unused:()=>!Array.isArray(state.pinnedIntentions)||!state.pinnedIntentions.length,
-      open:()=>window.rosarioOpenIntentionSettings?.()
+      open:()=>openIntentionTarget(
+        '#navList .intention-entry:not(.is-pinned) .intention-pin-btn, '+
+        '#navList .intention-entry .intention-pin-btn')
     },
     {
       id:'vertical-controls',
       text:'El punto de los controles también puede abrir un menú vertical, con etiquetas y fondo difuminado.',
       unused:()=>state.controlsMenuLayout!=='vertical',
-      open:()=>openSettings('interaction')
+      open:()=>openSettings('interaction',
+        '.rosario-controls-menu-layout-setting select')
     },
     {
       id:'final-intentions',
       text:'Puedes elegir entre una lista con marcas o leer las oraciones completas en las intenciones finales.',
       unused:()=>state.finalIntentionsDisplay!=='prayers',
-      open:()=>window.rosarioOpenFinalIntentionChoice?.()
+      open:openFinalIntentionTarget
     },
     {
       id:'custom-intention-heading',
       text:'La frase que acompaña cada intención puede cambiarse, escribirse a tu gusto o desaparecer.',
       unused:()=>!state.intentionCaptionMode||state.intentionCaptionMode==='default',
-      open:()=>window.rosarioOpenIntentionSettings?.()
+      open:()=>openIntentionTarget(
+        '#navList .intention-caption-settings .intention-caption-options')
     },
     {
       id:'haptic-intensity',
@@ -45,7 +76,7 @@
       unused:()=>state.haptics!==false&&
         (state.hapticIntensity===undefined||state.hapticIntensity==='system')&&
         (Boolean(window.RosarioAndroid)||typeof navigator.vibrate==='function'),
-      open:()=>openSettings('haptics')
+      open:()=>openSettings('haptics','.rosario-haptic-gear')
     }
   ];
   function hideTip(){
@@ -83,10 +114,12 @@
 
     const kicker=document.createElement('p');
     kicker.className='rosario-tip-kicker';
-    kicker.textContent='¿Sabías que…?';
+    kicker.textContent='¿Sabías que…';
     const description=document.createElement('p');
     description.className='rosario-tip-description';
-    description.textContent=tip.text;
+    const sentence=tip.text.replace(/[.!?\s]+$/,'').trim();
+    description.textContent='…'+sentence.charAt(0).toLowerCase()+
+      sentence.slice(1)+'?';
     const actions=document.createElement('div');
     actions.className='rosario-tip-actions';
     function button(label,cssClass,handler){
