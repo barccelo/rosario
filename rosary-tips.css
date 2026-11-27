@@ -28,9 +28,9 @@ body.rosario-physical-view[data-rosary-side="right"] #rosario-discovery-tip{
 }
 #rosario-discovery-tip .rosario-tip-kicker{
   margin:0 0 7px;
-  font:600 10px/1.3 system-ui;
-  letter-spacing:.11em;
-  text-transform:uppercase;
+  font:600 13px/1.3 system-ui;
+  letter-spacing:0;
+  text-transform:none;
   color:#a0814c;
 }
 body.dark #rosario-discovery-tip .rosario-tip-kicker{color:#d7ba8a}
@@ -108,4 +108,12 @@ body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
   display:block;
   color:var(--ui-muted,#858d85);
   font:12px/1.45 system-ui;
+}
+
+/* «Probar» desplaza hasta el ajuste preciso y lo señala unos segundos. */
+.rosario-tip-target{
+  outline:2px solid var(--ui-accent,#b99b65)!important;
+  outline-offset:3px!important;
+  border-radius:9px;
+  box-shadow:0 0 0 5px rgba(185,155,101,.14)!important;
 }
