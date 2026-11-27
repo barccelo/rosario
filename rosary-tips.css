@@ -110,10 +110,16 @@ body.dark #rosario-discovery-tip .rosario-tip-never{color:#aaa99b}
   font:12px/1.45 system-ui;
 }
 
-/* «Probar» desplaza hasta el ajuste preciso y lo señala unos segundos. */
-.rosario-tip-target{
-  outline:2px solid var(--ui-accent,#b99b65)!important;
+/* Una sola línea nítida, independiente del color del misterio.
+   Sin halo ni segundo anillo; contraste diferenciado por tema. */
+.rosario-tip-target,
+.rosario-tip-target:focus-visible{
+  outline:3px solid #245a89!important;
   outline-offset:3px!important;
   border-radius:9px;
-  box-shadow:0 0 0 5px rgba(185,155,101,.14)!important;
+  box-shadow:none!important;
+}
+body.dark .rosario-tip-target,
+body.dark .rosario-tip-target:focus-visible{
+  outline-color:#b9e6ff!important;
 }

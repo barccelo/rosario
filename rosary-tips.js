@@ -9,19 +9,36 @@
   let interactionStarted=false;
   let hiddenAt=0;
   let previewIndex=0;
+  let activeTarget=null;
+  let targetTimer=null;
+  let focusRequestId=0;
 
-  // «Probar» va al control concreto y lo destaca durante unos
-  // segundos, incluso en una lista interior con desplazamiento.
+  // Un solo resalte activo. Cualquier interacción cancela también
+  // el temporizador o una animación de enfoque todavía pendiente.
+  function clearFocusedTarget(){
+    focusRequestId++;
+    clearTimeout(targetTimer);
+    targetTimer=null;
+    if(activeTarget){
+      activeTarget.classList.remove('rosario-tip-target');
+      activeTarget=null;
+    }
+  }
+  // «Probar» va al control exacto, incluso en listas con desplazamiento.
   const focusControl=selector=>{
+    clearFocusedTarget();
+    const requestId=focusRequestId;
     requestAnimationFrame(()=>{
+      if(requestId!==focusRequestId)return;
       const target=document.querySelector(selector);
       if(!target)return;
       target.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'});
+      activeTarget=target;
       target.classList.add('rosario-tip-target');
       if(typeof target.focus==='function'&&
          target.matches('button,select,input,[tabindex]'))
         target.focus({preventScroll:true});
-      setTimeout(()=>target.classList.remove('rosario-tip-target'),5500);
+      targetTimer=setTimeout(clearFocusedTarget,5500);
     });
   };
   const openSettings=(id,selector)=>{
@@ -49,13 +66,6 @@
       open:()=>openIntentionTarget(
         '#navList .intention-entry:not(.is-pinned) .intention-pin-btn, '+
         '#navList .intention-entry .intention-pin-btn')
-    },
-    {
-      id:'vertical-controls',
-      text:'El punto de los controles también puede abrir un menú vertical, con etiquetas y fondo difuminado.',
-      unused:()=>state.controlsMenuLayout!=='vertical',
-      open:()=>openSettings('interaction',
-        '.rosario-controls-menu-layout-setting select')
     },
     {
       id:'final-intentions',
@@ -171,14 +181,21 @@
     if(tip)showTip(tip);
   }
   document.addEventListener('pointerdown',event=>{
+    clearFocusedTarget();
     if(!tipCard||!tipCard.contains(event.target))hideTip();
     interactionStarted=true;
   },true);
+  // También cubrir activación por teclado o clics sin pointerdown.
+  document.addEventListener('click',clearFocusedTarget,true);
   document.addEventListener('keydown',event=>{
+    clearFocusedTarget();
     if(!tipCard||!tipCard.contains(event.target))hideTip();
     interactionStarted=true;
   },true);
-  document.addEventListener('rosario:daily-reset',hideTip);
+  document.addEventListener('rosario:daily-reset',()=>{
+    hideTip();
+    clearFocusedTarget();
+  });
 
   document.addEventListener('DOMContentLoaded',()=>{
     state.rosarioTipsOpenCount=Math.min(100000,

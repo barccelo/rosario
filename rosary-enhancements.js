@@ -1592,8 +1592,8 @@
           add.onclick=()=>{
             const value=input.value.trim();
             if(!value || state.intentionPool.includes(value) || state.intentionPool.length>=200)return;
-            // Las nuevas intenciones se muestran al comienzo,
-            // incluso cuando ya existen intenciones fijadas.
+            // Las nuevas se colocan antes de las demás personales;
+            // las fijadas mantienen su prioridad al mostrar la lista.
             state.intentionPool.unshift(value);
             persist();
             fill('intentions');
@@ -1609,11 +1609,20 @@
               ' · Aparecen en todos los misterios junto a la aleatoria.'
             :'Fija una intención para mostrarla en todos los misterios. Mantén pulsada una tarjeta para regresar aquí.';
           list.append(pinHint);
-          // Respetar el orden de la lista; las nuevas van primero.
-          // Las fijadas se distinguen visualmente sin desplazar la
-          // intención recién creada al final del catálogo.
-          const ordered=state.intentionPool.map((value,i)=>({value,i}));
-          ordered.forEach(({value,i})=>{
+          // Prioridad: fijadas, personales (más recientes primero), catálogo.
+          // Las personales guardadas al final en versiones anteriores
+          // también pasan arriba sin modificar ni perder sus datos.
+          const ordered=state.intentionPool.map((value,i)=>({value,i}))
+            .sort((a,b)=>{
+              const pinnedA=state.pinnedIntentions.includes(a.value);
+              const pinnedB=state.pinnedIntentions.includes(b.value);
+              if(pinnedA!==pinnedB)return pinnedA?-1:1;
+              const customA=!defaultIntentions.includes(a.value);
+              const customB=!defaultIntentions.includes(b.value);
+              if(customA!==customB)return customA?-1:1;
+              return a.i-b.i;
+            });
+          ordered.forEach(({value,i},position)=>{
             const row=document.createElement('div');
             const isPinned=state.pinnedIntentions.includes(value);
             row.className='intention-entry'+(isPinned?' is-pinned':'');
@@ -1624,7 +1633,7 @@
             pin.className='intention-small-btn intention-pin-btn'+
               (isPinned?' is-pinned':'');
             pin.setAttribute('aria-pressed',String(isPinned));
-            pin.setAttribute('aria-label',(isPinned?'Desfijar':'Fijar')+' intención '+(i+1));
+            pin.setAttribute('aria-label',(isPinned?'Desfijar':'Fijar')+' intención '+(position+1));
             pin.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+
               '<path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"/>'+
               '<path d="M12 14v7"/></svg><span>'+(isPinned?'Desfijar':'Fijar')+'</span>';
@@ -1642,7 +1651,7 @@
             edit.type='button';
             edit.className='intention-small-btn';
             edit.textContent='Editar';
-            edit.setAttribute('aria-label','Editar intención '+(i+1));
+            edit.setAttribute('aria-label','Editar intención '+(position+1));
             edit.onclick=()=>{
               row.replaceChildren();
               const field=document.createElement('textarea');
@@ -1675,7 +1684,7 @@
             del.type='button';
             del.className='intention-small-btn danger';
             del.textContent='Quitar';
-            del.setAttribute('aria-label','Eliminar intención '+(i+1));
+            del.setAttribute('aria-label','Eliminar intención '+(position+1));
             del.onclick=()=>{
               state.intentionPool.splice(i,1);
               state.intentionCycle=state.intentionCycle.map(t=>t===value?null:t);
