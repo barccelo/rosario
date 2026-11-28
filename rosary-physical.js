@@ -805,13 +805,19 @@
         if(destination>=0)pick(destination);
         return;
       }
-      // La cuenta compartida y el colgante se usan al entrar y al
-      // regresar. Al seleccionar la décima Avemaría del quinto misterio,
-      // sus toques deben corresponder al recorrido de cierre desde
-      // que se selecciona la cuenta 10, sin esperar al siguiente avance.
+      // El colgante y la cruz sólo pasan al recorrido de cierre
+      // después de la décima Avemaría del quinto misterio.
       const lastFifthAvemaria=steps.findIndex(s=>
         s.m===4 && s.title==='Avemaría' && s.n===10 && s.bead===54);
       const closing=lastFifthAvemaria>=0 && state.index>=lastFifthAvemaria;
+      // La primera cuenta grande (0) es diferente: cuando ya comenzó
+      // el quinto misterio pertenece a su Gloria final, incluso si
+      // todavía no se han rezado las diez Avemarías. Los saltos largos
+      // siguen solicitando confirmación mediante pick().
+      const fifthMysteryStart=steps.findIndex(s=>
+        s.kind==='mystery'&&s.m===4);
+      const sharedLargeAtClosing=fifthMysteryStart>=0 &&
+        state.index>=fifthMysteryStart;
       if(el.hasAttribute('data-cross')){
         const finalSalve=steps.findIndex(s=>s.title==='Salve' && s.m===5);
         const closingCross=state.salvePosition==='after-dedication'
@@ -834,8 +840,9 @@
         const announcement=mysteryNumber>=0
           ?steps.findIndex(s=>s.kind==='mystery'&&s.m===mysteryNumber)
           :-1;
-        // La grande compartida 0 también cierra el quinto misterio.
-        destination=closing && touched===0
+        // La grande compartida 0 cierra el quinto misterio desde
+        // que se anuncia, sin esperar su décima Avemaría.
+        destination=sharedLargeAtClosing && touched===0
           ?steps.findIndex(s=>s.m===4&&s.title==='Gloria')
           :announcement>=0?announcement
           :steps.findIndex(s=>s.bead===touched);
